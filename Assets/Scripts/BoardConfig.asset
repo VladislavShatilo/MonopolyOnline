@@ -1,0 +1,695 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0730096c5a7f42843bbf67c73ceb9b06, type: 3}
+  m_Name: BoardConfig
+  m_EditorClassIdentifier: 
+  cells:
+  - index: 0
+    cellName: 
+    cellType: 3
+    companyData:
+      name: 
+      price: 
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 21300000, guid: 11814a35829a71549af3e3ff8c42a9ed, type: 3}
+  - index: 1
+    cellName: 123
+    cellType: 0
+    companyData:
+      name: oBoticario
+      price: 58020000
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 2
+    cellName: 124
+    cellType: 2
+    companyData:
+      name: 
+      price: 
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 3
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Fendi
+      price: 58020000
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 4
+    cellName: 124
+    cellType: 1
+    companyData:
+      name: 
+      price: 
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 21300000, guid: 33931e115144dbf4aa0c07aa140b4333, type: 3}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 5
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Mercedes
+      price: fa000000
+      rent: 
+      owner: 
+      group: 3
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 6
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: H&M
+      price: e8030000
+      rent: 
+      owner: 
+      group: 1
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 7
+    cellName: 124
+    cellType: 2
+    companyData:
+      name: 
+      price: 
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 8
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: DKNY
+      price: e8030000
+      rent: 
+      owner: 
+      group: 1
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 9
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: LACOSTE
+      price: b0040000
+      rent: 
+      owner: 
+      group: 1
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 10
+    cellName: 124
+    cellType: 3
+    companyData:
+      name: 
+      price: 
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 21300000, guid: 9bc2bac6d8a211b47a610a01caa715d5, type: 3}
+  - index: 11
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: VK
+      price: 78050000
+      rent: 
+      owner: 
+      group: 2
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 12
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: RockStar
+      price: dc050000
+      rent: 
+      owner: 
+      group: 9
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 13
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: YouTube
+      price: 78050000
+      rent: 
+      owner: 
+      group: 2
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 14
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Twitter
+      price: 40060000
+      rent: 
+      owner: 
+      group: 2
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 15
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Audi
+      price: d0070000
+      rent: 
+      owner: 
+      group: 3
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 16
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Apotekarnes
+      price: 08070000
+      rent: 
+      owner: 
+      group: 4
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 17
+    cellName: 124
+    cellType: 2
+    companyData:
+      name: 
+      price: 
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 18
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: MntDew
+      price: 08070000
+      rent: 
+      owner: 
+      group: 4
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 19
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Beats
+      price: d0070000
+      rent: 
+      owner: 
+      group: 4
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 20
+    cellName: 124
+    cellType: 3
+    companyData:
+      name: 
+      price: 
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 21300000, guid: 245aa86c83a0a5b41aa158176413282b, type: 3}
+  - index: 21
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: J AirLines
+      price: 98080000
+      rent: 
+      owner: 
+      group: 5
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 22
+    cellName: 124
+    cellType: 2
+    companyData:
+      name: J AirLines
+      price: 
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 23
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: I Airlines
+      price: 98080000
+      rent: 
+      owner: 
+      group: 5
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 24
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: P airlines
+      price: 60090000
+      rent: 
+      owner: 
+      group: 5
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 25
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Ford
+      price: d0070000
+      rent: 
+      owner: 
+      group: 3
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 26
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: MCDonalds
+      price: 280a0000
+      rent: 
+      owner: 
+      group: 6
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 27
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Burger King
+      price: 280a0000
+      rent: 
+      owner: 
+      group: 6
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 28
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Rovio
+      price: dc050000
+      rent: 
+      owner: 
+      group: 9
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 29
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: KFC
+      price: f00a0000
+      rent: 
+      owner: 
+      group: 6
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 30
+    cellName: 124
+    cellType: 3
+    companyData:
+      name: 
+      price: 
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 21300000, guid: 4e53e4a10c35bf645879738a78a37f75, type: 3}
+  - index: 31
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Holiday INn
+      price: b80b0000
+      rent: 
+      owner: 
+      group: 7
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 32
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Radisson
+      price: b80b0000
+      rent: 
+      owner: 
+      group: 7
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 33
+    cellName: 124
+    cellType: 2
+    companyData:
+      name: NOVOTEL
+      price: 
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 34
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Novotel
+      price: 800c0000
+      rent: 
+      owner: 
+      group: 7
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 35
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: LandRover
+      price: d0070000
+      rent: 
+      owner: 
+      group: 3
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 36
+    cellName: 124
+    cellType: 1
+    companyData:
+      name: Novotel
+      price: 
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 21300000, guid: 52236e55f910a5a4db77fe1ec0e8856b, type: 3}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 37
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Apple
+      price: ac0d0000
+      rent: 
+      owner: 
+      group: 8
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 38
+    cellName: 124
+    cellType: 2
+    companyData:
+      name: 
+      price: 
+      rent: 
+      owner: 
+      group: 0
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
+  - index: 39
+    cellName: 124
+    cellType: 0
+    companyData:
+      name: Nokia
+      price: a00f0000
+      rent: 
+      owner: 
+      group: 8
+    spendData:
+      spendSprite: {fileID: 0}
+      amount: 0
+    questionData:
+      description: 
+      effect: 
+    cornerData:
+      logoSprite: {fileID: 0}
