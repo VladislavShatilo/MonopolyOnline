@@ -38,6 +38,13 @@ public class AuthUI : MonoBehaviour
 
         //Photon.Pun.PhotonNetwork.NickName = PlayerAuthData.Nickname;
 
-        UnityEngine.SceneManagement.SceneManager.LoadScene("LobbyScene");
+        if (SceneFadeManager.instance != null)
+        {
+            SceneFadeManager.instance.LoadLobbyScene();
+        }
+        else
+        {
+            SceneManager.LoadScene("LobbyScene");
+        }
     }
 }
