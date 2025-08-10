@@ -19,6 +19,7 @@ public class BoardGeneratorEditor : EditorWindow
     private const float CellWidth = 70f;
     private const float CellHeight = 140f;
     private const float interval = 2f;
+
     [MenuItem("Monopoly/Build Board")]
     public static void ShowWindow()
     {
@@ -52,7 +53,6 @@ public class BoardGeneratorEditor : EditorWindow
             ClearChildren();
         }
     }
-
     private void BuildBoard()
     {
         ClearChildren();
@@ -70,6 +70,13 @@ public class BoardGeneratorEditor : EditorWindow
 
             GameObject cellGO = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parentTransform);
             cellGO.name = $"Cell_{i}_{cell.cellName}";
+
+            var uiComponent = cellGO.GetComponent<UICellBase>();
+            if (uiComponent != null)
+            {
+                uiComponent.UpdateUI(cell, null); // при инициализации владелец неизвестен (null)
+            }
+
             RectTransform rt = cellGO.GetComponent<RectTransform>();
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchorMin = rt.anchorMax = new Vector2(0, 1); // левый верх
@@ -79,24 +86,18 @@ public class BoardGeneratorEditor : EditorWindow
             {
                 case CellType.Company:
                     UICompanyCell uiCompanyCell = cellGO.GetComponent<UICompanyCell>();
-                    uiCompanyCell.SetupCompany(cell.companyData.name, cell.companyData.price[0],(int)cell.companyData.group);
                     if(i > 20 &&  i < 30)
                     {
-                        uiCompanyCell.RotateLogoText(270);
-                       
-                        uiCompanyCell.RotatePriceText();
-                        
+                        uiCompanyCell.RotateLogoText(270);                   
+                        uiCompanyCell.RotatePriceText();                     
                     }
                     if(i > 30 && i < 40)
                     {
                         uiCompanyCell.RotateLogoText(270);
-
-
                     }
                     break;
                 case CellType.Spend:
                     UISpendCell uiSpendCell = cellGO.GetComponent<UISpendCell>();
-                    uiSpendCell.SetupSpend(cell.spendData.spendSprite);
                     if (i > 30 && i < 40)
                     {
                         uiSpendCell.RotateIcon();
@@ -104,15 +105,11 @@ public class BoardGeneratorEditor : EditorWindow
                     break;
                 case CellType.Question:
                     UIQuestionCell uiQuestionCell = cellGO.GetComponent<UIQuestionCell>();
-                    uiQuestionCell.SetupQuestion();
                     if (i > 20 && i < 30 )
                     {
                         uiQuestionCell.RotateQuestionText();
 
                     }
-                    break;
-                case CellType.Corner:
-                    cellGO.GetComponent<UICornerCell>().SetLogo(cell.cornerData.logoSprite);
                     break;
                 default:
                     break;

@@ -1,17 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using TMPro;
 using UnityEngine;
+using UnityEngine.U2D;
 using UnityEngine.UI;
 
-public class UISpendCell : MonoBehaviour
+public class UISpendCell : UICellBase
 {
     [SerializeField] private Image spendImage;
-
-    public void SetupSpend(Sprite sprite)
+    public override void UpdateUI(CellData cellData, Player owner)
     {
-        spendImage.sprite = sprite;
-    }
+        var spend = cellData.spendData;
+        spendImage.sprite = spend.spendSprite;
+    }   
     public void RotateIcon()
     {
         spendImage.rectTransform.eulerAngles = new Vector3(0,0,270);

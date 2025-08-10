@@ -30,7 +30,8 @@ public class CompanyData : ICellDetails
     public string name;
     public int[] price;
     public int []rent;
-    public string owner;
+    public bool isBought;
+    public int ownerID;
     public CompanyGroup group;
 }
 
