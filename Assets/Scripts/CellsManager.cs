@@ -20,7 +20,7 @@ public class CellsManager : MonoBehaviour
             cellUIMap[i] = boardCellsTransforms[i].GetComponent<UICellBase>();
         }
     }
-    public void RefreshCellUI(int cellIndex, Player owner)
+    public void RefreshCellUI(int cellIndex, PlayerData owner)
     {
         if (cellUIMap.TryGetValue(cellIndex, out var ui))
         {

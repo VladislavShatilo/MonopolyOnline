@@ -7,7 +7,7 @@ using UnityEngine;
 public class UIQuestionCell : UICellBase
 {
     [SerializeField] private TextMeshProUGUI questionText;
-    public override void UpdateUI(CellData cellData, Player owner)
+    public override void UpdateUI(CellData cellData, PlayerData owner)
     {
         var question = cellData.questionData;
 

@@ -80,7 +80,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         string roomName = "Room_" + Random.Range(1000, 9999);
         RoomOptions options = new RoomOptions
         {
-            MaxPlayers = 4,
+            MaxPlayers = 2,
             CustomRoomProperties = new ExitGames.Client.Photon.Hashtable
             {
                 { "rules", "Правила: играем до 100 очков, без обмена картами" }

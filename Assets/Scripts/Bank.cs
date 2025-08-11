@@ -7,7 +7,7 @@ public class Bank : MonoBehaviour
 {
     public static Bank Instance { get; private set; }
 
-    public event Action<Player, int> OnBalanceChanged;
+    public event Action<PlayerData, int> OnBalanceChanged;
 
     private void Awake()
     {
@@ -20,13 +20,13 @@ public class Bank : MonoBehaviour
     }
 
   
-    public void AddMoney(Player player, int amount)
+    public void AddMoney(PlayerData player, int amount)
     {
         player.Money += amount;
         OnBalanceChanged?.Invoke(player, player.Money);
     }
 
-    public bool RemoveMoney(Player player, int amount)
+    public bool RemoveMoney(PlayerData player, int amount)
     {
         if (player.Money < amount)
             return false; // Недостаточно средств
@@ -35,7 +35,7 @@ public class Bank : MonoBehaviour
         OnBalanceChanged?.Invoke(player, player.Money);
         return true;
     }
-    public bool BuyCompany(Player buyer, CompanyData company)
+    public bool BuyCompany(PlayerData buyer, CompanyData company)
     {
         int price = company.price[0];
 
@@ -53,7 +53,7 @@ public class Bank : MonoBehaviour
         return true;
     }
 
-    public bool TransferMoney(Player from, Player to, int amount)
+    public bool TransferMoney(PlayerData from, PlayerData to, int amount)
     {
         if (!RemoveMoney(from, amount))
             return false;

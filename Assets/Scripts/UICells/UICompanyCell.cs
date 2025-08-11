@@ -14,7 +14,7 @@ public class UICompanyCell : UICellBase
     [SerializeField] private Image BGPriceImage;
     [SerializeField] private Color[] groupColors;
 
-    public override void UpdateUI(CellData cellData, Player owner)
+    public override void UpdateUI(CellData cellData, PlayerData owner)
     {
         var company = cellData.companyData;
         companyNameText.text = company.name;

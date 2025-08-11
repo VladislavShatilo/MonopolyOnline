@@ -19,7 +19,7 @@ public class UIPlayerStats : MonoBehaviour
         moneyPlayerText.text=moneyPlayer.ToString("N0", CultureInfo.InvariantCulture)+"k";
     }
 
-    public void SetPlayerStats(Player player)
+    public void SetPlayerStats(PlayerData player)
     {
         namePlayerText.text = player.Name;
         moneyPlayerText.text = player.Money.ToString("N0", CultureInfo.InvariantCulture) + "k";

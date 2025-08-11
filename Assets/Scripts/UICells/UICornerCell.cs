@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class UICornerCell : UICellBase
 {
     [SerializeField] private Image logoImage;
-    public override void UpdateUI(CellData cellData, Player owner)
+    public override void UpdateUI(CellData cellData, PlayerData owner)
     {
         var corner = cellData.cornerData;
         logoImage.sprite = corner.logoSprite;

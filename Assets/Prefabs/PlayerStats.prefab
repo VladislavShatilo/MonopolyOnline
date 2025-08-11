@@ -85,6 +85,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6697124729053851565}
   - component: {fileID: 42686235886149328}
+  - component: {fileID: 1849180318958290263}
   m_Layer: 5
   m_Name: PlayerStats
   m_TagString: Untagged
@@ -120,6 +121,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1723613515744396118}
   m_CullTransparentMesh: 1
+--- !u!114 &1849180318958290263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1723613515744396118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180c6bd8eaf9716409cf86574089a971, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  namePlayerText: {fileID: 5436644641352282496}
+  moneyPlayerText: {fileID: 6449036139050059934}
 --- !u!1 &2151262820857562738
 GameObject:
   m_ObjectHideFlags: 0

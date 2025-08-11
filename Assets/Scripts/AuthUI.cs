@@ -36,7 +36,7 @@ public class AuthUI : MonoBehaviour
 
         Debug.Log($"Логин: {PlayerAuthData.Nickname}, Пароль: {PlayerAuthData.Password}");
 
-        //Photon.Pun.PhotonNetwork.NickName = PlayerAuthData.Nickname;
+        Photon.Pun.PhotonNetwork.NickName = PlayerAuthData.Nickname;
 
         if (SceneFadeManager.instance != null)
         {

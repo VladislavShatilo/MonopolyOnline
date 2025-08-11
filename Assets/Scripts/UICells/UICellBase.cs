@@ -4,5 +4,5 @@ using UnityEngine;
 
 public abstract class UICellBase : MonoBehaviour
 {
-    public abstract void UpdateUI(CellData cellData, Player owner);
+    public abstract void UpdateUI(CellData cellData, PlayerData owner);
 }

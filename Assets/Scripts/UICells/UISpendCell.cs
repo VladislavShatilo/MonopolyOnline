@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class UISpendCell : UICellBase
 {
     [SerializeField] private Image spendImage;
-    public override void UpdateUI(CellData cellData, Player owner)
+    public override void UpdateUI(CellData cellData, PlayerData owner)
     {
         var spend = cellData.spendData;
         spendImage.sprite = spend.spendSprite;
