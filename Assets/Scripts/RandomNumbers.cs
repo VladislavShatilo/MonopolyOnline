@@ -1,3 +1,6 @@
+using ExitGames.Client.Photon;
+using Photon.Pun;
+using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,23 +14,42 @@ public class RandomNumbers : MonoBehaviour
     [SerializeField] private TextMeshProUGUI firstRandomText;
     [SerializeField] private TextMeshProUGUI secondRandomText;
     public static Action<int> playerMoveAction;
-    private int firstRandomNumber;
-    private int secondRandomNumber;
 
-    // Start is called before the first frame update
+    public static RandomNumbers Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
+
     void Start()
     {
-        randomButton.onClick.AddListener(() =>StartCoroutine( GenerateNumbers()));
+        randomButton.onClick.AddListener(OnRollDiceButton);
     }
-    private IEnumerator GenerateNumbers()
+
+    public void OnRollDiceButton()
     {
-        firstRandomNumber = UnityEngine.Random.Range(1, 7);
-        secondRandomNumber = UnityEngine.Random.Range(1, 7);
-        firstRandomText.text = firstRandomNumber.ToString();
-        secondRandomText.text = secondRandomNumber.ToString();
-        yield return new WaitForSeconds(0.3f);
-        playerMoveAction?.Invoke(firstRandomNumber + secondRandomNumber);
+       
+            TurnManager.Instance.RollDice();
+       
     }
-   
-   
+
+    public void SetDiceNumbers(int first, int second, int targetPlayerId)
+    {
+        firstRandomText.text = first.ToString();
+        secondRandomText.text = second.ToString();
+
+        // Ходит только тот, чей это ID
+        if (PhotonNetwork.LocalPlayer.ActorNumber == targetPlayerId)
+        {
+            playerMoveAction?.Invoke(first + second);
+        }
+    }
+
+
 }

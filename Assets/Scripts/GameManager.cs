@@ -1,19 +1,34 @@
 using Photon.Pun;
+using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
     public static GameManager Instance { get; private set; }
 
-    [SerializeField] private UIPlayerStats playersStatsPrefabs;
+    [Header("Root transforms")]
     [SerializeField] private Transform playersStatsContainerTrans;
-    [SerializeField] private BoardConfig boardConfig;
-    [SerializeField] private UIBuyWindow uiBuyWindow;
-    [SerializeField] private CellsManager cellsManager;
-    [SerializeField] private Color [] playerColors;   
+    [SerializeField] private Transform playerRootGO;
+    [SerializeField] private Transform cellsRootTransforms;
+
+    [Header("Prefabs")]
+    [SerializeField] private UIPlayerStats playersStatsPrefab;
+    [SerializeField] private GameObject playerPiecePrefab; 
+
+    [Header("Settings")]
+    [SerializeField] private Color[] playerColors;
+    [SerializeField] private Vector3 startPlayerPosition = new Vector3(-240f, 390f, 0f);
+
     private List<PlayerData> players = new List<PlayerData>();
+    private Dictionary<int, PlayerMove> playerMoves = new Dictionary<int, PlayerMove>();
+    private Dictionary<int, UIPlayerStats> uiPlayerStatsDict = new Dictionary<int, UIPlayerStats>();
+
+    public Transform CellsRootTransforms => cellsRootTransforms;
+    public Transform PlayerRootTransform => playerRootGO;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -23,112 +38,138 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
         Instance = this;
     }
-    public override void OnJoinedRoom()
+
+    private void Start()
     {
-        Debug.Log("Я вошёл в комнату");
-        SetupPlayer(PhotonNetwork.LocalPlayer);
+          Debug.Log("Start: already in room, creating UI and local player if needed.");
+          CreateAllPlayersUI();
+          CreateLocalPlayerIfNeeded();
+          CheckStartGame();
+        
+    }
+
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        Debug.Log($"{newPlayer.NickName} зашёл в комнату (actor {newPlayer.ActorNumber}).");
+        SetupPlayerUI(newPlayer);
         CheckStartGame();
     }
 
-    public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
+    public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        Debug.Log($"{newPlayer.NickName} зашёл в комнату.");
-        MessageLog.Instance.AddMessage($"{newPlayer.NickName} зашёл в комнату.");
-        SetupPlayer(newPlayer);
-        CheckStartGame();
+        Debug.Log($"{otherPlayer.NickName} вышел из комнаты (actor {otherPlayer.ActorNumber}).");
+        int id = otherPlayer.ActorNumber;
+
+        var p = GetPlayerById(id);
+        if (p != null) players.Remove(p);
+
+        if (uiPlayerStatsDict.TryGetValue(id, out var ui))
+        {
+            Destroy(ui.gameObject);
+            uiPlayerStatsDict.Remove(id);
+        }
+
+        if (playerMoves.TryGetValue(id, out var pm))
+        {
+            // попытка уничтожить сетевой объект
+            if (pm != null && pm.photonView != null && pm.photonView.IsMine)
+            {
+                PhotonNetwork.Destroy(pm.gameObject);
+            }
+            else if (pm != null && pm.gameObject != null)
+            {
+                Destroy(pm.gameObject); // если не владеем — просто уничтожим локально
+            }
+            playerMoves.Remove(id);
+        }
     }
 
-    // Общий метод для создания и настройки UI игрока
-    private void SetupPlayer(Photon.Realtime.Player photonPlayer)
+    private void CreateAllPlayersUI()
     {
-        int idPlayerOnRoom = GetPlayerOrderId(photonPlayer);
+        foreach (var p in PhotonNetwork.PlayerList)
+            SetupPlayerUI(p);
+    }
 
-        // Создаем новый UI элемент для игрока
-        GameObject go = Instantiate(playersStatsPrefabs.gameObject, playersStatsContainerTrans);
-        var uiPlayerStats = go.GetComponent<UIPlayerStats>();
+    private void SetupPlayerUI(Player photonPlayer)
+    {
+        int playerId = photonPlayer.ActorNumber;
 
-        // Создаем PlayerData
-        PlayerData player = new PlayerData(photonPlayer.NickName, 15000, idPlayerOnRoom, playerColors[idPlayerOnRoom], photonPlayer);
+        if (players.Exists(x => x.id == playerId))
+            return;
 
-        // Настраиваем UI под этого игрока
+        var uiInst = Instantiate(playersStatsPrefab, playersStatsContainerTrans);
+        var uiPlayerStats = uiInst as UIPlayerStats;
+
+        int colorIndex = Mathf.Clamp(playerId - 1, 0, playerColors.Length - 1);
+        PlayerData player = new PlayerData(
+            photonPlayer.NickName,
+            15000,
+            playerId,
+            playerColors[colorIndex],
+            photonPlayer
+        );
+
+        players.Add(player);
         uiPlayerStats.SetPlayerStats(player);
+        uiPlayerStatsDict[playerId] = uiPlayerStats;
 
-        // Подписываемся на событие изменения баланса для этого игрока (лучше делать в Bank с проверкой по player)
+        TurnManager.Instance.RegisterPlayerUI(playerId, uiPlayerStats);
+
         Bank.Instance.OnBalanceChanged += (changedPlayer, money) =>
         {
             if (changedPlayer.id == player.id)
-            {
-                Debug.Log($"{changedPlayer.Name} теперь имеет {money}$");
                 uiPlayerStats.SetMoneyPlayerText(money);
-            }
         };
     }
 
-    // Проверяем условие старта игры
+    private void CreateLocalPlayerIfNeeded()
+    {
+
+        int localId = PhotonNetwork.LocalPlayer.ActorNumber;
+        if (playerMoves.ContainsKey(localId)) return;
+
+        int colorIndex = Mathf.Clamp(localId - 1, 0, playerColors.Length - 1);
+
+        // передаём индекс цвета через instantiationData, чтобы все копии получили одинаковый цвет
+        GameObject playerPiece = PhotonNetwork.Instantiate(
+            playerPiecePrefab.name,
+            startPlayerPosition,
+            Quaternion.identity,
+            0,
+            new object[] { colorIndex }
+        );
+
+        var pm = playerPiece.GetComponent<PlayerMove>();
+        pm.id = localId;
+
+        // локально можно настроить дополнительные вещи, но SetRootTransform будет вызван в Start() у PlayerMove на всех клиентах
+        playerMoves[localId] = pm;
+    }
+
     private void CheckStartGame()
     {
-        if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
+        if (!PhotonNetwork.InRoom) return;
+
+        if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers &&
+            PhotonNetwork.IsMasterClient)
         {
-            StartGame();
+            TurnManager.Instance.StartRandomTurn();
         }
     }
 
-    private int GetPlayerOrderId(Photon.Realtime.Player photonPlayer)
-    {
-        var players = PhotonNetwork.PlayerList;
-        for (int i = 0; i < players.Length; i++)
-        {
-            if (players[i].ActorNumber == photonPlayer.ActorNumber)
-                return i;  // i — порядковый ID: 0,1,2...
-        }
-        return -1; // не найден
-    }
-    private void StartGame()
-    {
-
-    }
     public PlayerData GetPlayerById(int id)
     {
         return players.Find(p => p.id == id);
     }
-    private void SetPlayerUIStats()
+
+    public Color GetColorByIndex(int idx)
     {
-        //for(int i = 0;i < playersStats.Count; i++)
-        //{
-        //    playersStats[i].SetPlayerStats(players[i]);
-        //}
+        if (playerColors == null || playerColors.Length == 0) return Color.white;
+        return playerColors[Mathf.Clamp(idx, 0, playerColors.Length - 1)];
     }
-    private void ShowBuyMenu(int currentCellID)
+
+    public Color GetColorForActor(int actorNumber)
     {
-        var cellData = boardConfig.cells[currentCellID];
-        var company = cellData.companyData;
-
-        if (company.isBought)
-            return; 
-
-        uiBuyWindow.SetBuyText(company.price[0]);
-        uiBuyWindow.ShowBuyWindow();
-
-        uiBuyWindow.BuyButton().onClick.RemoveAllListeners();
-        uiBuyWindow.BuyButton().onClick.AddListener(() =>
-        {
-            var currentPlayer = GetPlayerById(0); // Текущий игрок, можно через ход
-            if (Bank.Instance.BuyCompany(currentPlayer, company))
-            {
-                uiBuyWindow.HideBuyWindow();
-                cellsManager.RefreshCellUI(currentCellID,currentPlayer);
-            }
-        });
-    }
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            Bank.Instance.AddMoney(GetPlayerById(0), 200);
-        }
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            Bank.Instance.RemoveMoney(GetPlayerById(1), 200);
-        }
+        return GetColorByIndex(actorNumber - 1);
     }
 }
