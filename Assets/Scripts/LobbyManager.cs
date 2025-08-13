@@ -95,7 +95,6 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Комната создана: " + PhotonNetwork.CurrentRoom.Name);
         CreateRoomUI(PhotonNetwork.CurrentRoom);
-        PhotonNetwork.LoadLevel("GameScene"); // название твоей игровой сцены
     }
 
 }

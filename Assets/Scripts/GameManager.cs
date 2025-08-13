@@ -1,5 +1,6 @@
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -37,11 +38,17 @@ public class GameManager : MonoBehaviourPunCallbacks
             return;
         }
         Instance = this;
+        Debug.Log($"GameManager создан через: {Environment.StackTrace}");
+
+        Debug.Log($"[GameManager] Awake в {Time.time}, Scene: {gameObject.scene.name}, InstanceID: {GetInstanceID()}");
+
     }
 
     private void Start()
     {
-            Debug.Log("Start: already in room, creating UI and local player if needed.");
+        Debug.Log($"[GameManager] Start в {Time.time}, Scene: {gameObject.scene.name}, InstanceID: {GetInstanceID()}");
+
+        Debug.Log("Start: already in room, creating UI and local player if needed.");
           CreateAllPlayersUI();
           CreateLocalPlayerIfNeeded();
           CheckStartGame();
