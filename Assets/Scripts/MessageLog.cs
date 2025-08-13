@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MessageLog : MonoBehaviour
 {
@@ -27,6 +28,7 @@ public class MessageLog : MonoBehaviour
     {
         var newMsg = Instantiate(messagePrefab, contentTransform);
         newMsg.text = message;
+        LayoutRebuilder.ForceRebuildLayoutImmediate(contentTransform); // Важный фикс
         messages.Enqueue(newMsg);
 
         if (messages.Count > maxMessages)

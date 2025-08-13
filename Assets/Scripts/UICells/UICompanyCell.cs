@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 public class UICompanyCell : UICellBase
 {
+
     [SerializeField] private TextMeshProUGUI companyNameText;
     [SerializeField] private TextMeshProUGUI priceText;
     [SerializeField] private Image BGImage;

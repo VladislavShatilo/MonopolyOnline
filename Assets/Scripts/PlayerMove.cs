@@ -85,7 +85,7 @@ public class PlayerMove : MonoBehaviourPun
         if (!photonView.IsMine) return;
 
         // посылаем всем команду переместить этот токен
-        photonView.RPC("RPC_MoveSteps", RpcTarget.AllBuffered, steps);
+        photonView.RPC(nameof(RPC_MoveSteps), RpcTarget.AllBuffered, steps);
     }
 
     [PunRPC]
@@ -126,19 +126,25 @@ public class PlayerMove : MonoBehaviourPun
     public void CellHandle(GameObject cellGO, int currentCellID)
     {
         Debug.Log(currentCellID);
+        string name = GameManager.Instance.GetPlayerById(id).Name;
+        string coloredName = $"<color=#{ColorUtility.ToHtmlStringRGB(GameManager.Instance.GetPlayerById(id).playerColor)}>{name}</color>";
         switch (boardConfig.cells[currentCellID].cellType)
         {
             case CellType.Company:
                 {
-                    MessageLog.Instance.AddMessage("Вы попали в сектор " + boardConfig.cells[currentCellID].companyData.name + " и у вас забрали 1,000k");
-                    //CompanyManager.Instance.TryBuyCompany();
-                    //ShowBuyMenuAction?.Invoke(currentCellID);
+                   
+                    MessageLog.Instance.AddMessage(coloredName + " попал в сектор " + boardConfig.cells[currentCellID].companyData.name);
+                    var cell = CompanyManager.Instance.GetCompany(currentCellID);
+                    if (cell != null && !cell.isBought)
+                    {
+                        CompanyManager.Instance.OfferPurchaseToPlayer(currentCellID, id);
+                    }
 
                     break;
                 }
             case CellType.Question:
                 {
-                    MessageLog.Instance.AddMessage("Вы попали в сектор говно и у вас забрали 1,000k");
+                    MessageLog.Instance.AddMessage(coloredName + " попал в сектор говно и у вас забрали 1,000k");
 
                     Bank.Instance.RemoveMoney(GameManager.Instance.GetPlayerById(id), 1000);
                     if (photonView.IsMine)
@@ -150,8 +156,18 @@ public class PlayerMove : MonoBehaviourPun
                 }
             case CellType.Spend:
                 {
-                    MessageLog.Instance.AddMessage("Вы попали в сектор говно-говно и у вас забрали 2,000k");
+                    MessageLog.Instance.AddMessage(coloredName + " попал в сектор говно-говно и у вас забрали 2,000k");
                     Bank.Instance.RemoveMoney(GameManager.Instance.GetPlayerById(id), 2000);
+                    if (photonView.IsMine)
+                    {
+                        // Завершение хода запрашивает только владелец фишки
+                        TurnManager.Instance.RequestEndTurn();
+                    }
+                    break;
+                }
+            case CellType.Corner:
+                {
+                    MessageLog.Instance.AddMessage(coloredName + " попали в сектор говно-говно-говно");
                     if (photonView.IsMine)
                     {
                         // Завершение хода запрашивает только владелец фишки

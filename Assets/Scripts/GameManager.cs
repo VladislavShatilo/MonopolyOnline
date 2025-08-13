@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-          Debug.Log("Start: already in room, creating UI and local player if needed.");
+            Debug.Log("Start: already in room, creating UI and local player if needed.");
           CreateAllPlayersUI();
           CreateLocalPlayerIfNeeded();
           CheckStartGame();
