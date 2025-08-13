@@ -120,16 +120,46 @@ public class PlayerMove : MonoBehaviourPun
 
         CellHandle(boardCells[currentCellIndex].gameObject, currentCellIndex);
 
-        if (photonView.IsMine)
-        {
-            // Завершение хода запрашивает только владелец фишки
-            TurnManager.Instance.RequestEndTurn();
-        }
+       
     }
 
     public void CellHandle(GameObject cellGO, int currentCellID)
     {
-        // твоя логика на приземлении на клетку
+        Debug.Log(currentCellID);
+        switch (boardConfig.cells[currentCellID].cellType)
+        {
+            case CellType.Company:
+                {
+                    MessageLog.Instance.AddMessage("Вы попали в сектор " + boardConfig.cells[currentCellID].companyData.name + " и у вас забрали 1,000k");
+                    //CompanyManager.Instance.TryBuyCompany();
+                    //ShowBuyMenuAction?.Invoke(currentCellID);
+
+                    break;
+                }
+            case CellType.Question:
+                {
+                    MessageLog.Instance.AddMessage("Вы попали в сектор говно и у вас забрали 1,000k");
+
+                    Bank.Instance.RemoveMoney(GameManager.Instance.GetPlayerById(id), 1000);
+                    if (photonView.IsMine)
+                    {
+                        // Завершение хода запрашивает только владелец фишки
+                        TurnManager.Instance.RequestEndTurn();
+                    }
+                    break;
+                }
+            case CellType.Spend:
+                {
+                    MessageLog.Instance.AddMessage("Вы попали в сектор говно-говно и у вас забрали 2,000k");
+                    Bank.Instance.RemoveMoney(GameManager.Instance.GetPlayerById(id), 2000);
+                    if (photonView.IsMine)
+                    {
+                        // Завершение хода запрашивает только владелец фишки
+                        TurnManager.Instance.RequestEndTurn();
+                    }
+                    break;
+                }
+        }
     }
 
     private IEnumerator MoveToPosition(Vector3 target)
