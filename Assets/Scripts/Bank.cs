@@ -1,3 +1,4 @@
+using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,39 +27,30 @@ public class Bank : MonoBehaviour
         OnBalanceChanged?.Invoke(player, player.Money);
     }
 
-    public bool RemoveMoney(PlayerData player, int amount)
+    public void RemoveMoney(PlayerData player, int amount)
     {
-        if (player.Money < amount)
-            return false; // Недостаточно средств
-
         player.Money -= amount;
         OnBalanceChanged?.Invoke(player, player.Money);
-        return true;
     }
-    public bool BuyCompany(PlayerData buyer, CompanyData company)
+    public bool hasEnoughMoney(PlayerData player, int amount)
     {
-        int price = company.price[0];
-
-        if (buyer.Money < price)
+        if (player.Money < amount)
         {
-            Debug.Log("Недостаточно средств!");
             return false;
         }
+        else
+        {
+            return true;
 
-        RemoveMoney(buyer, price);
-        company.ownerID = buyer.id;
-        company.isBought = true;
 
-        Debug.Log($"{buyer.Name} купил компанию {company.name} за {price}$");
-        return true;
+        }
+
     }
 
-    public bool TransferMoney(PlayerData from, PlayerData to, int amount)
+    public void TransferMoney(PlayerData from, PlayerData to, int amount)
     {
-        if (!RemoveMoney(from, amount))
-            return false;
+        
 
         AddMoney(to, amount);
-        return true;
     }
 }

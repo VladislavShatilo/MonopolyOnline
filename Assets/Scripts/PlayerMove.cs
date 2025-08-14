@@ -137,7 +137,7 @@ public class PlayerMove : MonoBehaviourPun
                     var cell = CompanyManager.Instance.GetCompany(currentCellID);
                     if (cell != null && !cell.isBought)
                     {
-                        CompanyManager.Instance.OfferPurchaseToPlayer(currentCellID, id);
+                        CompanyManager.Instance.CompanyHandle(currentCellID, id);
                     }
 
                     break;

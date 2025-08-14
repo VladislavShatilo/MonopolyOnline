@@ -32,7 +32,7 @@ public class CellsManager : MonoBehaviour
         {
             cellUIMap[i] = boardCellsTransforms[i].GetComponent<UICellBase>();
         }
-        CompanyManager.Instance.InitializeCells(boardConfig.cells);
+        CompanyManager.Instance.InitializeCompanies(boardConfig.cells);
     }
     public void RefreshCellUI(int cellIndex, PlayerData owner)
     {

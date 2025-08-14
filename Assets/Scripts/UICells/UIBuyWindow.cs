@@ -30,7 +30,7 @@ public class UIBuyWindow : MonoBehaviour
     private void Start()
     {
         buyButton.onClick.AddListener(() => OnBuyClicked());
-        auctionButton.onClick.AddListener(() =>Cancel());
+        auctionButton.onClick.AddListener(() => HideWindow());
     }
     public void ShowBuyWindow(int cellIndex, CompanyData companyData)
     {
@@ -38,7 +38,7 @@ public class UIBuyWindow : MonoBehaviour
         buyButtonText.text = "Купить за " + companyData.price[0].ToString("N0", CultureInfo.InvariantCulture) + "k";
         windowAnimation.ShowWindow();
     }
-    public void Cancel()
+    public void HideWindow()
     { 
         windowAnimation.HideWindow();
         TurnManager.Instance.RequestEndTurn();
@@ -47,8 +47,7 @@ public class UIBuyWindow : MonoBehaviour
     private void OnBuyClicked()
     {
         CompanyManager.Instance.TryBuyCompany(currentCellIndex);
-        windowAnimation.HideWindow();
-        TurnManager.Instance.RequestEndTurn();
+       
 
     }
 

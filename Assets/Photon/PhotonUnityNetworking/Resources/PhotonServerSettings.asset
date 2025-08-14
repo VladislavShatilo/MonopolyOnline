@@ -52,6 +52,10 @@ MonoBehaviour:
   - RPC_RequestBuyCompany
   - RPC_RequestPayRent
   - RPC_ShowPurchaseOffer
+  - RPC_ShowBranchOffer
+  - RPC_ShowRentOffer
+  - RPC_ConfirmRent
+  - RPC_RequestRent
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 0
