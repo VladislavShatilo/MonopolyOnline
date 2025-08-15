@@ -23,13 +23,13 @@ public class GameManager : MonoBehaviourPunCallbacks
     [SerializeField] private Color[] playerColors;
     [SerializeField] private Vector3 startPlayerPosition = new Vector3(-240f, 390f, 0f);
 
+
     private List<PlayerData> players = new List<PlayerData>();
     private Dictionary<int, PlayerMove> playerMoves = new Dictionary<int, PlayerMove>();
     private Dictionary<int, UIPlayerStats> uiPlayerStatsDict = new Dictionary<int, UIPlayerStats>();
 
     public Transform CellsRootTransforms => cellsRootTransforms;
     public Transform PlayerRootTransform => playerRootGO;
-
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -38,17 +38,11 @@ public class GameManager : MonoBehaviourPunCallbacks
             return;
         }
         Instance = this;
-        Debug.Log($"GameManager создан через: {Environment.StackTrace}");
-
-        Debug.Log($"[GameManager] Awake в {Time.time}, Scene: {gameObject.scene.name}, InstanceID: {GetInstanceID()}");
-
+      
     }
 
     private void Start()
     {
-        Debug.Log($"[GameManager] Start в {Time.time}, Scene: {gameObject.scene.name}, InstanceID: {GetInstanceID()}");
-
-        Debug.Log("Start: already in room, creating UI and local player if needed.");
           CreateAllPlayersUI();
           CreateLocalPlayerIfNeeded();
           CheckStartGame();

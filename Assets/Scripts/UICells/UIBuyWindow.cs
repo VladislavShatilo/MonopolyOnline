@@ -35,7 +35,7 @@ public class UIBuyWindow : MonoBehaviour
     public void ShowBuyWindow(int cellIndex, CompanyData companyData)
     {
         currentCellIndex = cellIndex;
-        buyButtonText.text = "Купить за " + companyData.price[0].ToString("N0", CultureInfo.InvariantCulture) + "k";
+        buyButtonText.text = "Купить за " + companyData.price.ToString("N0", CultureInfo.InvariantCulture) + "k";
         windowAnimation.ShowWindow();
     }
     public void HideWindow()

@@ -93,7 +93,7 @@ public class CompanyManager : MonoBehaviourPun
         if (!ValidateCompanyAvailable(cellIndex, out var cell)) return;
 
         var buyer = GameManager.Instance.GetPlayerById(buyerId);
-        int price = cell.companyData.price[0];
+        int price = cell.companyData.price;
 
         if (!Bank.Instance.hasEnoughMoney(buyer, price))
         {
@@ -119,7 +119,7 @@ public class CompanyManager : MonoBehaviourPun
         cell.companyData.isBought = true;
         cell.companyData.ownerID = ownerId;
         var buyer = GameManager.Instance.GetPlayerById(ownerId);
-        int price = cell.companyData.price[0];
+        int price = cell.companyData.price;
         Bank.Instance.RemoveMoney(buyer, price);
         var owner = GameManager.Instance.GetPlayerById(ownerId);
         if (CellsManager.Instance.GetCellByIndex(cellIndex)?.TryGetComponent(out UICompanyCell uiCell) == true)

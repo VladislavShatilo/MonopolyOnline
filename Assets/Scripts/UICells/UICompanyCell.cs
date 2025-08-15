@@ -13,14 +13,31 @@ public class UICompanyCell : UICellBase
     [SerializeField] private TextMeshProUGUI priceText;
     [SerializeField] private Image BGImage;
     [SerializeField] private Image BGPriceImage;
-    [SerializeField] private Color[] groupColors;
 
     public override void UpdateUI(CellData cellData, PlayerData owner)
     {
-        var company = cellData.companyData;
-        companyNameText.text = company.name;
-        priceText.text = company.price[0].ToString("N0", CultureInfo.InvariantCulture) + "k";
-        BGPriceImage.color = groupColors[(int)company.group];
+        switch (cellData.cellType)
+        {
+            case CellType.Company:
+                var company = cellData.companyData;
+                companyNameText.text = company.name;
+                priceText.text = company.price.ToString("N0", CultureInfo.InvariantCulture) + "k";
+                BGPriceImage.color = GroupColors.Colors[(int)company.group];
+                break;
+            case CellType.FieldCompany:
+                var fieldCompany = cellData.fieldCompanyData;
+                companyNameText.text = fieldCompany.name;
+                priceText.text = fieldCompany.price.ToString("N0", CultureInfo.InvariantCulture) + "k";
+                BGPriceImage.color = GroupColors.Colors[(int)fieldCompany.group];
+                break;
+            case CellType.DiceCompany:
+                var diceCompany = cellData.diceCompanyData;
+                companyNameText.text = diceCompany.name;
+                priceText.text = diceCompany.price.ToString("N0", CultureInfo.InvariantCulture) + "k";
+                BGPriceImage.color = GroupColors.Colors[(int)diceCompany.group];
+                break;
+
+        }
 
         if (owner != null)
         {

@@ -4,6 +4,8 @@ using UnityEngine;
 public enum CellType
 {
     Company,
+    FieldCompany,
+    DiceCompany,
     Spend,
     Question,
     Corner
@@ -11,30 +13,52 @@ public enum CellType
 public enum CompanyGroup
 {
     Perfume,
+    Cars,
     Clothes,
     SocialMedia,
-    Cars,
+    Games,
     Drinks,
     Airlines,
     FastFood,
     Hotels,
-    Phones,
-    Games
+    Phones
+    
 }
-
-public interface ICellDetails { }
-
 [System.Serializable]
-public class CompanyData : ICellDetails
+public abstract class CompanyBaseData : ICellDetails
 {
     public string name;
-    public int[] price;
-    public int []rent;
+    public CompanyGroup group;
+    public int price;
+    public int pledgePrice;
+    public int buyoutPrice;
     public bool isBought;
     public int ownerID;
-    public CompanyGroup group;
+    public StatsWindowPosition popupData;
+}
+public interface ICellDetails
+{
 }
 
+[System.Serializable]
+public class CompanyData : CompanyBaseData
+{
+    public int[] rent;
+    public int rentLevel;
+    public int branchPrice;
+}
+[System.Serializable]
+public class FieldCompanyData : CompanyBaseData
+{
+    public int[] rentField;
+    public int amountLevel;
+}
+[System.Serializable]
+public class DiceCompanyData : CompanyBaseData
+{   
+    public int[] rentMultiplier;
+    public int amountLevel;
+}
 [System.Serializable]
 public class SpendData : ICellDetails
 {
@@ -61,6 +85,8 @@ public class CellData
     public string cellName;
     public CellType cellType;
     public CompanyData companyData;
+    public FieldCompanyData fieldCompanyData;
+    public DiceCompanyData diceCompanyData;
     public SpendData spendData;
     public QuestionData questionData;
     public CornerData cornerData;

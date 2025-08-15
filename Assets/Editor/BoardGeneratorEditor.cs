@@ -12,6 +12,9 @@ public class BoardGeneratorEditor : EditorWindow
     public GameObject bonusPrefab;
     public GameObject questionPrefab;
     public GameObject cornerPrefab;
+    public GameObject companyInfoWindowRect;
+    public GameObject fieldCompanyInfoWindowRect;
+    public GameObject diceCompanyInfoWindowRect;
 
     public Transform parentTransform;
 
@@ -35,6 +38,10 @@ public class BoardGeneratorEditor : EditorWindow
         bonusPrefab = (GameObject)EditorGUILayout.ObjectField("Bonus Prefab", bonusPrefab, typeof(GameObject), false);
         questionPrefab = (GameObject)EditorGUILayout.ObjectField("Question Prefab", questionPrefab, typeof(GameObject), false);
         cornerPrefab = (GameObject)EditorGUILayout.ObjectField("Corner Prefab", cornerPrefab, typeof(GameObject), false);
+        companyInfoWindowRect = (GameObject)EditorGUILayout.ObjectField("Company Stats Window", companyInfoWindowRect, typeof(GameObject), false);
+        fieldCompanyInfoWindowRect = (GameObject)EditorGUILayout.ObjectField("Field Company Stats Window", fieldCompanyInfoWindowRect, typeof(GameObject), false);
+        diceCompanyInfoWindowRect = (GameObject)EditorGUILayout.ObjectField("Dice Company Stats Window", diceCompanyInfoWindowRect, typeof(GameObject), false);
+
         parentTransform = (Transform)EditorGUILayout.ObjectField("Parent Transform", parentTransform, typeof(Transform), true);
 
         if (GUILayout.Button("Build Board"))
@@ -69,6 +76,7 @@ public class BoardGeneratorEditor : EditorWindow
             }
 
             GameObject cellGO = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parentTransform);
+            
             cellGO.name = $"Cell_{i}_{cell.cellName}";
 
             var uiComponent = cellGO.GetComponent<UICellBase>();
@@ -82,17 +90,22 @@ public class BoardGeneratorEditor : EditorWindow
             rt.anchorMin = rt.anchorMax = new Vector2(0, 1); // левый верх
             rt.localRotation = Quaternion.identity;
 
+         
             switch (cell.cellType)
             {
                 case CellType.Company:
+                case CellType.FieldCompany:
+                case CellType.DiceCompany:
                     UICompanyCell uiCompanyCell = cellGO.GetComponent<UICompanyCell>();
-                    if(i > 20 &&  i < 30)
+                    
+                    if (i > 20 &&  i < 30)
                     {
                         uiCompanyCell.RotateLogoText(270);                   
                         uiCompanyCell.RotatePriceText();                     
                     }
                     if(i > 30 && i < 40)
                     {
+                       
                         uiCompanyCell.RotateLogoText(270);
                     }
                     break;
@@ -125,8 +138,23 @@ public class BoardGeneratorEditor : EditorWindow
             rt.localEulerAngles = new Vector3(0, 0, rotationZ);
             rt.sizeDelta = size;
         }
-
+        GameObject companyWindow = InitializeWindow(companyInfoWindowRect, parentTransform);
+        GameObject fieldCompanyWindow = InitializeWindow(fieldCompanyInfoWindowRect, parentTransform);
+        GameObject diceCompanyWindow = InitializeWindow(diceCompanyInfoWindowRect, parentTransform);
         Debug.Log("Board built.");
+    }
+    private GameObject InitializeWindow(GameObject prefab, Transform parent)
+    {
+        GameObject window = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
+        var rectTransform = window.GetComponent<RectTransform>();
+
+        rectTransform.anchoredPosition = Vector2.zero;
+        rectTransform.anchorMin = new Vector2(0, 1);
+        rectTransform.anchorMax = new Vector2(0, 1);
+        rectTransform.pivot = new Vector2(0, 1);
+
+        window.SetActive(false);
+        return window;
     }
 
     private void GetCellTransform(int index, out Vector2 position, out float rotation, out Vector2 size)
@@ -198,9 +226,13 @@ public class BoardGeneratorEditor : EditorWindow
         return type switch
         {
             CellType.Company => companyPrefab,
+            CellType.FieldCompany => companyPrefab,
+            CellType.DiceCompany => companyPrefab,
             CellType.Spend => bonusPrefab,
             CellType.Question => questionPrefab,
             CellType.Corner => cornerPrefab,
+            
+
             _ => null
         };
     }

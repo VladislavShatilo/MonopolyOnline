@@ -19,6 +19,12 @@ public class CellDataDrawer : PropertyDrawer
             case CellType.Company:
                 height += EditorGUI.GetPropertyHeight(property.FindPropertyRelative("companyData"), true);
                 break;
+            case CellType.FieldCompany:
+                height += EditorGUI.GetPropertyHeight(property.FindPropertyRelative("fieldCompanyData"), true);
+                break;
+            case CellType.DiceCompany:
+                height += EditorGUI.GetPropertyHeight(property.FindPropertyRelative("diceCompanyData"), true);
+                break;
             case CellType.Spend:
                 height += EditorGUI.GetPropertyHeight(property.FindPropertyRelative("spendData"), true);
                 break;
@@ -58,6 +64,12 @@ public class CellDataDrawer : PropertyDrawer
         {
             case CellType.Company:
                 EditorGUI.PropertyField(rect, property.FindPropertyRelative("companyData"), true);
+                break;
+            case CellType.FieldCompany:
+                EditorGUI.PropertyField(rect, property.FindPropertyRelative("fieldCompanyData"), true);
+                break;
+            case CellType.DiceCompany:
+                EditorGUI.PropertyField(rect, property.FindPropertyRelative("diceCompanyData"), true);
                 break;
             case CellType.Spend:
                 EditorGUI.PropertyField(rect, property.FindPropertyRelative("spendData"), true);
