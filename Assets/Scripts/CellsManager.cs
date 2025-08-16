@@ -37,39 +37,42 @@ public class CellsManager : MonoBehaviour
         for (int i = 0; i < boardConfig.cells.Count; i++)
         {
             var cellData = boardConfig.cells[i];
-            var popup = boardCellsTransforms[i].GetComponent<CompanyWindowPopup>();
-            if(popup == null)
+
+            if (cellData.cellType == CellType.Company ||
+                cellData.cellType == CellType.FieldCompany || 
+                cellData.cellType == CellType.DiceCompany )
             {
-                Debug.Log(boardConfig.cells.Count);
-            }
-        
-            popup.Init(i);
-            if (cellData.cellType == CellType.Company)
-            {   
-                popup.OnCompanyClicked += (id) =>
+                Debug.Log("1242");
+                var popup = boardCellsTransforms[i].GetComponent<CompanyWindowPopup>();
+                popup.Init(i);
+                if (cellData.cellType == CellType.Company)
                 {
-                    var pos = boardConfig.cells[id].companyData.popupData;
-                
-                    companyUIManager.ShowCompanyWindow(boardCellsTransforms[id] as RectTransform, pos,cellData.companyData);
-                };
-            }
-            else if(cellData.cellType == CellType.FieldCompany)
-            {  
-                popup.OnCompanyClicked += (id) =>
+                    popup.OnCompanyClicked += (id) =>
+                    {
+                        var pos = boardConfig.cells[id].companyData.popupData;
+
+                        companyUIManager.ShowCompanyWindow(boardCellsTransforms[id] as RectTransform, pos, cellData.companyData);
+                    };
+                }
+                else if (cellData.cellType == CellType.FieldCompany)
                 {
-                    var pos = boardConfig.cells[id].fieldCompanyData.popupData;
-                    companyUIManager.ShowFieldCompanyWindow(boardCellsTransforms[id] as RectTransform, pos, cellData.fieldCompanyData);
-                };
-            }
-            else if(cellData.cellType == CellType.FieldCompany)
-            {
-                popup.OnCompanyClicked += (id) =>
+                    popup.OnCompanyClicked += (id) =>
+                    {
+                        var pos = boardConfig.cells[id].fieldCompanyData.popupData;
+                        companyUIManager.ShowFieldCompanyWindow(boardCellsTransforms[id] as RectTransform, pos, cellData.fieldCompanyData);
+                    };
+                }
+                else if (cellData.cellType == CellType.DiceCompany)
                 {
-                    var pos = boardConfig.cells[id].diceCompanyData.popupData;
-                 
-                    companyUIManager.ShowDiceCompanyWindow(boardCellsTransforms[id] as RectTransform, pos, cellData.diceCompanyData);
-                };
+                    popup.OnCompanyClicked += (id) =>
+                    {
+                        var pos = boardConfig.cells[id].diceCompanyData.popupData;
+
+                        companyUIManager.ShowDiceCompanyWindow(boardCellsTransforms[id] as RectTransform, pos, cellData.diceCompanyData);
+                    };
+                }
             }
+           
         }
 
         CompanyManager.Instance.InitializeCompanies(boardConfig.cells);

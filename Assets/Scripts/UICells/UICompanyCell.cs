@@ -21,19 +21,19 @@ public class UICompanyCell : UICellBase
             case CellType.Company:
                 var company = cellData.companyData;
                 companyNameText.text = company.name;
-                priceText.text = company.price.ToString("N0", CultureInfo.InvariantCulture) + "k";
+                priceText.text = company.price.ToString("N0", CultureInfo.InvariantCulture);
                 BGPriceImage.color = GroupColors.Colors[(int)company.group];
                 break;
             case CellType.FieldCompany:
                 var fieldCompany = cellData.fieldCompanyData;
                 companyNameText.text = fieldCompany.name;
-                priceText.text = fieldCompany.price.ToString("N0", CultureInfo.InvariantCulture) + "k";
+                priceText.text = fieldCompany.price.ToString("N0", CultureInfo.InvariantCulture);
                 BGPriceImage.color = GroupColors.Colors[(int)fieldCompany.group];
                 break;
             case CellType.DiceCompany:
                 var diceCompany = cellData.diceCompanyData;
                 companyNameText.text = diceCompany.name;
-                priceText.text = diceCompany.price.ToString("N0", CultureInfo.InvariantCulture) + "k";
+                priceText.text = diceCompany.price.ToString("N0", CultureInfo.InvariantCulture);
                 BGPriceImage.color = GroupColors.Colors[(int)diceCompany.group];
                 break;
 

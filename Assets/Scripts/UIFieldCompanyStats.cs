@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,7 +15,7 @@ public class UIFieldCompanyStats : UIBaseCompanyStats
     {
         for (int i = 0; i < fieldPriceTexts.Length && i < values.Length; i++)
         {
-            fieldPriceTexts[i].text = values[i].ToString();
+            fieldPriceTexts[i].text = values[i].ToString("N0", CultureInfo.InvariantCulture);
         }
     }
 

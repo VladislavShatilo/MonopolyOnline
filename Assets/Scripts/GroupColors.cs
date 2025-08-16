@@ -25,7 +25,6 @@ public static class GroupColors
         {
             return color;
         }
-        Debug.LogError($"Неверный HEX-код: {hex}");
         return Color.magenta; // Возвращаем цвет по умолчанию при ошибке
     }
 }

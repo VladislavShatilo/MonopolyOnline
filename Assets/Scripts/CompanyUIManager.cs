@@ -1,4 +1,6 @@
+using System.Globalization;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class CompanyUIManager : MonoBehaviour
 {
@@ -12,6 +14,59 @@ public class CompanyUIManager : MonoBehaviour
 
     [SerializeField] private float cellWidth = 70;
     [SerializeField] private float offset = 80;
+
+    private void Update()
+    {
+#if UNITY_EDITOR || UNITY_STANDALONE || UNITY_WEBGL
+        if (Input.GetMouseButtonDown(0))
+        {
+            HandleClick(Input.mousePosition);
+        }
+#elif UNITY_IOS || UNITY_ANDROID
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        {
+            HandleClick(Input.GetTouch(0).position);
+        }
+#endif
+    }
+
+    private void HandleClick(Vector2 screenPosition)
+    {
+        // Если курсор не над UI — сразу закрываем
+        if (!IsPointerOverUI(screenPosition))
+        {
+            HideAllWindows();
+            return;
+        }
+
+        // Если клик вне всех окон — закрываем
+        if (!IsPointerInsideWindow(companyInfoWindow, screenPosition) &&
+            !IsPointerInsideWindow(fieldCompanyInfoWindow, screenPosition) &&
+            !IsPointerInsideWindow(diceCompanyInfoWindow, screenPosition))
+        {
+            HideAllWindows();
+        }
+    }
+
+    private bool IsPointerInsideWindow(RectTransform window, Vector2 screenPosition)
+    {
+        if (!window.gameObject.activeSelf) return false;
+        return RectTransformUtility.RectangleContainsScreenPoint(window, screenPosition);
+    }
+
+    private bool IsPointerOverUI(Vector2 screenPosition)
+    {
+#if UNITY_EDITOR || UNITY_STANDALONE || UNITY_WEBGL
+        return EventSystem.current.IsPointerOverGameObject();
+#elif UNITY_IOS || UNITY_ANDROID
+        if (Input.touchCount > 0)
+            return EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId);
+        return false;
+#else
+        return false;
+#endif
+    }
+
 
     private void ConfigureWindowPosition(RectTransform window, RectTransform companyCell, StatsWindowPosition position)
     {
@@ -63,23 +118,23 @@ public class CompanyUIManager : MonoBehaviour
         statsCompanyPanel.SetGroupName(data.group.ToString());
         statsCompanyPanel.SetTopBarColor(GroupColors.Colors[(int)data.group]);
         statsCompanyPanel.SetRentPrices(data.rent);
-        statsCompanyPanel.SetCellPrice(data.price.ToString());
-        statsCompanyPanel.SetPledgePrice(data.pledgePrice.ToString());
-        statsCompanyPanel.SetBuyoutPrice(data.buyoutPrice.ToString());
-        statsCompanyPanel.SetBranchPrice(data.branchPrice.ToString());
+        statsCompanyPanel.SetCellPrice(data.price.ToString("N0", CultureInfo.InvariantCulture));
+        statsCompanyPanel.SetPledgePrice(data.pledgePrice.ToString("N0", CultureInfo.InvariantCulture));
+        statsCompanyPanel.SetBuyoutPrice(data.buyoutPrice.ToString("N0", CultureInfo.InvariantCulture));
+        statsCompanyPanel.SetBranchPrice(data.branchPrice.ToString("N0", CultureInfo.InvariantCulture));
     }
 
     public void ShowFieldCompanyWindow(RectTransform companyCell, StatsWindowPosition position, FieldCompanyData data)
-    {
+    {    
         ConfigureWindowPosition(fieldCompanyInfoWindow, companyCell, position);
 
         statsFieldCompanyPanel.SetCompanyName(data.name);
         statsFieldCompanyPanel.SetGroupName(data.group.ToString());
         statsFieldCompanyPanel.SetTopBarColor(GroupColors.Colors[(int)data.group]);
         statsFieldCompanyPanel.SetFieldPrices(data.rentField);
-        statsFieldCompanyPanel.SetCellPrice(data.price.ToString());
-        statsFieldCompanyPanel.SetPledgePrice(data.pledgePrice.ToString());
-        statsFieldCompanyPanel.SetBuyoutPrice(data.buyoutPrice.ToString());
+        statsFieldCompanyPanel.SetCellPrice(data.price.ToString("N0", CultureInfo.InvariantCulture));
+        statsFieldCompanyPanel.SetPledgePrice(data.pledgePrice.ToString("N0", CultureInfo.InvariantCulture));
+        statsFieldCompanyPanel.SetBuyoutPrice(data.buyoutPrice.ToString("N0", CultureInfo.InvariantCulture));
     }
 
     public void ShowDiceCompanyWindow(RectTransform companyCell, StatsWindowPosition position, DiceCompanyData data)
@@ -90,9 +145,9 @@ public class CompanyUIManager : MonoBehaviour
         statsDiceCompanyPanel.SetGroupName(data.group.ToString());
         statsDiceCompanyPanel.SetTopBarColor(GroupColors.Colors[(int)data.group]);
         statsDiceCompanyPanel.SetDiceFieldMultiTexts(data.rentMultiplier);
-        statsDiceCompanyPanel.SetCellPrice(data.price.ToString());
-        statsDiceCompanyPanel.SetPledgePrice(data.pledgePrice.ToString());
-        statsDiceCompanyPanel.SetBuyoutPrice(data.buyoutPrice.ToString());
+        statsDiceCompanyPanel.SetCellPrice(data.price.ToString("N0", CultureInfo.InvariantCulture));
+        statsDiceCompanyPanel.SetPledgePrice(data.pledgePrice.ToString("N0", CultureInfo.InvariantCulture));
+        statsDiceCompanyPanel.SetBuyoutPrice(data.buyoutPrice.ToString("N0", CultureInfo.InvariantCulture));
     }
 
     public void HideAllWindows()
