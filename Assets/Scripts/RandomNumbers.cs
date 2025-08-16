@@ -34,22 +34,16 @@ public class RandomNumbers : MonoBehaviour
 
     public void OnRollDiceButton()
     {
-       
-            TurnManager.Instance.RollDice();
-       
+        // Любой игрок может нажать кнопку броска
+        TurnManager.Instance.RequestRollDice(PhotonNetwork.LocalPlayer.ActorNumber);
     }
-
     public void SetDiceNumbers(int first, int second, int targetPlayerId)
     {
-        firstRandomText.text = first.ToString();
-        secondRandomText.text = second.ToString();
-
-        // Ходит только тот, чей это ID
         if (PhotonNetwork.LocalPlayer.ActorNumber == targetPlayerId)
         {
             playerMoveAction?.Invoke(first + second);
         }
     }
 
-
+  
 }

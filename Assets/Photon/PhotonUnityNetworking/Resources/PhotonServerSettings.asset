@@ -56,6 +56,9 @@ MonoBehaviour:
   - RPC_ShowRentOffer
   - RPC_ConfirmRent
   - RPC_RequestRent
+  - RPC_StartDiceRoll
+  - RPC_RequestRollDice
+  - RPC_RequestSetNumbersDice
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 0

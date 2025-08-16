@@ -8,6 +8,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
     public static TurnManager Instance { get; private set; }
 
     public float turnDuration = 90f;
+    [SerializeField] private DiceManagerPhoton diceManager;
 
     private double turnStartTime; // время старта хода (PhotonNetwork.Time)
     private int currentTurnPlayerId;
@@ -64,22 +65,32 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
         StartTurn(randomPlayerId);
     }
-    public void RollDice()
+    public void RequestRollDice(int requestingPlayerId)
     {
-        int first = UnityEngine.Random.Range(1, 7);
-        int second = UnityEngine.Random.Range(1, 7);
-
-        // Передаём сразу и playerId
-        photonView.RPC("RPC_RollDiceResult", RpcTarget.All, first, second, currentTurnPlayerId);
+        // Любой игрок вызывает бросок — отправляем запрос мастеру
+        photonView.RPC(nameof(RPC_RequestSetNumbersDice), RpcTarget.MasterClient, requestingPlayerId);
     }
 
     [PunRPC]
-    private void RPC_RollDiceResult(int first, int second, int playerId)
+    private void RPC_RequestSetNumbersDice(int requestingPlayerId)
     {
-        Debug.Log($"Dice rolled: {first}, {second} for player {playerId}");
-        RandomNumbers.Instance.SetDiceNumbers(first, second, playerId);
-    }
+        if (!PhotonNetwork.IsMasterClient) return;
 
+        // Генерируем числа кубиков
+        int first = UnityEngine.Random.Range(1, 7);
+        int second = UnityEngine.Random.Range(1, 7);
+
+        // Запускаем кубики у всех клиентов с этими числами
+        photonView.RPC(nameof(RPC_RequestSetNumbersDice), RpcTarget.AllBuffered, first,second,requestingPlayerId);
+
+       
+    }
+    [PunRPC]
+    private void RPC_RequestSetNumbersDice(int first, int second,int requestingPlayerId)
+    {
+        
+        diceManager.StartDiceRollWithResult(first, second, requestingPlayerId);
+    }
     public void StartTurn(int playerId)
     {
         if (!PhotonNetwork.IsMasterClient)
