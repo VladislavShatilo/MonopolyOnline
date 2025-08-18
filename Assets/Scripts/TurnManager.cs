@@ -18,7 +18,6 @@ public class TurnManager : MonoBehaviourPunCallbacks
     // UI игроков, ключ — ActorNumber.ToString()
     private Dictionary<int, UIPlayerStats> playerStatsDict = new Dictionary<int, UIPlayerStats>();
 
-    public event Action<int> TurnChanged;
     public int CurrentTurnPlayerId => currentTurnPlayerId;
 
     private void Awake()
@@ -100,7 +99,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
         turnStartTime = PhotonNetwork.Time;
         isTurnActive = true;
 
-        photonView.RPC("RPC_StartTurn", RpcTarget.All, playerId, turnStartTime);
+        photonView.RPC(nameof(RPC_StartTurn), RpcTarget.All, playerId, turnStartTime);
         Debug.Log($"Master started turn for player {playerId}");
     }
 
@@ -110,11 +109,11 @@ public class TurnManager : MonoBehaviourPunCallbacks
         currentTurnPlayerId = playerId;
         turnStartTime = startTime;
         isTurnActive = true;
-
-        TurnChanged?.Invoke(currentTurnPlayerId);
+        DiceRollWindow.Instance.TurnChangeWindow(playerId);
+        
         Debug.Log($"RPC_StartTurn: current turn is {playerId}");
     }
-
+   
     private void UpdateTurnTimerOnAllClients(float timeLeft)
     {
         foreach (var kvp in playerStatsDict)
@@ -161,7 +160,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
         }
         else
         {
-            photonView.RPC("RPC_RequestEndTurn", RpcTarget.MasterClient);
+            photonView.RPC(nameof(RPC_RequestEndTurn), RpcTarget.MasterClient);
         }
     }
 

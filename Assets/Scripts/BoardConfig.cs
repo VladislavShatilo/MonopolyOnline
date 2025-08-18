@@ -32,8 +32,6 @@ public abstract class CompanyBaseData : ICellDetails
     public int price;
     public int pledgePrice;
     public int buyoutPrice;
-    public bool isBought;
-    public int ownerID;
     public StatsWindowPosition popupData;
 }
 public interface ICellDetails
@@ -44,20 +42,17 @@ public interface ICellDetails
 public class CompanyData : CompanyBaseData
 {
     public int[] rent;
-    public int rentLevel;
     public int branchPrice;
 }
 [System.Serializable]
 public class FieldCompanyData : CompanyBaseData
 {
     public int[] rentField;
-    public int amountLevel;
 }
 [System.Serializable]
 public class DiceCompanyData : CompanyBaseData
 {   
     public int[] rentMultiplier;
-    public int amountLevel;
 }
 [System.Serializable]
 public class SpendData : ICellDetails

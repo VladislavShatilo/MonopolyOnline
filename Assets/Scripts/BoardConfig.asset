@@ -158,7 +158,7 @@ MonoBehaviour:
       pledgePrice: 300
       buyoutPrice: 360
       isBought: 0
-      ownerID: 0
+      ownerID: 2
       popupData: 0
       rent: 28000000c80000005802000008070000800c000094110000
       rentLevel: 0
@@ -293,7 +293,7 @@ MonoBehaviour:
       pledgePrice: 500
       buyoutPrice: 600
       isBought: 0
-      ownerID: 0
+      ownerID: 1
       popupData: 0
       rent: 3c0000002c010000840300008c0a0000a00f00007c150000
       rentLevel: 0
@@ -383,7 +383,7 @@ MonoBehaviour:
       pledgePrice: 500
       buyoutPrice: 600
       isBought: 0
-      ownerID: 0
+      ownerID: 2
       popupData: 0
       rent: 3c0000002c010000840300008c0a0000301100007c150000
       rentLevel: 0
@@ -428,7 +428,7 @@ MonoBehaviour:
       pledgePrice: 600
       buyoutPrice: 720
       isBought: 0
-      ownerID: 0
+      ownerID: 1
       popupData: 0
       rent: 5000000090010000e8030000b80b00009411000070170000
       rentLevel: 0

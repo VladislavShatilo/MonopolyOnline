@@ -59,6 +59,8 @@ MonoBehaviour:
   - RPC_StartDiceRoll
   - RPC_RequestRollDice
   - RPC_RequestSetNumbersDice
+  - RPC_StartTurnWindpw
+  - RPC_StartTurnWindow
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 0

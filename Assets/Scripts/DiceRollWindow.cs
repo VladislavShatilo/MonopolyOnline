@@ -8,10 +8,11 @@ public class DiceRollWindow : MonoBehaviour
 {
     public static DiceRollWindow Instance { get; private set; }
 
+    [Header("UI")]
     [SerializeField] private RectTransform windowRectTransform;
     [SerializeField] private float animationDuration = 0.5f;
+
     private int localPlayerId;
-    private Coroutine hideCoroutine;
 
     private void Awake()
     {
@@ -23,60 +24,42 @@ public class DiceRollWindow : MonoBehaviour
         Instance = this;
     }
 
-    private void OnEnable()
-    {
-        if (TurnManager.Instance != null)
-            TurnManager.Instance.TurnChanged += OnTurnChanged;
-    }
-
-    private void OnDisable()
-    {
-        if (TurnManager.Instance != null)
-            TurnManager.Instance.TurnChanged -= OnTurnChanged;
-    }
-
     private void Start()
     {
         localPlayerId = PhotonNetwork.LocalPlayer.ActorNumber;
-        HideWindow();
+        ForceHideWindow(); // сразу скрываем окно при старте
     }
 
-    private void OnTurnChanged(int currentPlayerId)
+    public void TurnChangeWindow(int currentPlayerId)
     {
-        Debug.Log($"DiceRollWindow: OnTurnChanged called with currentPlayerId={currentPlayerId}, localPlayerId={localPlayerId}");
-
         if (currentPlayerId == localPlayerId)
         {
-            if (hideCoroutine != null)
-            {
-                StopCoroutine(hideCoroutine);
-                hideCoroutine = null;
-            }
             ShowWindow();
         }
         else
         {
-            if (hideCoroutine == null)
-                hideCoroutine = StartCoroutine(DelayedHide());
+            ForceHideWindow();
         }
     }
 
-    private IEnumerator DelayedHide()
-    {
-        // Чтобы избежать резких переключений, небольшая задержка перед скрытием окна
-        yield return new WaitForSeconds(0.1f);
-        HideWindow();
-        hideCoroutine = null;
-    }
-
+    /// <summary> Показ окна (только для локального игрока). </summary>
     public void ShowWindow()
     {
-
+        windowRectTransform.DOKill(); // сброс анимаций
         windowRectTransform.DOAnchorPos(Vector2.zero, animationDuration);
     }
+
+    /// <summary> Скрытие окна с анимацией. </summary>
     public void HideWindow()
     {
+        windowRectTransform.DOKill();
         windowRectTransform.DOAnchorPos(new Vector2(0, 160), animationDuration);
+    }
+
+    /// <summary> Мгновенное скрытие (без анимации). </summary>
+    private void ForceHideWindow()
+    {
+        windowRectTransform.anchoredPosition = new Vector2(0, 160);
     }
 
 }

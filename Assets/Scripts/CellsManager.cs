@@ -42,6 +42,7 @@ public class CellsManager : MonoBehaviour
                 cellData.cellType == CellType.FieldCompany || 
                 cellData.cellType == CellType.DiceCompany )
             {
+                CompanyDatabase.Instance.AddComponyData(i);
                 var popup = boardCellsTransforms[i].GetComponent<CompanyWindowPopup>();
                 popup.Init(i);
                 if (cellData.cellType == CellType.Company)

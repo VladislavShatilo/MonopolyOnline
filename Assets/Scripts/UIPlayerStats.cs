@@ -36,7 +36,11 @@ public class UIPlayerStats : MonoBehaviour
     public void SetTurnActive(bool active)
     {
         isTurnActive = active;
-        timerText.gameObject.SetActive(active);
+        if(timerText!= null)
+        {
+            timerText.gameObject.SetActive(active);
+
+        }
         highlightImage.enabled = active;
     }
     public void UpdateTurnTimer(float secondsLeft)

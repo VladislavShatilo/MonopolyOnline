@@ -130,15 +130,15 @@ public class PlayerMove : MonoBehaviourPun
         string coloredName = $"<color=#{ColorUtility.ToHtmlStringRGB(GameManager.Instance.GetPlayerById(id).playerColor)}>{name}</color>";
         switch (boardConfig.cells[currentCellID].cellType)
         {
+            case CellType.DiceCompany:
+            case CellType.FieldCompany:
             case CellType.Company:
                 {
                    
                     MessageLog.Instance.AddMessage(coloredName + " попал в сектор " + boardConfig.cells[currentCellID].companyData.name);
-                    var cell = CompanyManager.Instance.GetCompany(currentCellID);
-                    if (cell != null && !cell.isBought)
-                    {
+                    
                         CompanyManager.Instance.CompanyHandle(currentCellID, id);
-                    }
+                    
 
                     break;
                 }

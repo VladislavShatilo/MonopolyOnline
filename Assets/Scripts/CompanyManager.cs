@@ -8,6 +8,7 @@ public class CompanyManager : MonoBehaviourPun
 
     /// <summary> Компании по индексу клетки. </summary>
     private readonly Dictionary<int, CellData> cells = new();
+    private Dictionary<int, CompanyData> companies = new Dictionary<int, CompanyData>();
 
     private void Awake()
     {
@@ -37,13 +38,12 @@ public class CompanyManager : MonoBehaviourPun
     /// <summary> Отправляет предложение игроку купить компанию. </summary>
     public void CompanyHandle(int cellIndex, int playerId)
     {
-        if (!cells[cellIndex].companyData.isBought)
+        if (!CompanyDatabase.Instance.GetCompanyById(cellIndex).IsBought)
         {
-            photonView.RPC(nameof(RPC_ShowPurchaseOffer), PhotonNetwork.CurrentRoom.GetPlayer(playerId), cellIndex);
         }
-        else if(cells[cellIndex].companyData.isBought)
+        else if(CompanyDatabase.Instance.GetCompanyById(cellIndex).IsBought)
         {
-            if(cells[cellIndex].companyData.ownerID == playerId)
+            if(CompanyDatabase.Instance.GetCompanyById(cellIndex).OwnerId == playerId)
             {
                 photonView.RPC(nameof(RPC_ShowBranchOffer), PhotonNetwork.CurrentRoom.GetPlayer(playerId), cellIndex);
             }
@@ -54,30 +54,39 @@ public class CompanyManager : MonoBehaviourPun
             }
         }
     }
+    public void OfferPurchase(int cellIndex, int  playerId)
+    {
+        photonView.RPC(nameof(RPC_ShowPurchaseOffer), PhotonNetwork.CurrentRoom.GetPlayer(playerId), cellIndex);
 
-  
+    }
+    /// <summary> Мастер показывает игроку окно покупки. </summary>
+    [PunRPC]
+    private void RPC_ShowPurchaseOffer(int cellIndex, CellType cellType)
+    {
+        //switch (cellType)
+        //{
+        //    case CellType.
+        //}
+        //UIBuyWindow.Instance.ShowBuyWindow(cellIndex, cell.companyData);
+    }
+
+
     /// <summary> Мастер показывает игроку окно филиала. </summary>
     [PunRPC]
     private void RPC_ShowBranchOffer(int cellIndex)
     {
-        UIBuyWindow.Instance.ShowBuyWindow(cellIndex, cells[cellIndex].companyData);
+       
+        UIBuyWindow.Instance.ShowBuyWindow(cellIndex, cells[cellIndex].fieldCompanyData);
     }
 
    
-    /// <summary> Мастер показывает игроку окно покупки. </summary>
-    [PunRPC]
-    private void RPC_ShowPurchaseOffer(int cellIndex)
-    {
-        if (!ValidateCompanyAvailable(cellIndex, out var cell)) return;
-        UIBuyWindow.Instance.ShowBuyWindow(cellIndex, cell.companyData);
-    }
+   
     /// <summary> Локальная попытка купить компанию. </summary>
     public void TryBuyCompany(int cellIndex)
     {
         if (!ValidateCompanyExists(cellIndex, out var cell)) return;
-        if (cell.companyData.isBought)
+        if (CompanyDatabase.Instance.GetCompanyById(cellIndex).IsBought)
         {
-            UnityEngine.Debug.Log("Компания уже куплена");
             return;
         }
 
@@ -101,23 +110,22 @@ public class CompanyManager : MonoBehaviourPun
             return;
         }
 
-        cell.companyData.isBought = true;
-        cell.companyData.ownerID = buyerId;
-
         Debug.Log($"Игрок {buyerId} купил компанию {cell.companyData.name}");
 
         photonView.RPC(nameof(RPC_ConfirmPurchase), RpcTarget.AllBuffered, cellIndex, buyerId);
+        TurnManager.Instance.RequestEndTurn();
+
     }
 
-  
+
     /// <summary> Обновляет состояние компании у всех клиентов. </summary>
     [PunRPC]
     private void RPC_ConfirmPurchase(int cellIndex, int ownerId)
     {
         if (!ValidateCompanyExists(cellIndex, out var cell)) return;
 
-        cell.companyData.isBought = true;
-        cell.companyData.ownerID = ownerId;
+        CompanyDatabase.Instance.GetCompanyById(cellIndex).IsBought = true;
+        CompanyDatabase.Instance.GetCompanyById(cellIndex).OwnerId = ownerId;
         var buyer = GameManager.Instance.GetPlayerById(ownerId);
         int price = cell.companyData.price;
         Bank.Instance.RemoveMoney(buyer, price);
@@ -125,7 +133,6 @@ public class CompanyManager : MonoBehaviourPun
         if (CellsManager.Instance.GetCellByIndex(cellIndex)?.TryGetComponent(out UICompanyCell uiCell) == true)
             uiCell.UpdateUI(cell, owner);
         UIBuyWindow.Instance.HideWindow();
-        TurnManager.Instance.RequestEndTurn();
 
     }
 
@@ -204,7 +211,7 @@ public class CompanyManager : MonoBehaviourPun
     private bool ValidateCompanyAvailable(int cellIndex, out CellData cell)
     {
         if (!ValidateCompanyExists(cellIndex, out cell)) return false;
-        if (cell.cellType != CellType.Company || cell.companyData.isBought)
+        if (cell.cellType != CellType.Company || CompanyDatabase.Instance.GetCompanyById(cellIndex).IsBought)
             return false;
         return true;
     }

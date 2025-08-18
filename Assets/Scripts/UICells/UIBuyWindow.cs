@@ -30,23 +30,26 @@ public class UIBuyWindow : MonoBehaviour
     private void Start()
     {
         buyButton.onClick.AddListener(() => OnBuyClicked());
-        auctionButton.onClick.AddListener(() => HideWindow());
+        auctionButton.onClick.AddListener(() => AuctionWindow());
     }
-    public void ShowBuyWindow(int cellIndex, CompanyData companyData)
+    public void ShowBuyWindow(int cellIndex, CompanyBaseData companyBaseData)
     {
         currentCellIndex = cellIndex;
-        buyButtonText.text = "Купить за " + companyData.price.ToString("N0", CultureInfo.InvariantCulture) + "k";
+        buyButtonText.text = "Купить за " + companyBaseData.price.ToString("N0", CultureInfo.InvariantCulture) + "k";
         windowAnimation.ShowWindow();
     }
     public void HideWindow()
     { 
         windowAnimation.HideWindow();
+    }
+    private void AuctionWindow()
+    {
+        windowAnimation.HideWindow();
         TurnManager.Instance.RequestEndTurn();
     }
-
     private void OnBuyClicked()
     {
-        CompanyManager.Instance.TryBuyCompany(currentCellIndex);
+        CompanyManager.Instance.TryBuyCompany (currentCellIndex);
        
 
     }
