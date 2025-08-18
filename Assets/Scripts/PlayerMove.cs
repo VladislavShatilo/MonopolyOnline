@@ -137,7 +137,7 @@ public class PlayerMove : MonoBehaviourPun
                    
                     MessageLog.Instance.AddMessage(coloredName + " попал в сектор " + boardConfig.cells[currentCellID].companyData.name);
                     
-                        CompanyManager.Instance.CompanyHandle(currentCellID, id);
+                    CompanyManager.Instance.HandleCell(currentCellID, id);
                     
 
                     break;

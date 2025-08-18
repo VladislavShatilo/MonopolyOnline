@@ -8,7 +8,9 @@ public class CompanyManager : MonoBehaviourPun
 
     /// <summary> Компании по индексу клетки. </summary>
     private readonly Dictionary<int, CellData> cells = new();
-    private Dictionary<int, CompanyData> companies = new Dictionary<int, CompanyData>();
+
+    /// <summary> Обработчики по типам клеток. </summary>
+    private readonly Dictionary<CellType, ICellHandler> handlers = new();
 
     private void Awake()
     {
@@ -19,6 +21,11 @@ public class CompanyManager : MonoBehaviourPun
         }
 
         Instance = this;
+
+        // Регистрируем обработчики
+        handlers[CellType.Company] = new DefaultCompanyHandler();
+        handlers[CellType.FieldCompany] = new FieldCompanyHandler();
+        handlers[CellType.DiceCompany] = new DiceCompanyHandler();
     }
 
     #region Initialization
@@ -33,73 +40,60 @@ public class CompanyManager : MonoBehaviourPun
 
     #endregion
 
+    #region Обработка клетки
+
+    public void HandleCell(int cellIndex, int playerId)
+    {
+        if (!cells.ContainsKey(cellIndex))
+        {
+            Debug.LogError($"Клетка с индексом {cellIndex} не найдена");
+            return;
+        }
+
+        var cell = cells[cellIndex];
+        if (handlers.TryGetValue(cell.cellType, out var handler))
+        {
+            handler.Handle(cellIndex, playerId);
+        }
+        else
+        {
+            Debug.LogWarning($"Нет обработчика для {cell.cellType}");
+        }
+    }
+
+    #endregion
+
     #region Покупка компаний
 
-    /// <summary> Отправляет предложение игроку купить компанию. </summary>
-    public void CompanyHandle(int cellIndex, int playerId)
-    {
-        if (!CompanyDatabase.Instance.GetCompanyById(cellIndex).IsBought)
-        {
-        }
-        else if(CompanyDatabase.Instance.GetCompanyById(cellIndex).IsBought)
-        {
-            if(CompanyDatabase.Instance.GetCompanyById(cellIndex).OwnerId == playerId)
-            {
-                photonView.RPC(nameof(RPC_ShowBranchOffer), PhotonNetwork.CurrentRoom.GetPlayer(playerId), cellIndex);
-            }
-            else
-            {
-                photonView.RPC(nameof(RPC_ShowRentOffer), PhotonNetwork.CurrentRoom.GetPlayer(playerId), cellIndex);
-
-            }
-        }
-    }
-    public void OfferPurchase(int cellIndex, int  playerId)
+    public void OfferPurchase(int cellIndex, int playerId)
     {
         photonView.RPC(nameof(RPC_ShowPurchaseOffer), PhotonNetwork.CurrentRoom.GetPlayer(playerId), cellIndex);
-
     }
-    /// <summary> Мастер показывает игроку окно покупки. </summary>
+
     [PunRPC]
-    private void RPC_ShowPurchaseOffer(int cellIndex, CellType cellType)
+    private void RPC_ShowPurchaseOffer(int cellIndex)
     {
-        //switch (cellType)
-        //{
-        //    case CellType.
-        //}
-        //UIBuyWindow.Instance.ShowBuyWindow(cellIndex, cell.companyData);
+        if (!ValidateCompanyExists(cellIndex, out var cell)) return;
+
+        if (handlers.TryGetValue(cell.cellType, out var handler))
+        {
+            handler.ShowPurchaseUI(cellIndex);
+        }
     }
 
-
-    /// <summary> Мастер показывает игроку окно филиала. </summary>
-    [PunRPC]
-    private void RPC_ShowBranchOffer(int cellIndex)
-    {
-       
-        UIBuyWindow.Instance.ShowBuyWindow(cellIndex, cells[cellIndex].fieldCompanyData);
-    }
-
-   
-   
-    /// <summary> Локальная попытка купить компанию. </summary>
     public void TryBuyCompany(int cellIndex)
     {
         if (!ValidateCompanyExists(cellIndex, out var cell)) return;
-        if (CompanyDatabase.Instance.GetCompanyById(cellIndex).IsBought)
-        {
-            return;
-        }
+        if (CompanyDatabase.Instance.GetCompanyById(cellIndex).IsBought) return;
 
         int playerId = PhotonNetwork.LocalPlayer.ActorNumber;
         photonView.RPC(nameof(RPC_RequestBuyCompany), RpcTarget.MasterClient, cellIndex, playerId);
     }
-  
 
-    /// <summary> Мастер обрабатывает запрос на покупку. </summary>
     [PunRPC]
     private void RPC_RequestBuyCompany(int cellIndex, int buyerId)
     {
-        if (!ValidateCompanyAvailable(cellIndex, out var cell)) return;
+        if (!ValidateCompanyExists(cellIndex, out var cell)) return;
 
         var buyer = GameManager.Instance.GetPlayerById(buyerId);
         int price = cell.companyData.price;
@@ -114,80 +108,79 @@ public class CompanyManager : MonoBehaviourPun
 
         photonView.RPC(nameof(RPC_ConfirmPurchase), RpcTarget.AllBuffered, cellIndex, buyerId);
         TurnManager.Instance.RequestEndTurn();
-
     }
 
-
-    /// <summary> Обновляет состояние компании у всех клиентов. </summary>
     [PunRPC]
     private void RPC_ConfirmPurchase(int cellIndex, int ownerId)
     {
         if (!ValidateCompanyExists(cellIndex, out var cell)) return;
 
-        CompanyDatabase.Instance.GetCompanyById(cellIndex).IsBought = true;
-        CompanyDatabase.Instance.GetCompanyById(cellIndex).OwnerId = ownerId;
+        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
+        company.IsBought = true;
+        company.OwnerId = ownerId;
+
         var buyer = GameManager.Instance.GetPlayerById(ownerId);
         int price = cell.companyData.price;
         Bank.Instance.RemoveMoney(buyer, price);
-        var owner = GameManager.Instance.GetPlayerById(ownerId);
-        if (CellsManager.Instance.GetCellByIndex(cellIndex)?.TryGetComponent(out UICompanyCell uiCell) == true)
-            uiCell.UpdateUI(cell, owner);
-        UIBuyWindow.Instance.HideWindow();
 
+        if (CellsManager.Instance.GetCellByIndex(cellIndex)?.TryGetComponent(out UICompanyCell uiCell) == true)
+            uiCell.UpdateUI(cell, buyer);
+
+        UIBuyWindow.Instance.HideWindow();
     }
 
     #endregion
 
     #region Аренда
 
-    /// <summary> Мастер показывает игроку окно аренды. </summary>
-    [PunRPC]
-    private void RPC_ShowRentOffer(int cellIndex)
+    public void OfferRent(int cellIndex, int playerId, int? customPrice = null)
     {
-        UIBuyWindow.Instance.ShowBuyWindow(cellIndex, cells[cellIndex].companyData);
+        photonView.RPC(nameof(RPC_ShowRentOffer), PhotonNetwork.CurrentRoom.GetPlayer(playerId), cellIndex, customPrice ?? -1);
     }
 
-    /// <summary> Локальная попытка оплатить аренду. </summary>
+    [PunRPC]
+    private void RPC_ShowRentOffer(int cellIndex, int rentPrice)
+    {
+        if (!ValidateCompanyExists(cellIndex, out var cell)) return;
+        int price = rentPrice >= 0 ? rentPrice : cell.companyData.rent[0];
+      //  UIPayRent.Instance.ShowRentWindow(cellIndex, (float)price);
+    }
+
     public void TryPayRent(int cellIndex)
     {
-
         int playerId = PhotonNetwork.LocalPlayer.ActorNumber;
         photonView.RPC(nameof(RPC_RequestRent), RpcTarget.MasterClient, cellIndex, playerId);
     }
 
-    /// <summary> Мастер обрабатывает запрос на аренду. </summary>
-
     [PunRPC]
     private void RPC_RequestRent(int cellIndex, int renterID)
     {
+        if (!ValidateCompanyExists(cellIndex, out var cell)) return;
 
         var renter = GameManager.Instance.GetPlayerById(renterID);
-        int price = cells[cellIndex].companyData.rent[0];
+        int price = cell.companyData.rent[0];
 
         if (!Bank.Instance.hasEnoughMoney(renter, price))
         {
-            Debug.Log("Недостаточно денег для покупки");
+            Debug.Log("Недостаточно денег для аренды");
             return;
         }
 
-        Debug.Log($"Игрок {renterID} купил компанию {cells[cellIndex].companyData.name}");
-
         photonView.RPC(nameof(RPC_ConfirmRent), RpcTarget.AllBuffered, cellIndex, renterID);
     }
-    /// <summary> Подтвердение платы за аренду. </summary>
+
     [PunRPC]
     private void RPC_ConfirmRent(int cellIndex, int renterId)
     {
-
+        if (!ValidateCompanyExists(cellIndex, out var cell)) return;
 
         var renter = GameManager.Instance.GetPlayerById(renterId);
-        int price = cells[cellIndex].companyData.rent[0];
+        int price = cell.companyData.rent[0];
         Bank.Instance.RemoveMoney(renter, price);
+
         UIPayRent.Instance.HideWindow();
         TurnManager.Instance.RequestEndTurn();
-
     }
-
 
     #endregion
 
@@ -196,7 +189,6 @@ public class CompanyManager : MonoBehaviourPun
     public CompanyData GetCompany(int cellIndex) =>
         cells.TryGetValue(cellIndex, out var cell) ? cell.companyData : null;
 
-    /// <summary> Проверка, что клетка существует. </summary>
     private bool ValidateCompanyExists(int cellIndex, out CellData cell)
     {
         if (!cells.TryGetValue(cellIndex, out cell))
@@ -207,14 +199,8 @@ public class CompanyManager : MonoBehaviourPun
         return true;
     }
 
-    /// <summary> Проверка, что клетка — это доступная для покупки компания. </summary>
-    private bool ValidateCompanyAvailable(int cellIndex, out CellData cell)
-    {
-        if (!ValidateCompanyExists(cellIndex, out cell)) return false;
-        if (cell.cellType != CellType.Company || CompanyDatabase.Instance.GetCompanyById(cellIndex).IsBought)
-            return false;
-        return true;
-    }
+    public bool TryGetHandler(CellType type, out ICellHandler handler) =>
+        handlers.TryGetValue(type, out handler);
 
     #endregion
 }
