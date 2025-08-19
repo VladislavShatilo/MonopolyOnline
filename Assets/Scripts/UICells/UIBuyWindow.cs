@@ -50,7 +50,6 @@ public class UIBuyWindow : MonoBehaviour
     private void OnBuyClicked()
     {
         CompanyManager.Instance.TryBuyCompany (currentCellIndex);
-       
 
     }
 

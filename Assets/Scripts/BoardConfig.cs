@@ -10,6 +10,7 @@ public enum CellType
     Question,
     Corner
 }
+
 public enum CompanyGroup
 {
     Perfume,
@@ -22,7 +23,7 @@ public enum CompanyGroup
     FastFood,
     Hotels,
     Phones
-    
+
 }
 [System.Serializable]
 public abstract class CompanyBaseData : ICellDetails
@@ -33,6 +34,8 @@ public abstract class CompanyBaseData : ICellDetails
     public int pledgePrice;
     public int buyoutPrice;
     public StatsWindowPosition popupData;
+
+
 }
 public interface ICellDetails
 {
@@ -51,7 +54,7 @@ public class FieldCompanyData : CompanyBaseData
 }
 [System.Serializable]
 public class DiceCompanyData : CompanyBaseData
-{   
+{
     public int[] rentMultiplier;
 }
 [System.Serializable]

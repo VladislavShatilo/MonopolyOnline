@@ -2,16 +2,24 @@ using Photon.Pun;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Менеджер компаний: обработка покупки, аренды, взаимодействие с UI через события.
+/// </summary>
 public class CompanyManager : MonoBehaviourPun
 {
     public static CompanyManager Instance { get; private set; }
 
-    /// <summary> Компании по индексу клетки. </summary>
-    private readonly Dictionary<int, CellData> cells = new();
-    private readonly Dictionary<int, Company> companysWithBranches = new();
+    private readonly Dictionary<CompanyType, ICellHandler> handlers = new();
 
-    /// <summary> Обработчики по типам клеток. </summary>
-    private readonly Dictionary<CellType, ICellHandler> handlers = new();
+    #region События
+
+    // Событие: компания куплена (cellIndex, ownerId)
+    public event System.Action<int, int> OnCompanyBought;
+
+    // Событие: арендная плата произведена (cellIndex, payerId, ownerId, amount)
+    public event System.Action<int, int, int, int> OnRentPaid;
+
+    #endregion
 
     private void Awake()
     {
@@ -23,55 +31,31 @@ public class CompanyManager : MonoBehaviourPun
 
         Instance = this;
 
-        // Регистрируем обработчики
-        handlers[CellType.Company] = new DefaultCompanyHandler();
-        handlers[CellType.FieldCompany] = new FieldCompanyHandler();
-        handlers[CellType.DiceCompany] = new DiceCompanyHandler();
+        // Регистрируем обработчики клеток
+        handlers[CompanyType.Company] = new DefaultCompanyHandler();
+        handlers[CompanyType.FieldCompany] = new FieldCompanyHandler();
+        handlers[CompanyType.DiceCompany] = new DiceCompanyHandler();
     }
 
-    #region Initialization
-
-    /// <summary> Загружает список компаний в словарь. </summary>
-    public void InitializeCompanies(List<CellData> cells)
-    {
-
-        this.cells.Clear();
-        CompanyDatabase companyDataBase = CompanyDatabase.Instance;
-        for (int i = 0; i< cells.Count; i++)
-        {
-            if (cells[i].cellType == CellType.Company)
-            {
-                companysWithBranches.Add(i, companyDataBase.GetCompanyById(i));
-                
-            }
-        }
-        foreach (var cell in cells)
-        {
-            this.cells[cell.index] = cell;
-         
-        }
-    }
-
-    #endregion
-
-    #region Обработка клетки
+    #region Работа с клеткой
 
     public void HandleCell(int cellIndex, int playerId)
     {
-        if (!cells.ContainsKey(cellIndex))
+        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
+        if(company == null)
         {
             Debug.LogError($"Клетка с индексом {cellIndex} не найдена");
             return;
         }
-
-        var cell = cells[cellIndex];
-        if (handlers.TryGetValue(cell.cellType, out var handler))
+       
+        if (TryGetHandler(company.Type, out var handler))
         {
             handler.Handle(cellIndex, playerId);
+
         }
         else
         {
-            Debug.LogWarning($"Нет обработчика для {cell.cellType}");
+            Debug.LogWarning($"Нет обработчика для {company.Type}");
         }
     }
 
@@ -87,18 +71,14 @@ public class CompanyManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_ShowPurchaseOffer(int cellIndex)
     {
-        if (!ValidateCompanyExists(cellIndex, out var cell)) return;
-
-        if (handlers.TryGetValue(cell.cellType, out var handler))
-        {
-            handler.ShowPurchaseUI(cellIndex);
-        }
+        if (!TryGetCompanyAndHandler(cellIndex, out var company, out var handler)) return;
+        handler.ShowPurchaseUI(cellIndex);
     }
 
     public void TryBuyCompany(int cellIndex)
     {
-        if (!ValidateCompanyExists(cellIndex, out var cell)) return;
-        if (CompanyDatabase.Instance.GetCompanyById(cellIndex).IsBought) return;
+        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
+        if (company == null || company.IsBought) return;
 
         int playerId = PhotonNetwork.LocalPlayer.ActorNumber;
         photonView.RPC(nameof(RPC_RequestBuyCompany), RpcTarget.MasterClient, cellIndex, playerId);
@@ -107,23 +87,16 @@ public class CompanyManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_RequestBuyCompany(int cellIndex, int buyerId)
     {
-        if (!ValidateCompanyExists(cellIndex, out var cell)) return;
+        if (!TryGetCompanyAndHandler(cellIndex, out var company, out var handler)) return;
 
         var buyer = GameManager.Instance.GetPlayerById(buyerId);
-        int price = 0;
-        if (handlers.TryGetValue(cell.cellType, out var handler))
-        {
-            price = handler.GetPrice(cellIndex);
+        int price = handler.GetPrice(cellIndex);
 
-        }
-   
         if (!Bank.Instance.hasEnoughMoney(buyer, price))
         {
             Debug.Log("Недостаточно денег для покупки");
             return;
         }
-
-        Debug.Log($"Игрок {buyerId} купил компанию {cell.cellName}");
 
         photonView.RPC(nameof(RPC_ConfirmPurchase), RpcTarget.AllBuffered, cellIndex, buyerId);
         TurnManager.Instance.RequestEndTurn();
@@ -132,66 +105,23 @@ public class CompanyManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_ConfirmPurchase(int cellIndex, int ownerId)
     {
-        if (!ValidateCompanyExists(cellIndex, out var cell)) return;
-
         var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
+        if (company == null || !TryGetHandler(cellIndex, out var handler)) return;
+
         company.IsBought = true;
         company.OwnerId = ownerId;
 
+        int price = handler.GetPrice(cellIndex);
         var buyer = GameManager.Instance.GetPlayerById(ownerId);
-        int price =0,rent = 0;
-        
-        if (handlers.TryGetValue(cell.cellType, out var handler))
-        {
-            price = handler.GetPrice(cellIndex);
-            rent = handler.GetRent(cellIndex);
-        }
         Bank.Instance.RemoveMoney(buyer, price);
 
-        if (CellsManager.Instance.GetCellByIndex(cellIndex)?.TryGetComponent(out UICompanyCell uiCell) == true)
-        {
-            uiCell.UpdateUI(cell, buyer);
-            uiCell.SetRentText(rent);
-        }
-        if (cells[cellIndex].cellType == CellType.FieldCompany)
-        {
-            for (int i = 0; i < cells.Count; i++)
-            {
-                if (cells[i].cellType == CellType.FieldCompany &&
-                    cells[i].fieldCompanyData.group == cell.fieldCompanyData.group
-                    && CompanyDatabase.Instance.GetCompanyById(i).IsBought &&
-                    CompanyDatabase.Instance.GetCompanyById(i).OwnerId == ownerId)
-                {
-                    int newRent = handlers[CellType.FieldCompany].GetRent(i);
+     
 
-                    if (CellsManager.Instance.GetCellByIndex(i)?.TryGetComponent(out UICompanyCell uiCellField) == true)
-                    {
-                        uiCellField.SetRentText(newRent);
-                    }
-                }
-            }
-        }
-        else if (cells[cellIndex].cellType == CellType.DiceCompany)
-        {
-            for (int i = 0; i < cells.Count; i++)
-            {
-                if (cells[i].cellType == CellType.DiceCompany &&
-                    cells[i].diceCompanyData.group == cell.diceCompanyData.group
-                    && CompanyDatabase.Instance.GetCompanyById(i).IsBought &&
-                    CompanyDatabase.Instance.GetCompanyById(i).OwnerId == ownerId)
-                {
-                    int newRent = handlers[CellType.DiceCompany].GetRent(i);
-                    int multiplier = newRent / RandomNumbers.Instance.SumOfDices();
-                    if (CellsManager.Instance.GetCellByIndex(i)?.TryGetComponent(out UICompanyCell uiCellField) == true)
-                    {
-                        uiCellField.SetRentText(multiplier);
-                    }
-                }
-            }
-        }
-
-
-            UIBuyWindow.Instance.HideWindow();
+        var cellUI = CellsManager.Instance.GetCellByIndex(cellIndex).GetComponent<UICompanyCell>();
+        cellUI.HandleCompanyBought(cellIndex, ownerId);
+        // Обновляем аренду для группы
+        UpdateRent(company);
+        UIBuyWindow.Instance.HideWindow();
     }
 
     #endregion
@@ -206,12 +136,8 @@ public class CompanyManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_ShowRentOffer(int cellIndex, int rentPrice)
     {
-        if (!ValidateCompanyExists(cellIndex, out var cell)) return;
-
-        if (handlers.TryGetValue(cell.cellType, out var handler))
-        {
-            handler.ShowRentUI(cellIndex);
-        }
+        if (!TryGetCompanyAndHandler(cellIndex, out var company, out var handler)) return;
+        handler.ShowRentUI(cellIndex);
     }
 
     public void TryPayRent(int cellIndex)
@@ -221,72 +147,99 @@ public class CompanyManager : MonoBehaviourPun
     }
 
     [PunRPC]
-    private void RPC_RequestRent(int cellIndex, int renterID)
+    private void RPC_RequestRent(int cellIndex, int renterId)
     {
-        if (!ValidateCompanyExists(cellIndex, out var cell)) return;
+        if (!TryGetCompanyAndHandler(cellIndex, out var company, out var handler)) return;
 
-        var renter = GameManager.Instance.GetPlayerById(renterID);
-        int rentPrice = 0;
+        var renter = GameManager.Instance.GetPlayerById(renterId);
+        int rentPrice = handler.GetRent(cellIndex);
 
-        if (handlers.TryGetValue(cell.cellType, out var handler))
-        {
-            rentPrice = handler.GetRent(cellIndex);
-        }
         if (!Bank.Instance.hasEnoughMoney(renter, rentPrice))
         {
             Debug.Log("Недостаточно денег для аренды");
             return;
         }
 
-        photonView.RPC(nameof(RPC_ConfirmRent), RpcTarget.AllBuffered, cellIndex, renterID);
+        photonView.RPC(nameof(RPC_ConfirmRent), RpcTarget.AllBuffered, cellIndex, renterId);
         TurnManager.Instance.RequestEndTurn();
-
     }
 
     [PunRPC]
     private void RPC_ConfirmRent(int cellIndex, int renterId)
     {
-        if (!ValidateCompanyExists(cellIndex, out var cell)) return;
+        if (!TryGetCompanyAndHandler(cellIndex, out var company, out var handler)) return;
+
+        int rentPrice = handler.GetRent(cellIndex);
+        int ownerId = handler.GetOwner(cellIndex);
 
         var renter = GameManager.Instance.GetPlayerById(renterId);
-        int rentPrice = 0;
-        int ownerId = -1;
-        if (handlers.TryGetValue(cell.cellType, out var handler))
-        {
-            rentPrice = handler.GetRent(cellIndex);
-            ownerId = handler.GetOwner(cellIndex);
-        }
-        GameManager gameManager = GameManager.Instance;
-        PlayerData renterPlayerData = gameManager.GetPlayerById(renterId);
-        PlayerData ownerPlayerData = gameManager.GetPlayerById(ownerId);
+        var owner = GameManager.Instance.GetPlayerById(ownerId);
 
-        Bank.Instance.TransferMoney(renterPlayerData, ownerPlayerData, rentPrice);
+        Bank.Instance.TransferMoney(renter, owner, rentPrice);
 
         UIPayRent.Instance.HideWindow();
     }
 
     #endregion
 
-    #region Helpers
+    #region Вспомогательные методы
 
-    public CompanyData GetCompany(int cellIndex) =>
-        cells.TryGetValue(cellIndex, out var cell) ? cell.companyData : null;
-
-    private bool ValidateCompanyExists(int cellIndex, out CellData cell)
+    private bool TryGetHandler(int cellIndex, out ICellHandler handler)
     {
-        if (!cells.TryGetValue(cellIndex, out cell))
-        {
-            Debug.LogError($"Клетка с индексом {cellIndex} не найдена");
-            return false;
-        }
+        handler = null;
+        var companyData = CompanyDatabase.Instance.GetCompanyById(cellIndex);
+        if (companyData == null ) return false;
+
+        return handlers.TryGetValue(companyData.Type, out handler);
+    }
+
+    private bool TryGetCompanyAndHandler(int cellIndex, out Company company, out ICellHandler handler)
+    {
+        handler = null;
+        company = null;
+        var companyData = CompanyDatabase.Instance.GetCompanyById(cellIndex);
+        if (companyData == null) return false;
+        if (!handlers.TryGetValue(companyData.Type, out handler)) return false;
         return true;
+    }
+
+    private void UpdateRent(Company company)
+    {
+
+        if (company.Type == CompanyType.FieldCompany || company.Type == CompanyType.DiceCompany)
+        {
+            foreach (var c in CompanyDatabase.Instance.GetAllCompanies())
+            {
+                if (c.Type == company.Type && c.Group == company.Group && c.IsBought && c.OwnerId == company.OwnerId)
+                {
+                    int newRent = handlers[company.Type].GetRent(company.Id); 
+                    if (company.Type == CompanyType.DiceCompany)
+                    {
+                        newRent /= RandomNumbers.Instance.SumOfDices();
+                    }
+                    if (CellsManager.Instance.GetCellByIndex(c.Id)?.TryGetComponent(out UICompanyCell uiCell) == true)
+                    {
+                        uiCell.SetRentText(newRent);
+                    }
+                }
+            }
+        }
+        else if (company.Type == CompanyType.Company)
+        {
+            int baseRent = handlers[company.Type].GetRent(company.Id);
+            if (CellsManager.Instance.GetCellByIndex(company.Id)?.TryGetComponent(out UICompanyCell uiCell) == true)
+            {
+                uiCell.SetRentText(baseRent);
+            }
+        }
+
+       
     }
     public bool PlayerOwnsWholeGroup(CompanyGroup group, int playerId)
     {
-        
-        foreach (var company in companysWithBranches.Values) // companies — твой словарь компаний
+        foreach (var company in CompanyDatabase.Instance.GetAllCompanies())
         {
-            if (company.CompanyBranchData.group == group)
+            if (company.Group == group)
             {
                 if (!company.IsBought || company.OwnerId != playerId)
                     return false;
@@ -294,7 +247,8 @@ public class CompanyManager : MonoBehaviourPun
         }
         return true;
     }
-    public bool TryGetHandler(CellType type, out ICellHandler handler) =>
+
+    public bool TryGetHandler(CompanyType type, out ICellHandler handler) =>
         handlers.TryGetValue(type, out handler);
 
     #endregion

@@ -1,35 +1,32 @@
 using Photon.Pun;
 using Photon.Realtime;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SocialPlatforms;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
     public static GameManager Instance { get; private set; }
 
-    [Header("Root transforms")]
-    [SerializeField] private Transform playersStatsContainerTrans;
-    [SerializeField] private Transform playerRootGO;
-    [SerializeField] private Transform cellsRootTransforms;
+    [Header("Root Transforms")]
+    [SerializeField] private Transform playersStatsContainer;
+    [SerializeField] private Transform playerRoot;
+    [SerializeField] private Transform cellsRoot;
 
     [Header("Prefabs")]
-    [SerializeField] private UIPlayerStats playersStatsPrefab;
-    [SerializeField] private GameObject playerPiecePrefab; 
+    [SerializeField] private UIPlayerStats playerStatsPrefab;
+    [SerializeField] private GameObject playerPiecePrefab;
 
     [Header("Settings")]
     [SerializeField] private Color[] playerColors;
     [SerializeField] private Vector3 startPlayerPosition = new Vector3(-240f, 390f, 0f);
 
+    private readonly List<PlayerData> players = new();
+    private readonly Dictionary<int, PlayerMove> playerMoves = new();
+    private readonly Dictionary<int, UIPlayerStats> uiPlayerStatsDict = new();
 
-    private List<PlayerData> players = new List<PlayerData>();
-    private Dictionary<int, PlayerMove> playerMoves = new Dictionary<int, PlayerMove>();
-    private Dictionary<int, UIPlayerStats> uiPlayerStatsDict = new Dictionary<int, UIPlayerStats>();
+    public Transform CellsRoot => cellsRoot;
+    public Transform PlayerRoot => playerRoot;
 
-    public Transform CellsRootTransforms => cellsRootTransforms;
-    public Transform PlayerRootTransform => playerRootGO;
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -38,54 +35,35 @@ public class GameManager : MonoBehaviourPunCallbacks
             return;
         }
         Instance = this;
-      
     }
 
     private void Start()
     {
-          CreateAllPlayersUI();
-          CreateLocalPlayerIfNeeded();
-          CheckStartGame();
-        
+        InitializeAllPlayersUI();
+        SpawnLocalPlayerIfNeeded();
+        TryStartGame();
     }
+
+    #region Photon Callbacks
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        Debug.Log($"{newPlayer.NickName} зашЄл в комнату (actor {newPlayer.ActorNumber}).");
+        Debug.Log($"Player {newPlayer.NickName} joined (actor {newPlayer.ActorNumber})");
         SetupPlayerUI(newPlayer);
-        CheckStartGame();
+        TryStartGame();
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        Debug.Log($"{otherPlayer.NickName} вышел из комнаты (actor {otherPlayer.ActorNumber}).");
-        int id = otherPlayer.ActorNumber;
-
-        var p = GetPlayerById(id);
-        if (p != null) players.Remove(p);
-
-        if (uiPlayerStatsDict.TryGetValue(id, out var ui))
-        {
-            Destroy(ui.gameObject);
-            uiPlayerStatsDict.Remove(id);
-        }
-
-        if (playerMoves.TryGetValue(id, out var pm))
-        {
-            // попытка уничтожить сетевой объект
-            if (pm != null && pm.photonView != null && pm.photonView.IsMine)
-            {
-                PhotonNetwork.Destroy(pm.gameObject);
-            }
-            else if (pm != null && pm.gameObject != null)
-            {
-                Destroy(pm.gameObject); // если не владеем Ч просто уничтожим локально
-            }
-            playerMoves.Remove(id);
-        }
+        Debug.Log($"Player {otherPlayer.NickName} left (actor {otherPlayer.ActorNumber})");
+        RemovePlayer(otherPlayer.ActorNumber);
     }
 
-    private void CreateAllPlayersUI()
+    #endregion
+
+    #region Player Management
+
+    private void InitializeAllPlayersUI()
     {
         foreach (var p in PhotonNetwork.PlayerList)
             SetupPlayerUI(p);
@@ -95,43 +73,56 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         int playerId = photonPlayer.ActorNumber;
 
-        if (players.Exists(x => x.id == playerId))
-            return;
+        if (players.Exists(p => p.id == playerId)) return;
 
-        var uiInst = Instantiate(playersStatsPrefab, playersStatsContainerTrans);
-        var uiPlayerStats = uiInst as UIPlayerStats;
-
+        // Instantiate UI
+        var uiStats = Instantiate(playerStatsPrefab, playersStatsContainer);
         int colorIndex = Mathf.Clamp(playerId - 1, 0, playerColors.Length - 1);
-        PlayerData player = new PlayerData(
-            photonPlayer.NickName,
-            100000,
-            playerId,
-            playerColors[colorIndex],
-            photonPlayer
-        );
+        PlayerData player = new(photonPlayer.NickName, 100_000, playerId, playerColors[colorIndex], photonPlayer);
 
         players.Add(player);
-        uiPlayerStats.SetPlayerStats(player);
-        uiPlayerStatsDict[playerId] = uiPlayerStats;
+        uiStats.SetPlayerStats(player);
+        uiPlayerStatsDict[playerId] = uiStats;
 
-        TurnManager.Instance.RegisterPlayerUI(playerId, uiPlayerStats);
+        // Register UI for turn updates
+        TurnManager.Instance.RegisterPlayerUI(playerId, uiStats);
 
+        // Listen to bank updates
         Bank.Instance.OnBalanceChanged += (changedPlayer, money) =>
         {
             if (changedPlayer.id == player.id)
-                uiPlayerStats.SetMoneyPlayerText(money);
+                uiStats.SetMoneyPlayerText(money);
         };
     }
 
-    private void CreateLocalPlayerIfNeeded()
+    private void RemovePlayer(int playerId)
     {
+        var playerData = GetPlayerById(playerId);
+        if (playerData != null) players.Remove(playerData);
 
+        if (uiPlayerStatsDict.TryGetValue(playerId, out var ui))
+        {
+            Destroy(ui.gameObject);
+            uiPlayerStatsDict.Remove(playerId);
+        }
+
+        if (playerMoves.TryGetValue(playerId, out var move))
+        {
+            if (move != null && move.photonView != null && move.photonView.IsMine)
+                PhotonNetwork.Destroy(move.gameObject);
+            else if (move != null)
+                Destroy(move.gameObject);
+
+            playerMoves.Remove(playerId);
+        }
+    }
+
+    private void SpawnLocalPlayerIfNeeded()
+    {
         int localId = PhotonNetwork.LocalPlayer.ActorNumber;
         if (playerMoves.ContainsKey(localId)) return;
 
         int colorIndex = Mathf.Clamp(localId - 1, 0, playerColors.Length - 1);
-
-        // передаЄм индекс цвета через instantiationData, чтобы все копии получили одинаковый цвет
         GameObject playerPiece = PhotonNetwork.Instantiate(
             playerPiecePrefab.name,
             startPlayerPosition,
@@ -142,12 +133,14 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         var pm = playerPiece.GetComponent<PlayerMove>();
         pm.id = localId;
-
-        // локально можно настроить дополнительные вещи, но SetRootTransform будет вызван в Start() у PlayerMove на всех клиентах
         playerMoves[localId] = pm;
     }
 
-    private void CheckStartGame()
+    #endregion
+
+    #region Game Flow
+
+    private void TryStartGame()
     {
         if (!PhotonNetwork.InRoom) return;
 
@@ -157,6 +150,10 @@ public class GameManager : MonoBehaviourPunCallbacks
             TurnManager.Instance.StartRandomTurn();
         }
     }
+
+    #endregion
+
+    #region Helpers
 
     public PlayerData GetPlayerById(int id)
     {
@@ -169,8 +166,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         return playerColors[Mathf.Clamp(idx, 0, playerColors.Length - 1)];
     }
 
-    public Color GetColorForActor(int actorNumber)
-    {
-        return GetColorByIndex(actorNumber - 1);
-    }
+    public Color GetColorForActor(int actorNumber) => GetColorByIndex(actorNumber - 1);
+
+    #endregion
 }

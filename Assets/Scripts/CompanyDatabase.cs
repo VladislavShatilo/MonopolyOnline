@@ -2,7 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
+public enum CompanyType
+{
+    Company,
+    FieldCompany,
+    DiceCompany
 
+}
 
 public class Company
 {
@@ -12,17 +18,54 @@ public class Company
     public bool IsBought { get; set; }
     public int OwnerId { get; set; }
     public int RentLevel { get; set; }
-    public CompanyData CompanyBranchData { get; set; }
-    public Company(int id, CompanyData companyBranchData)
+    public  CompanyType Type { get; set; }
+    public CompanyData CompanyData { get; set; }
+    public FieldCompanyData FieldCompanyData { get; set; }
+    public DiceCompanyData DiceCompanyData { get; set; }
+    public CompanyGroup Group { get; set; }
+    public Company(int id, CompanyData companyData)
       
     {
         Id = id;
-        CompanyBranchData = companyBranchData;  
         IsBought = false;
         OwnerId = -1;
         RentLevel = 0;
+        Type = CompanyType.Company;
+        CompanyData = companyData;
+        FieldCompanyData = null;
+        DiceCompanyData = null;
+        Group = companyData.group;
+        
+      
     }
+    public Company(int id, FieldCompanyData fieldCompanyData)
+    {
+        Id = id;
+        IsBought = false;
+        OwnerId = -1;
+        RentLevel = 0;
+        Type = CompanyType.FieldCompany;
+        CompanyData = null;
+        FieldCompanyData = fieldCompanyData;
+        DiceCompanyData = null;
+        Group = fieldCompanyData.group;
 
+
+    }
+    public Company(int id, DiceCompanyData diceCompanyData)
+    {
+        Id = id;
+        IsBought = false;
+        OwnerId = -1;
+        RentLevel = 0;
+        Type = CompanyType.DiceCompany;
+        CompanyData = null;
+        FieldCompanyData = null;
+        DiceCompanyData = diceCompanyData;
+        Group = diceCompanyData.group;
+
+
+    }
     public void ResetData()
     {
         IsBought = false;
@@ -37,9 +80,17 @@ public class CompanyDatabase
 
     private List<Company> companies = new List<Company>();
 
-    public void AddComponyData(int id, CompanyData companyBranchData)
+    public void AddComponyData(int id,  CompanyData companyData)
     {
-        companies.Add(new Company(id, companyBranchData));
+        companies.Add(new Company(id, companyData));
+    }
+    public void AddComponyData(int id, FieldCompanyData fieldCompanyData)
+    {
+        companies.Add(new Company(id, fieldCompanyData));
+    }
+    public void AddComponyData(int id,  DiceCompanyData diceCompanyData)
+    {
+        companies.Add(new Company(id, diceCompanyData));
     }
     public List<Company> GetAllCompanies() => companies;
 

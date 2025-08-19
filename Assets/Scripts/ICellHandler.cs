@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using UnityEngine;
 
+// Интерфейс обработчика клеток
 public interface ICellHandler
 {
     void Handle(int cellIndex, int playerId);
@@ -7,171 +9,133 @@ public interface ICellHandler
     void ShowRentUI(int cellIndex);
     int GetPrice(int cellIndex);
     int GetRent(int cellIndex);
-
     int GetOwner(int cellIndex);
 }
 
-public class DefaultCompanyHandler : ICellHandler
+// Базовый класс с общей логикой
+public abstract class BaseCompanyHandler : ICellHandler
 {
-    public void Handle(int cellIndex, int playerId)
+    public virtual void Handle(int cellIndex, int playerId)
     {
         var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
         if (!company.IsBought)
-        {
             CompanyManager.Instance.OfferPurchase(cellIndex, playerId);
-        }
-        else if (company.IsBought && company.OwnerId != playerId)
-        {
+        else if (company.OwnerId != playerId)
             CompanyManager.Instance.OfferRent(cellIndex, playerId);
-        }
-
     }
 
-    public void ShowPurchaseUI(int cellIndex)
+    public abstract void ShowPurchaseUI(int cellIndex);
+    public abstract void ShowRentUI(int cellIndex);
+    public abstract int GetPrice(int cellIndex);
+    public abstract int GetRent(int cellIndex);
+
+    public int GetOwner(int cellIndex)
+    {
+        return CompanyDatabase.Instance.GetCompanyById(cellIndex).OwnerId;
+    }
+
+    // Универсальный метод подсчета количества клеток, купленных игроком в определенной группе
+    protected int CountOwnedByPlayer(int playerId, CompanyType companyType)
+    {
+        int count = 0;
+        
+         List<Company> companies = CompanyDatabase.Instance.GetAllCompanies();
+        for (int i = 0; i < companies.Count; i++)
+        {
+            if (companies[i].IsBought && companies[i].OwnerId == playerId && companies[i].Type == companyType)
+                count++;
+        }
+
+        return count;
+    }
+}
+
+// Обработчик обычной компании
+public class DefaultCompanyHandler : BaseCompanyHandler
+{
+    public override void ShowPurchaseUI(int cellIndex)
     {
         var cell = CellsManager.Instance.GetCellDataByIndex(cellIndex);
         UIBuyWindow.Instance.ShowBuyWindow(cellIndex, cell.companyData);
     }
-    public void ShowRentUI(int cellIndex)
+
+    public override void ShowRentUI(int cellIndex)
     {
         var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
-
-        UIPayRent.Instance.ShowRentWindow(cellIndex, company.CompanyBranchData.rent[company.RentLevel]);
+        UIPayRent.Instance.ShowRentWindow(cellIndex, company.CompanyData.rent[company.RentLevel]);
     }
-    public int GetPrice(int cellIndex)
+
+    public override int GetPrice(int cellIndex)
     {
         return CellsManager.Instance.GetCellDataByIndex(cellIndex).companyData.price;
     }
-    public int GetRent(int cellIndex)
+
+    public override int GetRent(int cellIndex)
     {
         var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
-        return company.CompanyBranchData.rent[company.RentLevel];
-    }
-    public int GetOwner(int cellIndex)
-    {
-        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
-        return company.OwnerId;
+        return company.CompanyData.rent[company.RentLevel];
     }
 }
 
-public class FieldCompanyHandler : ICellHandler
+// Обработчик полевой компании
+public class FieldCompanyHandler : BaseCompanyHandler
 {
-    public void Handle(int cellIndex, int playerId)
-    {
-        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
-        if (!company.IsBought)
-        {
-            CompanyManager.Instance.OfferPurchase(cellIndex, playerId);
-        }
-        else if (company.IsBought && company.OwnerId != playerId)
-        {
-            CompanyManager.Instance.OfferRent(cellIndex, playerId);
-        }
-       
-    }
-
-    public void ShowPurchaseUI(int cellIndex)
+    public override void ShowPurchaseUI(int cellIndex)
     {
         var cell = CellsManager.Instance.GetCellDataByIndex(cellIndex);
         UIBuyWindow.Instance.ShowBuyWindow(cellIndex, cell.fieldCompanyData);
     }
-    public void ShowRentUI(int cellIndex)
+
+    public override void ShowRentUI(int cellIndex)
     {
         var rent = GetRent(cellIndex);
         UIPayRent.Instance.ShowRentWindow(cellIndex, rent);
     }
-    public int GetPrice(int cellIndex)
+
+    public override int GetPrice(int cellIndex)
     {
         return CellsManager.Instance.GetCellDataByIndex(cellIndex).fieldCompanyData.price;
     }
-    public int GetRent(int cellIndex)
-    {
-        var cell = CellsManager.Instance.GetCellDataByIndex(cellIndex);
-        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
 
+    public override int GetRent(int cellIndex)
+    {
+        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
         if (!company.IsBought) return 0;
 
-        int ownerId = company.OwnerId;
-
-        // Считаем, сколько полей из этой группы купил владелец
-        int ownedCount = 0;
-        foreach (var kv in CompanyDatabase.Instance.GetAllCompanies())
-        { 
-            
-            if (kv is { IsBought: true } otherCompany &&
-                otherCompany.OwnerId == ownerId &&
-                cell.cellType == CellType.FieldCompany)
-            {
-                ownedCount++;
-            }
-        }
-
+        var cell = CellsManager.Instance.GetCellDataByIndex(cellIndex);
+        int ownedCount = CountOwnedByPlayer(company.OwnerId, CompanyType.FieldCompany);
         return cell.fieldCompanyData.rentField[ownedCount - 1];
-    }
-    public int GetOwner(int cellIndex)
-    {
-        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
-        return company.OwnerId;
     }
 }
 
-public class DiceCompanyHandler : ICellHandler
+// Обработчик компании с кубиком
+public class DiceCompanyHandler : BaseCompanyHandler
 {
-    public void Handle(int cellIndex, int playerId)
-    {
-        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
-        if (!company.IsBought)
-        {
-            CompanyManager.Instance.OfferPurchase(cellIndex, playerId);
-        }
-        else if (company.IsBought && company.OwnerId != playerId)
-        {
-            CompanyManager.Instance.OfferRent(cellIndex, playerId);
-        }
-       
-    }
-    public void ShowPurchaseUI(int cellIndex)
+    public override void ShowPurchaseUI(int cellIndex)
     {
         var cell = CellsManager.Instance.GetCellDataByIndex(cellIndex);
         UIBuyWindow.Instance.ShowBuyWindow(cellIndex, cell.diceCompanyData);
     }
-    public void ShowRentUI(int cellIndex)
+
+    public override void ShowRentUI(int cellIndex)
     {
         var rent = GetRent(cellIndex);
         UIPayRent.Instance.ShowRentWindow(cellIndex, rent);
     }
-    public int GetPrice(int cellIndex)
+
+    public override int GetPrice(int cellIndex)
     {
         return CellsManager.Instance.GetCellDataByIndex(cellIndex).diceCompanyData.price;
     }
-    public int GetRent(int cellIndex)
-    {
-        var cell = CellsManager.Instance.GetCellDataByIndex(cellIndex);
-        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
 
+    public override int GetRent(int cellIndex)
+    {
+        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
         if (!company.IsBought) return 0;
 
-        int ownerId = company.OwnerId;
-
-        // Считаем, сколько полей из этой группы купил владелец
-        int ownedCount = 0;
-        foreach (var kv in CompanyDatabase.Instance.GetAllCompanies())
-        {
-
-            if (kv is { IsBought: true } otherCompany &&
-                otherCompany.OwnerId == ownerId &&
-                cell.cellType == CellType.DiceCompany)
-            {
-                ownedCount++;
-            }
-        }
+        var cell = CellsManager.Instance.GetCellDataByIndex(cellIndex);
+        int ownedCount = CountOwnedByPlayer(company.OwnerId, CompanyType.DiceCompany);
 
         return cell.diceCompanyData.rentMultiplier[ownedCount - 1] * RandomNumbers.Instance.SumOfDices();
-      
-    }
-    public int GetOwner(int cellIndex)
-    {
-        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
-        return company.OwnerId;
     }
 }

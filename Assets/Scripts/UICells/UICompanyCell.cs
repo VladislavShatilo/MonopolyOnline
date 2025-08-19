@@ -3,6 +3,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// UI-компонент для отображения компании и управления кнопками филиалов.
+/// </summary>
 public class UICompanyCell : UICellBase
 {
     [Header("UI")]
@@ -13,11 +16,11 @@ public class UICompanyCell : UICellBase
 
     [Header("Branch Buttons")]
     [SerializeField] private Button buyFirstBranchButton;
-    [SerializeField] private Button buyBranchButton; 
+    [SerializeField] private Button buyBranchButton;
     [SerializeField] private Button sellBranchButton;
     [SerializeField] private Button sellFirstBranchButton;
 
-    [Header("Branch Buttons Icons")]
+    [Header("Branch Button Icons")]
     [SerializeField] private Image buyFirstBranchIcon;
     [SerializeField] private Image buyBranchIcon;
     [SerializeField] private Image sellBranchIcon;
@@ -31,176 +34,150 @@ public class UICompanyCell : UICellBase
     [SerializeField] private Image goldStarImage;
 
     private int companyId;
+
+    /// <summary> Инициализация UI клетки. </summary>
     public void Init(int id)
+    {
+        companyId = id;
+
+        HideAllBranchButtons();
+        HideStars();
+
+        buyFirstBranchButton.onClick.AddListener(() => TurnManager.Instance.RequestBuyBranch(companyId));
+        buyBranchButton.onClick.AddListener(() => TurnManager.Instance.RequestBuyBranch(companyId));
+        sellBranchButton.onClick.AddListener(() => TurnManager.Instance.RequestSellBranch(companyId));
+        sellFirstBranchButton.onClick.AddListener(() => TurnManager.Instance.RequestSellBranch(companyId));
+    }
+
+  
+    #region UI Updates
+
+    public override void UpdateUI(CellData cellData, PlayerData owner)
+    {
+        if (cellData == null) return;
+        Debug.Log("UpdateUI(CellData cellData, PlayerData owner)");
+        switch (cellData.cellType)
+        {
+            case CellType.Company:
+                companyNameText.text = cellData.companyData.name;
+                priceText.text = cellData.companyData.price.ToString("N0", CultureInfo.InvariantCulture);
+                BGPriceImage.color = GroupColors.Colors[(int)cellData.companyData.group];
+                break;
+
+            case CellType.FieldCompany:
+                companyNameText.text = cellData.fieldCompanyData.name;
+                priceText.text = cellData.fieldCompanyData.price.ToString("N0", CultureInfo.InvariantCulture);
+                BGPriceImage.color = GroupColors.Colors[(int)cellData.fieldCompanyData.group];
+                break;
+
+            case CellType.DiceCompany:
+                companyNameText.text = cellData.diceCompanyData.name;
+                priceText.text = cellData.diceCompanyData.price.ToString("N0", CultureInfo.InvariantCulture);
+                BGPriceImage.color = GroupColors.Colors[(int)cellData.diceCompanyData.group];
+                break;
+        }
+        Debug.Log(owner.playerColor);
+        BGImage.color = owner.playerColor;
+    }
+
+    public void SetRentText(int rent)
+    {
+        priceText.text = rent.ToString("N0", CultureInfo.InvariantCulture);
+    }
+
+    public void UpdateBranchStars(int level)
+    {
+        HideStars();
+        switch (level)
+        {
+            case 1: star1Image.gameObject.SetActive(true); break;
+            case 2: star1Image.gameObject.SetActive(true); star2Image.gameObject.SetActive(true); break;
+            case 3: star1Image.gameObject.SetActive(true); star2Image.gameObject.SetActive(true); star3Image.gameObject.SetActive(true); break;
+            case 4: star1Image.gameObject.SetActive(true); star2Image.gameObject.SetActive(true); star3Image.gameObject.SetActive(true); star4Image.gameObject.SetActive(true); break;
+            case 5: goldStarImage.gameObject.SetActive(true); break;
+        }
+    }
+
+    private void HideStars()
     {
         star1Image.gameObject.SetActive(false);
         star2Image.gameObject.SetActive(false);
         star3Image.gameObject.SetActive(false);
         star4Image.gameObject.SetActive(false);
         goldStarImage.gameObject.SetActive(false);
-
-        companyId = id;
-        buyFirstBranchButton.gameObject.SetActive(false);
-
-        buyFirstBranchButton.onClick.AddListener(() =>
-        {
-            TurnManager.Instance.RequestBuyBranch(companyId);
-        });
-        buyBranchButton.onClick.AddListener(() =>
-        {
-            TurnManager.Instance.RequestBuyBranch(companyId);
-        });
-        sellBranchButton.onClick.AddListener(() =>
-        {
-            TurnManager.Instance.RequestSellBranch(companyId);
-        });
-        sellFirstBranchButton.onClick.AddListener(() =>
-        {
-            TurnManager.Instance.RequestSellBranch(companyId);
-        });
     }
-    public void ShowBuyFirstBranchButton()
+
+    #endregion
+
+    #region Branch Buttons
+
+    public void ShowBuyFirstBranchButton() { ShowOnlyButton(buyFirstBranchButton); }
+    public void ShowBuySellButtons() { ShowOnlyButtons(buyBranchButton, sellBranchButton); }
+    public void ShowSellFirstButton() { ShowOnlyButton(sellFirstBranchButton); }
+    private void ShowOnlyButton(Button button)
     {
         HideAllBranchButtons();
-        buyFirstBranchButton.gameObject.SetActive(true);
+        button.gameObject.SetActive(true);
         BGPriceImage.gameObject.SetActive(false);
         priceText.gameObject.SetActive(false);
     }
 
-    public void ShowBuySellButtons()
+    private void ShowOnlyButtons(Button button1, Button button2)
     {
         HideAllBranchButtons();
-        buyBranchButton.gameObject.SetActive(true);
-        sellBranchButton.gameObject.SetActive(true);
+        button1.gameObject.SetActive(true);
+        button2.gameObject.SetActive(true);
         BGPriceImage.gameObject.SetActive(false);
         priceText.gameObject.SetActive(false);
     }
 
-    public void ShowSellFirstButton()
-    {
-        HideAllBranchButtons();
-        sellFirstBranchButton.gameObject.SetActive(true);
-        BGPriceImage.gameObject.SetActive(false);
-        priceText.gameObject.SetActive(false);
-    }
     public void HideAllBranchButtons()
     {
         buyFirstBranchButton.gameObject.SetActive(false);
         buyBranchButton.gameObject.SetActive(false);
         sellBranchButton.gameObject.SetActive(false);
-        sellFirstBranchButton.gameObject.SetActive(false); 
+        sellFirstBranchButton.gameObject.SetActive(false);
+
         BGPriceImage.gameObject.SetActive(true);
         priceText.gameObject.SetActive(true);
     }
-    public override void UpdateUI(CellData cellData, PlayerData owner)
-    {
-
-        switch (cellData.cellType)
-        {
-            case CellType.Company:
-                var company = cellData.companyData;
-                companyNameText.text = company.name;
-                priceText.text = company.price.ToString("N0", CultureInfo.InvariantCulture);
-                BGPriceImage.color = GroupColors.Colors[(int)company.group];
-                break;
-            case CellType.FieldCompany:
-                var fieldCompany = cellData.fieldCompanyData;
-                companyNameText.text = fieldCompany.name;
-                priceText.text = fieldCompany.price.ToString("N0", CultureInfo.InvariantCulture);
-                BGPriceImage.color = GroupColors.Colors[(int)fieldCompany.group];
-                break;
-            case CellType.DiceCompany:
-                var diceCompany = cellData.diceCompanyData;
-                companyNameText.text = diceCompany.name;
-                priceText.text = diceCompany.price.ToString("N0", CultureInfo.InvariantCulture);
-                BGPriceImage.color = GroupColors.Colors[(int)diceCompany.group];
-                break;
-
-        }
-
-        if (owner != null)
-        {
-            BGImage.color = owner.playerColor;
-        }
-        else
-        {
-            BGImage.color = Color.white; // или стандартный цвет
-        }
+    public void ChangeBuySellBranchButtons()
+    { 
+        Vector3 pos = buyBranchButton.GetComponent<RectTransform>().position;
+        buyBranchButton.GetComponent<RectTransform>().position = sellBranchButton.GetComponent<RectTransform>().position;
+        sellBranchButton.GetComponent<RectTransform>().position = pos; 
     }
-   
-    public void SetRentText(int rent)
-    {
-        priceText.text= rent.ToString("N0", CultureInfo.InvariantCulture);
-    }
+    #endregion
+
+    #region Rotation Utilities
+
     public void RotateLogoText(int angle)
     {
-        companyNameText.rectTransform.eulerAngles = new Vector3(0,0, angle);
+        companyNameText.rectTransform.eulerAngles = new Vector3(0, 0, angle);
     }
+
     public void RotatePriceText()
     {
         priceText.rectTransform.eulerAngles = new Vector3(0, 0, 180);
     }
-    public void RotateBrunchButtonIcons(int angle)
+
+    public void RotateBranchButtonIcons(int angle)
     {
         buyFirstBranchIcon.rectTransform.eulerAngles += new Vector3(0, 0, angle);
         buyBranchIcon.rectTransform.eulerAngles += new Vector3(0, 0, angle);
         sellBranchIcon.rectTransform.eulerAngles += new Vector3(0, 0, angle);
         sellFirstBranchIcon.rectTransform.eulerAngles += new Vector3(0, 0, angle);
     }
-    public void ChangeBuySellBranchButtons()
+
+    #endregion
+
+    #region Event Handlers
+
+    public void HandleCompanyBought(int cellIndex, int ownerId)
     {
-        
-        Vector3 pos = buyBranchButton.GetComponent<RectTransform>().position;
-        buyBranchButton.GetComponent<RectTransform>().position = sellBranchButton.GetComponent<RectTransform>().position;
-        sellBranchButton.GetComponent<RectTransform>().position = pos;
-    }
-    public void UpdateBranchStars(int level)
-    {
-        switch (level)
-        {
-            case 0:
-                star1Image.gameObject.SetActive(false);
-                star2Image.gameObject.SetActive(false);
-                star3Image.gameObject.SetActive(false);
-                star4Image.gameObject.SetActive(false);
-                goldStarImage.gameObject.SetActive(false);
-                break;
-            case 1:
-                star1Image.gameObject.SetActive(true);
-                star2Image.gameObject.SetActive(false);
-                star3Image.gameObject.SetActive(false);
-                star4Image.gameObject.SetActive(false);
-                goldStarImage.gameObject.SetActive(false);
-                break;
-            case 2:
-                star1Image.gameObject.SetActive(true);
-                star2Image.gameObject.SetActive(true);
-                star3Image.gameObject.SetActive(false);
-                star4Image.gameObject.SetActive(false);
-                goldStarImage.gameObject.SetActive(false);
-                break;
-            case 3:
-                star1Image.gameObject.SetActive(true);
-                star2Image.gameObject.SetActive(true);
-                star3Image.gameObject.SetActive(true);
-                star4Image.gameObject.SetActive(false);
-                goldStarImage.gameObject.SetActive(false);
-                break;
-            case 4:
-                star1Image.gameObject.SetActive(true);
-                star2Image.gameObject.SetActive(true);
-                star3Image.gameObject.SetActive(true);
-                star4Image.gameObject.SetActive(true);
-                goldStarImage.gameObject.SetActive(false);
-                break;
-            case 5:
-                star1Image.gameObject.SetActive(false);
-                star2Image.gameObject.SetActive(false);
-                star3Image.gameObject.SetActive(false);
-                star4Image.gameObject.SetActive(false);
-                goldStarImage.gameObject.SetActive(true);
-                break;
-        }
+    
+        UpdateUI(CellsManager.Instance.GetCellDataByIndex(companyId), GameManager.Instance.GetPlayerById(ownerId));
     }
 
+    #endregion
 }

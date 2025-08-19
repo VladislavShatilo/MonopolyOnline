@@ -1,21 +1,27 @@
 using Photon.Pun;
-using Photon.Pun.Demo.PunBasics;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
+/// <summary>
+/// Управляет всеми клетками на игровом поле: инициализация UI, регистрация компаний,
+/// отображение кнопок филиалов и обновление состояния клеток.
+/// </summary>
 public class CellsManager : MonoBehaviour
 {
     public static CellsManager Instance { get; private set; }
 
-    [SerializeField] private BoardConfig boardConfig; // Ссылка на ScriptableObject с данными
+    [Header("Board Setup")]
+    [SerializeField] private BoardConfig boardConfig;
     [SerializeField] private Transform parentTransform;
-    [SerializeField] private CompanyUIManager companyUIManager;
-    private List<Transform> boardCellsTransforms = new List<Transform>();
 
-    private Dictionary<int, UICellBase> cellUIMap = new Dictionary<int, UICellBase>();
-    private Dictionary<int, UICompanyCell> companyUIs = new Dictionary<int, UICompanyCell>();
+    [Header("UI Managers")]
+    [SerializeField] private CompanyUIManager companyUIManager;
+
+    private readonly List<Transform> boardCellsTransforms = new();
+    private readonly Dictionary<int, UICellBase> cellUIMap = new();
+    private readonly Dictionary<int, UICompanyCell> companyUIs = new();
+
+    #region Unity Lifecycle
 
     private void Awake()
     {
@@ -26,154 +32,197 @@ public class CellsManager : MonoBehaviour
         }
         Instance = this;
     }
+
+    private void Start()
+    {
+        CacheBoardCells();
+        InitializeCells();
+    }
+
+    #endregion
+
+    #region Инициализация поля
+
+    private void CacheBoardCells()
+    {
+        foreach (Transform child in parentTransform)
+            boardCellsTransforms.Add(child);
+
+        for (int i = 0; i < boardCellsTransforms.Count; i++)
+        {
+            if (boardCellsTransforms[i].TryGetComponent(out UICellBase uiCell))
+                cellUIMap[i] = uiCell;
+        }
+    }
+
+    private void InitializeCells()
+    {
+        for (int i = 0; i < boardConfig.cells.Count; i++)
+        {
+            var cellData = boardConfig.cells[i];
+            switch (cellData.cellType)
+            {
+                case CellType.Company:
+                    InitCompanyCell(i, cellData.companyData);
+                    break;
+
+                case CellType.FieldCompany:
+                    CompanyDatabase.Instance.AddComponyData(i, cellData.fieldCompanyData);
+                    InitPopup(i, cellData.cellType);
+                    break;
+
+                case CellType.DiceCompany:
+                    CompanyDatabase.Instance.AddComponyData(i, cellData.diceCompanyData);
+                    InitPopup(i, cellData.cellType);
+                    break;
+            }
+        }
+    }
+
+    private void InitCompanyCell(int index, CompanyData companyData)
+    {
+        if (boardCellsTransforms[index].TryGetComponent(out UICompanyCell companyUI))
+        {
+            companyUI.Init(index);
+            RegisterCompanyUI(index, companyUI);
+        }
+
+        CompanyDatabase.Instance.AddComponyData(index, companyData);
+        InitPopup(index, CellType.Company);
+    }
+
+    private void InitPopup(int index, CellType type)
+    {
+        if (!boardCellsTransforms[index].TryGetComponent(out CompanyWindowPopup popup))
+            return;
+
+        popup.Init(index);
+
+        popup.OnCompanyClicked += (id) =>
+        {
+            RectTransform rect = boardCellsTransforms[id] as RectTransform;
+
+            switch (type)
+            {
+                case CellType.Company:
+                    companyUIManager.ShowCompanyWindow(rect, boardConfig.cells[id].companyData.popupData, boardConfig.cells[id].companyData);
+                    break;
+
+                case CellType.FieldCompany:
+                    companyUIManager.ShowFieldCompanyWindow(rect, boardConfig.cells[id].fieldCompanyData.popupData, boardConfig.cells[id].fieldCompanyData);
+                    break;
+
+                case CellType.DiceCompany:
+                    companyUIManager.ShowDiceCompanyWindow(rect, boardConfig.cells[id].diceCompanyData.popupData, boardConfig.cells[id].diceCompanyData);
+                    break;
+            }
+        };
+    }
+
+    #endregion
+
+    #region Работа с UI компаний
+
     public void RegisterCompanyUI(int id, UICompanyCell ui)
     {
         if (!companyUIs.ContainsKey(id))
             companyUIs[id] = ui;
     }
 
-    public UICompanyCell GetCompanyUI(int id)
+    public UICompanyCell GetCompanyUI(int id) =>
+        companyUIs.TryGetValue(id, out var ui) ? ui : null;
+
+    public void RefreshCellUI(int cellIndex, PlayerData owner)
     {
-        companyUIs.TryGetValue(id, out var ui);
-        return ui;
+        if (!cellUIMap.TryGetValue(cellIndex, out var ui)) return;
+        var cellData = boardConfig.cells[cellIndex];
+        ui.UpdateUI(cellData, owner);
     }
-    private void Start()
-    {
-        foreach (Transform child in parentTransform)
-        {
-            boardCellsTransforms.Add(child);
-        }
-        for (int i = 0; i < boardCellsTransforms.Count; i++)
-        {
-            cellUIMap[i] = boardCellsTransforms[i].GetComponent<UICellBase>();
-        }
-        for (int i = 0; i < boardConfig.cells.Count; i++)
-        {
-            var cellData = boardConfig.cells[i];
 
-            if (cellData.cellType == CellType.Company ||
-                cellData.cellType == CellType.FieldCompany || 
-                cellData.cellType == CellType.DiceCompany )
-            {
-                if(cellData.cellType == CellType.Company)
-                {
-                    var companyUI = boardCellsTransforms[i].GetComponent<UICompanyCell>();
-                    companyUI.Init(i);
-                    RegisterCompanyUI(i, companyUI);
-                }
-                CompanyDatabase.Instance.AddComponyData(i,cellData.companyData);
-                var popup = boardCellsTransforms[i].GetComponent<CompanyWindowPopup>();
-                popup.Init(i);
-                if (cellData.cellType == CellType.Company)
-                {
-                    popup.OnCompanyClicked += (id) =>
-                    {
-                        var pos = boardConfig.cells[id].companyData.popupData;
+    #endregion
 
-                        companyUIManager.ShowCompanyWindow(boardCellsTransforms[id] as RectTransform, pos, cellData.companyData);
-                    };
-                }
-                else if (cellData.cellType == CellType.FieldCompany)
-                {
-                    popup.OnCompanyClicked += (id) =>
-                    {
-                        var pos = boardConfig.cells[id].fieldCompanyData.popupData;
-                        companyUIManager.ShowFieldCompanyWindow(boardCellsTransforms[id] as RectTransform, pos, cellData.fieldCompanyData);
-                    };
-                }
-                else if (cellData.cellType == CellType.DiceCompany)
-                {
-                    popup.OnCompanyClicked += (id) =>
-                    {
-                        var pos = boardConfig.cells[id].diceCompanyData.popupData;
+    #region Управление кнопками филиалов
 
-                        companyUIManager.ShowDiceCompanyWindow(boardCellsTransforms[id] as RectTransform, pos, cellData.diceCompanyData);
-                    };
-                }
-            }
-           
-        }
-
-        CompanyManager.Instance.InitializeCompanies(boardConfig.cells);
-    }
     public void ShowBranchButtons(int currentPlayerId)
     {
-       
-
         foreach (var company in CompanyDatabase.Instance.GetAllCompanies())
         {
             var ui = GetCompanyUI(company.Id);
             if (ui == null) continue;
 
-            // Проверяем, локальный ли это игрок и его ли сейчас ход
             bool isMyTurn = currentPlayerId == PhotonNetwork.LocalPlayer.ActorNumber;
-            bool canBuyBranch = isMyTurn &&
-                                company.IsBought &&
-                                company.OwnerId == currentPlayerId &&
-                                company.RentLevel < 6 &&
-                                CompanyManager.Instance.PlayerOwnsWholeGroup(company.CompanyBranchData.group, currentPlayerId);
+            bool ownsGroup = CompanyManager.Instance.PlayerOwnsWholeGroup(company.CompanyData.group, currentPlayerId);
+
+            bool canBuyBranch =
+                isMyTurn &&
+                company.IsBought &&
+                company.OwnerId == currentPlayerId &&
+                company.RentLevel < 6 &&
+                ownsGroup;
 
             if (!canBuyBranch)
             {
-                // скрываем все кнопки (чтобы лишние не оставались активными)
                 ui.HideAllBranchButtons();
                 continue;
             }
 
-            int currentLevel = company.RentLevel;
-            Debug.Log(company.RentLevel);
-            if (currentLevel == 0)
-            {
-                ui.ShowBuyFirstBranchButton();
-            }
-            else if (currentLevel == 5)
-            {
-                ui.ShowSellFirstButton();
-            }
-            else
-            {
-                ui.ShowBuySellButtons();
-            }
+            ShowBranchButtonsForLevel(ui, company.RentLevel);
         }
     }
+
+    private void ShowBranchButtonsForLevel(UICompanyCell ui, int level)
+    {
+        switch (level)
+        {
+            case 0:
+                ui.ShowBuyFirstBranchButton();
+                break;
+            case 5:
+                ui.ShowSellFirstButton();
+                break;
+            default:
+                ui.ShowBuySellButtons();
+                break;
+        }
+    }
+
     public void HideAllBranchButtons(int currentPlayerId)
     {
         if (currentPlayerId != PhotonNetwork.LocalPlayer.ActorNumber) return;
+
         foreach (var company in CompanyDatabase.Instance.GetAllCompanies())
         {
             var ui = GetCompanyUI(company.Id);
-            if (ui == null) continue;
-            ui.HideAllBranchButtons();
+            ui?.HideAllBranchButtons();
         }
     }
-    public void HideAllBranchButtonsByGroup(int currentPlayerId,CompanyGroup group)
+
+    public void HideAllBranchButtonsByGroup(int currentPlayerId, CompanyGroup group)
     {
         if (currentPlayerId != PhotonNetwork.LocalPlayer.ActorNumber) return;
+
         foreach (var company in CompanyDatabase.Instance.GetAllCompanies())
-        {      
-            if(company.CompanyBranchData.group == group)
-            {
-                var ui = GetCompanyUI(company.Id);
-                if (ui == null) continue;
-                ui.HideAllBranchButtons();
-            }
-        }
-    }
-    public void RefreshCellUI(int cellIndex, PlayerData owner)
-    {
-        if (cellUIMap.TryGetValue(cellIndex, out var ui))
         {
-            var cellData = boardConfig.cells[cellIndex];
-            ui.UpdateUI(cellData, owner);
+            if (company.Type != CompanyType.Company) continue;
+            if (company.CompanyData.group != group) continue;
+
+            var ui = GetCompanyUI(company.Id);
+            ui?.HideAllBranchButtons();
         }
     }
-  
-    public GameObject GetCellByIndex(int index)
-    {
-        return boardCellsTransforms[index].gameObject;
-    }
-    public CellData GetCellDataByIndex(int index)
-    {
-        return boardConfig.cells[index];
-    }
+
+    #endregion
+
+    #region Утилиты
+
+    public GameObject GetCellByIndex(int index) =>
+        boardCellsTransforms[index].gameObject;
+
+    public CellData GetCellDataByIndex(int index) =>
+        boardConfig.cells[index];
+
+    public List<CellData> GetCellDataList() =>
+        boardConfig.cells;
+
+    #endregion
 }
