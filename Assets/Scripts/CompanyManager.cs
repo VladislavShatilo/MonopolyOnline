@@ -155,11 +155,11 @@ public class CompanyManager : MonoBehaviourPun
         }
         if (cells[cellIndex].cellType == CellType.FieldCompany)
         {
-            for(int i = 0; i< cells.Count;i++)
+            for (int i = 0; i < cells.Count; i++)
             {
                 if (cells[i].cellType == CellType.FieldCompany &&
                     cells[i].fieldCompanyData.group == cell.fieldCompanyData.group
-                    && CompanyDatabase.Instance.GetCompanyById(i).IsBought&&
+                    && CompanyDatabase.Instance.GetCompanyById(i).IsBought &&
                     CompanyDatabase.Instance.GetCompanyById(i).OwnerId == ownerId)
                 {
                     int newRent = handlers[CellType.FieldCompany].GetRent(i);
@@ -171,8 +171,27 @@ public class CompanyManager : MonoBehaviourPun
                 }
             }
         }
-      
-        UIBuyWindow.Instance.HideWindow();
+        else if (cells[cellIndex].cellType == CellType.DiceCompany)
+        {
+            for (int i = 0; i < cells.Count; i++)
+            {
+                if (cells[i].cellType == CellType.DiceCompany &&
+                    cells[i].diceCompanyData.group == cell.diceCompanyData.group
+                    && CompanyDatabase.Instance.GetCompanyById(i).IsBought &&
+                    CompanyDatabase.Instance.GetCompanyById(i).OwnerId == ownerId)
+                {
+                    int newRent = handlers[CellType.DiceCompany].GetRent(i);
+                    int multiplier = newRent / RandomNumbers.Instance.SumOfDices();
+                    if (CellsManager.Instance.GetCellByIndex(i)?.TryGetComponent(out UICompanyCell uiCellField) == true)
+                    {
+                        uiCellField.SetRentText(multiplier);
+                    }
+                }
+            }
+        }
+
+
+            UIBuyWindow.Instance.HideWindow();
     }
 
     #endregion
