@@ -153,7 +153,25 @@ public class CompanyManager : MonoBehaviourPun
             uiCell.UpdateUI(cell, buyer);
             uiCell.SetRentText(rent);
         }
+        if (cells[cellIndex].cellType == CellType.FieldCompany)
+        {
+            for(int i = 0; i< cells.Count;i++)
+            {
+                if (cells[i].cellType == CellType.FieldCompany &&
+                    cells[i].fieldCompanyData.group == cell.fieldCompanyData.group
+                    && CompanyDatabase.Instance.GetCompanyById(i).IsBought&&
+                    CompanyDatabase.Instance.GetCompanyById(i).OwnerId == ownerId)
+                {
+                    int newRent = handlers[CellType.FieldCompany].GetRent(i);
 
+                    if (CellsManager.Instance.GetCellByIndex(i)?.TryGetComponent(out UICompanyCell uiCellField) == true)
+                    {
+                        uiCellField.SetRentText(newRent);
+                    }
+                }
+            }
+        }
+      
         UIBuyWindow.Instance.HideWindow();
     }
 

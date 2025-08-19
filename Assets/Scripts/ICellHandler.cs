@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public interface ICellHandler
 {
     void Handle(int cellIndex, int playerId);
@@ -75,10 +77,8 @@ public class FieldCompanyHandler : ICellHandler
     }
     public void ShowRentUI(int cellIndex)
     {
-        var cell = CellsManager.Instance.GetCellDataByIndex(cellIndex);
-        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
-
-        UIPayRent.Instance.ShowRentWindow(cellIndex, cell.fieldCompanyData.rentField[company.RentLevel]);
+        var rent = GetRent(cellIndex);
+        UIPayRent.Instance.ShowRentWindow(cellIndex, rent);
     }
     public int GetPrice(int cellIndex)
     {
@@ -86,8 +86,27 @@ public class FieldCompanyHandler : ICellHandler
     }
     public int GetRent(int cellIndex)
     {
+        var cell = CellsManager.Instance.GetCellDataByIndex(cellIndex);
         var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
-        return CellsManager.Instance.GetCellDataByIndex(cellIndex).fieldCompanyData.rentField[company.RentLevel];
+
+        if (!company.IsBought) return 0;
+
+        int ownerId = company.OwnerId;
+
+        // —читаем, сколько полей из этой группы купил владелец
+        int ownedCount = 0;
+        foreach (var kv in CompanyDatabase.Instance.GetAllCompanies())
+        { 
+            
+            if (kv is { IsBought: true } otherCompany &&
+                otherCompany.OwnerId == ownerId &&
+                cell.cellType == CellType.FieldCompany)
+            {
+                ownedCount++;
+            }
+        }
+
+        return cell.fieldCompanyData.rentField[ownedCount - 1];
     }
     public int GetOwner(int cellIndex)
     {
