@@ -61,6 +61,14 @@ MonoBehaviour:
   - RPC_RequestSetNumbersDice
   - RPC_StartTurnWindpw
   - RPC_StartTurnWindow
+  - RPC_OnBranchBought
+  - RPC_RequestBuyBranch
+  - RPC_OnHideButtons
+  - RPC_OnBranchChange
+  - RPC_OnHideSellsButtons
+  - RPC_RequestSellBranch
+  - RPC_OnBuyBranchChange
+  - RPC_OnSellBranchChange
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 0

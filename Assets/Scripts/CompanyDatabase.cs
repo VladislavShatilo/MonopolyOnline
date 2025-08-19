@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 
@@ -11,12 +12,12 @@ public class Company
     public bool IsBought { get; set; }
     public int OwnerId { get; set; }
     public int RentLevel { get; set; }
-
-    public Company(int id)
+    public CompanyData CompanyBranchData { get; set; }
+    public Company(int id, CompanyData companyBranchData)
       
     {
         Id = id;
-       
+        CompanyBranchData = companyBranchData;  
         IsBought = false;
         OwnerId = -1;
         RentLevel = 0;
@@ -36,9 +37,9 @@ public class CompanyDatabase
 
     private List<Company> companies = new List<Company>();
 
-    public void AddComponyData(int id)
+    public void AddComponyData(int id, CompanyData companyBranchData)
     {
-        companies.Add(new Company(id));
+        companies.Add(new Company(id, companyBranchData));
     }
     public List<Company> GetAllCompanies() => companies;
 

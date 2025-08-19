@@ -8,6 +8,7 @@ public class CompanyManager : MonoBehaviourPun
 
     /// <summary> Компании по индексу клетки. </summary>
     private readonly Dictionary<int, CellData> cells = new();
+    private readonly Dictionary<int, Company> companysWithBranches = new();
 
     /// <summary> Обработчики по типам клеток. </summary>
     private readonly Dictionary<CellType, ICellHandler> handlers = new();
@@ -33,9 +34,22 @@ public class CompanyManager : MonoBehaviourPun
     /// <summary> Загружает список компаний в словарь. </summary>
     public void InitializeCompanies(List<CellData> cells)
     {
+
         this.cells.Clear();
+        CompanyDatabase companyDataBase = CompanyDatabase.Instance;
+        for (int i = 0; i< cells.Count; i++)
+        {
+            if (cells[i].cellType == CellType.Company)
+            {
+                companysWithBranches.Add(i, companyDataBase.GetCompanyById(i));
+                
+            }
+        }
         foreach (var cell in cells)
+        {
             this.cells[cell.index] = cell;
+         
+        }
     }
 
     #endregion
@@ -96,15 +110,20 @@ public class CompanyManager : MonoBehaviourPun
         if (!ValidateCompanyExists(cellIndex, out var cell)) return;
 
         var buyer = GameManager.Instance.GetPlayerById(buyerId);
-        int price = cell.companyData.price;
+        int price = 0;
+        if (handlers.TryGetValue(cell.cellType, out var handler))
+        {
+            price = handler.GetPrice(cellIndex);
 
+        }
+   
         if (!Bank.Instance.hasEnoughMoney(buyer, price))
         {
             Debug.Log("Недостаточно денег для покупки");
             return;
         }
 
-        Debug.Log($"Игрок {buyerId} купил компанию {cell.companyData.name}");
+        Debug.Log($"Игрок {buyerId} купил компанию {cell.cellName}");
 
         photonView.RPC(nameof(RPC_ConfirmPurchase), RpcTarget.AllBuffered, cellIndex, buyerId);
         TurnManager.Instance.RequestEndTurn();
@@ -120,11 +139,20 @@ public class CompanyManager : MonoBehaviourPun
         company.OwnerId = ownerId;
 
         var buyer = GameManager.Instance.GetPlayerById(ownerId);
-        int price = cell.companyData.price;
+        int price =0,rent = 0;
+        
+        if (handlers.TryGetValue(cell.cellType, out var handler))
+        {
+            price = handler.GetPrice(cellIndex);
+            rent = handler.GetRent(cellIndex);
+        }
         Bank.Instance.RemoveMoney(buyer, price);
 
         if (CellsManager.Instance.GetCellByIndex(cellIndex)?.TryGetComponent(out UICompanyCell uiCell) == true)
+        {
             uiCell.UpdateUI(cell, buyer);
+            uiCell.SetRentText(rent);
+        }
 
         UIBuyWindow.Instance.HideWindow();
     }
@@ -142,8 +170,11 @@ public class CompanyManager : MonoBehaviourPun
     private void RPC_ShowRentOffer(int cellIndex, int rentPrice)
     {
         if (!ValidateCompanyExists(cellIndex, out var cell)) return;
-        int price = rentPrice >= 0 ? rentPrice : cell.companyData.rent[0];
-      //  UIPayRent.Instance.ShowRentWindow(cellIndex, (float)price);
+
+        if (handlers.TryGetValue(cell.cellType, out var handler))
+        {
+            handler.ShowRentUI(cellIndex);
+        }
     }
 
     public void TryPayRent(int cellIndex)
@@ -158,15 +189,21 @@ public class CompanyManager : MonoBehaviourPun
         if (!ValidateCompanyExists(cellIndex, out var cell)) return;
 
         var renter = GameManager.Instance.GetPlayerById(renterID);
-        int price = cell.companyData.rent[0];
+        int rentPrice = 0;
 
-        if (!Bank.Instance.hasEnoughMoney(renter, price))
+        if (handlers.TryGetValue(cell.cellType, out var handler))
+        {
+            rentPrice = handler.GetRent(cellIndex);
+        }
+        if (!Bank.Instance.hasEnoughMoney(renter, rentPrice))
         {
             Debug.Log("Недостаточно денег для аренды");
             return;
         }
 
         photonView.RPC(nameof(RPC_ConfirmRent), RpcTarget.AllBuffered, cellIndex, renterID);
+        TurnManager.Instance.RequestEndTurn();
+
     }
 
     [PunRPC]
@@ -175,11 +212,20 @@ public class CompanyManager : MonoBehaviourPun
         if (!ValidateCompanyExists(cellIndex, out var cell)) return;
 
         var renter = GameManager.Instance.GetPlayerById(renterId);
-        int price = cell.companyData.rent[0];
-        Bank.Instance.RemoveMoney(renter, price);
+        int rentPrice = 0;
+        int ownerId = -1;
+        if (handlers.TryGetValue(cell.cellType, out var handler))
+        {
+            rentPrice = handler.GetRent(cellIndex);
+            ownerId = handler.GetOwner(cellIndex);
+        }
+        GameManager gameManager = GameManager.Instance;
+        PlayerData renterPlayerData = gameManager.GetPlayerById(renterId);
+        PlayerData ownerPlayerData = gameManager.GetPlayerById(ownerId);
+
+        Bank.Instance.TransferMoney(renterPlayerData, ownerPlayerData, rentPrice);
 
         UIPayRent.Instance.HideWindow();
-        TurnManager.Instance.RequestEndTurn();
     }
 
     #endregion
@@ -198,7 +244,19 @@ public class CompanyManager : MonoBehaviourPun
         }
         return true;
     }
-
+    public bool PlayerOwnsWholeGroup(CompanyGroup group, int playerId)
+    {
+        
+        foreach (var company in companysWithBranches.Values) // companies — твой словарь компаний
+        {
+            if (company.CompanyBranchData.group == group)
+            {
+                if (!company.IsBought || company.OwnerId != playerId)
+                    return false;
+            }
+        }
+        return true;
+    }
     public bool TryGetHandler(CellType type, out ICellHandler handler) =>
         handlers.TryGetValue(type, out handler);
 

@@ -29,16 +29,15 @@ public class UIPayRent : MonoBehaviour
         payRentButton.onClick.AddListener(() => OnRentClicked());
        
     }
-    public void ShowRentWindow(int cellIndex, CompanyData companyData)
+    public void ShowRentWindow(int cellIndex, float rent)
     {
         currentCellIndex = cellIndex;
-        payButtonText.text = "Заплатите " + companyData.rent[0].ToString("N0", CultureInfo.InvariantCulture) + "k";
+        payButtonText.text = "Заплатите " + rent.ToString("N0", CultureInfo.InvariantCulture);
         windowAnimation.ShowWindow();
     }
     public void HideWindow()
     {
         windowAnimation.HideWindow();
-        TurnManager.Instance.RequestEndTurn();
     }
     private void OnRentClicked()
     {

@@ -22,11 +22,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -34,22 +31,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -67,11 +58,8 @@ MonoBehaviour:
       price: 600
       pledgePrice: 300
       buyoutPrice: 360
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 14000000640000002c0100008403000040060000c4090000
-      rentLevel: 0
       branchPrice: 500
     fieldCompanyData:
       name: 
@@ -79,22 +67,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -112,11 +94,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -124,22 +103,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -157,11 +130,8 @@ MonoBehaviour:
       price: 600
       pledgePrice: 300
       buyoutPrice: 360
-      isBought: 0
-      ownerID: 2
       popupData: 0
       rent: 28000000c80000005802000008070000800c000094110000
-      rentLevel: 0
       branchPrice: 500
     fieldCompanyData:
       name: 
@@ -169,22 +139,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -202,11 +166,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -214,22 +175,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 21300000, guid: 33931e115144dbf4aa0c07aa140b4333, type: 3}
       amount: 0
@@ -247,11 +202,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: Mercedes
@@ -259,22 +211,16 @@ MonoBehaviour:
       price: 2000
       pledgePrice: 1000
       buyoutPrice: 1200
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: fa000000f4010000e8030000d0070000
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -292,11 +238,8 @@ MonoBehaviour:
       price: 1000
       pledgePrice: 500
       buyoutPrice: 600
-      isBought: 0
-      ownerID: 1
       popupData: 0
       rent: 3c0000002c010000840300008c0a0000a00f00007c150000
-      rentLevel: 0
       branchPrice: 500
     fieldCompanyData:
       name: 
@@ -304,22 +247,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -337,11 +274,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -349,22 +283,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -382,11 +310,8 @@ MonoBehaviour:
       price: 1000
       pledgePrice: 500
       buyoutPrice: 600
-      isBought: 0
-      ownerID: 2
       popupData: 0
       rent: 3c0000002c010000840300008c0a0000301100007c150000
-      rentLevel: 0
       branchPrice: 500
     fieldCompanyData:
       name: 
@@ -394,22 +319,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -427,11 +346,8 @@ MonoBehaviour:
       price: 1200
       pledgePrice: 600
       buyoutPrice: 720
-      isBought: 0
-      ownerID: 1
       popupData: 0
       rent: 5000000090010000e8030000b80b00009411000070170000
-      rentLevel: 0
       branchPrice: 500
     fieldCompanyData:
       name: 
@@ -439,22 +355,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -472,11 +382,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -484,22 +391,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -517,11 +418,8 @@ MonoBehaviour:
       price: 1400
       pledgePrice: 700
       buyoutPrice: 840
-      isBought: 0
-      ownerID: 0
       popupData: 5
       rent: 64000000f4010000dc050000941100006a1800004c1d0000
-      rentLevel: 0
       branchPrice: 750
     fieldCompanyData:
       name: 
@@ -529,22 +427,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -562,11 +454,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 5
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -574,22 +463,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: RockStar
       group: 4
       price: 1500
       pledgePrice: 750
       buyoutPrice: 900
-      isBought: 0
-      ownerID: 0
       popupData: 5
       rentMultiplier: 64000000fa000000
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -607,11 +490,8 @@ MonoBehaviour:
       price: 1400
       pledgePrice: 700
       buyoutPrice: 840
-      isBought: 0
-      ownerID: 0
       popupData: 5
       rent: 64000000f4010000dc050000941100006a1800004c1d0000
-      rentLevel: 0
       branchPrice: 750
     fieldCompanyData:
       name: 
@@ -619,22 +499,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -652,11 +526,8 @@ MonoBehaviour:
       price: 1600
       pledgePrice: 800
       buyoutPrice: 960
-      isBought: 0
-      ownerID: 0
       popupData: 5
       rent: 78000000580200000807000088130000581b000028230000
-      rentLevel: 0
       branchPrice: 750
     fieldCompanyData:
       name: 
@@ -664,22 +535,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -697,11 +562,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 5
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: Audi
@@ -709,22 +571,16 @@ MonoBehaviour:
       price: 2000
       pledgePrice: 1000
       buyoutPrice: 1200
-      isBought: 0
-      ownerID: 0
       popupData: 5
       rentField: fa000000f4010000e8030000d0070000
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -742,11 +598,8 @@ MonoBehaviour:
       price: 1800
       pledgePrice: 900
       buyoutPrice: 1080
-      isBought: 0
-      ownerID: 0
       popupData: 4
       rent: 8c000000bc020000d00700007c1500004c1d00001c250000
-      rentLevel: 0
       branchPrice: 1000
     fieldCompanyData:
       name: 
@@ -754,22 +607,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -787,11 +634,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -799,22 +643,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -832,11 +670,8 @@ MonoBehaviour:
       price: 1800
       pledgePrice: 900
       buyoutPrice: 1080
-      isBought: 0
-      ownerID: 0
       popupData: 4
       rent: 8c000000bc020000d00700007c1500004c1d00001c250000
-      rentLevel: 0
       branchPrice: 1000
     fieldCompanyData:
       name: 
@@ -844,22 +679,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -873,15 +702,12 @@ MonoBehaviour:
     cellType: 0
     companyData:
       name: Fanta
-      group: 4
+      group: 5
       price: 2000
       pledgePrice: 1000
       buyoutPrice: 1200
-      isBought: 0
-      ownerID: 0
       popupData: 4
       rent: a0000000200300009808000070170000401f000010270000
-      rentLevel: 0
       branchPrice: 1000
     fieldCompanyData:
       name: 
@@ -889,22 +715,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -922,11 +742,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -934,22 +751,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -967,11 +778,8 @@ MonoBehaviour:
       price: 2200
       pledgePrice: 1100
       buyoutPrice: 1320
-      isBought: 0
-      ownerID: 0
       popupData: 3
       rent: b400000084030000c4090000581b00002e22000004290000
-      rentLevel: 0
       branchPrice: 1250
     fieldCompanyData:
       name: 
@@ -979,22 +787,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1012,11 +814,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -1024,22 +823,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1057,11 +850,8 @@ MonoBehaviour:
       price: 2200
       pledgePrice: 1100
       buyoutPrice: 1320
-      isBought: 0
-      ownerID: 0
       popupData: 3
       rent: b400000084030000c4090000581b00002e22000004290000
-      rentLevel: 0
       branchPrice: 1250
     fieldCompanyData:
       name: 
@@ -1069,22 +859,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1102,11 +886,8 @@ MonoBehaviour:
       price: 2400
       pledgePrice: 1200
       buyoutPrice: 1440
-      isBought: 0
-      ownerID: 0
       popupData: 3
       rent: c8000000e8030000b80b00004c1d000022240000f82a0000
-      rentLevel: 0
       branchPrice: 1250
     fieldCompanyData:
       name: 
@@ -1114,22 +895,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1147,11 +922,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 3
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: Ford
@@ -1159,22 +931,16 @@ MonoBehaviour:
       price: 2000
       pledgePrice: 1000
       buyoutPrice: 1200
-      isBought: 0
-      ownerID: 0
       popupData: 3
       rentField: fa000000f4010000e8030000d0070000
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1192,11 +958,8 @@ MonoBehaviour:
       price: 2600
       pledgePrice: 1300
       buyoutPrice: 1560
-      isBought: 0
-      ownerID: 0
       popupData: 3
       rent: dc0000004c040000e40c0000401f000016260000ec2c0000
-      rentLevel: 0
       branchPrice: 1500
     fieldCompanyData:
       name: 
@@ -1204,22 +967,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1237,11 +994,8 @@ MonoBehaviour:
       price: 2600
       pledgePrice: 1300
       buyoutPrice: 1560
-      isBought: 0
-      ownerID: 0
       popupData: 3
       rent: dc0000004c040000e40c0000401f000016260000ec2c0000
-      rentLevel: 0
       branchPrice: 1500
     fieldCompanyData:
       name: 
@@ -1249,22 +1003,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1282,11 +1030,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 4
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -1294,22 +1039,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: Rovio
       group: 4
       price: 1500
       pledgePrice: 750
       buyoutPrice: 900
-      isBought: 0
-      ownerID: 0
       popupData: 3
       rentMultiplier: 64000000fa000000
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1327,11 +1066,8 @@ MonoBehaviour:
       price: 2800
       pledgePrice: 1400
       buyoutPrice: 1680
-      isBought: 0
-      ownerID: 0
       popupData: 3
       rent: f0000000b0040000100e0000342100000a280000e02e0000
-      rentLevel: 0
       branchPrice: 1500
     fieldCompanyData:
       name: 
@@ -1339,22 +1075,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1372,11 +1102,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -1384,22 +1111,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1417,11 +1138,8 @@ MonoBehaviour:
       price: 3000
       pledgePrice: 1500
       buyoutPrice: 1800
-      isBought: 0
-      ownerID: 0
       popupData: 2
       rent: 04010000140500003c0f000028230000f82a0000ce310000
-      rentLevel: 0
       branchPrice: 1750
     fieldCompanyData:
       name: 
@@ -1429,22 +1147,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1462,11 +1174,8 @@ MonoBehaviour:
       price: 3000
       pledgePrice: 1500
       buyoutPrice: 1800
-      isBought: 0
-      ownerID: 0
       popupData: 2
       rent: 04010000140500003c0f000028230000f82a0000ce310000
-      rentLevel: 0
       branchPrice: 1750
     fieldCompanyData:
       name: 
@@ -1474,22 +1183,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1507,11 +1210,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -1519,22 +1219,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1552,11 +1246,8 @@ MonoBehaviour:
       price: 3200
       pledgePrice: 1600
       buyoutPrice: 1920
-      isBought: 0
-      ownerID: 0
       popupData: 2
       rent: 18010000dc0500009411000010270000e02e0000b0360000
-      rentLevel: 0
       branchPrice: 1750
     fieldCompanyData:
       name: 
@@ -1564,22 +1255,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1597,11 +1282,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 1
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: Land Rover
@@ -1609,22 +1291,16 @@ MonoBehaviour:
       price: 2000
       pledgePrice: 1000
       buyoutPrice: 1200
-      isBought: 0
-      ownerID: 0
       popupData: 1
       rentField: fa000000f4010000e8030000d0070000
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1642,11 +1318,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -1654,22 +1327,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 21300000, guid: 52236e55f910a5a4db77fe1ec0e8856b, type: 3}
       amount: 0
@@ -1687,11 +1354,8 @@ MonoBehaviour:
       price: 3500
       pledgePrice: 1750
       buyoutPrice: 2100
-      isBought: 0
-      ownerID: 0
       popupData: 1
       rent: 5e010000d606000088130000f82a0000c8320000983a0000
-      rentLevel: 0
       branchPrice: 2000
     fieldCompanyData:
       name: 
@@ -1699,22 +1363,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1732,11 +1390,8 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rent: 
-      rentLevel: 0
       branchPrice: 0
     fieldCompanyData:
       name: 
@@ -1744,22 +1399,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0
@@ -1777,11 +1426,8 @@ MonoBehaviour:
       price: 4000
       pledgePrice: 2000
       buyoutPrice: 2400
-      isBought: 0
-      ownerID: 0
       popupData: 1
       rent: 5e010000d606000088130000f82a0000c8320000983a0000
-      rentLevel: 0
       branchPrice: 2000
     fieldCompanyData:
       name: 
@@ -1789,22 +1435,16 @@ MonoBehaviour:
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentField: 
-      amountLevel: 0
     diceCompanyData:
       name: 
       group: 0
       price: 0
       pledgePrice: 0
       buyoutPrice: 0
-      isBought: 0
-      ownerID: 0
       popupData: 0
       rentMultiplier: 
-      amountLevel: 0
     spendData:
       spendSprite: {fileID: 0}
       amount: 0

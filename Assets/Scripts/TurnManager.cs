@@ -1,4 +1,5 @@
 using Photon.Pun;
+using Photon.Pun.Demo.PunBasics;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -64,6 +65,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
         StartTurn(randomPlayerId);
     }
+
     public void RequestRollDice(int requestingPlayerId)
     {
         // Любой игрок вызывает бросок — отправляем запрос мастеру
@@ -80,16 +82,15 @@ public class TurnManager : MonoBehaviourPunCallbacks
         int second = UnityEngine.Random.Range(1, 7);
 
         // Запускаем кубики у всех клиентов с этими числами
-        photonView.RPC(nameof(RPC_RequestSetNumbersDice), RpcTarget.AllBuffered, first,second,requestingPlayerId);
-
-       
+        photonView.RPC(nameof(RPC_RequestSetNumbersDice), RpcTarget.AllBuffered, first, second, requestingPlayerId);
     }
+
     [PunRPC]
-    private void RPC_RequestSetNumbersDice(int first, int second,int requestingPlayerId)
+    private void RPC_RequestSetNumbersDice(int first, int second, int requestingPlayerId)
     {
-        
         diceManager.StartDiceRollWithResult(first, second, requestingPlayerId);
     }
+
     public void StartTurn(int playerId)
     {
         if (!PhotonNetwork.IsMasterClient)
@@ -100,7 +101,6 @@ public class TurnManager : MonoBehaviourPunCallbacks
         isTurnActive = true;
 
         photonView.RPC(nameof(RPC_StartTurn), RpcTarget.All, playerId, turnStartTime);
-        Debug.Log($"Master started turn for player {playerId}");
     }
 
     [PunRPC]
@@ -110,10 +110,140 @@ public class TurnManager : MonoBehaviourPunCallbacks
         turnStartTime = startTime;
         isTurnActive = true;
         DiceRollWindow.Instance.TurnChangeWindow(playerId);
+       CellsManager.Instance.ShowBranchButtons(playerId);
         
-        Debug.Log($"RPC_StartTurn: current turn is {playerId}");
+        
     }
-   
+
+    public void RequestSellBranch(int companyId)
+    {
+        // локальный игрок отправляет запрос мастеру
+        photonView.RPC(nameof(RPC_RequestSellBranch), RpcTarget.MasterClient, companyId, PhotonNetwork.LocalPlayer.ActorNumber);
+    }
+
+    [PunRPC]
+    private void RPC_RequestSellBranch(int companyId, int requestingPlayerId)
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+
+        var company = CompanyDatabase.Instance.GetCompanyById(companyId);
+        if (company == null) return;
+
+        // Проверка условий (владелец, деньги, лимит филиалов)
+        if (company.OwnerId == requestingPlayerId && company.RentLevel > 0)
+        {
+            int sellPrice = company.CompanyBranchData.branchPrice;
+            PlayerData player = GameManager.Instance.GetPlayerById(requestingPlayerId);
+
+            company.RentLevel--;
+
+            photonView.RPC(nameof(RPC_OnSellBranchChange), RpcTarget.All,requestingPlayerId, companyId, company.RentLevel);
+            photonView.RPC(nameof(RPC_OnHideSellsButtons), RpcTarget.All, requestingPlayerId, companyId);
+        }
+    }
+
+    public void RequestBuyBranch(int companyId)
+    {
+        // локальный игрок отправляет запрос мастеру
+        photonView.RPC(nameof(RPC_RequestBuyBranch), RpcTarget.MasterClient, companyId, PhotonNetwork.LocalPlayer.ActorNumber);
+    }
+
+    [PunRPC]
+    private void RPC_RequestBuyBranch(int companyId, int requestingPlayerId)
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+
+        var company = CompanyDatabase.Instance.GetCompanyById(companyId);
+        if (company == null) return;
+
+        // Проверка условий (владелец, деньги, лимит филиалов)
+        if (company.OwnerId == requestingPlayerId && company.RentLevel < 5)
+        {
+            int price = company.CompanyBranchData.branchPrice;
+            PlayerData player = GameManager.Instance.GetPlayerById(requestingPlayerId);
+            if (!Bank.Instance.hasEnoughMoney(player, price)) return;
+
+            company.RentLevel++;
+
+            Debug.Log($"[Master] Игрок {requestingPlayerId} купил филиал {companyId}, новый уровень = {company.RentLevel}");
+
+            photonView.RPC(nameof(RPC_OnBuyBranchChange), RpcTarget.All, requestingPlayerId, companyId, company.RentLevel);
+            photonView.RPC(nameof(RPC_OnHideButtons), RpcTarget.All, requestingPlayerId, companyId);
+        }
+    }
+
+    [PunRPC]
+    private void RPC_OnHideSellsButtons(int playerID, int companyId)
+    {
+        var company = CompanyDatabase.Instance.GetCompanyById(companyId);
+        if (company != null)
+        {
+            if (CellsManager.Instance.GetCompanyUI(companyId)?.TryGetComponent(out UICompanyCell uiCell) == true)
+            {
+                int newCompanyRentLevel = company.RentLevel;
+                if (newCompanyRentLevel == 4)
+                {
+                    uiCell.ShowBuySellButtons();
+                }
+                if(newCompanyRentLevel == 0)
+                {
+                    uiCell.HideAllBranchButtons();
+
+                }
+            }
+        }
+    }
+
+    [PunRPC]
+    private void RPC_OnHideButtons(int playerID, int companyId)
+    {
+        var company = CompanyDatabase.Instance.GetCompanyById(companyId);
+        if (company != null)
+        {
+            CellsManager.Instance.HideAllBranchButtonsByGroup(playerID, company.CompanyBranchData.group);
+        }
+    }
+
+    [PunRPC]
+    private void RPC_OnBuyBranchChange(int playerID,int companyId, int newLevel)
+    {
+        var company = CompanyDatabase.Instance.GetCompanyById(companyId);
+        if (company != null)
+        {
+            var uiCompany = CellsManager.Instance.GetCompanyUI(companyId);
+            if (uiCompany != null)
+            {
+                int price = company.CompanyBranchData.branchPrice;
+                PlayerData player = GameManager.Instance.GetPlayerById(playerID);
+
+                Bank.Instance.RemoveMoney(player, price);
+
+                company.RentLevel = newLevel;
+                uiCompany.UpdateBranchStars(newLevel);
+                uiCompany.SetRentText(company.CompanyBranchData.rent[newLevel]);
+            }
+        }
+    }
+    [PunRPC]
+    private void RPC_OnSellBranchChange(int playerID, int companyId, int newLevel)
+    {
+        var company = CompanyDatabase.Instance.GetCompanyById(companyId);
+        if (company != null)
+        {
+            var uiCompany = CellsManager.Instance.GetCompanyUI(companyId);
+            if (uiCompany != null)
+            {
+                int price = company.CompanyBranchData.branchPrice;
+                PlayerData player = GameManager.Instance.GetPlayerById(playerID);
+
+                Bank.Instance.AddMoney(player, price);
+
+                company.RentLevel = newLevel;
+                uiCompany.UpdateBranchStars(newLevel);
+                uiCompany.SetRentText(company.CompanyBranchData.rent[newLevel]);
+            }
+        }
+    }
     private void UpdateTurnTimerOnAllClients(float timeLeft)
     {
         foreach (var kvp in playerStatsDict)
@@ -135,7 +265,6 @@ public class TurnManager : MonoBehaviourPunCallbacks
         if (!isTurnActive) return;
 
         isTurnActive = false;
-
         if (PhotonNetwork.IsMasterClient)
         {
             int nextPlayerId = GetNextPlayerId(currentTurnPlayerId);

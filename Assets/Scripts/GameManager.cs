@@ -104,7 +104,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         int colorIndex = Mathf.Clamp(playerId - 1, 0, playerColors.Length - 1);
         PlayerData player = new PlayerData(
             photonPlayer.NickName,
-            15000,
+            100000,
             playerId,
             playerColors[colorIndex],
             photonPlayer

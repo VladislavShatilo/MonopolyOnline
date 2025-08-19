@@ -49,8 +49,7 @@ public class Bank : MonoBehaviour
 
     public void TransferMoney(PlayerData from, PlayerData to, int amount)
     {
-        
-
+        RemoveMoney(from, amount);
         AddMoney(to, amount);
     }
 }

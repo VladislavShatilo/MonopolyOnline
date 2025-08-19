@@ -134,9 +134,18 @@ public class PlayerMove : MonoBehaviourPun
             case CellType.FieldCompany:
             case CellType.Company:
                 {
-                   
+                 
                     MessageLog.Instance.AddMessage(coloredName + " попал в сектор " + boardConfig.cells[currentCellID].companyData.name);
-                    
+
+                    var company = CompanyDatabase.Instance.GetCompanyById(currentCellID);
+                    if (company.IsBought && company.OwnerId == id)
+                    {
+                        if (photonView.IsMine)
+                        {
+                            // Завершение хода запрашивает только владелец фишки
+                            TurnManager.Instance.RequestEndTurn();
+                        }
+                    }
                     CompanyManager.Instance.HandleCell(currentCellID, id);
                     
 
