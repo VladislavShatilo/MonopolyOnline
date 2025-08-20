@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,11 +18,16 @@ public abstract class BaseCompanyHandler : ICellHandler
 {
     public virtual void Handle(int cellIndex, int playerId)
     {
+
         var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
         if (!company.IsBought)
             CompanyManager.Instance.OfferPurchase(cellIndex, playerId);
         else if (company.OwnerId != playerId)
             CompanyManager.Instance.OfferRent(cellIndex, playerId);
+
+        var playerData = GameManager.Instance.GetPlayerById(PhotonNetwork.LocalPlayer.ActorNumber);
+        string coloredName = $"<color=#{ColorUtility.ToHtmlStringRGB(playerData.playerColor)}>{playerData.Name}</color>";
+        //MessageLog.Instance.AddMessage($"{coloredName} попал в сектор {company.Id");
     }
 
     public abstract void ShowPurchaseUI(int cellIndex);
@@ -38,11 +44,11 @@ public abstract class BaseCompanyHandler : ICellHandler
     protected int CountOwnedByPlayer(int playerId, CompanyType companyType)
     {
         int count = 0;
-        
-         List<Company> companies = CompanyDatabase.Instance.GetAllCompanies();
-        for (int i = 0; i < companies.Count; i++)
+
+        List<Company> companiesList = new List<Company>(CompanyDatabase.Instance.Companies);
+        for (int i = 0; i < companiesList.Count; i++)
         {
-            if (companies[i].IsBought && companies[i].OwnerId == playerId && companies[i].Type == companyType)
+            if (companiesList[i].IsBought && companiesList[i].OwnerId == playerId && companiesList[i].Type == companyType)
                 count++;
         }
 
@@ -136,6 +142,6 @@ public class DiceCompanyHandler : BaseCompanyHandler
         var cell = CellsManager.Instance.GetCellDataByIndex(cellIndex);
         int ownedCount = CountOwnedByPlayer(company.OwnerId, CompanyType.DiceCompany);
 
-        return cell.diceCompanyData.rentMultiplier[ownedCount - 1] * RandomNumbers.Instance.SumOfDices();
+        return cell.diceCompanyData.rentMultiplier[ownedCount - 1] /** TurnManager.Instance.DiceSum*/;
     }
 }

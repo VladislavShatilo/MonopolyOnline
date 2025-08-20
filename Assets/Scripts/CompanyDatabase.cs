@@ -1,71 +1,52 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using UnityEngine;
+
 public enum CompanyType
 {
     Company,
     FieldCompany,
     DiceCompany
-
 }
 
 public class Company
 {
     public int Id { get; private set; }
-  
-    // Игровые данные
-    public bool IsBought { get; set; }
-    public int OwnerId { get; set; }
-    public int RentLevel { get; set; }
-    public  CompanyType Type { get; set; }
-    public CompanyData CompanyData { get; set; }
-    public FieldCompanyData FieldCompanyData { get; set; }
-    public DiceCompanyData DiceCompanyData { get; set; }
-    public CompanyGroup Group { get; set; }
+    public bool IsBought { get; set; } = false;
+    public int OwnerId { get; set; } = -1;
+    public int RentLevel { get; set; } = 0;
+    public CompanyType Type { get; private set; }
+    public CompanyData CompanyData { get; private set; }
+    public FieldCompanyData FieldCompanyData { get; private set; }
+    public DiceCompanyData DiceCompanyData { get; private set; }
+    public CompanyGroup Group { get; private set; }
+
     public Company(int id, CompanyData companyData)
-      
     {
+        if (companyData == null) throw new System.ArgumentNullException(nameof(companyData));
         Id = id;
-        IsBought = false;
-        OwnerId = -1;
-        RentLevel = 0;
         Type = CompanyType.Company;
         CompanyData = companyData;
-        FieldCompanyData = null;
-        DiceCompanyData = null;
         Group = companyData.group;
-        
-      
     }
+
     public Company(int id, FieldCompanyData fieldCompanyData)
     {
+        if (fieldCompanyData == null) throw new System.ArgumentNullException(nameof(fieldCompanyData));
         Id = id;
-        IsBought = false;
-        OwnerId = -1;
-        RentLevel = 0;
         Type = CompanyType.FieldCompany;
-        CompanyData = null;
         FieldCompanyData = fieldCompanyData;
-        DiceCompanyData = null;
         Group = fieldCompanyData.group;
-
-
     }
+
     public Company(int id, DiceCompanyData diceCompanyData)
     {
+        if (diceCompanyData == null) throw new System.ArgumentNullException(nameof(diceCompanyData));
         Id = id;
-        IsBought = false;
-        OwnerId = -1;
-        RentLevel = 0;
         Type = CompanyType.DiceCompany;
-        CompanyData = null;
-        FieldCompanyData = null;
         DiceCompanyData = diceCompanyData;
         Group = diceCompanyData.group;
-
-
     }
+
     public void ResetData()
     {
         IsBought = false;
@@ -73,26 +54,36 @@ public class Company
         RentLevel = 0;
     }
 }
+
 public class CompanyDatabase
 {
     private static CompanyDatabase _instance;
     public static CompanyDatabase Instance => _instance ??= new CompanyDatabase();
 
-    private List<Company> companies = new List<Company>();
+    private readonly List<Company> companies = new List<Company>();
 
-    public void AddComponyData(int id,  CompanyData companyData)
+    public IReadOnlyList<Company> Companies => companies.AsReadOnly();
+
+    public bool AddCompanyData(int id, CompanyData companyData)
     {
+        if (GetCompanyById(id) != null) return false;
         companies.Add(new Company(id, companyData));
+        return true;
     }
-    public void AddComponyData(int id, FieldCompanyData fieldCompanyData)
+
+    public bool AddCompanyData(int id, FieldCompanyData fieldCompanyData)
     {
+        if (GetCompanyById(id) != null) return false;
         companies.Add(new Company(id, fieldCompanyData));
+        return true;
     }
-    public void AddComponyData(int id,  DiceCompanyData diceCompanyData)
+
+    public bool AddCompanyData(int id, DiceCompanyData diceCompanyData)
     {
+        if (GetCompanyById(id) != null) return false;
         companies.Add(new Company(id, diceCompanyData));
+        return true;
     }
-    public List<Company> GetAllCompanies() => companies;
 
     public Company GetCompanyById(int id)
     {

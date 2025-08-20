@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Globalization;
 using TMPro;
 using UnityEngine;
@@ -43,10 +44,10 @@ public class UICompanyCell : UICellBase
         HideAllBranchButtons();
         HideStars();
 
-        buyFirstBranchButton.onClick.AddListener(() => TurnManager.Instance.RequestBuyBranch(companyId));
-        buyBranchButton.onClick.AddListener(() => TurnManager.Instance.RequestBuyBranch(companyId));
-        sellBranchButton.onClick.AddListener(() => TurnManager.Instance.RequestSellBranch(companyId));
-        sellFirstBranchButton.onClick.AddListener(() => TurnManager.Instance.RequestSellBranch(companyId));
+        buyFirstBranchButton.onClick.AddListener(() => BranchManager.Instance.RequestBuyBranch(companyId));
+        buyBranchButton.onClick.AddListener(() => BranchManager.Instance.RequestBuyBranch(companyId));
+        sellBranchButton.onClick.AddListener(() => BranchManager.Instance.RequestSellBranch(companyId));
+        sellFirstBranchButton.onClick.AddListener(() => BranchManager.Instance.RequestSellBranch(companyId));
     }
 
   
@@ -76,8 +77,9 @@ public class UICompanyCell : UICellBase
                 BGPriceImage.color = GroupColors.Colors[(int)cellData.diceCompanyData.group];
                 break;
         }
-        Debug.Log(owner.playerColor);
-        BGImage.color = owner.playerColor;
+      
+        Debug.Log(GameManager.Instance.GetColorForActor(owner.id));
+        BGImage.color = GameManager.Instance.GetColorForActor(owner.id);
     }
 
     public void SetRentText(int rent)
@@ -177,6 +179,7 @@ public class UICompanyCell : UICellBase
     {
     
         UpdateUI(CellsManager.Instance.GetCellDataByIndex(companyId), GameManager.Instance.GetPlayerById(ownerId));
+        
     }
 
     #endregion

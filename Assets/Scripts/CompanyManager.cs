@@ -92,7 +92,7 @@ public class CompanyManager : MonoBehaviourPun
         var buyer = GameManager.Instance.GetPlayerById(buyerId);
         int price = handler.GetPrice(cellIndex);
 
-        if (!Bank.Instance.hasEnoughMoney(buyer, price))
+        if (!Bank.Instance.HasEnoughMoney(buyer, price))
         {
             Debug.Log("Недостаточно денег для покупки");
             return;
@@ -154,7 +154,7 @@ public class CompanyManager : MonoBehaviourPun
         var renter = GameManager.Instance.GetPlayerById(renterId);
         int rentPrice = handler.GetRent(cellIndex);
 
-        if (!Bank.Instance.hasEnoughMoney(renter, rentPrice))
+        if (!Bank.Instance.HasEnoughMoney(renter, rentPrice))
         {
             Debug.Log("Недостаточно денег для аренды");
             return;
@@ -208,14 +208,14 @@ public class CompanyManager : MonoBehaviourPun
 
         if (company.Type == CompanyType.FieldCompany || company.Type == CompanyType.DiceCompany)
         {
-            foreach (var c in CompanyDatabase.Instance.GetAllCompanies())
+            foreach (var c in CompanyDatabase.Instance.Companies)
             {
                 if (c.Type == company.Type && c.Group == company.Group && c.IsBought && c.OwnerId == company.OwnerId)
                 {
                     int newRent = handlers[company.Type].GetRent(company.Id); 
                     if (company.Type == CompanyType.DiceCompany)
                     {
-                        newRent /= RandomNumbers.Instance.SumOfDices();
+                       // newRent /= TurnManager.Instance.DiceSum;
                     }
                     if (CellsManager.Instance.GetCellByIndex(c.Id)?.TryGetComponent(out UICompanyCell uiCell) == true)
                     {
@@ -237,7 +237,7 @@ public class CompanyManager : MonoBehaviourPun
     }
     public bool PlayerOwnsWholeGroup(CompanyGroup group, int playerId)
     {
-        foreach (var company in CompanyDatabase.Instance.GetAllCompanies())
+        foreach (var company in CompanyDatabase.Instance.Companies)
         {
             if (company.Group == group)
             {

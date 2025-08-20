@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,8 +6,9 @@ public class PlayerSkin : MonoBehaviour
 {
     [SerializeField] private Image playerSkinImage;
 
-    public void SetSkinColor(Color color)
+
+    public void SetColorDirect(Color c)
     {
-        playerSkinImage.color = color;
+        playerSkinImage.color = c;
     }
 }

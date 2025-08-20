@@ -1,10 +1,9 @@
+using Photon.Pun;
 using Photon.Realtime;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Bank : MonoBehaviour
+public class Bank : MonoBehaviourPunCallbacks
 {
     public static Bank Instance { get; private set; }
 
@@ -20,36 +19,48 @@ public class Bank : MonoBehaviour
         Instance = this;
     }
 
-  
+    // Добавляем деньги с синхронизацией
     public void AddMoney(PlayerData player, int amount)
     {
-        player.Money += amount;
-        OnBalanceChanged?.Invoke(player, player.Money);
+        if (amount <= 0) return;
+
+        int newMoney = player.Money + amount;
+        UpdatePlayerMoney(player, newMoney);
     }
 
-    public void RemoveMoney(PlayerData player, int amount)
+    // Убираем деньги с проверкой
+    public bool RemoveMoney(PlayerData player, int amount)
     {
-        player.Money -= amount;
-        OnBalanceChanged?.Invoke(player, player.Money);
-    }
-    public bool hasEnoughMoney(PlayerData player, int amount)
-    {
-        if (player.Money < amount)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
+        if (amount <= 0) return false;
+        if (!HasEnoughMoney(player, amount)) return false;
 
-
-        }
-
+        int newMoney = player.Money - amount;
+        UpdatePlayerMoney(player, newMoney);
+        return true;
     }
 
-    public void TransferMoney(PlayerData from, PlayerData to, int amount)
+    public bool HasEnoughMoney(PlayerData player, int amount)
     {
-        RemoveMoney(from, amount);
+        return player.Money >= amount;
+    }
+
+    public bool TransferMoney(PlayerData from, PlayerData to, int amount)
+    {
+        if (!RemoveMoney(from, amount)) return false;
         AddMoney(to, amount);
+        return true;
+    }
+
+    private void UpdatePlayerMoney(PlayerData player, int newAmount)
+    {
+        player.Money = newAmount;
+        OnBalanceChanged?.Invoke(player, newAmount);
+
+        // Если игрок Photon
+        if (player.photonPlayer != null)
+        {
+            var props = new ExitGames.Client.Photon.Hashtable { { "Money", newAmount } };
+            player.photonPlayer.SetCustomProperties(props);
+        }
     }
 }

@@ -31,7 +31,19 @@ public class CompanyUIManager : MonoBehaviour
             HandleClick(Input.GetTouch(0).position);
 #endif
     }
+    private void OnEnable()
+    {
+        EventBus.Subscribe<ShowCompanyWindowEvent>(OnShowCompanyWindow);
+        EventBus.Subscribe<ShowFieldCompanyWindowEvent>(OnShowFieldCompanyWindow);
+        EventBus.Subscribe<ShowDiceCompanyWindowEvent>(OnShowDiceCompanyWindow);
+    }
 
+    private void OnDisable()
+    {
+        EventBus.Unsubscribe<ShowCompanyWindowEvent>(OnShowCompanyWindow);
+        EventBus.Unsubscribe<ShowFieldCompanyWindowEvent>(OnShowFieldCompanyWindow);
+        EventBus.Unsubscribe<ShowDiceCompanyWindowEvent>(OnShowDiceCompanyWindow);
+    }
     private void HandleClick(Vector2 screenPosition)
     {
         if (!IsPointerOverUI(screenPosition))
@@ -110,13 +122,63 @@ public class CompanyUIManager : MonoBehaviour
         // Активируем текущее окно
         window.gameObject.SetActive(true);
     }
+    private void OnShowCompanyWindow(ShowCompanyWindowEvent e)
+    {
+        ShowWindow(companyInfoWindow, statsCompanyPanel, e.Cell, e.Position, e.Data);
+    }
 
-    public void ShowCompanyWindow(RectTransform cell, StatsWindowPosition pos, CompanyData data) =>
-        ShowWindow(companyInfoWindow, statsCompanyPanel, cell, pos, data);
+    private void OnShowFieldCompanyWindow(ShowFieldCompanyWindowEvent e)
+    {
+        ShowWindow(fieldCompanyInfoWindow, statsFieldCompanyPanel, e.Cell, e.Position, e.Data);
+    }
 
-    public void ShowFieldCompanyWindow(RectTransform cell, StatsWindowPosition pos, FieldCompanyData data) =>
-        ShowWindow(fieldCompanyInfoWindow, statsFieldCompanyPanel, cell, pos, data);
+    private void OnShowDiceCompanyWindow(ShowDiceCompanyWindowEvent e)
+    {
+        ShowWindow(diceCompanyInfoWindow, statsDiceCompanyPanel, e.Cell, e.Position, e.Data);
+    }
 
-    public void ShowDiceCompanyWindow(RectTransform cell, StatsWindowPosition pos, DiceCompanyData data) =>
-        ShowWindow(diceCompanyInfoWindow, statsDiceCompanyPanel, cell, pos, data);
+
+
+
+}
+public class ShowCompanyWindowEvent
+{
+    public RectTransform Cell { get; }
+    public StatsWindowPosition Position { get; }
+    public CompanyData Data { get; }
+
+    public ShowCompanyWindowEvent(RectTransform cell, StatsWindowPosition pos, CompanyData data)
+    {
+        Cell = cell;
+        Position = pos;
+        Data = data;
+    }
+}
+
+public class ShowFieldCompanyWindowEvent
+{
+    public RectTransform Cell { get; }
+    public StatsWindowPosition Position { get; }
+    public FieldCompanyData Data { get; }
+
+    public ShowFieldCompanyWindowEvent(RectTransform cell, StatsWindowPosition pos, FieldCompanyData data)
+    {
+        Cell = cell;
+        Position = pos;
+        Data = data;
+    }
+}
+
+public class ShowDiceCompanyWindowEvent
+{
+    public RectTransform Cell { get; }
+    public StatsWindowPosition Position { get; }
+    public DiceCompanyData Data { get; }
+
+    public ShowDiceCompanyWindowEvent(RectTransform cell, StatsWindowPosition pos, DiceCompanyData data)
+    {
+        Cell = cell;
+        Position = pos;
+        Data = data;
+    }
 }

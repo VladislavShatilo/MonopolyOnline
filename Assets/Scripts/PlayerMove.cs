@@ -3,69 +3,54 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 [RequireComponent(typeof(PlayerSkin))]
 public class PlayerMove : MonoBehaviourPun
 {
-    [Header("Board Settings")]
-    [SerializeField] private BoardConfig boardConfig;
+    [Header("Move Settings")]
     [SerializeField] private float moveDuration = 0.1f;
-
-    public static Action<int> ShowBuyMenuAction;
-
-    public int id;
-    private int currentCellIndex = 0;
-    private int instColorIndex = -1;
 
     private Transform rootCellsObject;
     private List<Transform> boardCells = new List<Transform>();
-
-    private void Awake()
-    {
-        // Получаем данные при инстанциации
-        if (photonView.InstantiationData != null && photonView.InstantiationData.Length > 0)
-        {
-            instColorIndex = Convert.ToInt32(photonView.InstantiationData[0]);
-        }
-    }
+    private int currentCellIndex = 0;
 
     private void Start()
-    {
-        id = id != 0 ? id : photonView.Owner?.ActorNumber ?? 0;
+    {       
+        if (GameManager.Instance?.PlayerRoot != null)
+        {
+            transform.SetParent(GameManager.Instance.PlayerRoot, false);
+        }
 
-        // Назначаем родителя
         if (GameManager.Instance?.PlayerRoot != null)
             transform.SetParent(GameManager.Instance.PlayerRoot, false);
 
-        ApplySkinColor();
+        var c = GameManager.Instance.GetColorForActor(photonView.Owner.ActorNumber);
+        GetComponent<PlayerSkin>().SetColorDirect(c);
+
         EnsureBoardCellsInitialized();
     }
 
-    private void ApplySkinColor()
+  
+    private void OnEnable()
     {
-        var skin = GetComponent<PlayerSkin>();
-        if (!skin) return;
+        EventBus.Subscribe<OnPlayerMoveEvent>(Move);
 
-        Color c = Color.white;
-        if (photonView.Owner != null)
-            c = GameManager.Instance.GetColorForActor(photonView.Owner.ActorNumber);
+    } 
+    private void OnDisable()
+    {
+        EventBus.Unsubscribe<OnPlayerMoveEvent>(Move);
 
-        skin.SetSkinColor(c);
     }
 
-    private void OnEnable() => RandomNumbers.playerMoveAction += Move;
-    private void OnDisable() => RandomNumbers.playerMoveAction -= Move;
-
-    private void Move(int steps)
+    private void Move(OnPlayerMoveEvent e)
     {
         if (!photonView.IsMine) return;
-        photonView.RPC(nameof(RPC_MoveSteps), RpcTarget.AllBuffered, steps);
+        photonView.RPC(nameof(RPC_MoveSteps), RpcTarget.AllBuffered, e.Steps);
     }
 
     [PunRPC]
     private void RPC_MoveSteps(int steps)
     {
-        EnsureBoardCellsInitialized();
+       
         if (boardCells.Count == 0)
         {
             Debug.LogError("Board cells not initialized, canceling move.");
@@ -82,9 +67,13 @@ public class PlayerMove : MonoBehaviourPun
             currentCellIndex = (currentCellIndex + 1) % boardCells.Count;
             Vector3 targetPos = boardCells[currentCellIndex].position;
             yield return MoveToPosition(targetPos);
+            PlayerData player = GameManager.Instance.GetPlayerById(photonView.Owner.ActorNumber);
+            if (currentCellIndex == 0)
+            {
+                Bank.Instance.AddMoney(player, 2_000);
+            }
         }
-
-        HandleCell(boardCells[currentCellIndex].gameObject, currentCellIndex);
+        EventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.Owner.ActorNumber));
     }
 
     private IEnumerator MoveToPosition(Vector3 target)
@@ -102,65 +91,9 @@ public class PlayerMove : MonoBehaviourPun
         transform.position = target;
     }
 
-    private void HandleCell(GameObject cellGO, int cellIndex)
-    {
-        if (boardConfig == null || cellIndex >= boardConfig.cells.Count) return;
 
-        var playerData = GameManager.Instance.GetPlayerById(id);
-        string coloredName = $"<color=#{ColorUtility.ToHtmlStringRGB(playerData.playerColor)}>{playerData.Name}</color>";
-        var cellData = boardConfig.cells[cellIndex];
-
-        switch (cellData.cellType)
-        {
-            case CellType.Company:
-            case CellType.FieldCompany:
-            case CellType.DiceCompany:
-                HandleCompanyCell(cellIndex, coloredName);
-                break;
-
-            case CellType.Question:
-                Bank.Instance.RemoveMoney(playerData, 1_000);
-                MessageLog.Instance.AddMessage($"{coloredName} попал в сектор и потерял 1,000k");
-                EndTurnIfMine();
-                break;
-
-            case CellType.Spend:
-                Bank.Instance.RemoveMoney(playerData, 2_000);
-                MessageLog.Instance.AddMessage($"{coloredName} попал в сектор и потерял 2,000k");
-                EndTurnIfMine();
-                break;
-
-            case CellType.Corner:
-                MessageLog.Instance.AddMessage($"{coloredName} попал в сектор");
-                EndTurnIfMine();
-                break;
-        }
-    }
-
-    private void HandleCompanyCell(int cellIndex, string coloredName)
-    {
-        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
-        MessageLog.Instance.AddMessage($"{coloredName} попал в сектор {company.CompanyData.name}");
-
-        if (company.IsBought && company.OwnerId == id)
-            EndTurnIfMine();
-
-        CompanyManager.Instance.HandleCell(cellIndex, id);
-    }
-
-    private void EndTurnIfMine()
-    {
-        if (photonView.IsMine)
-            TurnManager.Instance.RequestEndTurn();
-    }
 
     #region Board Initialization
-
-    public void SetRootTransform(Transform root)
-    {
-        rootCellsObject = root;
-        BuildBoardCellsFromRoot();
-    }
 
     private void EnsureBoardCellsInitialized()
     {
@@ -179,14 +112,7 @@ public class PlayerMove : MonoBehaviourPun
             if (boardCells.Count > 0) return;
         }
 
-        var found = GameObject.Find("CellsRoot");
-        if (found != null)
-        {
-            rootCellsObject = found.transform;
-            BuildBoardCellsFromRoot();
-            if (boardCells.Count > 0) return;
-        }
-
+        
         if (boardCells.Count == 0)
             Debug.LogWarning($"[{name}] Не удалось инициализировать boardCells!");
     }
@@ -201,4 +127,15 @@ public class PlayerMove : MonoBehaviourPun
     }
 
     #endregion
+}
+public class HandleCellEvent
+{
+    public int CellID;
+    public int PlayerID;
+
+    public HandleCellEvent( int cellID,int playerId)
+    {
+        CellID = cellID;
+        PlayerID= playerId;
+    }
 }

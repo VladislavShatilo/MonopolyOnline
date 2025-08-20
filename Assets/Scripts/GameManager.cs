@@ -8,12 +8,10 @@ public class GameManager : MonoBehaviourPunCallbacks
     public static GameManager Instance { get; private set; }
 
     [Header("Root Transforms")]
-    [SerializeField] private Transform playersStatsContainer;
     [SerializeField] private Transform playerRoot;
     [SerializeField] private Transform cellsRoot;
 
     [Header("Prefabs")]
-    [SerializeField] private UIPlayerStats playerStatsPrefab;
     [SerializeField] private GameObject playerPiecePrefab;
 
     [Header("Settings")]
@@ -22,7 +20,6 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private readonly List<PlayerData> players = new();
     private readonly Dictionary<int, PlayerMove> playerMoves = new();
-    private readonly Dictionary<int, UIPlayerStats> uiPlayerStatsDict = new();
 
     public Transform CellsRoot => cellsRoot;
     public Transform PlayerRoot => playerRoot;
@@ -39,7 +36,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        InitializeAllPlayersUI();
+        InitializeAllPlayers();
         SpawnLocalPlayerIfNeeded();
         TryStartGame();
     }
@@ -49,7 +46,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         Debug.Log($"Player {newPlayer.NickName} joined (actor {newPlayer.ActorNumber})");
-        SetupPlayerUI(newPlayer);
+        SetupPlayer(newPlayer);
         TryStartGame();
     }
 
@@ -63,48 +60,46 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     #region Player Management
 
-    private void InitializeAllPlayersUI()
+    private void InitializeAllPlayers()
     {
         foreach (var p in PhotonNetwork.PlayerList)
-            SetupPlayerUI(p);
+            SetupPlayer(p);
     }
 
-    private void SetupPlayerUI(Player photonPlayer)
+    private void SetupPlayer(Player photonPlayer)
     {
         int playerId = photonPlayer.ActorNumber;
-
         if (players.Exists(p => p.id == playerId)) return;
 
-        // Instantiate UI
-        var uiStats = Instantiate(playerStatsPrefab, playersStatsContainer);
-        int colorIndex = Mathf.Clamp(playerId - 1, 0, playerColors.Length - 1);
-        PlayerData player = new(photonPlayer.NickName, 100_000, playerId, playerColors[colorIndex], photonPlayer);
-
+        PlayerData player = new(photonPlayer.NickName, 100_000, playerId, GetColorForActor(playerId), photonPlayer);
         players.Add(player);
-        uiStats.SetPlayerStats(player);
-        uiPlayerStatsDict[playerId] = uiStats;
 
-        // Register UI for turn updates
-        TurnManager.Instance.RegisterPlayerUI(playerId, uiStats);
+        // Событие
+        EventBus.Publish(new PlayerJoinedEvent(player));
+    }
 
-        // Listen to bank updates
-        Bank.Instance.OnBalanceChanged += (changedPlayer, money) =>
-        {
-            if (changedPlayer.id == player.id)
-                uiStats.SetMoneyPlayerText(money);
-        };
+    private void SpawnLocalPlayerIfNeeded()
+    {
+        int localId = PhotonNetwork.LocalPlayer.ActorNumber;
+        if (playerMoves.ContainsKey(localId)) return;
+
+        GameObject playerPiece = PhotonNetwork.Instantiate(
+            playerPiecePrefab.name,
+            startPlayerPosition,
+            Quaternion.identity,
+            0,
+            new object[] { localId - 1 }
+        );
+
+        var pm = playerPiece.GetComponent<PlayerMove>();
+        playerMoves[localId] = pm;
+
     }
 
     private void RemovePlayer(int playerId)
     {
         var playerData = GetPlayerById(playerId);
         if (playerData != null) players.Remove(playerData);
-
-        if (uiPlayerStatsDict.TryGetValue(playerId, out var ui))
-        {
-            Destroy(ui.gameObject);
-            uiPlayerStatsDict.Remove(playerId);
-        }
 
         if (playerMoves.TryGetValue(playerId, out var move))
         {
@@ -115,25 +110,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
             playerMoves.Remove(playerId);
         }
-    }
 
-    private void SpawnLocalPlayerIfNeeded()
-    {
-        int localId = PhotonNetwork.LocalPlayer.ActorNumber;
-        if (playerMoves.ContainsKey(localId)) return;
-
-        int colorIndex = Mathf.Clamp(localId - 1, 0, playerColors.Length - 1);
-        GameObject playerPiece = PhotonNetwork.Instantiate(
-            playerPiecePrefab.name,
-            startPlayerPosition,
-            Quaternion.identity,
-            0,
-            new object[] { colorIndex }
-        );
-
-        var pm = playerPiece.GetComponent<PlayerMove>();
-        pm.id = localId;
-        playerMoves[localId] = pm;
+        EventBus.Publish(new PlayerLeftEvent(playerId));
     }
 
     #endregion
@@ -147,7 +125,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers &&
             PhotonNetwork.IsMasterClient)
         {
-            TurnManager.Instance.StartRandomTurn();
+            EventBus.Publish(new AllPlayersInitializedEvent(players));
         }
     }
 
@@ -155,18 +133,45 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     #region Helpers
 
-    public PlayerData GetPlayerById(int id)
-    {
-        return players.Find(p => p.id == id);
-    }
+    public PlayerData GetPlayerById(int id) => players.Find(p => p.id == id);
 
-    public Color GetColorByIndex(int idx)
+    public Color GetColorForActor(int actorNumber)
     {
         if (playerColors == null || playerColors.Length == 0) return Color.white;
-        return playerColors[Mathf.Clamp(idx, 0, playerColors.Length - 1)];
+        return playerColors[actorNumber - 1];
     }
-
-    public Color GetColorForActor(int actorNumber) => GetColorByIndex(actorNumber - 1);
 
     #endregion
 }
+public class PlayerJoinedEvent
+{
+    public PlayerData Player { get; }
+
+    public PlayerJoinedEvent(PlayerData player)
+    {
+        Player = player;
+    }
+}
+
+public class PlayerLeftEvent
+{
+    public int PlayerId { get; }
+
+    public PlayerLeftEvent(int playerId)
+    {
+        PlayerId = playerId;
+    }
+}
+
+public class AllPlayersInitializedEvent
+{
+    public List<PlayerData> Players { get; }
+
+    public AllPlayersInitializedEvent(List<PlayerData> players)
+    {
+        Players = players;
+    }
+}
+
+
+public class TryStartGameEvent { }

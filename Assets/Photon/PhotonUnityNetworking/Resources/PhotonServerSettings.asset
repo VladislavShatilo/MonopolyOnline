@@ -69,6 +69,14 @@ MonoBehaviour:
   - RPC_RequestSellBranch
   - RPC_OnBuyBranchChange
   - RPC_OnSellBranchChange
+  - RPC_BuyBranchRequest
+  - RPC_HideButtons
+  - RPC_HideSellButtons
+  - RPC_SellBranchRequest
+  - RPC_SetDiceResult
+  - RPC_UpdateBranchUI
+  - RPC_ConfirmSpend
+  - RPC_RequestSpendMoney
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 0
