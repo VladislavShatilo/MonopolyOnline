@@ -12,7 +12,7 @@ public class PlayerMove : MonoBehaviourPun
     private Transform rootCellsObject;
     private List<Transform> boardCells = new List<Transform>();
     private int currentCellIndex = 0;
-
+    private const int JAIL_CELL_ID = 10;
     private void Start()
     {       
         if (GameManager.Instance?.PlayerRoot != null)
@@ -33,11 +33,14 @@ public class PlayerMove : MonoBehaviourPun
     private void OnEnable()
     {
         EventBus.Subscribe<OnPlayerMoveEvent>(Move);
+        EventBus.Subscribe<MoveToJailEvent>(MoveToJail);
+
 
     } 
     private void OnDisable()
     {
         EventBus.Unsubscribe<OnPlayerMoveEvent>(Move);
+        EventBus.Unsubscribe<MoveToJailEvent>(MoveToJail);
 
     }
 
@@ -46,7 +49,7 @@ public class PlayerMove : MonoBehaviourPun
         if (!photonView.IsMine) return;
         photonView.RPC(nameof(RPC_MoveSteps), RpcTarget.AllBuffered, e.Steps);
     }
-
+  
     [PunRPC]
     private void RPC_MoveSteps(int steps)
     {
@@ -68,7 +71,7 @@ public class PlayerMove : MonoBehaviourPun
             Vector3 targetPos = boardCells[currentCellIndex].position;
             yield return MoveToPosition(targetPos);
             PlayerData player = GameManager.Instance.GetPlayerById(photonView.Owner.ActorNumber);
-            if (currentCellIndex == 0)
+            if (currentCellIndex == 0 && !player.IsInJail)
             {
                 Bank.Instance.AddMoney(player, 2_000);
             }
@@ -91,6 +94,32 @@ public class PlayerMove : MonoBehaviourPun
         transform.position = target;
     }
 
+    private void MoveToJail(MoveToJailEvent e)
+    {
+        if (!photonView.IsMine) return;
+        photonView.RPC(nameof(RPC_MoveToJail), RpcTarget.AllBuffered);
+    }
+    [PunRPC]
+    private void RPC_MoveToJail()
+    {
+
+        if (boardCells.Count == 0)
+        {
+            Debug.LogError("Board cells not initialized, canceling move.");
+            return;
+        }
+
+        StartCoroutine(MoveToJailCoroutine());
+    }
+    private IEnumerator MoveToJailCoroutine()
+    {
+        yield return new WaitForSeconds(0.2f);
+        currentCellIndex = JAIL_CELL_ID;
+        Vector3 targetPos = boardCells[JAIL_CELL_ID].position;
+        yield return MoveToPosition(targetPos);
+          
+        //EventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.Owner.ActorNumber));
+    }
 
 
     #region Board Initialization
@@ -127,6 +156,15 @@ public class PlayerMove : MonoBehaviourPun
     }
 
     #endregion
+}
+public class MoveToJailEvent
+{
+    public int PlayerID;
+
+    public MoveToJailEvent(int playerId)
+    {
+        PlayerID = playerId;
+    }
 }
 public class HandleCellEvent
 {

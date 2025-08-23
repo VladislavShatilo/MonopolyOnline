@@ -46,6 +46,7 @@ public class DiceManagerPhoton : MonoBehaviourPun
                 cheatMoves = i;
         }
         if (Input.GetKeyDown(KeyCode.Q)) cheatMoves = 10;
+        if (Input.GetKeyDown(KeyCode.W)) cheatMoves = 30;
     }
 
     private void OnRollDiceButton(RollDiceButtonEvent e)

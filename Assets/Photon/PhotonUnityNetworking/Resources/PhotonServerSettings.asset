@@ -28,7 +28,7 @@ MonoBehaviour:
     AuthMode: 0
     EnableLobbyStatistics: 0
     NetworkLogging: 1
-  DevRegion: 
+  DevRegion: ussc
   PunLogging: 0
   EnableSupportLogger: 0
   RunInBackground: 1
@@ -77,6 +77,10 @@ MonoBehaviour:
   - RPC_UpdateBranchUI
   - RPC_ConfirmSpend
   - RPC_RequestSpendMoney
+  - RPC_CasinoChangeMoney
+  - RPC_MoveToJail
+  - RPC_SetTurnJain
+  - RPC_ShowJailOffer
   DisableAutoOpenWizard: 1
   ShowSettings: 0
-  DevRegionSetOnce: 0
+  DevRegionSetOnce: 1

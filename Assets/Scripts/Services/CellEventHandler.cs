@@ -33,9 +33,29 @@ public class CellEventHandler
                
                 break;
             case CellType.Corner:
-                if (!PhotonNetwork.IsMasterClient) return;
 
-                TurnManager.Instance.RequestEndTurn();
+                switch (cellData.cornerData.type)
+                {
+                    case CornerType.Start:
+                        if (!PhotonNetwork.IsMasterClient) return;
+
+                        TurnManager.Instance.RequestEndTurn();
+                        break;
+                    case CornerType.ChillJail:
+                        if (!PhotonNetwork.IsMasterClient) return;
+
+                        TurnManager.Instance.RequestEndTurn();
+                        break;
+                    case CornerType.Caisno:
+                        CasinoManager.Instance.CasinoOffer(e.PlayerID);
+                        break;
+                    case CornerType.Police:
+                       JailManager.Instance.GoToJail(e.PlayerID);
+                        break;
+                   
+                    
+                }
+               
                 break;
         }
     }

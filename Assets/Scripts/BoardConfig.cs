@@ -10,6 +10,13 @@ public enum CellType
     Question,
     Corner
 }
+public enum CornerType
+{
+   Start,
+   ChillJail,
+   Caisno,
+   Police
+}
 
 public enum CompanyGroup
 {
@@ -75,6 +82,7 @@ public class QuestionData : ICellDetails
 public class CornerData : ICellDetails
 {
     public Sprite logoSprite;
+    public CornerType type;
 }
 [System.Serializable]
 public class CellData

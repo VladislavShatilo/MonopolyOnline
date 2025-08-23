@@ -49,6 +49,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 21300000, guid: 11814a35829a71549af3e3ff8c42a9ed, type: 3}
+      type: 0
   - index: 1
     cellName: Chanel
     cellType: 0
@@ -85,6 +86,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 2
     cellName: Question_1
     cellType: 4
@@ -121,6 +123,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 3
     cellName: BOSS
     cellType: 0
@@ -157,6 +160,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 4
     cellName: Spend_1
     cellType: 3
@@ -193,6 +197,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 5
     cellName: Mercedes
     cellType: 1
@@ -229,6 +234,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 6
     cellName: Adidas
     cellType: 0
@@ -265,6 +271,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 7
     cellName: Question_2
     cellType: 4
@@ -301,6 +308,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 8
     cellName: Puma
     cellType: 0
@@ -337,6 +345,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 9
     cellName: LACOSTE
     cellType: 0
@@ -373,6 +382,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 10
     cellName: Jail
     cellType: 5
@@ -409,6 +419,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 21300000, guid: 9bc2bac6d8a211b47a610a01caa715d5, type: 3}
+      type: 1
   - index: 11
     cellName: VK
     cellType: 0
@@ -445,6 +456,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 12
     cellName: RockStar
     cellType: 2
@@ -481,6 +493,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 13
     cellName: Facebook
     cellType: 0
@@ -517,6 +530,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 14
     cellName: Twitter
     cellType: 0
@@ -553,6 +567,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 15
     cellName: Audi
     cellType: 1
@@ -589,6 +604,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 16
     cellName: Coca-cola
     cellType: 0
@@ -625,6 +641,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 17
     cellName: Question_3
     cellType: 4
@@ -661,6 +678,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 18
     cellName: Pepsi
     cellType: 0
@@ -697,6 +715,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 19
     cellName: Fanta
     cellType: 0
@@ -733,6 +752,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 20
     cellName: Jackpot
     cellType: 5
@@ -769,6 +789,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 21300000, guid: 245aa86c83a0a5b41aa158176413282b, type: 3}
+      type: 2
   - index: 21
     cellName: American Airlines
     cellType: 0
@@ -805,6 +826,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 22
     cellName: Question_4
     cellType: 4
@@ -841,6 +863,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 23
     cellName: Lufthansa
     cellType: 0
@@ -877,6 +900,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 24
     cellName: British Airlines
     cellType: 0
@@ -913,6 +937,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 25
     cellName: Ford
     cellType: 1
@@ -949,6 +974,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 26
     cellName: Max Burgers
     cellType: 0
@@ -985,6 +1011,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 27
     cellName: Burger King
     cellType: 0
@@ -1021,6 +1048,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 28
     cellName: Rovio
     cellType: 2
@@ -1057,6 +1085,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 29
     cellName: KFC
     cellType: 0
@@ -1093,6 +1122,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 30
     cellName: Police
     cellType: 5
@@ -1129,6 +1159,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 21300000, guid: 4e53e4a10c35bf645879738a78a37f75, type: 3}
+      type: 3
   - index: 31
     cellName: Holiday Inn
     cellType: 0
@@ -1165,6 +1196,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 32
     cellName: Radisson
     cellType: 0
@@ -1201,6 +1233,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 33
     cellName: Question_5
     cellType: 4
@@ -1237,6 +1270,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 34
     cellName: Novotel
     cellType: 0
@@ -1273,6 +1307,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 35
     cellName: Land Rover
     cellType: 1
@@ -1309,6 +1344,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 36
     cellName: DIamond
     cellType: 3
@@ -1345,6 +1381,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 37
     cellName: 124
     cellType: 0
@@ -1381,6 +1418,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 38
     cellName: Question_6
     cellType: 4
@@ -1417,6 +1455,7 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0
   - index: 39
     cellName: Nokia
     cellType: 0
@@ -1453,3 +1492,4 @@ MonoBehaviour:
       effect: 
     cornerData:
       logoSprite: {fileID: 0}
+      type: 0

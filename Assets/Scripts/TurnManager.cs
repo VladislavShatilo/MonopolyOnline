@@ -1,4 +1,5 @@
 using Photon.Pun;
+using Photon.Pun.Demo.PunBasics;
 using Photon.Realtime;
 using System;
 using System.Collections.Generic;
@@ -78,7 +79,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
     public void StartTurn(int playerId)
     {
         if (!PhotonNetwork.IsMasterClient) return;
-
+     
         currentTurnPlayerId = playerId;
         turnStartTime = PhotonNetwork.Time;
         isTurnActive = true;
@@ -92,6 +93,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
         currentTurnPlayerId = playerId;
         turnStartTime = startTime;
         isTurnActive = true;
+        EventBus.Publish(new StartTurnJailEvent(playerId));
         EventBus.Publish(new TurnStartEvent(playerId));
     }
 
@@ -206,5 +208,16 @@ public class StartDiceRollEvent
         PlayerId = playerId;
         SecondDiceValue = secondDiceValue;
         FirstDiceValue = firstDiceValue;
+    }
+}
+public class StartTurnJailEvent
+{
+
+    public int PlayerId;
+
+
+    public StartTurnJailEvent(int playerId)
+    {
+        PlayerId = playerId;
     }
 }
