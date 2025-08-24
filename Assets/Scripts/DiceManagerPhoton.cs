@@ -1,10 +1,10 @@
-using Photon.Pun;
+п»їusing Photon.Pun;
 using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// DiceManagerPhoton отвечает за синхронные броски кубиков в Photon.
-/// Работает как для обычных ходов, так и для проверок выхода из тюрьмы.
+/// DiceManagerPhoton РѕС‚РІРµС‡Р°РµС‚ Р·Р° СЃРёРЅС…СЂРѕРЅРЅС‹Рµ Р±СЂРѕСЃРєРё РєСѓР±РёРєРѕРІ РІ Photon.
+/// Р Р°Р±РѕС‚Р°РµС‚ РєР°Рє РґР»СЏ РѕР±С‹С‡РЅС‹С… С…РѕРґРѕРІ, С‚Р°Рє Рё РґР»СЏ РїСЂРѕРІРµСЂРѕРє РІС‹С…РѕРґР° РёР· С‚СЋСЂСЊРјС‹.
 /// </summary>
 public class DiceManagerPhoton : MonoBehaviourPun
 {
@@ -17,7 +17,7 @@ public class DiceManagerPhoton : MonoBehaviourPun
     [Header("Cheat Keys")]
     [SerializeField] private KeyCode cheat10 = KeyCode.Q;
     [SerializeField] private KeyCode cheat30 = KeyCode.W;
-
+    [SerializeField] private KeyCode cheat40 = KeyCode.E;
     private int cheatMoves = -1;
 
     private void Awake()
@@ -83,6 +83,12 @@ public class DiceManagerPhoton : MonoBehaviourPun
 
         yield return new WaitForSeconds(0.4f);
 
+        if (!isForJail && PhotonNetwork.IsMasterClient)
+        {
+            bool isDouble = first == second;
+            TurnManager.Instance.RegisterDoubleForTurn(playerId, isDouble);
+        }
+
         if (isForJail)
         {
             EventBus.Publish(new CheckDiceJailEvent(first, second, playerId));
@@ -96,13 +102,18 @@ public class DiceManagerPhoton : MonoBehaviourPun
     private void HandlePlayerMove(int first, int second, int playerId)
     {
         int result = (cheatMoves > 0) ? cheatMoves : (first + second);
+        bool isDouble = first == second;
 
         if (PhotonNetwork.LocalPlayer.ActorNumber == playerId)
         {
             EventBus.Publish(new OnPlayerMoveEvent(result));
+            if (isDouble)
+            {
+                EventBus.Publish(new PlayerRolledDoubleEvent(playerId, result));
+            }
         }
 
-        cheatMoves = -1; // сброс
+        cheatMoves = -1; // СЃР±СЂРѕСЃ
     }
 
     #endregion
@@ -111,7 +122,7 @@ public class DiceManagerPhoton : MonoBehaviourPun
 
     private void HandleCheatInputs()
     {
-        // Читы (1–9 ? шаги)
+        // Р§РёС‚С‹ (1вЂ“9 в†’ С€Р°РіРё)
         for (int i = 1; i <= 9; i++)
         {
             if (Input.GetKeyDown(i.ToString()))
@@ -120,6 +131,7 @@ public class DiceManagerPhoton : MonoBehaviourPun
 
         if (Input.GetKeyDown(cheat10)) cheatMoves = 10;
         if (Input.GetKeyDown(cheat30)) cheatMoves = 30;
+        if (Input.GetKeyDown(cheat40)) cheatMoves = 40;
     }
 
     #endregion
@@ -144,5 +156,15 @@ public class OnPlayerMoveEvent
     public int Steps { get; }
     public OnPlayerMoveEvent(int steps) => Steps = steps;
 }
+public class PlayerRolledDoubleEvent
+{
+    public int PlayerId { get; }
+    public int Steps { get; }
 
+    public PlayerRolledDoubleEvent(int playerId, int steps)
+    {
+        PlayerId = playerId;
+        Steps = steps;
+    }
+}
 #endregion

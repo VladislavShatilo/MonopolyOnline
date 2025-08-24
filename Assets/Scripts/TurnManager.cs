@@ -1,4 +1,4 @@
-using Photon.Pun;
+﻿using Photon.Pun;
 using Photon.Pun.Demo.PunBasics;
 using Photon.Realtime;
 using System;
@@ -17,6 +17,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
     private int currentTurnPlayerId;
     private bool isTurnActive = false;
     public int CurrentTurnPlayerId => currentTurnPlayerId;
+    private HashSet<int> playersWithExtraTurn = new HashSet<int>();
 
     private void Awake()
     {
@@ -31,11 +32,15 @@ public class TurnManager : MonoBehaviourPunCallbacks
     public override void OnEnable()
     {
         EventBus.Subscribe<AllPlayersInitializedEvent>(StartRandomTurn);
+        EventBus.Subscribe<PlayerRolledDoubleEvent>(OnPlayerRolledDouble);
+
     }
 
     public override void OnDisable()
     {
         EventBus.Unsubscribe<AllPlayersInitializedEvent>(StartRandomTurn);
+        EventBus.Unsubscribe<PlayerRolledDoubleEvent>(OnPlayerRolledDouble);
+
     }
 
     private void Update()
@@ -65,7 +70,15 @@ public class TurnManager : MonoBehaviourPunCallbacks
     #endregion Player UI
 
     #region Turn Management
+    public void RegisterDoubleForTurn(int playerId, bool isDouble)
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+        if (!isTurnActive) return;
+        if (!isDouble) return;
+        if (playerId != currentTurnPlayerId) return; // защита от гонок
 
+        playersWithExtraTurn.Add(playerId);
+    }
     public void StartRandomTurn(AllPlayersInitializedEvent e)
     {
         if (!PhotonNetwork.IsMasterClient || PhotonNetwork.PlayerList.Length == 0) return;
@@ -86,6 +99,10 @@ public class TurnManager : MonoBehaviourPunCallbacks
         photonView.RPC(nameof(RPC_StartTurn), RpcTarget.All, playerId, turnStartTime);
     }
 
+    private void OnPlayerRolledDouble(PlayerRolledDoubleEvent e)
+    {
+        playersWithExtraTurn.Add(e.PlayerId);
+    }
     [PunRPC]
     private void RPC_StartTurn(int playerId, double startTime)
     {
@@ -107,6 +124,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
     public void RequestEndTurn()
     {
+        Debug.Log("RequestEndTurn");
         if (PhotonNetwork.IsMasterClient)
         {
             EndTurnInternal();
@@ -123,13 +141,21 @@ public class TurnManager : MonoBehaviourPunCallbacks
     private void EndTurnInternal()
     {
         if (!isTurnActive) return;
-
         isTurnActive = false;
 
         if (!PhotonNetwork.IsMasterClient) return;
 
+        // ⬇️ Если у текущего игрока отмечен дополнительный ход — не передаём ход дальше
+        if (playersWithExtraTurn.Contains(currentTurnPlayerId))
+        {
+            playersWithExtraTurn.Remove(currentTurnPlayerId);
+            StartTurn(currentTurnPlayerId); // тот же игрок ходит снова
+            return;
+        }
+
         int nextPlayerId = GetNextPlayerId(currentTurnPlayerId);
         StartTurn(nextPlayerId);
+
     }
 
     private int GetNextPlayerId(int currentId)

@@ -184,6 +184,13 @@ public class CompanyManager : MonoBehaviourPun
 
     #region Вспомогательные методы
 
+    public void EndTurnIfMine()
+    {
+        if (photonView.IsMine)
+        {
+            TurnManager.Instance.RequestEndTurn();
+        }
+    }
     private bool TryGetHandler(int cellIndex, out ICellHandler handler)
     {
         handler = null;

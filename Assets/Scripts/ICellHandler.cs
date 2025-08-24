@@ -21,11 +21,20 @@ public abstract class BaseCompanyHandler : ICellHandler
 
         var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
         if (!company.IsBought)
+        {
             CompanyManager.Instance.OfferPurchase(cellIndex, playerId);
+        }
         else if (company.OwnerId != playerId)
+        {
             CompanyManager.Instance.OfferRent(cellIndex, playerId);
+        }
+        else
+        {
+            CompanyManager.Instance.EndTurnIfMine();
+        }
 
-        var playerData = GameManager.Instance.GetPlayerById(PhotonNetwork.LocalPlayer.ActorNumber);
+
+            var playerData = GameManager.Instance.GetPlayerById(PhotonNetwork.LocalPlayer.ActorNumber);
         string coloredName = $"<color=#{ColorUtility.ToHtmlStringRGB(playerData.playerColor)}>{playerData.Name}</color>";
         //MessageLog.Instance.AddMessage($"{coloredName} попал в сектор {company.Id");
     }
