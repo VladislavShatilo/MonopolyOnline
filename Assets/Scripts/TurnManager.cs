@@ -110,6 +110,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
         turnStartTime = startTime;
         isTurnActive = true;
         PlayerData player = GameManager.Instance.GetPlayerById(playerId);
+       
         if (player.IsInJail)
         {
             EventBus.Publish(new StartTurnJailEvent(playerId));
@@ -119,6 +120,10 @@ public class TurnManager : MonoBehaviourPunCallbacks
         {
             EventBus.Publish(new TurnStartEvent(playerId));
 
+        }
+        if (PhotonNetwork.IsMasterClient)
+        {
+            MortgageManager.Instance.TickMortgageTurnsRequest(playerId);
         }
     }
 

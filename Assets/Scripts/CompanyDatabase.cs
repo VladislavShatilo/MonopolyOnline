@@ -14,6 +14,11 @@ public class Company
     public bool IsBought { get; set; } = false;
     public int OwnerId { get; set; } = -1;
     public int RentLevel { get; set; } = 0;
+    public bool IsMortgaged { get; set; } = false; 
+    public int MortgageTurnsLeft { get; set; } = 0;
+    public int MortgagePrice { get; set; }
+    public int BuyoutPrice { get; set; }
+
     public CompanyType Type { get; private set; }
     public CompanyData CompanyData { get; private set; }
     public FieldCompanyData FieldCompanyData { get; private set; }
@@ -27,6 +32,8 @@ public class Company
         Type = CompanyType.Company;
         CompanyData = companyData;
         Group = companyData.group;
+        MortgagePrice = companyData.pledgePrice;
+        BuyoutPrice = companyData.buyoutPrice;
     }
 
     public Company(int id, FieldCompanyData fieldCompanyData)
@@ -36,6 +43,8 @@ public class Company
         Type = CompanyType.FieldCompany;
         FieldCompanyData = fieldCompanyData;
         Group = fieldCompanyData.group;
+        MortgagePrice = fieldCompanyData.pledgePrice;
+        BuyoutPrice = fieldCompanyData.buyoutPrice;
     }
 
     public Company(int id, DiceCompanyData diceCompanyData)
@@ -45,6 +54,8 @@ public class Company
         Type = CompanyType.DiceCompany;
         DiceCompanyData = diceCompanyData;
         Group = diceCompanyData.group;
+        MortgagePrice = diceCompanyData.pledgePrice;
+        BuyoutPrice = diceCompanyData.buyoutPrice;
     }
 
     public void ResetData()

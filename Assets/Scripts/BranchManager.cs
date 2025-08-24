@@ -164,7 +164,7 @@ public class BranchManager : MonoBehaviourPun
             bool isMyTurn = e.PlayerId == PhotonNetwork.LocalPlayer.ActorNumber;
             bool ownsGroup = CompanyManager.Instance.PlayerOwnsWholeGroup(company.CompanyData.group, e.PlayerId);
 
-            if (!isMyTurn || !company.IsBought || company.OwnerId != e.PlayerId || !ownsGroup)
+            if (!isMyTurn || !company.IsBought || company.OwnerId != e.PlayerId || !ownsGroup || company.IsMortgaged)
             {
                 ui.HideAllBranchButtons();
                 continue;

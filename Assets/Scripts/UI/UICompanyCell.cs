@@ -27,6 +27,14 @@ public class UICompanyCell : UICellBase
     [SerializeField] private Image sellBranchIcon;
     [SerializeField] private Image sellFirstBranchIcon;
 
+    [Header("Branch Button Icons")]
+    [SerializeField] private Button mortgageButton;
+    [SerializeField] private Button buyoutButton;
+    [SerializeField] private TextMeshProUGUI turnsText;
+    [SerializeField] private GameObject mortgageStatsGO;
+    [SerializeField] private Image mortgageFadeImage;
+
+
     [Header("Stars")]
     [SerializeField] private Image star1Image;
     [SerializeField] private Image star2Image;
@@ -48,9 +56,12 @@ public class UICompanyCell : UICellBase
         buyBranchButton.onClick.AddListener(() => BranchManager.Instance.RequestBuyBranch(companyId));
         sellBranchButton.onClick.AddListener(() => BranchManager.Instance.RequestSellBranch(companyId));
         sellFirstBranchButton.onClick.AddListener(() => BranchManager.Instance.RequestSellBranch(companyId));
+        mortgageButton.onClick.AddListener(() => MortgageManager.Instance.RequestMortgageCompany(companyId));
+        buyoutButton.onClick.AddListener(() => MortgageManager.Instance.RequestBuyoutCompany(companyId));
+
     }
 
-  
+
     #region UI Updates
 
     public override void UpdateUI(CellData cellData, PlayerData owner)
@@ -99,7 +110,7 @@ public class UICompanyCell : UICellBase
             case 5: goldStarImage.gameObject.SetActive(true); break;
         }
     }
-
+   
     private void HideStars()
     {
         star1Image.gameObject.SetActive(false);
@@ -171,6 +182,63 @@ public class UICompanyCell : UICellBase
         sellFirstBranchIcon.rectTransform.eulerAngles += new Vector3(0, 0, angle);
     }
 
+    #endregion
+
+    #region Mortgage
+    public void ShowMortgageButton()
+    {
+        ShowButton(true);
+    }
+    public void ShowBuyoutButton()
+    {
+        ShowButton(false);
+
+    }
+    private void ShowButton(bool isMortgage)
+    {
+        HideAllBranchButtons();
+        mortgageButton.gameObject.SetActive(isMortgage);
+        buyoutButton.gameObject.SetActive(!isMortgage);
+        BGPriceImage.gameObject.SetActive(false);
+        priceText.gameObject.SetActive(false);
+    }
+    public void MortgageUI()
+    {
+        MortgageUIChange(true);
+    }
+    public void BuyoutUI()
+    {
+        MortgageUIChange(false);
+
+    }
+
+    public void SellCompany()
+    {
+        MortgageUIChange(false);
+        BGImage.color = Color.white;
+    }
+  
+    private void MortgageUIChange(bool isMortgage)
+    {
+
+        HideAllBranchButtons();
+        mortgageButton.gameObject.SetActive(false);
+        buyoutButton.gameObject.SetActive(false);
+
+        mortgageStatsGO.SetActive(isMortgage);
+        mortgageFadeImage.gameObject.SetActive(isMortgage);
+    }
+    public void HideAllButtnos()
+    {
+        mortgageButton.gameObject.SetActive(false);
+        buyoutButton.gameObject.SetActive(false);
+        BGPriceImage.gameObject.SetActive(true);
+        priceText.gameObject.SetActive(true);
+    }
+    public void SetTurnsText(int turns)
+    {
+        turnsText.text = turns.ToString();
+    }
     #endregion
 
     #region Event Handlers

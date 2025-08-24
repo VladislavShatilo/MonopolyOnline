@@ -24,6 +24,10 @@ public abstract class BaseCompanyHandler : ICellHandler
         {
             CompanyManager.Instance.OfferPurchase(cellIndex, playerId);
         }
+        else if (company.IsMortgaged)
+        {
+            CompanyManager.Instance.EndTurnIfMine();
+        }
         else if (company.OwnerId != playerId)
         {
             CompanyManager.Instance.OfferRent(cellIndex, playerId);
