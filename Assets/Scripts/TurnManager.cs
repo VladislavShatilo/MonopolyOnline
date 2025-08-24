@@ -27,6 +27,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
         }
         Instance = this;
     }
+
     public override void OnEnable()
     {
         EventBus.Subscribe<AllPlayersInitializedEvent>(StartRandomTurn);
@@ -36,6 +37,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
     {
         EventBus.Unsubscribe<AllPlayersInitializedEvent>(StartRandomTurn);
     }
+
     private void Update()
     {
         if (!isTurnActive) return;
@@ -56,15 +58,13 @@ public class TurnManager : MonoBehaviourPunCallbacks
         foreach (var player in PhotonNetwork.PlayerList)
         {
             bool isCurrent = player.ActorNumber == currentTurnPlayerId;
-            EventBus.Publish(new TurnTimerUpdatedEvent(player.ActorNumber, timeLeft,isCurrent ));
-
+            EventBus.Publish(new TurnTimerUpdatedEvent(player.ActorNumber, timeLeft, isCurrent));
         }
     }
 
-    #endregion
+    #endregion Player UI
 
     #region Turn Management
-
 
     public void StartRandomTurn(AllPlayersInitializedEvent e)
     {
@@ -75,11 +75,10 @@ public class TurnManager : MonoBehaviourPunCallbacks
         StartTurn(randomPlayer.ActorNumber);
     }
 
-
     public void StartTurn(int playerId)
     {
         if (!PhotonNetwork.IsMasterClient) return;
-     
+
         currentTurnPlayerId = playerId;
         turnStartTime = PhotonNetwork.Time;
         isTurnActive = true;
@@ -93,8 +92,17 @@ public class TurnManager : MonoBehaviourPunCallbacks
         currentTurnPlayerId = playerId;
         turnStartTime = startTime;
         isTurnActive = true;
-        EventBus.Publish(new StartTurnJailEvent(playerId));
-        EventBus.Publish(new TurnStartEvent(playerId));
+        PlayerData player = GameManager.Instance.GetPlayerById(playerId);
+        if (player.IsInJail)
+        {
+            EventBus.Publish(new StartTurnJailEvent(playerId));
+
+        }
+        else
+        {
+            EventBus.Publish(new TurnStartEvent(playerId));
+
+        }
     }
 
     public void RequestEndTurn()
@@ -132,10 +140,9 @@ public class TurnManager : MonoBehaviourPunCallbacks
         return players[idx].ActorNumber;
     }
 
-    #endregion
-
-  
+    #endregion Turn Management
 }
+
 public class BranchBuyRequestedEvent
 {
     public int PlayerId { get; }
@@ -173,6 +180,7 @@ public class BranchLevelChangedEvent
         NewLevel = newLevel;
     }
 }
+
 public class TurnTimerUpdatedEvent
 {
     public int PlayerId;
@@ -186,35 +194,20 @@ public class TurnTimerUpdatedEvent
         IsCurrent = isCurrent;
     }
 }
+
 public class TurnStartEvent
 {
     public int PlayerId;
- 
 
     public TurnStartEvent(int playerId)
     {
         PlayerId = playerId;
     }
 }
-public class StartDiceRollEvent
-{
-    public int FirstDiceValue;
-    public int SecondDiceValue;
-    public int PlayerId;
 
-
-    public StartDiceRollEvent(int firstDiceValue, int secondDiceValue, int playerId)
-    {
-        PlayerId = playerId;
-        SecondDiceValue = secondDiceValue;
-        FirstDiceValue = firstDiceValue;
-    }
-}
 public class StartTurnJailEvent
 {
-
     public int PlayerId;
-
 
     public StartTurnJailEvent(int playerId)
     {

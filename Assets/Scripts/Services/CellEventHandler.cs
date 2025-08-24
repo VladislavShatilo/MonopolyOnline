@@ -25,7 +25,7 @@ public class CellEventHandler
             case CellType.Company:
             case CellType.FieldCompany:
             case CellType.DiceCompany:
-                CompanyManager.Instance.HandleCell(cellIndex, PhotonNetwork.LocalPlayer.ActorNumber);
+                CompanyManager.Instance.HandleCell(cellIndex, e.PlayerID);
                 break;
             case CellType.Question:
             case CellType.Spend:
@@ -50,7 +50,7 @@ public class CellEventHandler
                         CasinoManager.Instance.CasinoOffer(e.PlayerID);
                         break;
                     case CornerType.Police:
-                       JailManager.Instance.GoToJail(e.PlayerID);
+                       JailManager.Instance.SendToJail(e.PlayerID);
                         break;
                    
                     

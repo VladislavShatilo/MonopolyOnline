@@ -81,6 +81,11 @@ MonoBehaviour:
   - RPC_MoveToJail
   - RPC_SetTurnJain
   - RPC_ShowJailOffer
+  - RPC_GoToJail
+  - RPC_ShowRansomJailOffer
+  - RPC_RequestRollDiceJail
+  - RPC_RequestDiceRoll
+  - RPC_SendToJail
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

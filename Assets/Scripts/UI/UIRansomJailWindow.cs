@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIJailWindow : MonoBehaviour
+public class UIRansomJailWindow : MonoBehaviour
 {
-    public static UIJailWindow Instance { get; private set; }
+    public static UIRansomJailWindow Instance { get; private set; }
 
     [SerializeField] private WindowAnimation windowAnimation;
     [SerializeField] private Button ransomButton;
-    [SerializeField] private Button throwDiceButton;
 
     private int playerID;
     private void Awake()
@@ -21,9 +20,8 @@ public class UIJailWindow : MonoBehaviour
         }
         Instance = this;
     }
-    void Start()
+    private void Start()
     {
-        throwDiceButton.onClick.AddListener(ThrowDice);
         ransomButton.onClick.AddListener(Ransom);
     }
     public void ShowWindow(int playerID)
@@ -35,13 +33,6 @@ public class UIJailWindow : MonoBehaviour
     public void HideWindow()
     {
         windowAnimation.HideWindow();
-    }
-    private void ThrowDice()
-    {
-        HideWindow();
-        EventBus.Publish(new RollDiceJailButtonEvent(playerID));
-        
-      
     }
     private void Ransom()
     {
