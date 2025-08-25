@@ -2,6 +2,11 @@ using Photon.Pun;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum BuyReason
+{
+    Buy,
+    Auction
+}
 /// <summary>
 /// Менеджер компаний: обработка покупки, аренды, взаимодействие с UI через события.
 /// </summary>
@@ -36,7 +41,16 @@ public class CompanyManager : MonoBehaviourPun
         handlers[CompanyType.FieldCompany] = new FieldCompanyHandler();
         handlers[CompanyType.DiceCompany] = new DiceCompanyHandler();
     }
+    private void OnEnable()
+    {
+        EventBus.Subscribe<AuctionEndedEventWin>(OnAuctionBuy);
 
+    }
+    private void OnDisable()
+    {
+        EventBus.Unsubscribe<AuctionEndedEventWin>(OnAuctionBuy);
+
+    }
     #region Работа с клеткой
 
     public void HandleCell(int cellIndex, int playerId)
@@ -81,16 +95,20 @@ public class CompanyManager : MonoBehaviourPun
         if (company == null || company.IsBought) return;
 
         int playerId = PhotonNetwork.LocalPlayer.ActorNumber;
-        photonView.RPC(nameof(RPC_RequestBuyCompany), RpcTarget.MasterClient, cellIndex, playerId);
+        photonView.RPC(nameof(RPC_RequestBuyCompany), RpcTarget.MasterClient, cellIndex, playerId,0,(int)BuyReason.Buy);
     }
 
     [PunRPC]
-    private void RPC_RequestBuyCompany(int cellIndex, int buyerId)
+    private void RPC_RequestBuyCompany(int cellIndex, int buyerId,int price,int buyReason)
     {
         if (!TryGetCompanyAndHandler(cellIndex, out var company, out var handler)) return;
 
         var buyer = GameManager.Instance.GetPlayerById(buyerId);
-        int price = handler.GetPrice(cellIndex);
+        if(buyReason ==(int)BuyReason.Buy)
+        {
+            price = handler.GetPrice(cellIndex);
+        }
+        Debug.Log("RPC_RequestBuyCompany" + price);
 
         if (!Bank.Instance.HasEnoughMoney(buyer, price))
         {
@@ -98,21 +116,29 @@ public class CompanyManager : MonoBehaviourPun
             return;
         }
 
-        photonView.RPC(nameof(RPC_ConfirmPurchase), RpcTarget.AllBuffered, cellIndex, buyerId);
-        TurnManager.Instance.RequestEndTurn();
+        photonView.RPC(nameof(RPC_ConfirmPurchase), RpcTarget.All, cellIndex, buyerId,price,buyReason);
+        if(buyReason == (int)BuyReason.Buy)
+        {
+            TurnManager.Instance.RequestEndTurn();
+        }
     }
 
     [PunRPC]
-    private void RPC_ConfirmPurchase(int cellIndex, int ownerId)
+    private void RPC_ConfirmPurchase(int cellIndex, int ownerId,int price, int buyReason)
     {
         var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
-        if (company == null || !TryGetHandler(cellIndex, out var handler)) return;
+        if (company == null || company.IsBought|| !TryGetHandler(cellIndex, out var handler)) return;
 
         company.IsBought = true;
         company.OwnerId = ownerId;
 
-        int price = handler.GetPrice(cellIndex);
+        if (buyReason == (int)BuyReason.Buy)
+        {
+            price = handler.GetPrice(cellIndex);
+        }
+
         var buyer = GameManager.Instance.GetPlayerById(ownerId);
+        Debug.Log("RPC_ConfirmPurchase" + price);
         Bank.Instance.RemoveMoney(buyer, price);
 
      
@@ -180,6 +206,16 @@ public class CompanyManager : MonoBehaviourPun
         UIPayRent.Instance.HideWindow();
     }
 
+    #endregion
+
+    #region Auction
+    private void OnAuctionBuy(AuctionEndedEventWin e)
+    {
+        var company = CompanyDatabase.Instance.GetCompanyById(e.CompanyId);
+        if (company == null || company.IsBought) return;
+        Debug.Log("OnAuctionBuy" + e.FinalPrice);
+        photonView.RPC(nameof(RPC_RequestBuyCompany), RpcTarget.MasterClient, e.CompanyId, e.WinnerActorNumber,e.FinalPrice,(int)BuyReason.Auction);
+    }
     #endregion
 
     #region Вспомогательные методы

@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,6 +18,7 @@ public class UIBuyWindow : MonoBehaviour
     [SerializeField] private TextMeshProUGUI buyButtonText;
 
     private int currentCellIndex;
+    private int companyPrice;
 
     private void Awake()
     {
@@ -27,6 +29,7 @@ public class UIBuyWindow : MonoBehaviour
         }
         Instance = this;
     }
+   
     private void Start()
     {
         buyButton.onClick.AddListener(() => OnBuyClicked());
@@ -35,17 +38,18 @@ public class UIBuyWindow : MonoBehaviour
     public void ShowBuyWindow(int cellIndex, CompanyBaseData companyBaseData)
     {
         currentCellIndex = cellIndex;
-        buyButtonText.text = "Купить за " + companyBaseData.price.ToString("N0", CultureInfo.InvariantCulture) + "k";
+        buyButtonText.text = "Купить за " + companyBaseData.price.ToString("N0", CultureInfo.InvariantCulture);
+        companyPrice = companyBaseData.price;
         windowAnimation.ShowWindow();
     }
+
     public void HideWindow()
     { 
         windowAnimation.HideWindow();
     }
     private void AuctionWindow()
     {
-        windowAnimation.HideWindow();
-        TurnManager.Instance.RequestEndTurn();
+        AuctionManager.Instance.StartAuctionRequest(PhotonNetwork.LocalPlayer.ActorNumber, currentCellIndex, companyPrice);
     }
     private void OnBuyClicked()
     {
@@ -53,6 +57,5 @@ public class UIBuyWindow : MonoBehaviour
 
     }
 
-    public Button BuyButton()=>buyButton;
  
 }

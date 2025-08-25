@@ -91,6 +91,25 @@ MonoBehaviour:
   - RPC_UpdateMortgageUI
   - RPC_TickMortgageRequest
   - RPC_TickMortgageUI
+  - RPC_AuctionFailed
+  - RPC_AuctionStarted
+  - RPC_AuctionWon
+  - RPC_BidPlaced
+  - RPC_PlayerBid
+  - RPC_PlayerPass
+  - RPC_PlayerPassed
+  - RPC_RequestBid
+  - RPC_AuctionEnded
+  - RPC_PromptBid
+  - RPC_RequestPass
+  - RPC_RequestPlaceBid
+  - RPC_StartAuctionRequest
+  - RPC_UpdateAuction
+  - RPC_PlayActionRequest
+  - RPC_UpdatePassAction
+  - RPC_UpdatePlayAction
+  - RPC_UpdateAuctionTimer
+  - RPC_ResetAuctionTimer
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

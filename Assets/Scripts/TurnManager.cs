@@ -5,7 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
+public enum TurnMode
+{
+    Normal,
+    Auction
+}
 public class TurnManager : MonoBehaviourPunCallbacks
 {
     public static TurnManager Instance { get; private set; }
@@ -19,6 +23,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
     public int CurrentTurnPlayerId => currentTurnPlayerId;
     private HashSet<int> playersWithExtraTurn = new HashSet<int>();
 
+ 
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -47,13 +52,16 @@ public class TurnManager : MonoBehaviourPunCallbacks
     {
         if (!isTurnActive) return;
 
-        double elapsed = PhotonNetwork.Time - turnStartTime;
-        float timeLeft = Mathf.Clamp((float)(turnDuration - elapsed), 0, turnDuration);
+        if (CurrentMode == TurnMode.Normal)
+        {
+            double elapsed = PhotonNetwork.Time - turnStartTime;
+            float timeLeft = Mathf.Clamp((float)(turnDuration - elapsed), 0, turnDuration);
 
-        UpdateTurnTimer(timeLeft);
+            UpdateTurnTimer(timeLeft);
 
-        if (timeLeft <= 0f)
-            EndTurnInternal();
+            if (timeLeft <= 0f)
+                EndTurnInternal();
+        }
     }
 
     #region Player UI
@@ -95,6 +103,7 @@ public class TurnManager : MonoBehaviourPunCallbacks
         currentTurnPlayerId = playerId;
         turnStartTime = PhotonNetwork.Time;
         isTurnActive = true;
+        SetMode(TurnMode.Normal);
 
         photonView.RPC(nameof(RPC_StartTurn), RpcTarget.All, playerId, turnStartTime);
     }
@@ -109,8 +118,9 @@ public class TurnManager : MonoBehaviourPunCallbacks
         currentTurnPlayerId = playerId;
         turnStartTime = startTime;
         isTurnActive = true;
+        CurrentMode = TurnMode.Normal;
+
         PlayerData player = GameManager.Instance.GetPlayerById(playerId);
-       
         if (player.IsInJail)
         {
             EventBus.Publish(new StartTurnJailEvent(playerId));
@@ -126,10 +136,28 @@ public class TurnManager : MonoBehaviourPunCallbacks
             MortgageManager.Instance.TickMortgageTurnsRequest(playerId);
         }
     }
+    public void OnAuctionEnded(int starterId)
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
 
+        SetMode(TurnMode.Normal);
+
+        // Если игрок, который был инициатором аукциона, имеет дополнительный ход
+        if (playersWithExtraTurn.Contains(starterId))
+        {
+            playersWithExtraTurn.Remove(starterId);
+            StartTurn(starterId);
+        }
+        else
+        {
+            int nextPlayerId = GetNextPlayerId(starterId);
+            StartTurn(nextPlayerId);
+        }
+    }
+
+    
     public void RequestEndTurn()
     {
-        Debug.Log("RequestEndTurn");
         if (PhotonNetwork.IsMasterClient)
         {
             EndTurnInternal();
@@ -150,11 +178,10 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
         if (!PhotonNetwork.IsMasterClient) return;
 
-        // ⬇️ Если у текущего игрока отмечен дополнительный ход — не передаём ход дальше
         if (playersWithExtraTurn.Contains(currentTurnPlayerId))
         {
             playersWithExtraTurn.Remove(currentTurnPlayerId);
-            StartTurn(currentTurnPlayerId); // тот же игрок ходит снова
+            StartTurn(currentTurnPlayerId);
             return;
         }
 
@@ -163,12 +190,18 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
     }
 
-    private int GetNextPlayerId(int currentId)
+    public int GetNextPlayerId(int currentId)
     {
         var players = PhotonNetwork.PlayerList.OrderBy(p => p.ActorNumber).ToList();
         int idx = players.FindIndex(p => p.ActorNumber == currentId);
         idx = (idx + 1) % players.Count;
         return players[idx].ActorNumber;
+    }
+    public TurnMode CurrentMode { get; private set; } = TurnMode.Normal;
+
+    public void SetMode(TurnMode mode)
+    {
+        CurrentMode = mode;
     }
 
     #endregion Turn Management

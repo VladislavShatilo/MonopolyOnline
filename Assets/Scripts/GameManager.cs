@@ -134,6 +134,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     #region Helpers
 
     public PlayerData GetPlayerById(int id) => players.Find(p => p.id == id);
+    public List<PlayerData> Players() => players;
 
     public Color GetColorForActor(int actorNumber)
     {

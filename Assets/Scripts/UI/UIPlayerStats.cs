@@ -8,25 +8,27 @@ public class UIPlayerStats : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI namePlayerText;
     [SerializeField] private TextMeshProUGUI moneyPlayerText;
+    [SerializeField] private GameObject timerGO;
     [SerializeField] private TextMeshProUGUI timerText;
-    [SerializeField] private Image highlightImage;
+    [SerializeField] private Image highlightTurnImage;
+    [SerializeField] private Image highlightAuctionImage;
+
     private bool isTurnActive = false;
     private PlayerData playerData;
+    private bool isActive = false;
 
     private void OnEnable()
     {
-       // EventBus.Subscribe<MoneyAddedEvent>(OnMoneyChanged);
-      //  EventBus.Subscribe<MoneyRemovedEvent>(OnMoneyChanged);
-       // EventBus.Subscribe<MoneyTransferredEvent>(OnMoneyChanged);
+        EventBus.Subscribe<TurnTimerUpdatedEvent>(OnTimerUpdated);
+        EventBus.Subscribe<AuctionTimerUpdatedEvent>(OnTimerUpdated);
 
         PhotonNetwork.NetworkingClient.EventReceived += OnPhotonEventReceived;
     }
 
     private void OnDisable()
     {
-       // EventBus.Unsubscribe<MoneyAddedEvent>(OnMoneyChanged);
-        //EventBus.Unsubscribe<MoneyRemovedEvent>(OnMoneyChanged);
-        //EventBus.Unsubscribe<MoneyTransferredEvent>(OnMoneyChanged);
+       EventBus.Unsubscribe<TurnTimerUpdatedEvent>(OnTimerUpdated);
+        EventBus.Unsubscribe<AuctionTimerUpdatedEvent>(OnTimerUpdated);
 
         PhotonNetwork.NetworkingClient.EventReceived -= OnPhotonEventReceived;
     }
@@ -40,33 +42,40 @@ public class UIPlayerStats : MonoBehaviour
         SetMoneyPlayerText(money);
     }
 
-    //private void OnMoneyChanged(object e)
-    //{
-    //    switch (e)
-    //    {
-    //        case MoneyAddedEvent added when added.Player.id == playerData.id:
-    //            SetMoneyPlayerText(added.Player.Money);
-    //            break;
-    //        case MoneyRemovedEvent removed when removed.Player.id == playerData.id:
-    //            SetMoneyPlayerText(removed.Player.Money);
-    //            break;
-    //        case MoneyTransferredEvent transfer:
-    //            if (transfer.From.id == playerData.id)
-    //                SetMoneyPlayerText(transfer.From.Money);
-    //            else if (transfer.To.id == playerData.id)
-    //                SetMoneyPlayerText(transfer.To.Money);
-    //            break;
-    //    }
-    //}
-    private void OnTurnTimerUpdated(TurnTimerUpdatedEvent e)
+    private void OnTimerUpdated(TurnTimerUpdatedEvent e)
     {
-        // обновляем только если это событие моего игрока
         if (playerData == null || e.PlayerId != playerData.id) return;
 
-        SetTurnActive(e.IsCurrent);
-        UpdateTurnTimer(e.TimeLeft);
-    }
+        isActive = e.IsCurrent;
+        timerText.gameObject.SetActive(isActive);
+        timerGO.gameObject.SetActive(isActive);
+        highlightTurnImage.enabled = isActive;
 
+        if (isActive)
+            timerText.text = Mathf.Ceil(e.TimeLeft).ToString();
+    }
+    private void OnTimerUpdated(AuctionTimerUpdatedEvent e)
+    {
+        if (playerData == null) return;
+
+        bool isCurrentBidder = e.PlayerId == playerData.id;
+
+        // Показываем таймер и подсветку только у текущего игрока
+        timerText.gameObject.SetActive(isCurrentBidder);
+        timerGO.SetActive(isCurrentBidder);
+        highlightAuctionImage.enabled = isCurrentBidder;
+
+        if (isCurrentBidder)
+            timerText.text = Mathf.Ceil(e.TimeLeft).ToString();
+
+        // Если аукцион закончился, сбрасываем все
+        if (e.TimeLeft <= 0f)
+        {
+            timerText.gameObject.SetActive(false);
+            timerGO.SetActive(false);
+            highlightAuctionImage.enabled = false;
+        }
+    }
     public void SetMoneyPlayerText(int moneyPlayer)
     {
         moneyPlayerText.text = moneyPlayer.ToString("N0", CultureInfo.InvariantCulture) + "k";
@@ -78,7 +87,10 @@ public class UIPlayerStats : MonoBehaviour
         namePlayerText.text = playerData.Name;
         moneyPlayerText.text = playerData.Money.ToString("N0", CultureInfo.InvariantCulture) + "k";
         timerText.gameObject.SetActive(false);
-        highlightImage.enabled = false;
+        highlightTurnImage.enabled = false;
+        highlightAuctionImage.enabled = false;
+        timerGO.SetActive(false);
+
     }
 
     public void SetTurnActive(bool active)
@@ -87,7 +99,7 @@ public class UIPlayerStats : MonoBehaviour
         if (timerText != null)
             timerText.gameObject.SetActive(active);
 
-        highlightImage.enabled = active;
+        highlightTurnImage.enabled = active;
     }
 
     public void UpdateTurnTimer(float secondsLeft)
