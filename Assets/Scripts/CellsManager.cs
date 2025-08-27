@@ -63,7 +63,6 @@ public class CellsManager : MonoBehaviourPun
         cellData = boardService.GetCellData(index);
         return cellData != null;
     }
-
     public GameObject GetCellByIndex(int index) => boardService.GetCellGameObject(index);
     public CellData GetCellDataByIndex(int index) => boardService.GetCellData(index);
     public List<CellData> GetCellDataList() => boardService.GetAllCellData();

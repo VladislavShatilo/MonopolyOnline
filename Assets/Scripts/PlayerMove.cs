@@ -62,9 +62,13 @@ public class PlayerMove : MonoBehaviourPun
 
         StartCoroutine(MoveStepsCoroutine(steps));
     }
-
+ 
     private IEnumerator MoveStepsCoroutine(int steps)
     {
+        int targetIndex = (currentCellIndex + steps) % boardCells.Count;
+        EventBus.Publish(new DiceFadeEvent(targetIndex,true));
+        yield return new WaitForSeconds(0.8f);
+
         for (int i = 0; i < steps; i++)
         {
             currentCellIndex = (currentCellIndex + 1) % boardCells.Count;
@@ -76,6 +80,8 @@ public class PlayerMove : MonoBehaviourPun
                 Bank.Instance.AddMoney(player, 2_000);
             }
         }
+        EventBus.Publish(new DiceFadeEvent(targetIndex, false));
+
         EventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.Owner.ActorNumber));
     }
 

@@ -1,4 +1,4 @@
-using Photon.Pun;
+п»їusing Photon.Pun;
 using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,6 +23,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     }
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
+        Debug.Log("OnRoomListUpdate");
         foreach (RoomInfo room in roomList)
         {
             if (room.RemovedFromList)
@@ -46,7 +47,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     private void CreateRoomUI(RoomInfo room)
     {
         if (roomUIWindows.ContainsKey(room.Name))
-            return; // Уже есть
+            return; // РЈР¶Рµ РµСЃС‚СЊ
+        Debug.Log("РџCreateRoomUI");
 
         GameObject go = Instantiate(roomPopupPrefab, roomListContainer);
         roomUIWindows.Add(room.Name, go);
@@ -69,11 +71,11 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinRoom(roomName);
     }
   
-    // Коллбэк, когда присоединились к комнате
+    // РљРѕР»Р»Р±СЌРє, РєРѕРіРґР° РїСЂРёСЃРѕРµРґРёРЅРёР»РёСЃСЊ Рє РєРѕРјРЅР°С‚Рµ
     public override void OnJoinedRoom()
     {
-        Debug.Log("Присоединились к комнате, загружаем игровую сцену...");
-        PhotonNetwork.LoadLevel("GameScene"); // та же игровая сцена
+        Debug.Log("РџСЂРёСЃРѕРµРґРёРЅРёР»РёСЃСЊ Рє РєРѕРјРЅР°С‚Рµ, Р·Р°РіСЂСѓР¶Р°РµРј РёРіСЂРѕРІСѓСЋ СЃС†РµРЅСѓ...");
+        PhotonNetwork.LoadLevel("GameScene"); // С‚Р° Р¶Рµ РёРіСЂРѕРІР°СЏ СЃС†РµРЅР°
     }
     public void CreateRoom()
     {
@@ -83,17 +85,17 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             MaxPlayers = 2,
             CustomRoomProperties = new ExitGames.Client.Photon.Hashtable
             {
-                { "rules", "Правила: играем до 100 очков, без обмена картами" }
+                { "rules", "РџСЂР°РІРёР»Р°: РёРіСЂР°РµРј РґРѕ 100 РѕС‡РєРѕРІ, Р±РµР· РѕР±РјРµРЅР° РєР°СЂС‚Р°РјРё" }
             },
             CustomRoomPropertiesForLobby = new string[] { "rules" }
         };
         PhotonNetwork.CreateRoom(roomName, options);
     }
 
-    // Вот тут создаём UI сразу после создания комнаты
+    // Р’РѕС‚ С‚СѓС‚ СЃРѕР·РґР°С‘Рј UI СЃСЂР°Р·Сѓ РїРѕСЃР»Рµ СЃРѕР·РґР°РЅРёСЏ РєРѕРјРЅР°С‚С‹
     public override void OnCreatedRoom()
     {
-        Debug.Log("Комната создана: " + PhotonNetwork.CurrentRoom.Name);
+        Debug.Log("РљРѕРјРЅР°С‚Р° СЃРѕР·РґР°РЅР°: " + PhotonNetwork.CurrentRoom.Name);
         CreateRoomUI(PhotonNetwork.CurrentRoom);
     }
 

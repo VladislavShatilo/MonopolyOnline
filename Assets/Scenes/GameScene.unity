@@ -4181,21 +4181,18 @@ MonoBehaviour:
   leftPanel: {fileID: 1541854863}
   rightPanel: {fileID: 977057517}
   companyCardPrefab: {fileID: 6847487903718748667, guid: e79fcca758f858d46b5df281fa633c16, type: 3}
-  offerButton: {fileID: 1786861479}
-  closeButton: {fileID: 1309615251}
-  EqualizeButton: {fileID: 426366398}
-  x2ForRightButton: {fileID: 127559776}
-  x2ForLeftButton: {fileID: 2101745633}
   animationDuration: 0.5
   windowRectTransform: {fileID: 661660942}
-  leftMoneyInputField: {fileID: 1638916348}
-  rightMoneyInputField: {fileID: 1843718682}
   leftTotalAmountText: {fileID: 661758547}
   rightTotalAmountText: {fileID: 1131737607}
   leftMoneyText: {fileID: 863978518}
   rightMoneyText: {fileID: 410142939}
   leftPlayerNameText: {fileID: 1687345559}
   rightPlayerNameText: {fileID: 448370302}
+  offerButton: {fileID: 1786861479}
+  closeButton: {fileID: 1309615251}
+  leftMoneyInputField: {fileID: 1638916348}
+  rightMoneyInputField: {fileID: 1843718682}
 --- !u!1 &242051801
 GameObject:
   m_ObjectHideFlags: 0
@@ -6764,6 +6761,8 @@ MonoBehaviour:
   cheat10: 113
   cheat30: 119
   cheat40: 101
+  fadeImage: {fileID: 828017730}
+  "distance\u0421orrection": 45
 --- !u!4 &456273708
 Transform:
   m_ObjectHideFlags: 0
@@ -10600,6 +10599,81 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &828017728
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 828017729}
+  - component: {fileID: 828017731}
+  - component: {fileID: 828017730}
+  m_Layer: 5
+  m_Name: DiceFadeImage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &828017729
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 828017728}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1139753952}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 144, y: 0}
+  m_SizeDelta: {x: 1000, y: 1000}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &828017730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 828017728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.14901961, g: 0.14901961, b: 0.16470589, a: 0.8235294}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &828017731
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 828017728}
+  m_CullTransparentMesh: 1
 --- !u!1 &828929717
 GameObject:
   m_ObjectHideFlags: 0
@@ -15309,6 +15383,7 @@ RectTransform:
   - {fileID: 50872913}
   - {fileID: 737342320}
   - {fileID: 225522486}
+  - {fileID: 828017729}
   m_Father: {fileID: 835971906}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -20715,8 +20790,6 @@ MonoBehaviour:
   leftPanel: {fileID: 869794660}
   rightPanel: {fileID: 1348437632}
   companyCardPrefab: {fileID: 6847487903718748667, guid: e79fcca758f858d46b5df281fa633c16, type: 3}
-  acceptButton: {fileID: 1337825400}
-  cancelButton: {fileID: 964931189}
   animationDuration: 0.5
   windowRectTransform: {fileID: 1608823746}
   leftTotalAmountText: {fileID: 1607349938}
@@ -20725,6 +20798,8 @@ MonoBehaviour:
   rightMoneyText: {fileID: 72497169}
   leftPlayerNameText: {fileID: 1350335257}
   rightPlayerNameText: {fileID: 1265540987}
+  acceptButton: {fileID: 1337825400}
+  cancelButton: {fileID: 964931189}
 --- !u!1 &1612031360
 GameObject:
   m_ObjectHideFlags: 0

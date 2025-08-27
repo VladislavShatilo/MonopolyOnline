@@ -1,6 +1,7 @@
 ﻿using Photon.Pun;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// DiceManagerPhoton отвечает за синхронные броски кубиков в Photon.
@@ -18,6 +19,12 @@ public class DiceManagerPhoton : MonoBehaviourPun
     [SerializeField] private KeyCode cheat10 = KeyCode.Q;
     [SerializeField] private KeyCode cheat30 = KeyCode.W;
     [SerializeField] private KeyCode cheat40 = KeyCode.E;
+
+    [Header("UI")]
+    [SerializeField] private Image fadeImage;
+    [SerializeField] private int distanceСorrection = 45;
+
+    private GameObject tempCell; 
     private int cheatMoves = -1;
 
     private void Awake()
@@ -25,17 +32,20 @@ public class DiceManagerPhoton : MonoBehaviourPun
         dice1GO.SetActive(false);
         dice2GO.SetActive(false);
     }
-
+  
     private void OnEnable()
     {
+        EventBus.Subscribe<DiceFadeEvent>(HighlightCell);
         EventBus.Subscribe<RollDiceJailButtonEvent>(OnRollDiceJail);
         EventBus.Subscribe<RollDiceButtonEvent>(OnRollDiceButton);
     }
 
     private void OnDisable()
     {
+        EventBus.Unsubscribe<DiceFadeEvent>(HighlightCell);
         EventBus.Unsubscribe<RollDiceJailButtonEvent>(OnRollDiceJail);
         EventBus.Unsubscribe<RollDiceButtonEvent>(OnRollDiceButton);
+
     }
 
     private void Update()
@@ -70,18 +80,16 @@ public class DiceManagerPhoton : MonoBehaviourPun
     [PunRPC]
     private void RPC_SetDiceResult(int first, int second, int playerId, bool isForJail)
     {
-        StartCoroutine(RollDiceRoutine(first, second, playerId, isForJail));
+        RollDiceRoutine(first, second, playerId, isForJail);
     }
 
-    private IEnumerator RollDiceRoutine(int first, int second, int playerId, bool isForJail)
+    private void RollDiceRoutine(int first, int second, int playerId, bool isForJail)
     {
         dice1GO.SetActive(true);
         dice2GO.SetActive(true);
-
         dice1Instance.RollToResult(first);
         dice2Instance.RollToResult(second);
 
-        yield return new WaitForSeconds(0.4f);
 
         if (!isForJail && PhotonNetwork.IsMasterClient)
         {
@@ -98,7 +106,25 @@ public class DiceManagerPhoton : MonoBehaviourPun
             HandlePlayerMove(first, second, playerId);
         }
     }
-
+    public void HighlightCell(DiceFadeEvent e)
+    {
+        if (e.IsMovementStart)
+        {
+            fadeImage.gameObject.SetActive(true);
+            GameObject cell = CellsManager.Instance.GetCellByIndex(e.CellId);
+            tempCell = Instantiate(cell, fadeImage.transform);
+            RectTransform rectTransform = tempCell.GetComponent<RectTransform>();
+            tempCell.GetComponent<RectTransform>().position = new Vector2(rectTransform.position.x + distanceСorrection, rectTransform.position.y - distanceСorrection);
+        }
+        else
+        {
+            fadeImage.gameObject.SetActive(false);
+            if (tempCell != null) Destroy(tempCell);
+            dice1GO.SetActive(false);
+            dice2GO.SetActive(false);
+        }
+       
+    }
     private void HandlePlayerMove(int first, int second, int playerId)
     {
         int result = (cheatMoves > 0) ? cheatMoves : (first + second);
@@ -167,4 +193,18 @@ public class PlayerRolledDoubleEvent
         Steps = steps;
     }
 }
+public class DiceFadeEvent
+{
+
+    public int CellId;
+    public bool IsMovementStart;
+    public DiceFadeEvent(int cellId, bool isMovementStart)
+    {
+
+        CellId = cellId;
+        IsMovementStart = isMovementStart;
+    }
+}
+
+
 #endregion
