@@ -56,7 +56,7 @@ public class AuctionManager : MonoBehaviourPunCallbacks
     private void RPC_StartAuctionRequest(int starterActorNumber, int companyId, int companyBasePrice)
     {
         if (!PhotonNetwork.IsMasterClient) return;
-       
+
 
         photonView.RPC(nameof(RPC_UpdateAuction), RpcTarget.All, starterActorNumber, companyId, companyBasePrice);
 
@@ -87,7 +87,7 @@ public class AuctionManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        
+
 
         currentBidderIndex = 0;
     }
@@ -107,7 +107,13 @@ public class AuctionManager : MonoBehaviourPunCallbacks
     public void RPC_PlayActionRequest(int playerId)
     {
         if (!PhotonNetwork.IsMasterClient || !isAuctionActive) return;
-
+        int activeNotPassed = PhotonNetwork.PlayerList.Length - passed.Count;
+        if (bidders.Count == 1 || activeNotPassed <= 1)
+        {
+            Debug.Log("[Auction] Only one active player left → auto-win");
+            EndAuction_WithWinner(playerId, basePrice+ FIRST_BID_INCREMENT);
+            return;
+        }
         // Проверка: сейчас ли ход этого игрока?
         int currentActor = bidders[currentBidderIndex];
         if (currentActor != playerId)
@@ -115,17 +121,19 @@ public class AuctionManager : MonoBehaviourPunCallbacks
             Debug.LogWarning($"[Auction] Not bidder's turn. Actor {playerId}");
             return;
         }
-        currentPrice = (lastBidderActorNumber == -1) ? basePrice + FIRST_BID_INCREMENT  : currentPrice + FIRST_BID_INCREMENT;
+        
+        currentPrice = (lastBidderActorNumber == -1) ? basePrice + FIRST_BID_INCREMENT : currentPrice + FIRST_BID_INCREMENT;
 
         lastBidderActorNumber = playerId;
 
+       
         photonView.RPC(nameof(RPC_UpdatePlayAction), RpcTarget.All, playerId, currentPrice);
 
 
         MoveToNextBidderAndPrompt();
     }
     [PunRPC]
-    public void RPC_UpdatePlayAction(int playerId,int newPrice)
+    public void RPC_UpdatePlayAction(int playerId, int newPrice)
     {
         lastBidderActorNumber = playerId;
         currentPrice = newPrice;
@@ -216,7 +224,7 @@ public class AuctionManager : MonoBehaviourPunCallbacks
     {
         EventBus.Publish(new AuctionTimerUpdatedEvent(currentBidderActorNumber, timeLeft));
     }
- 
+
     #endregion
 
     #region Master helpers
@@ -245,12 +253,28 @@ public class AuctionManager : MonoBehaviourPunCallbacks
     }
     private void MoveToNextBidderAndPrompt()
     {
+        // Если больше нет участников, а ставок не было → никто не выиграл
         if (bidders.Count == 0)
         {
-            EndAuction_NoWinner();
+            if (lastBidderActorNumber == -1)
+                EndAuction_NoWinner();
+            else
+                EndAuction_WithWinner(lastBidderActorNumber, currentPrice);
             return;
         }
 
+        // Получаем список оставшихся участников, которые еще не пасовали
+        var activeBidders = bidders.Where(b => !passed.Contains(b)).ToList();
+
+        // Особый случай: остался только один участник
+        if (activeBidders.Count == 1)
+        {
+            currentBidderIndex = bidders.IndexOf(activeBidders[0]);
+            PromptCurrentBidder();
+            return; // ждём решения игрока (купит или пас)
+        }
+
+        // Иначе — обычная логика: найти следующего не пасовавшего
         for (int safety = 0; safety < bidders.Count; safety++)
         {
             currentBidderIndex = (currentBidderIndex + 1) % bidders.Count;
@@ -283,7 +307,7 @@ public class AuctionManager : MonoBehaviourPunCallbacks
         bidStartTime = PhotonNetwork.Time;
 
         photonView.RPC(nameof(RPC_PromptBid), RpcTarget.All, bidder, companyId, currentPrice, minAllowedBid, bidStartTime);
-        
+
     }
 
     private void EndAuction_NoWinner()
@@ -329,10 +353,10 @@ public class AuctionManager : MonoBehaviourPunCallbacks
     {
         EventBus.Publish(new AuctionPromptBidEvent(bidderActorNumber, companyId, shownCurrentPrice, minAllowedBid));
 
-        
+
     }
 
-  
+
     [PunRPC]
     private void RPC_AuctionEnded(int winnerActorNumber, int finalPrice, int companyId, int reasonInt)
     {
@@ -435,7 +459,7 @@ public class AuctionEndedEventWin
         Reason = reason;
     }
 }
-   
+
 
 /// <summary>
 /// Доп. доменное событие — победитель аукциона купил компанию.

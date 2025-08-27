@@ -8,7 +8,8 @@ using UnityEngine;
 public enum TurnMode
 {
     Normal,
-    Auction
+    Auction,
+    Trade  // новый режим для предложения договора
 }
 public class TurnManager : MonoBehaviourPunCallbacks
 {
@@ -22,8 +23,9 @@ public class TurnManager : MonoBehaviourPunCallbacks
     private bool isTurnActive = false;
     public int CurrentTurnPlayerId => currentTurnPlayerId;
     private HashSet<int> playersWithExtraTurn = new HashSet<int>();
+    private float pausedTimeLeft;
 
- 
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -52,16 +54,16 @@ public class TurnManager : MonoBehaviourPunCallbacks
     {
         if (!isTurnActive) return;
 
-        if (CurrentMode == TurnMode.Normal)
-        {
-            double elapsed = PhotonNetwork.Time - turnStartTime;
-            float timeLeft = Mathf.Clamp((float)(turnDuration - elapsed), 0, turnDuration);
+        // считаем только если режим NORMAL
+        if (CurrentMode != TurnMode.Normal) return;
 
-            UpdateTurnTimer(timeLeft);
+        double elapsed = PhotonNetwork.Time - turnStartTime;
+        float timeLeft = Mathf.Clamp((float)(turnDuration - elapsed), 0, turnDuration);
 
-            if (timeLeft <= 0f)
-                EndTurnInternal();
-        }
+        UpdateTurnTimer(timeLeft);
+
+        if (timeLeft <= 0f)
+            EndTurnInternal();
     }
 
     #region Player UI
@@ -201,6 +203,18 @@ public class TurnManager : MonoBehaviourPunCallbacks
 
     public void SetMode(TurnMode mode)
     {
+        if (CurrentMode == TurnMode.Normal && mode != TurnMode.Normal)
+        {
+            // уходим из Normal → сохраняем остаток
+            double elapsed = PhotonNetwork.Time - turnStartTime;
+            pausedTimeLeft = Mathf.Clamp((float)(turnDuration - elapsed), 0, turnDuration);
+        }
+        else if (CurrentMode != TurnMode.Normal && mode == TurnMode.Normal)
+        {
+            // возвращаемся в Normal → пересчитываем startTime
+            turnStartTime = PhotonNetwork.Time - (turnDuration - pausedTimeLeft);
+        }
+
         CurrentMode = mode;
     }
 

@@ -12,6 +12,8 @@ public class Company
 {
     public int Id { get; private set; }
     public bool IsBought { get; set; } = false;
+    public string Name { get; set; }
+    public int Price { get; set; }
     public int OwnerId { get; set; } = -1;
     public int RentLevel { get; set; } = 0;
     public bool IsMortgaged { get; set; } = false; 
@@ -34,6 +36,9 @@ public class Company
         Group = companyData.group;
         MortgagePrice = companyData.pledgePrice;
         BuyoutPrice = companyData.buyoutPrice;
+        Name = companyData.name;
+        Price = companyData.price;
+
     }
 
     public Company(int id, FieldCompanyData fieldCompanyData)
@@ -45,6 +50,8 @@ public class Company
         Group = fieldCompanyData.group;
         MortgagePrice = fieldCompanyData.pledgePrice;
         BuyoutPrice = fieldCompanyData.buyoutPrice;
+        Name = fieldCompanyData.name;
+        Price = fieldCompanyData.price;
     }
 
     public Company(int id, DiceCompanyData diceCompanyData)
@@ -56,12 +63,34 @@ public class Company
         Group = diceCompanyData.group;
         MortgagePrice = diceCompanyData.pledgePrice;
         BuyoutPrice = diceCompanyData.buyoutPrice;
+        Name = diceCompanyData.name;
+        Price = diceCompanyData.price;
     }
 
     public void ResetData()
     {
         IsBought = false;
         OwnerId = -1;
+        RentLevel = 0;
+    }
+    public void TransferTo(int newOwnerId)
+    {
+        // Сначала проверяем, что компания вообще куплена
+        if (!IsBought) return;
+
+        // Меняем владельца
+        OwnerId = newOwnerId;
+
+        IsMortgaged = IsMortgaged;
+        MortgageTurnsLeft = MortgageTurnsLeft;
+
+        var cellUI = CellsManager.Instance.GetCellByIndex(Id).GetComponent<UICompanyCell>();
+        cellUI.HandleCompanyBought(Id, newOwnerId);
+        // Обновляем аренду для группы
+       CompanyManager.Instance.UpdateRent(this);
+        // MortgageTurnsLeft = 0;
+
+        // При передаче можно сбросить уровень ренты (по правилам твоей игры)
         RentLevel = 0;
     }
 }

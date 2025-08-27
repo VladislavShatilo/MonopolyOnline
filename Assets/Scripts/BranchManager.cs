@@ -209,7 +209,7 @@ public class BranchManager : MonoBehaviourPun
         return company.OwnerId == player.id && company.RentLevel > 0;
     }
 
-    private void ShowBranchButtonsForLevel(UICompanyCell ui, int level)
+    public void ShowBranchButtonsForLevel(UICompanyCell ui, int level)
     {
         switch (level)
         {

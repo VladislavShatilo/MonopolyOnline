@@ -110,6 +110,17 @@ MonoBehaviour:
   - RPC_UpdatePlayAction
   - RPC_UpdateAuctionTimer
   - RPC_ResetAuctionTimer
+  - RPC_ReceiveTradeProposal
+  - RPC_PromptTrade
+  - RPC_StartTradeRequest
+  - RPC_TradeEnded
+  - RPC_UpdateTradeTimer
+  - RPC_SendOfferToAll
+  - RPC_CompleteTrade
+  - RPC_AuctionStartedBroadcast
+  - RPC_OnBidPlaced
+  - RPC_OnPassed
+  - RPC_PlayActionRequest_Min
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

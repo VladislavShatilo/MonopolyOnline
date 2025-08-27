@@ -246,7 +246,7 @@ public class CompanyManager : MonoBehaviourPun
         return true;
     }
 
-    private void UpdateRent(Company company)
+    public void UpdateRent(Company company)
     {
 
         if (company.Type == CompanyType.FieldCompany || company.Type == CompanyType.DiceCompany)

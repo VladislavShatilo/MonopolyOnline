@@ -81,6 +81,10 @@ public class MortgageManager : MonoBehaviourPun
                     ui.ShowBuyoutButton();
                 }
             }
+            else if (isMyTurn && company.IsBought && company.OwnerId == e.PlayerId && ownsGroup)
+            {
+               BranchManager.Instance.ShowBranchButtonsForLevel(ui, company.RentLevel);
+            }
             else
             {
                 ui.HideAllBranchButtons();
