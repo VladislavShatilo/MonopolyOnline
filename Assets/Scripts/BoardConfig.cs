@@ -96,6 +96,8 @@ public class CellData
     public SpendData spendData;
     public QuestionData questionData;
     public CornerData cornerData;
+    public List<PlayerMove> PlayersOnCell = new List<PlayerMove>();
+
 }
 
 [CreateAssetMenu(fileName = "BoardConfig", menuName = "Monopoly/BoardConfig")]

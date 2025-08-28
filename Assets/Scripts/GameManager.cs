@@ -93,7 +93,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         var pm = playerPiece.GetComponent<PlayerMove>();
         playerMoves[localId] = pm;
-
+        pm.photonView.RPC(nameof(PlayerMove.RPC_RegisterOnCell), RpcTarget.AllBuffered, 0);
     }
 
     private void RemovePlayer(int playerId)

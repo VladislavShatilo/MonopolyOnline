@@ -14583,9 +14583,9 @@ MonoBehaviour:
   cellsRoot: {fileID: 50872913}
   playerPiecePrefab: {fileID: 6486996365655447274, guid: cdd9385e161b3184b9f5b6a92a83d2df, type: 3}
   playerColors:
-  - {r: 1, g: 0, b: 0.68348503, a: 1}
-  - {r: 0.026268482, g: 1, b: 0, a: 1}
-  - {r: 1, g: 0.57161915, b: 0, a: 1}
+  - {r: 1, g: 0.030918185, b: 0, a: 1}
+  - {r: 0.02512029, g: 0.9150943, b: 0, a: 1}
+  - {r: 0.9208026, g: 0, b: 1, a: 1}
   - {r: 0, g: 0.6845889, b: 1, a: 1}
   startPlayerPosition: {x: -240, y: 390, z: 0}
 --- !u!4 &1075959801
