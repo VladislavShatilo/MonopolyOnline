@@ -66,7 +66,7 @@ public static class CellOccupancyManager
 
         Vector3[] positions;
         // --- здесь оставляем твою логику позиций (скопируй свои варианты) ---
-        if (cellIndex % 10 == 0)
+        if (cellIndex % 10 == 0 && cellIndex != 30)
         {
             switch (count)
             {

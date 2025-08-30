@@ -35,19 +35,23 @@ public class PlayerMove : MonoBehaviourPun
     private void OnEnable()
     {
         EventBus.Subscribe<OnPlayerMoveEvent>(Move);
+        EventBus.Subscribe<OnPlayerTeleportEvent>(TeleportToRandomCell);
+
         EventBus.Subscribe<MoveToJailEvent>(MoveToJail);
     }
 
     private void OnDisable()
     {
         EventBus.Unsubscribe<OnPlayerMoveEvent>(Move);
+        EventBus.Unsubscribe<OnPlayerTeleportEvent>(TeleportToRandomCell);
+
         EventBus.Unsubscribe<MoveToJailEvent>(MoveToJail);
     }
 
     private void Move(OnPlayerMoveEvent e)
     {
         if (!photonView.IsMine) return;
-        photonView.RPC(nameof(RPC_MoveSteps), RpcTarget.AllBuffered, e.Steps);
+        photonView.RPC(nameof(RPC_MoveSteps), RpcTarget.AllBuffered, e.Steps,e.Forward);
     }
     [PunRPC]
     public void RPC_RegisterOnCell(int cellIndex)
@@ -72,9 +76,32 @@ public class PlayerMove : MonoBehaviourPun
 
         Debug.Log($"PLAYER_RPC: {gameObject.name} RPC_RegisterOnCell cell={cellIndex} center={center}");
     }
+    public void TeleportToRandomCell(OnPlayerTeleportEvent e)
+    {
+        if (PhotonNetwork.LocalPlayer.ActorNumber == e.PlayerId)
+        {
+            if (!photonView.IsMine) return;
+            int randomIndex;
+            do
+            {
+                randomIndex = UnityEngine.Random.Range(0, boardCells.Count);
+            } while (randomIndex == currentCellIndex);
+            int steps = 0;
+            if (randomIndex > currentCellIndex)
+            {
+                steps = randomIndex - currentCellIndex;
+            }
+            else
+            {
+                steps = randomIndex + 40 - currentCellIndex;
+            }
+            photonView.RPC(nameof(RPC_MoveSteps), RpcTarget.AllBuffered, steps, true);
+        }
+
+    }
 
     [PunRPC]
-    private void RPC_MoveSteps(int steps)
+    private void RPC_MoveSteps(int steps,bool forward)
     {
         if (boardCells.Count == 0)
         {
@@ -82,14 +109,17 @@ public class PlayerMove : MonoBehaviourPun
             return;
         }
 
-        StartCoroutine(MoveStepsCoroutine(steps));
+        StartCoroutine(MoveStepsCoroutine(steps, forward));
     }
 
-    private IEnumerator MoveStepsCoroutine(int steps)
+    private IEnumerator MoveStepsCoroutine(int steps,bool forward)
     {
-        // Сначала убираем игрока со старой клетки
 
         int targetIndex = (currentCellIndex + steps) % boardCells.Count;
+        if (!forward)
+        {
+            targetIndex = (currentCellIndex - steps + boardCells.Count) % boardCells.Count;
+        }
         EventBus.Publish(new DiceFadeEvent(targetIndex, true));
         yield return new WaitForSeconds(0.8f);
         CellOccupancyManager.UnregisterPlayerFromCell(currentCellIndex, this);
@@ -97,14 +127,21 @@ public class PlayerMove : MonoBehaviourPun
         // Движение по шагам
         for (int i = 0; i < steps; i++)
         {
-            currentCellIndex = (currentCellIndex + 1) % boardCells.Count;
+            if (forward)
+            {
+                currentCellIndex = (currentCellIndex + 1) % boardCells.Count;
+            }
+            else
+            {
+                currentCellIndex = (currentCellIndex - 1 + boardCells.Count) % boardCells.Count;
+            }
             Vector3 stepPos = boardCells[currentCellIndex].position;
 
             yield return MoveToPosition(stepPos);
 
             PlayerData player = GameManager.Instance.GetPlayerById(photonView.Owner.ActorNumber);
 
-            if (currentCellIndex == 0 && !player.IsInJail)
+            if (currentCellIndex == 0 && !player.IsInJail && !player.NextMoveBackward)
             {
                 Bank.Instance.AddMoney(player, 2_000);
             }

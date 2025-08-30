@@ -29,8 +29,7 @@ public class CellEventHandler
                 break;
             case CellType.Question:
             case CellType.Spend:
-                QuestionManager.Instance.HandleQuestionCell(e.PlayerID);            
-               
+                ChanceManager.Instance.GiveRandomBuff(e.PlayerID);               
                 break;
             case CellType.Corner:
 

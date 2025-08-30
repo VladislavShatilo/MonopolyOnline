@@ -13,6 +13,13 @@ public class PlayerData
 
     public bool IsInJail = false;
     public int JailTurnsLeft;
+    public bool SkipNextTurn = false;
+    public bool NextMoveBackward { get; set; } = false;
+    public bool HasLoan = false;
+    public int LoanTurnsLeft;
+
+
+
     // —сылка на Photon игрока (можно не хранить, если достаточно id)
     [System.NonSerialized]
     public Player photonPlayer;

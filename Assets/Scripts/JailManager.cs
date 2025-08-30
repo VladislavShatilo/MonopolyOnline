@@ -50,6 +50,7 @@ public class JailManager : MonoBehaviourPun
         if (!PhotonNetwork.IsMasterClient) return;
 
         photonView.RPC(nameof(RPC_SendToJail), PhotonNetwork.CurrentRoom.GetPlayer(playerID), playerID);
+        TurnManager.Instance.RequestEndTurn();
     }
 
     [PunRPC]
@@ -64,8 +65,7 @@ public class JailManager : MonoBehaviourPun
             EventBus.Publish(new MoveToJailEvent(playerID));
             EventBus.Publish(new SetTurnsJailEvent(playerID, player.JailTurnsLeft));
         }
-
-        TurnManager.Instance.RequestEndTurn();
+       
     }
 
     /// <summary> Выпускает игрока из тюрьмы. </summary>
@@ -108,7 +108,7 @@ public class JailManager : MonoBehaviourPun
             ReleaseFromJail(e.PlayerID, false);
 
             if (PhotonNetwork.LocalPlayer.ActorNumber == e.PlayerID)
-                EventBus.Publish(new OnPlayerMoveEvent(e.FirstDice + e.SecondDice));
+                EventBus.Publish(new OnPlayerMoveEvent(e.FirstDice + e.SecondDice,true));
         }
         else
         {

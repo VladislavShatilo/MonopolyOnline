@@ -129,13 +129,22 @@ public class DiceManagerPhoton : MonoBehaviourPun
     {
         int result = (cheatMoves > 0) ? cheatMoves : (first + second);
         bool isDouble = first == second;
+        PlayerData player = GameManager.Instance.GetPlayerById(playerId);
 
         if (PhotonNetwork.LocalPlayer.ActorNumber == playerId)
         {
-            EventBus.Publish(new OnPlayerMoveEvent(result));
+            if (player.NextMoveBackward)
+            {
+                player.NextMoveBackward = false; // сбросим, чтобы только один ход был назад
+                EventBus.Publish(new OnPlayerMoveEvent(result, false));
+            }
+            else
+            {
+                EventBus.Publish(new OnPlayerMoveEvent(result, true));
+            }
             if (isDouble)
             {
-                EventBus.Publish(new PlayerRolledDoubleEvent(playerId, result));
+                EventBus.Publish(new PlayerRolledDoubleEvent(playerId, isDouble));
             }
         }
 
@@ -180,17 +189,22 @@ public class RollDiceJailButtonEvent
 public class OnPlayerMoveEvent
 {
     public int Steps { get; }
-    public OnPlayerMoveEvent(int steps) => Steps = steps;
+    public bool Forward { get; }
+    public OnPlayerMoveEvent(int steps,bool forward)
+    {
+        Steps = steps;
+        Forward = forward;
+    }
 }
 public class PlayerRolledDoubleEvent
 {
     public int PlayerId { get; }
-    public int Steps { get; }
+    public bool IsDouble { get; }
 
-    public PlayerRolledDoubleEvent(int playerId, int steps)
+    public PlayerRolledDoubleEvent(int playerId, bool isDouble)
     {
         PlayerId = playerId;
-        Steps = steps;
+        IsDouble = isDouble;
     }
 }
 public class DiceFadeEvent

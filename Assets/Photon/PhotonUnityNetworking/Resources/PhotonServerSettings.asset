@@ -123,6 +123,12 @@ MonoBehaviour:
   - RPC_PlayActionRequest_Min
   - RPC_SetTargetPosition
   - RPC_RegisterOnCell
+  - RPC_ApplyBuff
+  - RPC_RequestBuff
+  - RPC_RequestTakeLoan
+  - RPC_RequestPayLoan
+  - RPC_ShowLoanWindow
+  - RPC_ReceiveChatMessage
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
