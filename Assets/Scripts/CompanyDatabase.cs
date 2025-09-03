@@ -80,6 +80,9 @@ public class Company
 
         // Меняем владельца
         OwnerId = newOwnerId;
+        PlayerData player =  GameManager.Instance.GetPlayerById(OwnerId);
+        player.OwnedCompanies.Add(this);
+        EventBus.Publish(new OnUpdatePlayerCapitalEvent(player));
 
         IsMortgaged = IsMortgaged;
         MortgageTurnsLeft = MortgageTurnsLeft;

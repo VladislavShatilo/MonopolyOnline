@@ -1,5 +1,4 @@
 ﻿using Photon.Pun;
-using Photon.Pun.Demo.PunBasics;
 using Photon.Realtime;
 using System;
 using System.Collections.Generic;
@@ -39,6 +38,22 @@ public class AuctionManager : MonoBehaviourPunCallbacks
 
     #region Public API (вызывают игровые системы)
 
+    public override void OnEnable()
+    {
+        base.OnEnable();
+        EventBus.Subscribe<StartAuctionEvent>(StartAuctionRequest);
+        EventBus.Subscribe<PassAuctionRequestEvent>(PassRequest);
+        EventBus.Subscribe<PlayAuctionRequestEvent>(PlayActionRequest);
+    }
+    public override void OnDisable()
+    {
+        base.OnDisable();
+        EventBus.Unsubscribe<StartAuctionEvent>(StartAuctionRequest);
+        EventBus.Unsubscribe<PassAuctionRequestEvent>(PassRequest);
+        EventBus.Unsubscribe<PlayAuctionRequestEvent>(PlayActionRequest);
+
+
+    }
     /// <summary>
     /// Старт аукциона. Вызывать у мастера после отказа игрока от покупки компании.
     /// </summary>
@@ -46,9 +61,9 @@ public class AuctionManager : MonoBehaviourPunCallbacks
     /// <param name="companyId">ID компании на доске</param>
     /// <param name="companyBasePrice">Базовая цена компании</param>
 
-    public void StartAuctionRequest(int starterActorNumber, int companyId, int companyBasePrice)
+    public void StartAuctionRequest(StartAuctionEvent e)
     {
-        photonView.RPC(nameof(RPC_StartAuctionRequest), RpcTarget.MasterClient, starterActorNumber, companyId, companyBasePrice);
+        photonView.RPC(nameof(RPC_StartAuctionRequest), RpcTarget.MasterClient, e.PlayerId, e.CellIndex, e.Price);
 
     }
 
@@ -97,9 +112,9 @@ public class AuctionManager : MonoBehaviourPunCallbacks
     /// </summary>
     /// 
 
-    public void PlayActionRequest(int playerId)
+    public void PlayActionRequest(PlayAuctionRequestEvent e)
     {
-        photonView.RPC(nameof(RPC_PlayActionRequest), RpcTarget.MasterClient, playerId);
+        photonView.RPC(nameof(RPC_PlayActionRequest), RpcTarget.MasterClient, e.PlayerId);
 
     }
 
@@ -145,9 +160,9 @@ public class AuctionManager : MonoBehaviourPunCallbacks
     /// </summary>
 
 
-    public void PassRequest(int playerId)
+    private void PassRequest(PassAuctionRequestEvent e)
     {
-        photonView.RPC(nameof(RPC_RequestPass), RpcTarget.MasterClient, playerId);
+        photonView.RPC(nameof(RPC_RequestPass), RpcTarget.MasterClient,e.PlayerId);
     }
     [PunRPC]
     private void RPC_RequestPass(int playerId)
@@ -216,7 +231,7 @@ public class AuctionManager : MonoBehaviourPunCallbacks
 
         if (timeLeft <= 0f && currentBidder != -1)
         {
-            PassRequest(currentBidder);
+            EventBus.Publish(new PlayAuctionRequestEvent(currentBidder));
         }
     }
     [PunRPC]
@@ -305,8 +320,9 @@ public class AuctionManager : MonoBehaviourPunCallbacks
             ? basePrice + FIRST_BID_INCREMENT // первая ставка
             : currentPrice + FIRST_BID_INCREMENT; // после чьей-то ставки
         bidStartTime = PhotonNetwork.Time;
+        string companyName = CellsManager.Instance.GetCellDataByIndex(companyId).cellName;
 
-        photonView.RPC(nameof(RPC_PromptBid), RpcTarget.All, bidder, companyId, currentPrice, minAllowedBid, bidStartTime);
+        photonView.RPC(nameof(RPC_PromptBid), PhotonNetwork.CurrentRoom.GetPlayer(bidder), bidder, companyName, minAllowedBid);
 
     }
 
@@ -349,9 +365,10 @@ public class AuctionManager : MonoBehaviourPunCallbacks
     /// Приглашение сделать ставку. UI должен показываться только локальному игроку, если его ActorNumber == bidderActorNumber.
     /// </summary>
     [PunRPC]
-    private void RPC_PromptBid(int bidderActorNumber, int companyId, int shownCurrentPrice, int minAllowedBid, double startTime)
+    private void RPC_PromptBid(int bidderActorNumber, string companyName, int minAllowedBid)
     {
-        EventBus.Publish(new AuctionPromptBidEvent(bidderActorNumber, companyId, shownCurrentPrice, minAllowedBid));
+        PlayerData playerData = GameManager.Instance.GetPlayerById(bidderActorNumber);
+        EventBus.Publish(new AuctionPromptBidEvent(playerData, companyName, minAllowedBid));
 
 
     }
@@ -431,15 +448,13 @@ public class AuctionEndedEvent
 }
 public class AuctionPromptBidEvent
 {
-    public int BidderActorNumber { get; }
-    public int CompanyId { get; }
-    public int ShownCurrentPrice { get; } // текущая отображаемая цена (0 → покажите базовую)
+    public PlayerData Player { get; }
+    public string CompanyName { get; }
     public int MinAllowedBid { get; }     // минимальная допустимая ставка для этого хода
-    public AuctionPromptBidEvent(int bidderActorNumber, int companyId, int shownCurrentPrice, int minAllowedBid)
+    public AuctionPromptBidEvent(PlayerData player, string companyName, int minAllowedBid)
     {
-        BidderActorNumber = bidderActorNumber;
-        CompanyId = companyId;
-        ShownCurrentPrice = shownCurrentPrice;
+        Player = player;
+        CompanyName = companyName;
         MinAllowedBid = minAllowedBid;
     }
 }

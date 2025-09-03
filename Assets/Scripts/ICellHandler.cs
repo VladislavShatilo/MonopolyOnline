@@ -6,8 +6,8 @@ using UnityEngine;
 public interface ICellHandler
 {
     void Handle(int cellIndex, int playerId);
-    void ShowPurchaseUI(int cellIndex);
-    void ShowRentUI(int cellIndex);
+    void ShowPurchaseUI(PlayerData player,int cellIndex);
+    void ShowRentUI(PlayerData player,int cellIndex);
     int GetPrice(int cellIndex);
     int GetRent(int cellIndex);
     int GetOwner(int cellIndex);
@@ -16,6 +16,7 @@ public interface ICellHandler
 // Базовый класс с общей логикой
 public abstract class BaseCompanyHandler : ICellHandler
 {
+    
     public virtual void Handle(int cellIndex, int playerId)
     {
 
@@ -38,13 +39,11 @@ public abstract class BaseCompanyHandler : ICellHandler
         }
 
 
-            var playerData = GameManager.Instance.GetPlayerById(PhotonNetwork.LocalPlayer.ActorNumber);
-        string coloredName = $"<color=#{ColorUtility.ToHtmlStringRGB(playerData.playerColor)}>{playerData.Name}</color>";
-        //MessageLog.Instance.AddMessage($"{coloredName} попал в сектор {company.Id");
+      
     }
 
-    public abstract void ShowPurchaseUI(int cellIndex);
-    public abstract void ShowRentUI(int cellIndex);
+    public abstract void ShowPurchaseUI(PlayerData player,int cellIndex);
+    public abstract void ShowRentUI(PlayerData player,int cellIndex);
     public abstract int GetPrice(int cellIndex);
     public abstract int GetRent(int cellIndex);
 
@@ -72,16 +71,17 @@ public abstract class BaseCompanyHandler : ICellHandler
 // Обработчик обычной компании
 public class DefaultCompanyHandler : BaseCompanyHandler
 {
-    public override void ShowPurchaseUI(int cellIndex)
+    public override void ShowPurchaseUI(PlayerData player,int cellIndex)
     {
         var cell = CellsManager.Instance.GetCellDataByIndex(cellIndex);
-        UIBuyWindow.Instance.ShowBuyWindow(cellIndex, cell.companyData);
+        UIBuyWindow.Instance.ShowBuyWindow(player,cellIndex, cell.companyData.price);
     }
 
-    public override void ShowRentUI(int cellIndex)
+    public override void ShowRentUI(PlayerData player, int cellIndex)
     {
         var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
-        UIPayRent.Instance.ShowRentWindow(cellIndex, company.CompanyData.rent[company.RentLevel]);
+
+        UIPayRentWindow.Instance.Show(player,cellIndex, company.CompanyData.rent[company.RentLevel]);
     }
 
     public override int GetPrice(int cellIndex)
@@ -99,16 +99,16 @@ public class DefaultCompanyHandler : BaseCompanyHandler
 // Обработчик полевой компании
 public class FieldCompanyHandler : BaseCompanyHandler
 {
-    public override void ShowPurchaseUI(int cellIndex)
+    public override void ShowPurchaseUI(PlayerData player,int cellIndex)
     {
         var cell = CellsManager.Instance.GetCellDataByIndex(cellIndex);
-        UIBuyWindow.Instance.ShowBuyWindow(cellIndex, cell.fieldCompanyData);
+        UIBuyWindow.Instance.ShowBuyWindow(player,cellIndex, cell.fieldCompanyData.price);
     }
 
-    public override void ShowRentUI(int cellIndex)
+    public override void ShowRentUI(PlayerData player, int cellIndex)
     {
         var rent = GetRent(cellIndex);
-        UIPayRent.Instance.ShowRentWindow(cellIndex, rent);
+        UIPayRentWindow.Instance.Show(player,cellIndex, rent);
     }
 
     public override int GetPrice(int cellIndex)
@@ -130,16 +130,16 @@ public class FieldCompanyHandler : BaseCompanyHandler
 // Обработчик компании с кубиком
 public class DiceCompanyHandler : BaseCompanyHandler
 {
-    public override void ShowPurchaseUI(int cellIndex)
+    public override void ShowPurchaseUI(PlayerData player,int cellIndex)
     {
         var cell = CellsManager.Instance.GetCellDataByIndex(cellIndex);
-        UIBuyWindow.Instance.ShowBuyWindow(cellIndex, cell.diceCompanyData);
+        UIBuyWindow.Instance.ShowBuyWindow(player, cellIndex, cell.diceCompanyData.price);
     }
 
-    public override void ShowRentUI(int cellIndex)
+    public override void ShowRentUI(PlayerData player, int cellIndex)
     {
         var rent = GetRent(cellIndex);
-        UIPayRent.Instance.ShowRentWindow(cellIndex, rent);
+        UIPayRentWindow.Instance.Show(player,cellIndex, rent);
     }
 
     public override int GetPrice(int cellIndex)

@@ -44,11 +44,16 @@ public class CompanyManager : MonoBehaviourPun
     private void OnEnable()
     {
         EventBus.Subscribe<AuctionEndedEventWin>(OnAuctionBuy);
-
+        EventBus.Subscribe<TryPayRentEvent>(TryPayRent);
+        EventBus.Subscribe<TryBuyCompanyEvent>(TryBuyCompany);
     }
     private void OnDisable()
     {
         EventBus.Unsubscribe<AuctionEndedEventWin>(OnAuctionBuy);
+        EventBus.Unsubscribe<TryPayRentEvent>(TryPayRent);
+        EventBus.Unsubscribe<TryBuyCompanyEvent>(TryBuyCompany);
+
+
 
     }
     #region Работа с клеткой
@@ -79,23 +84,25 @@ public class CompanyManager : MonoBehaviourPun
 
     public void OfferPurchase(int cellIndex, int playerId)
     {
-        photonView.RPC(nameof(RPC_ShowPurchaseOffer), PhotonNetwork.CurrentRoom.GetPlayer(playerId), cellIndex);
+        photonView.RPC(nameof(RPC_ShowPurchaseOffer), PhotonNetwork.CurrentRoom.GetPlayer(playerId), cellIndex, playerId);
     }
 
     [PunRPC]
-    private void RPC_ShowPurchaseOffer(int cellIndex)
+    private void RPC_ShowPurchaseOffer(int cellIndex,int playerId)
     {
         if (!TryGetCompanyAndHandler(cellIndex, out var company, out var handler)) return;
-        handler.ShowPurchaseUI(cellIndex);
+        PlayerData player = GameManager.Instance.GetPlayerById(playerId);
+
+        handler.ShowPurchaseUI(player, cellIndex);
     }
 
-    public void TryBuyCompany(int cellIndex)
+    public void TryBuyCompany(TryBuyCompanyEvent e)
     {
-        var company = CompanyDatabase.Instance.GetCompanyById(cellIndex);
+        var company = CompanyDatabase.Instance.GetCompanyById(e.CellIndex);
         if (company == null || company.IsBought) return;
 
         int playerId = PhotonNetwork.LocalPlayer.ActorNumber;
-        photonView.RPC(nameof(RPC_RequestBuyCompany), RpcTarget.MasterClient, cellIndex, playerId,0,(int)BuyReason.Buy);
+        photonView.RPC(nameof(RPC_RequestBuyCompany), RpcTarget.MasterClient, e.CellIndex, playerId,0,(int)BuyReason.Buy);
     }
 
     [PunRPC]
@@ -139,9 +146,10 @@ public class CompanyManager : MonoBehaviourPun
 
         var buyer = GameManager.Instance.GetPlayerById(ownerId);
         Debug.Log("RPC_ConfirmPurchase" + price);
+        buyer.OwnedCompanies.Add(company);
+
         Bank.Instance.RemoveMoney(buyer, price);
 
-     
 
         var cellUI = CellsManager.Instance.GetCellByIndex(cellIndex).GetComponent<UICompanyCell>();
         cellUI.HandleCompanyBought(cellIndex, ownerId);
@@ -156,20 +164,21 @@ public class CompanyManager : MonoBehaviourPun
 
     public void OfferRent(int cellIndex, int playerId, int? customPrice = null)
     {
-        photonView.RPC(nameof(RPC_ShowRentOffer), PhotonNetwork.CurrentRoom.GetPlayer(playerId), cellIndex, customPrice ?? -1);
+        photonView.RPC(nameof(RPC_ShowRentOffer), PhotonNetwork.CurrentRoom.GetPlayer(playerId), cellIndex, customPrice ?? -1,playerId);
     }
 
     [PunRPC]
-    private void RPC_ShowRentOffer(int cellIndex, int rentPrice)
+    private void RPC_ShowRentOffer(int cellIndex, int rentPrice,int playerId)
     {
         if (!TryGetCompanyAndHandler(cellIndex, out var company, out var handler)) return;
-        handler.ShowRentUI(cellIndex);
+        PlayerData player = GameManager.Instance.GetPlayerById(playerId);
+        handler.ShowRentUI(player,cellIndex);
     }
 
-    public void TryPayRent(int cellIndex)
+    public void TryPayRent(TryPayRentEvent e)
     {
         int playerId = PhotonNetwork.LocalPlayer.ActorNumber;
-        photonView.RPC(nameof(RPC_RequestRent), RpcTarget.MasterClient, cellIndex, playerId);
+        photonView.RPC(nameof(RPC_RequestRent), RpcTarget.MasterClient, e.CellIndex, playerId);
     }
 
     [PunRPC]
@@ -203,7 +212,7 @@ public class CompanyManager : MonoBehaviourPun
 
         Bank.Instance.TransferMoney(renter, owner, rentPrice);
 
-        UIPayRent.Instance.HideWindow();
+        UIPayRentWindow.Instance.HideWindow();
     }
 
     #endregion

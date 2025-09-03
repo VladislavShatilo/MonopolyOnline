@@ -1,6 +1,7 @@
 using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
@@ -10,7 +11,7 @@ public class PlayerData
     public string Name;
     public int Money;
     public Color playerColor;
-
+   
     public bool IsInJail = false;
     public int JailTurnsLeft;
     public bool SkipNextTurn = false;
@@ -18,9 +19,7 @@ public class PlayerData
     public bool HasLoan = false;
     public int LoanTurnsLeft;
 
-
-
-    // —сылка на Photon игрока (можно не хранить, если достаточно id)
+    public List<Company> OwnedCompanies = new List<Company>();
     [System.NonSerialized]
     public Player photonPlayer;
 
@@ -33,6 +32,61 @@ public class PlayerData
         playerColor = color;
         this.photonPlayer = photonPlayer;
     }
+
+    // ¬идима€ капитализаци€
+    public int VisibleCapital
+    {
+        get
+        {
+            int capital = Money;
+            for (int i = 0; i < OwnedCompanies.Count; i++)
+            {
+                capital += OwnedCompanies[i].Price;
+                if(OwnedCompanies[i].Type == CompanyType.Company)
+                {
+                    capital += OwnedCompanies[i].CompanyData.branchPrice * OwnedCompanies[i].RentLevel;
+                }
+
+            }
+            return capital;
+        }
+    }
+
+    // —крытые ресурсы, которые можно быстро мобилизовать
+    public int LiquidAssets
+    {
+        get
+        {
+            int liquid = Money;
+            for (int i = 0; i < OwnedCompanies.Count; i++)
+            {
+                if (!OwnedCompanies[i].IsMortgaged)
+                {
+                    liquid += OwnedCompanies[i].MortgagePrice;
+
+                }
+                if (OwnedCompanies[i].Type == CompanyType.Company)
+                {
+                    liquid += OwnedCompanies[i].CompanyData.branchPrice * OwnedCompanies[i].RentLevel;
+                }
+
+            }      
+            if (!HasLoan)
+            {
+                liquid += 5000; // кредиты
+
+            }
+            return liquid;
+        }
+    }
+
+    bool CanPay(int amount)
+    {
+        return LiquidAssets >= amount;
+    }
+
+    // —сылка на Photon игрока (можно не хранить, если достаточно id)
+  
 
    
 }

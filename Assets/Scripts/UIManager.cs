@@ -26,7 +26,7 @@ public class UIManager : MonoBehaviour
         Bank.Instance.OnBalanceChanged += (changedPlayer, money) =>
         {
             if (changedPlayer.id == e.Player.id)
-                uiStats.SetMoneyPlayerText(money);
+                uiStats.SetMoney(money);
         };
     }
 }

@@ -10,229 +10,130 @@ public class UIPlayerStats : MonoBehaviour
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI namePlayerText;
     [SerializeField] private TextMeshProUGUI moneyPlayerText;
+    [SerializeField] private TextMeshProUGUI capitalText;
+    [SerializeField] private TextMeshProUGUI liquidText;
+
+    [Header("Timer UI")]
     [SerializeField] private GameObject timerGO;
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private Image highlightTurnImage;
     [SerializeField] private Image highlightAuctionImage;
-    [SerializeField] private TextMeshProUGUI loanTurnsLeftText;
+
+    [Header("Loan UI")]
     [SerializeField] private GameObject loanContainer;
+    [SerializeField] private TextMeshProUGUI loanTurnsLeftText;
+    [SerializeField] private Button takeLoanButton;
+    [SerializeField] private Button payLoanButton;
 
     [Header("Buttons")]
     [SerializeField] private Button tradeButton;
-    [SerializeField] private Button takeLoanButton;
     [SerializeField] private Button leaveButton;
-    [SerializeField] private Button payLoanButton;
 
-
-    private bool isTurnActive = false;
     private PlayerData playerData;
-    private bool isActive = false;
-
-    private void Start()
-    {
-        tradeButton.onClick.AddListener(OnTradeButtonClicked);
-        takeLoanButton.onClick.AddListener(() => LoanManager.Instance.TakeLoan(playerData.id));
-        payLoanButton.onClick.AddListener(() => LoanManager.Instance.PayLoan(playerData.id));
-        loanContainer.gameObject.SetActive(false);
-
-    }
 
     private void OnEnable()
     {
-        EventBus.Subscribe<TurnTimerUpdatedEvent>(OnTimerUpdated);
-        EventBus.Subscribe<AuctionTimerUpdatedEvent>(OnTimerUpdated);
-        EventBus.Subscribe<OnTakeLoanEvent>(UpdateLoanUI);
-        EventBus.Subscribe<TradeTimerUpdatedEvent>(OnTimerUpdated);
-
+        EventBus.Subscribe<TurnTimerUpdatedEvent>(OnTurnTimerUpdated);
+        EventBus.Subscribe<AuctionTimerUpdatedEvent>(OnAuctionTimerUpdated);
+        EventBus.Subscribe<TradeTimerUpdatedEvent>(OnTradeTimerUpdated);
+        EventBus.Subscribe<OnUpdatePlayerCapitalEvent>(OnCapitalUpdated);
+        EventBus.Subscribe<OnTakeLoanEvent>(OnLoanUpdated);
         EventBus.Subscribe<TurnStartEvent>(OnTurnStarted);
-        PhotonNetwork.NetworkingClient.EventReceived += OnPhotonEventReceived;
+
+        tradeButton.onClick.AddListener(OnTradeButtonClicked);
+        takeLoanButton.onClick.AddListener(() => LoanManager.Instance.TakeLoan(playerData.id));
+        payLoanButton.onClick.AddListener(() => EventBus.Publish(new PayLoanEvent(playerData.id)));
     }
 
     private void OnDisable()
     {
-        EventBus.Unsubscribe<TurnTimerUpdatedEvent>(OnTimerUpdated);
-        EventBus.Unsubscribe<AuctionTimerUpdatedEvent>(OnTimerUpdated);
-        EventBus.Unsubscribe<TradeTimerUpdatedEvent>(OnTimerUpdated);
-        EventBus.Unsubscribe<OnTakeLoanEvent>(UpdateLoanUI);
-
+        EventBus.Unsubscribe<TurnTimerUpdatedEvent>(OnTurnTimerUpdated);
+        EventBus.Unsubscribe<AuctionTimerUpdatedEvent>(OnAuctionTimerUpdated);
+        EventBus.Unsubscribe<TradeTimerUpdatedEvent>(OnTradeTimerUpdated);
+        EventBus.Unsubscribe<OnUpdatePlayerCapitalEvent>(OnCapitalUpdated);
+        EventBus.Unsubscribe<OnTakeLoanEvent>(OnLoanUpdated);
         EventBus.Unsubscribe<TurnStartEvent>(OnTurnStarted);
 
-        PhotonNetwork.NetworkingClient.EventReceived -= OnPhotonEventReceived;
-    }
-
-    private void OnPhotonEventReceived(ExitGames.Client.Photon.EventData photonEvent)
-    {
-        // При изменении CustomProperties вызываем обновление UI
-        if (playerData == null) return;
-
-        int money = playerData.photonPlayer.CustomProperties.TryGetValue("Money", out var val) ? (int)val : playerData.Money;
-        SetMoneyPlayerText(money);
-    }
-
-    private void OnTimerUpdated(TurnTimerUpdatedEvent e)
-    {
-        if (playerData == null || e.PlayerId != playerData.id) return;
-
-        isActive = e.IsCurrent;
-        timerText.gameObject.SetActive(isActive);
-        timerGO.gameObject.SetActive(isActive);
-        highlightTurnImage.enabled = isActive;
-
-        if (isActive)
-            timerText.text = Mathf.Ceil(e.TimeLeft).ToString();
-    }
-
-    private void OnTimerUpdated(AuctionTimerUpdatedEvent e)
-    {
-        if (playerData == null) return;
-
-        bool isCurrentBidder = e.PlayerId == playerData.id;
-
-        // Показываем таймер и подсветку только у текущего игрока
-        timerText.gameObject.SetActive(isCurrentBidder);
-        timerGO.SetActive(isCurrentBidder);
-        highlightAuctionImage.enabled = isCurrentBidder;
-
-        if (isCurrentBidder)
-            timerText.text = Mathf.Ceil(e.TimeLeft).ToString();
-
-        // Если аукцион закончился, сбрасываем все
-        if (e.TimeLeft <= 0f)
-        {
-            timerText.gameObject.SetActive(false);
-            timerGO.SetActive(false);
-            highlightAuctionImage.enabled = false;
-        }
-    }
-
-    private void OnTimerUpdated(TradeTimerUpdatedEvent e)
-    {
-        if (playerData == null) return;
-        if (e.TimeLeft > 0f)
-        {
-            bool isCurrentTrader = e.PlayerId == playerData.id;
-
-            timerText.gameObject.SetActive(isCurrentTrader);
-            timerGO.SetActive(isCurrentTrader);
-            highlightAuctionImage.enabled = isCurrentTrader;
-            timerText.text = Mathf.Ceil(e.TimeLeft).ToString();
-        }
-        else
-        {
-            // Когда время вышло, у ВСЕХ игроков скрываем всё
-            timerText.gameObject.SetActive(false);
-            timerGO.SetActive(false);
-            highlightAuctionImage.enabled = false;
-        }
-    }
-    public void UpdateLoanUI(OnTakeLoanEvent e)
-    {
-        // Если обновление не для этого игрока — выходим
-        if (e.PlayerData.id != playerData.id) return;
-
-        if (e.PlayerData.HasLoan)
-        {
-            loanContainer.gameObject.SetActive(true);
-
-            // Кнопку оплаты показываем только локальному игроку
-            if (e.PlayerData.photonPlayer.IsLocal)
-            {
-                takeLoanButton.gameObject.SetActive(false);
-                payLoanButton.gameObject.SetActive(true);
-            }
-            else
-            {
-                takeLoanButton.gameObject.SetActive(false);
-                payLoanButton.gameObject.SetActive(false);
-            }
-
-            loanTurnsLeftText.text = e.PlayerData.LoanTurnsLeft.ToString();
-        }
-        else
-        {
-            if (e.PlayerData.photonPlayer.IsLocal)
-                takeLoanButton.gameObject.SetActive(true);
-
-            payLoanButton.gameObject.SetActive(false);
-            loanTurnsLeftText.text = "";
-            loanContainer.gameObject.SetActive(false);
-        }
-    }
-  
-
-    public void SetMoneyPlayerText(int moneyPlayer)
-    {
-        moneyPlayerText.text = moneyPlayer.ToString("N0", CultureInfo.InvariantCulture);
+        tradeButton.onClick.RemoveListener(OnTradeButtonClicked);
     }
 
     public void SetPlayerStats(PlayerData playerData)
     {
         this.playerData = playerData;
         namePlayerText.text = playerData.Name;
-        moneyPlayerText.text = playerData.Money.ToString("N0", CultureInfo.InvariantCulture);
-        timerText.gameObject.SetActive(false);
-        highlightTurnImage.enabled = false;
-        highlightAuctionImage.enabled = false;
-        leaveButton.gameObject.SetActive(playerData.id == PhotonNetwork.LocalPlayer.ActorNumber);
-        
-            timerGO.SetActive(false);
+        SetMoney(playerData.Money);
+        UpdateCapital(playerData);
+        timerGO.SetActive(false);
+
+        leaveButton.gameObject.SetActive(playerData.photonPlayer.IsLocal);
     }
 
-    public void SetTurnActive(bool active)
-    {
-        isTurnActive = active;
-        if (timerText != null)
-            timerText.gameObject.SetActive(active);
+    public void SetMoney(int money) =>
+        moneyPlayerText.text = money.ToString("N0", CultureInfo.InvariantCulture);
 
-        highlightTurnImage.enabled = active;
+    private void UpdateCapital(PlayerData player)
+    {
+        capitalText.text = player.VisibleCapital.ToString("N0", CultureInfo.InvariantCulture);
+        liquidText.text = player.LiquidAssets.ToString("N0", CultureInfo.InvariantCulture);
     }
 
-    public void UpdateTurnTimer(float secondsLeft)
+    private void UpdateTimerUI(bool active, float timeLeft, Image highlight)
     {
-        if (isTurnActive)
-            timerText.text = Mathf.Ceil(secondsLeft).ToString();
+        timerGO.SetActive(active);
+        timerText.gameObject.SetActive(active);
+        highlight.enabled = active;
+
+        if (active)
+            timerText.text = Mathf.Ceil(timeLeft).ToString();
+    }
+
+    private void OnTurnTimerUpdated(TurnTimerUpdatedEvent e)
+    {
+        if (playerData == null || e.PlayerId != playerData.id) return;
+        UpdateTimerUI(e.IsCurrent, e.TimeLeft, highlightTurnImage);
+    }
+
+    private void OnAuctionTimerUpdated(AuctionTimerUpdatedEvent e)
+    {
+        bool isCurrent = playerData != null && e.PlayerId == playerData.id;
+        UpdateTimerUI(isCurrent && e.TimeLeft > 0, e.TimeLeft, highlightAuctionImage);
+    }
+
+    private void OnTradeTimerUpdated(TradeTimerUpdatedEvent e)
+    {
+        bool isCurrent = playerData != null && e.PlayerId == playerData.id && e.TimeLeft > 0;
+        UpdateTimerUI(isCurrent, e.TimeLeft, highlightAuctionImage);
+    }
+
+    private void OnCapitalUpdated(OnUpdatePlayerCapitalEvent e)
+    {
+        if (e.Player.id == playerData.id)
+            UpdateCapital(e.Player);
+    }
+
+    private void OnLoanUpdated(OnTakeLoanEvent e)
+    {
+        if (e.PlayerData.id != playerData.id) return;
+
+        loanContainer.SetActive(e.PlayerData.HasLoan);
+        loanTurnsLeftText.text = e.PlayerData.HasLoan ? e.PlayerData.LoanTurnsLeft.ToString() : "";
+
+        takeLoanButton.gameObject.SetActive(!e.PlayerData.HasLoan && e.PlayerData.photonPlayer.IsLocal);
+        payLoanButton.gameObject.SetActive(e.PlayerData.HasLoan && e.PlayerData.photonPlayer.IsLocal);
     }
 
     private void OnTurnStarted(TurnStartEvent e)
     {
         if (playerData == null) return;
 
-        int currentTurnPlayerId = e.PlayerId;
-        int thisPlayerId = playerData.id;
-        int localPlayerId = PhotonNetwork.LocalPlayer.ActorNumber;
+        bool isLocalTurn = e.PlayerId == PhotonNetwork.LocalPlayer.ActorNumber;
+        bool isThisPlayerLocal = playerData.id == PhotonNetwork.LocalPlayer.ActorNumber;
 
-        // 1. Если это НЕ мой ход  скрыть все кнопки
-        if (currentTurnPlayerId != localPlayerId)
+        tradeButton.gameObject.SetActive(isLocalTurn && !isThisPlayerLocal);
+        if (isThisPlayerLocal)
         {
-            tradeButton.gameObject.SetActive(false);
-         
-                takeLoanButton.gameObject.SetActive(false);
-                payLoanButton.gameObject.SetActive(false);
-
-            return;
-        }
-     
-        // 2. Если это МОЙ ход  показывать кнопки только на других игроков
-        if (thisPlayerId == localPlayerId)
-        {
-            tradeButton.gameObject.SetActive(false); // сам себе не предлагаю
-            if (!playerData.HasLoan)
-            {
-                takeLoanButton.gameObject.SetActive(true);
-                payLoanButton.gameObject.SetActive(false);
-
-            }
-
-        }
-        else
-        {
-            tradeButton.gameObject.SetActive(true); // всем остальным показываю
-            if (!playerData.HasLoan)
-            {
-                takeLoanButton.gameObject.SetActive(false);
-                payLoanButton.gameObject.SetActive(false);
-
-            }
+            takeLoanButton.gameObject.SetActive(!playerData.HasLoan);
+            payLoanButton.gameObject.SetActive(playerData.HasLoan);
         }
     }
 
@@ -240,9 +141,18 @@ public class UIPlayerStats : MonoBehaviour
     {
         if (playerData == null) return;
         UITradeWindow.Instance.ShowWindow();
-        int fromPlayerId = PhotonNetwork.LocalPlayer.ActorNumber;
-        int toPlayerId = playerData.id;
-
-        TradeManager.Instance.StartTradeRequest(fromPlayerId, toPlayerId);
+        TradeManager.Instance.StartTradeRequest(PhotonNetwork.LocalPlayer.ActorNumber, playerData.id);
     }
+}
+
+public class OnUpdatePlayerCapitalEvent
+{
+    public PlayerData Player;
+
+
+    public OnUpdatePlayerCapitalEvent(PlayerData player)
+    {
+        Player = player;
+    }
+
 }

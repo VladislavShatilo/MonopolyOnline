@@ -55,7 +55,7 @@ public class Bank : MonoBehaviourPunCallbacks
     {
         player.Money = newAmount;
         OnBalanceChanged?.Invoke(player, newAmount);
-
+        EventBus.Publish(new OnUpdatePlayerCapitalEvent(player));
         // Если игрок Photon
         if (player.photonPlayer != null)
         {

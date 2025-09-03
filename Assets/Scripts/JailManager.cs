@@ -34,12 +34,16 @@ public class JailManager : MonoBehaviourPun
     {
         EventBus.Subscribe<StartTurnJailEvent>(OnStartTurnJail);
         EventBus.Subscribe<CheckDiceJailEvent>(OnCheckDiceJail);
+        EventBus.Subscribe<ReleaseFromJailEvent>(ReleaseFromJail);
+        
     }
 
     private void OnDisable()
     {
         EventBus.Unsubscribe<StartTurnJailEvent>(OnStartTurnJail);
         EventBus.Unsubscribe<CheckDiceJailEvent>(OnCheckDiceJail);
+        EventBus.Unsubscribe<ReleaseFromJailEvent>(ReleaseFromJail);
+
     }
 
     #region Jail Logic
@@ -69,8 +73,9 @@ public class JailManager : MonoBehaviourPun
     }
 
     /// <summary> Выпускает игрока из тюрьмы. </summary>
-    public void ReleaseFromJail(int playerID, bool isPaidExit)
+    public void ReleaseFromJail(ReleaseFromJailEvent e)
     {
+        int playerID= e.PlayerID;
         var player = GameManager.Instance.GetPlayerById(playerID);
 
         player.IsInJail = false;
@@ -78,7 +83,7 @@ public class JailManager : MonoBehaviourPun
 
         EventBus.Publish(new SetTurnsJailEvent(playerID, player.JailTurnsLeft));
 
-        if (isPaidExit)
+        if (e.IsPaidExit)
         {
             Bank.Instance.RemoveMoney(player, jailFine);
             EventBus.Publish(new RollDiceButtonEvent(playerID)); // сразу бросаем кубики
@@ -105,7 +110,7 @@ public class JailManager : MonoBehaviourPun
         if (e.FirstDice == e.SecondDice)
         {
             // Удвоенные кости ? выход
-            ReleaseFromJail(e.PlayerID, false);
+            EventBus.Publish(new ReleaseFromJailEvent(e.PlayerID, false));
 
             if (PhotonNetwork.LocalPlayer.ActorNumber == e.PlayerID)
                 EventBus.Publish(new OnPlayerMoveEvent(e.FirstDice + e.SecondDice,true));
@@ -140,9 +145,20 @@ public class JailManager : MonoBehaviourPun
 
     #region RPC UI
 
-    [PunRPC] private void RPC_ShowJailOffer(int playerID) => UIJailWindow.Instance.ShowWindow(playerID);
+    [PunRPC]
+    private void RPC_ShowJailOffer(int playerID)
+    {
+        PlayerData player = GameManager.Instance.GetPlayerById(playerID); 
+        UIJailWindow.Instance.ShowWindow(player);
+    }
 
-    [PunRPC] private void RPC_ShowRansomJailOffer(int playerID) => UIRansomJailWindow.Instance.ShowWindow(playerID);
+
+    [PunRPC]
+    private void RPC_ShowRansomJailOffer(int playerID)
+    {
+        PlayerData player = GameManager.Instance.GetPlayerById(playerID);
+        UIRansomJailWindow.Instance.ShowWindow(player);
+    }
 
     #endregion
 }

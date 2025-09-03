@@ -1,5 +1,4 @@
 using Photon.Pun;
-using Photon.Pun.Demo.PunBasics;
 using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,10 +23,13 @@ public class LoanManager : MonoBehaviourPun
     private void OnEnable()
     {
         EventBus.Subscribe<OnStartTurnLoanEvent>(OnPlayerTurnStart);
+        EventBus.Subscribe<PayLoanEvent>(PayLoan);
     }
     private void OnDisable()
     {
         EventBus.Unsubscribe<OnStartTurnLoanEvent>(OnPlayerTurnStart);
+        EventBus.Unsubscribe<PayLoanEvent>(PayLoan);
+
     }
     [PunRPC]
     private void RPC_RequestTakeLoan(int playerId)
@@ -39,11 +41,13 @@ public class LoanManager : MonoBehaviourPun
         player.HasLoan = true;
         player.LoanTurnsLeft = 1;
         EventBus.Publish(new OnTakeLoanEvent(player));
+        EventBus.Publish(new OnUpdatePlayerCapitalEvent(player));
+
     }
 
-    public void PayLoan(int playerId)
+    public void PayLoan(PayLoanEvent e)
     {
-        photonView.RPC(nameof(RPC_RequestPayLoan), RpcTarget.All, playerId);
+        photonView.RPC(nameof(RPC_RequestPayLoan), RpcTarget.All, e.PlayerId);
 
     }
     [PunRPC]
@@ -57,6 +61,8 @@ public class LoanManager : MonoBehaviourPun
         player.HasLoan = false;
         player.LoanTurnsLeft = 0;
         EventBus.Publish(new OnTakeLoanEvent(player));
+        EventBus.Publish(new OnUpdatePlayerCapitalEvent(player));
+
 
     }
     public void OnPlayerTurnStart(OnStartTurnLoanEvent e)
@@ -80,7 +86,8 @@ public class LoanManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_ShowLoanWindow(int playerId)
     {
-        UILoanPayWindow.Instance.ShowLoanWindow();
+        PlayerData player = GameManager.Instance.GetPlayerById(playerId);
+        UILoanPayWindow.Instance.ShowLoanWindow(player);
 
     }
 }
