@@ -118,7 +118,7 @@ public class UIBuyWindow : UIWindowBase<UIBuyWindow>
     private void HandleAuctionClicked()
     {
         HideWindow();
-        EventBus.Publish(new StartAuctionEvent(PhotonNetwork.LocalPlayer.ActorNumber, currentCellIndex, companyPrice));
+        EventBus.Publish(new StartAuctionEvent(currentPlayer, currentCellIndex, companyPrice));
     }
 }
 public class TryBuyCompanyEvent
@@ -132,13 +132,13 @@ public class TryBuyCompanyEvent
 }
 public class StartAuctionEvent
 {
-    public int PlayerId;
+    public PlayerData Player;
     public int CellIndex;
     public int Price;
 
-    public StartAuctionEvent(int playerId, int cellIndex, int price)
+    public StartAuctionEvent(PlayerData player, int cellIndex, int price)
     {
-        PlayerId = playerId;
+        Player = player;
         CellIndex = cellIndex;
         Price = price;
     }

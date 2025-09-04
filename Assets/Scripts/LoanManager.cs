@@ -37,7 +37,7 @@ public class LoanManager : MonoBehaviourPun
         PlayerData player = GameManager.Instance.GetPlayerById(playerId);
         if (player.HasLoan) return;
 
-        Bank.Instance.AddMoney(player, 5000);
+        Bank.Instance.AddMoney(playerId, 5000);
         player.HasLoan = true;
         player.LoanTurnsLeft = 1;
         EventBus.Publish(new OnTakeLoanEvent(player));
@@ -56,7 +56,7 @@ public class LoanManager : MonoBehaviourPun
         PlayerData player = GameManager.Instance.GetPlayerById(playerId);
 
         if (!player.HasLoan) return;
-        Bank.Instance.RemoveMoney(player, 5500);
+        Bank.Instance.RemoveMoney(playerId, 5500);
 
         player.HasLoan = false;
         player.LoanTurnsLeft = 0;

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Zenject;
 
 /// <summary>
 /// Менеджер аукциона. Вся логика и состояние — на MasterClient.
@@ -30,10 +31,15 @@ public class AuctionManager : MonoBehaviourPunCallbacks
     private const int FIRST_BID_INCREMENT = 100; // первая минимальная ставка = basePrice + 100
     private const float BID_DURATION = 10f; //  10 секунд на ход
     private double bidStartTime;
+
+    [Inject] private IPlayerRepository playerRepository;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
+        playerRepository = new GameManagerPlayerRepository();
+
     }
 
     #region Public API (вызывают игровые системы)
@@ -52,8 +58,12 @@ public class AuctionManager : MonoBehaviourPunCallbacks
         EventBus.Unsubscribe<PassAuctionRequestEvent>(PassRequest);
         EventBus.Unsubscribe<PlayAuctionRequestEvent>(PlayActionRequest);
 
-
     }
+    public void SetPlayerRepository(IPlayerRepository repository)
+    {
+        playerRepository = repository;
+    }
+
     /// <summary>
     /// Старт аукциона. Вызывать у мастера после отказа игрока от покупки компании.
     /// </summary>
@@ -63,7 +73,7 @@ public class AuctionManager : MonoBehaviourPunCallbacks
 
     public void StartAuctionRequest(StartAuctionEvent e)
     {
-        photonView.RPC(nameof(RPC_StartAuctionRequest), RpcTarget.MasterClient, e.PlayerId, e.CellIndex, e.Price);
+        photonView.RPC(nameof(RPC_StartAuctionRequest), RpcTarget.MasterClient, e.Player.id, e.CellIndex, e.Price);
 
     }
 
@@ -321,8 +331,10 @@ public class AuctionManager : MonoBehaviourPunCallbacks
             : currentPrice + FIRST_BID_INCREMENT; // после чьей-то ставки
         bidStartTime = PhotonNetwork.Time;
         string companyName = CellsManager.Instance.GetCellDataByIndex(companyId).cellName;
+        
+        int money = playerRepository.GetPlayerById(bidder).Money;
 
-        photonView.RPC(nameof(RPC_PromptBid), PhotonNetwork.CurrentRoom.GetPlayer(bidder), bidder, companyName, minAllowedBid);
+        photonView.RPC(nameof(RPC_PromptBid), PhotonNetwork.CurrentRoom.GetPlayer(bidder), bidder, money, companyName, minAllowedBid);
 
     }
 
@@ -365,10 +377,9 @@ public class AuctionManager : MonoBehaviourPunCallbacks
     /// Приглашение сделать ставку. UI должен показываться только локальному игроку, если его ActorNumber == bidderActorNumber.
     /// </summary>
     [PunRPC]
-    private void RPC_PromptBid(int bidderActorNumber, string companyName, int minAllowedBid)
+    private void RPC_PromptBid(int bidderActorNumber,int money, string companyName, int minAllowedBid)
     {
-        PlayerData playerData = GameManager.Instance.GetPlayerById(bidderActorNumber);
-        EventBus.Publish(new AuctionPromptBidEvent(playerData, companyName, minAllowedBid));
+        EventBus.Publish(new AuctionPromptBidEvent(bidderActorNumber,money, minAllowedBid, companyName ));
 
 
     }
@@ -448,14 +459,17 @@ public class AuctionEndedEvent
 }
 public class AuctionPromptBidEvent
 {
-    public PlayerData Player { get; }
+    public int PlayerId { get; }
+    public int Money { get; }
+    public int Bid { get; }
     public string CompanyName { get; }
     public int MinAllowedBid { get; }     // минимальная допустимая ставка для этого хода
-    public AuctionPromptBidEvent(PlayerData player, string companyName, int minAllowedBid)
+    public AuctionPromptBidEvent(int playerId,int money,int bid, string companyName)
     {
-        Player = player;
+        PlayerId = playerId;
+        Money = money;
+        Bid = bid;
         CompanyName = companyName;
-        MinAllowedBid = minAllowedBid;
     }
 }
 

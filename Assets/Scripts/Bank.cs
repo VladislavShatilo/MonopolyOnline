@@ -8,7 +8,7 @@ public class Bank : MonoBehaviourPunCallbacks
     public static Bank Instance { get; private set; }
 
     public event Action<PlayerData, int> OnBalanceChanged;
-
+     
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -20,8 +20,9 @@ public class Bank : MonoBehaviourPunCallbacks
     }
 
     // Добавляем деньги с синхронизацией
-    public void AddMoney(PlayerData player, int amount)
+    public void AddMoney(int playerId, int amount)
     {
+        PlayerData player = GetPlayerDataById(playerId);
         if (amount <= 0) return;
 
         int newMoney = player.Money + amount;
@@ -29,28 +30,39 @@ public class Bank : MonoBehaviourPunCallbacks
     }
 
     // Убираем деньги с проверкой
-    public bool RemoveMoney(PlayerData player, int amount)
+    public bool RemoveMoney(int playerId, int amount)
     {
+        PlayerData player = GetPlayerDataById(playerId);
+
         if (amount <= 0) return false;
-        if (!HasEnoughMoney(player, amount)) return false;
+        if (!HasEnoughMoney(playerId, amount)) return false;
 
         int newMoney = player.Money - amount;
         UpdatePlayerMoney(player, newMoney);
         return true;
     }
 
-    public bool HasEnoughMoney(PlayerData player, int amount)
+    public bool HasEnoughMoney(int playerId, int amount)
     {
+        PlayerData player = GetPlayerDataById(playerId);
+
         return player.Money >= amount;
     }
 
-    public bool TransferMoney(PlayerData from, PlayerData to, int amount)
+    public bool TransferMoney(int fromPlayerId, int toPlayerId, int amount)
     {
-        if (!RemoveMoney(from, amount)) return false;
-        AddMoney(to, amount);
+        PlayerData fromPlayer = GetPlayerDataById(fromPlayerId);
+        PlayerData toPlayer = GetPlayerDataById(toPlayerId);
+
+        if (!RemoveMoney(fromPlayerId, amount)) return false;
+        AddMoney(toPlayerId, amount);
         return true;
     }
+    private PlayerData GetPlayerDataById(int playerId)
+    {
+       return GameManager.Instance.GetPlayerById(playerId);
 
+    }
     private void UpdatePlayerMoney(PlayerData player, int newAmount)
     {
         player.Money = newAmount;

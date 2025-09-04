@@ -109,7 +109,6 @@ public class MortgageManager : MonoBehaviourPun
     private void RPC_UpdateMortgageUI(int playerId, int companyId, bool isMortgage)
     {
         var company = CompanyDatabase.Instance.GetCompanyById(companyId);
-        var player = GameManager.Instance.GetPlayerById(playerId);
 
         if (company.OwnerId != playerId) return;
         var ui = CellsManager.Instance.GetCompanyUI(company.Id);
@@ -119,7 +118,7 @@ public class MortgageManager : MonoBehaviourPun
             company.IsMortgaged = true;
             company.MortgageTurnsLeft = MORTGAGE_TURNS_COUNTS;
             Debug.Log(company.MortgagePrice);
-            Bank.Instance.AddMoney(player, company.MortgagePrice);
+            Bank.Instance.AddMoney(playerId, company.MortgagePrice);
             ui.SetTurnsText(MORTGAGE_TURNS_COUNTS);
             ui.MortgageUI();
         }
@@ -127,7 +126,7 @@ public class MortgageManager : MonoBehaviourPun
         {
             company.IsMortgaged = false;
             company.MortgageTurnsLeft = 0;
-            Bank.Instance.RemoveMoney(player, company.BuyoutPrice);
+            Bank.Instance.RemoveMoney(playerId, company.BuyoutPrice);
             ui.BuyoutUI();
         }
 

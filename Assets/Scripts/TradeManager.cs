@@ -23,7 +23,20 @@ public class TradeManager : MonoBehaviourPun
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
     }
+    private void OnEnable()
+    {
+        EventBus.Subscribe<OfferTradeEvent>(_ => OfferTrade());
+        EventBus.Subscribe<CancelTradeEvent>(_ => CancelTrade());
+        EventBus.Subscribe<StartTradeRequestEvent>(StartTradeRequest);
 
+    }
+    private void OnDisable()
+    {
+        EventBus.Unsubscribe<OfferTradeEvent>(_ => OfferTrade());
+        EventBus.Unsubscribe<CancelTradeEvent>(_ => CancelTrade());
+        EventBus.Unsubscribe<StartTradeRequestEvent>(StartTradeRequest);
+
+    }
     private void Update()
     {
         if (!PhotonNetwork.IsMasterClient || !isTradeActive) return;
@@ -41,16 +54,14 @@ public class TradeManager : MonoBehaviourPun
 
     #region Start / Offer
 
-    public void StartTradeRequest(int fromPlayerId, int toPlayerId)
+    public void StartTradeRequest(StartTradeRequestEvent e)
     {
-        CancelTrade(); // сброс перед новым трейдом
-        photonView.RPC(nameof(RPC_StartTradeRequest), RpcTarget.All, fromPlayerId, toPlayerId);
+        EventBus.Publish(new CancelTradeEvent());
+        photonView.RPC(nameof(RPC_StartTradeRequest), RpcTarget.All, e.FromId, e.ToId);
     }
     [PunRPC]
     private void RPC_StartTradeRequest(int fromPlayerId, int toPlayerId)
     {
-       // if (!PhotonNetwork.IsMasterClient) return;
-
         senderId = fromPlayerId;
         receiverId = toPlayerId;
         isTradeActive = true;
@@ -82,8 +93,8 @@ public class TradeManager : MonoBehaviourPun
 
         // Отправка всем через MasterClient
         photonView.RPC(nameof(RPC_SendOfferToAll), RpcTarget.MasterClient,
-            currentOffer.FromPlayerId,
-            currentOffer.ToPlayerId,
+            currentOffer.FromPlayerData.id,
+            currentOffer.ToPlayerData.id,
             SerializeCompanies(currentOffer.FromCompanies),
             SerializeCompanies(currentOffer.ToCompanies),
             currentOffer.FromMoney,
@@ -140,14 +151,13 @@ public class TradeManager : MonoBehaviourPun
     {
         if (accepted)
         {
-            PlayerData senderPlayer = GameManager.Instance.GetPlayerById(senderId);
-            PlayerData receiverPlayer = GameManager.Instance.GetPlayerById(receiverId);
+          
 
-            Bank.Instance.RemoveMoney(senderPlayer, currentOffer.FromMoney);
-            Bank.Instance.AddMoney(receiverPlayer, currentOffer.FromMoney);
+            Bank.Instance.RemoveMoney(senderId, currentOffer.FromMoney);
+            Bank.Instance.AddMoney(receiverId, currentOffer.FromMoney);
 
-            Bank.Instance.RemoveMoney(receiverPlayer, currentOffer.ToMoney);
-            Bank.Instance.AddMoney(senderPlayer, currentOffer.ToMoney);
+            Bank.Instance.RemoveMoney(receiverId, currentOffer.ToMoney);
+            Bank.Instance.AddMoney(senderId, currentOffer.ToMoney);
 
             ApplyTrade(currentOffer);
         }
@@ -184,8 +194,8 @@ public class TradeManager : MonoBehaviourPun
     {
         if (currentOffer == null) return;
 
-        if (companyOwnerId == currentOffer.FromPlayerId) currentOffer.FromCompanies.Add(company);
-        else if (companyOwnerId == currentOffer.ToPlayerId) currentOffer.ToCompanies.Add(company);
+        if (companyOwnerId == currentOffer.FromPlayerData.id) currentOffer.FromCompanies.Add(company);
+        else if (companyOwnerId == currentOffer.ToPlayerData.id) currentOffer.ToCompanies.Add(company);
         else return;
 
         EventBus.Publish(new TradeUpdatedEvent(currentOffer));
@@ -195,8 +205,8 @@ public class TradeManager : MonoBehaviourPun
     {
         if (currentOffer == null) return;
 
-        if (companyOwnerId == currentOffer.FromPlayerId) currentOffer.FromCompanies.Remove(company);
-        else if (companyOwnerId == currentOffer.ToPlayerId) currentOffer.ToCompanies.Remove(company);
+        if (companyOwnerId == currentOffer.FromPlayerData.id) currentOffer.FromCompanies.Remove(company);
+        else if (companyOwnerId == currentOffer.ToPlayerData.id) currentOffer.ToCompanies.Remove(company);
         else return;
 
         EventBus.Publish(new TradeUpdatedEvent(currentOffer));
@@ -206,8 +216,8 @@ public class TradeManager : MonoBehaviourPun
     {
         if (currentOffer == null) return;
 
-        if (playerId == currentOffer.FromPlayerId) currentOffer.FromMoney = amount;
-        else if (playerId == currentOffer.ToPlayerId) currentOffer.ToMoney = amount;
+        if (playerId == currentOffer.FromPlayerData.id) currentOffer.FromMoney = amount;
+        else if (playerId == currentOffer.ToPlayerData.id) currentOffer.ToMoney = amount;
 
         EventBus.Publish(new TradeUpdatedEvent(currentOffer));
     }

@@ -5,7 +5,7 @@ using System.Globalization;
 using TMPro;
 using UnityEngine;
 
-public class    UITradeWindowBase : MonoBehaviour
+public class UITradeWindowBase : MonoBehaviour
 {
     [Header("Panels & Prefabs")]
     [SerializeField] protected Transform leftPanel;
@@ -31,8 +31,8 @@ public class    UITradeWindowBase : MonoBehaviour
         ClearCompanies(leftPanel);
         ClearCompanies(rightPanel);
 
-        PlayerData leftPlayer = GameManager.Instance.GetPlayerById(currentOffer.FromPlayerId);
-        PlayerData rightPlayer = GameManager.Instance.GetPlayerById(currentOffer.ToPlayerId);
+        PlayerData leftPlayer = currentOffer.FromPlayerData;
+        PlayerData rightPlayer =currentOffer.ToPlayerData;
 
         if (leftPlayer == null || rightPlayer == null) return;
 
@@ -45,8 +45,8 @@ public class    UITradeWindowBase : MonoBehaviour
         leftMoneyText.text = leftSum.ToString();
         rightMoneyText.text = rightSum.ToString();
 
-        PopulateCompanies(leftPanel, currentOffer.FromCompanies, currentOffer.FromPlayerId, ref leftSum);
-        PopulateCompanies(rightPanel, currentOffer.ToCompanies, currentOffer.ToPlayerId, ref rightSum);
+        PopulateCompanies(leftPanel, currentOffer.FromCompanies, currentOffer.FromPlayerData.id, ref leftSum);
+        PopulateCompanies(rightPanel, currentOffer.ToCompanies, currentOffer.ToPlayerData.id, ref rightSum);
 
         leftTotalAmountText.text = leftSum.ToString("N0", CultureInfo.InvariantCulture);
         rightTotalAmountText.text = rightSum.ToString("N0", CultureInfo.InvariantCulture);

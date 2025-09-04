@@ -48,16 +48,15 @@ public class CasinoManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_CasinoChangeMoney(int reward, int playerID)
     {
-        PlayerData player= GameManager.Instance.GetPlayerById(playerID);
         if(reward > 0)
         {
-            Bank.Instance.AddMoney(player, reward);
+            Bank.Instance.AddMoney(playerID, reward);
 
         }
         else
         {
             reward = Mathf.Abs(reward);
-            Bank.Instance.AddMoney(player, reward);
+            Bank.Instance.AddMoney(playerID, reward);
         }
 
     }

@@ -94,15 +94,14 @@ public class BranchManager : MonoBehaviourPun
         uiCompany.UpdateBranchStars(newLevel);
         uiCompany.SetRentText(company?.CompanyData.rent[newLevel] ?? 0);
         company.RentLevel = newLevel;
-        PlayerData playerData = GameManager.Instance.GetPlayerById(playerId);
         if (!isBuy)
         {
-            Bank.Instance.AddMoney(playerData, company.CompanyData.branchPrice);
+            Bank.Instance.AddMoney(playerId, company.CompanyData.branchPrice);
 
         }
         else
         {
-            Bank.Instance.RemoveMoney(playerData, company.CompanyData.branchPrice);
+            Bank.Instance.RemoveMoney(playerId, company.CompanyData.branchPrice);
 
         }
     }
@@ -201,7 +200,7 @@ public class BranchManager : MonoBehaviourPun
     {
         return company.OwnerId == player.id &&
                company.RentLevel < 5 &&
-               Bank.Instance.HasEnoughMoney(player, company.CompanyData.branchPrice);
+               Bank.Instance.HasEnoughMoney(player.id, company.CompanyData.branchPrice);
     }
 
     private bool CanSellBranch(Company company, PlayerData player)

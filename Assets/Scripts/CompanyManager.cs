@@ -110,14 +110,13 @@ public class CompanyManager : MonoBehaviourPun
     {
         if (!TryGetCompanyAndHandler(cellIndex, out var company, out var handler)) return;
 
-        var buyer = GameManager.Instance.GetPlayerById(buyerId);
         if(buyReason ==(int)BuyReason.Buy)
         {
             price = handler.GetPrice(cellIndex);
         }
         Debug.Log("RPC_RequestBuyCompany" + price);
 
-        if (!Bank.Instance.HasEnoughMoney(buyer, price))
+        if (!Bank.Instance.HasEnoughMoney(buyerId, price))
         {
             Debug.Log("Недостаточно денег для покупки");
             return;
@@ -148,7 +147,7 @@ public class CompanyManager : MonoBehaviourPun
         Debug.Log("RPC_ConfirmPurchase" + price);
         buyer.OwnedCompanies.Add(company);
 
-        Bank.Instance.RemoveMoney(buyer, price);
+        Bank.Instance.RemoveMoney(ownerId, price);
 
 
         var cellUI = CellsManager.Instance.GetCellByIndex(cellIndex).GetComponent<UICompanyCell>();
@@ -186,10 +185,9 @@ public class CompanyManager : MonoBehaviourPun
     {
         if (!TryGetCompanyAndHandler(cellIndex, out var company, out var handler)) return;
 
-        var renter = GameManager.Instance.GetPlayerById(renterId);
         int rentPrice = handler.GetRent(cellIndex);
 
-        if (!Bank.Instance.HasEnoughMoney(renter, rentPrice))
+        if (!Bank.Instance.HasEnoughMoney(renterId, rentPrice))
         {
             Debug.Log("Недостаточно денег для аренды");
             return;
@@ -207,10 +205,7 @@ public class CompanyManager : MonoBehaviourPun
         int rentPrice = handler.GetRent(cellIndex);
         int ownerId = handler.GetOwner(cellIndex);
 
-        var renter = GameManager.Instance.GetPlayerById(renterId);
-        var owner = GameManager.Instance.GetPlayerById(ownerId);
-
-        Bank.Instance.TransferMoney(renter, owner, rentPrice);
+        Bank.Instance.TransferMoney(renterId, ownerId, rentPrice);
 
         UIPayRentWindow.Instance.HideWindow();
     }

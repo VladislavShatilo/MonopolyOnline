@@ -46,7 +46,7 @@ public class UITradeReviewWindow : UITradeWindowBase
         currentOffer = e.Offer;
         ShowWindow();
 
-        bool isRecipient = PhotonNetwork.LocalPlayer.ActorNumber == currentOffer.ToPlayerId;
+        bool isRecipient = PhotonNetwork.LocalPlayer.ActorNumber == currentOffer.ToPlayerData.id;
         acceptButton.gameObject.SetActive(isRecipient);
         cancelButton.gameObject.SetActive(isRecipient);
 

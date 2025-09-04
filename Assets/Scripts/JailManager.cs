@@ -85,7 +85,7 @@ public class JailManager : MonoBehaviourPun
 
         if (e.IsPaidExit)
         {
-            Bank.Instance.RemoveMoney(player, jailFine);
+            Bank.Instance.RemoveMoney(playerID, jailFine);
             EventBus.Publish(new RollDiceButtonEvent(playerID)); // сразу бросаем кубики
         }
     }

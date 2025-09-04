@@ -141,7 +141,7 @@ public class UIPlayerStats : MonoBehaviour
     {
         if (playerData == null) return;
         UITradeWindow.Instance.ShowWindow();
-        TradeManager.Instance.StartTradeRequest(PhotonNetwork.LocalPlayer.ActorNumber, playerData.id);
+        EventBus.Publish(new StartTradeRequestEvent(PhotonNetwork.LocalPlayer.ActorNumber, playerData.id));
     }
 }
 
@@ -155,4 +155,14 @@ public class OnUpdatePlayerCapitalEvent
         Player = player;
     }
 
+}
+public class StartTradeRequestEvent
+{
+    public int FromId;
+    public int ToId;
+    public StartTradeRequestEvent(int fromId,int toId)
+    {
+        FromId = fromId;
+        ToId= toId;
+    }
 }

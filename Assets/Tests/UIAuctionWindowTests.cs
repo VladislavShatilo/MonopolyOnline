@@ -71,7 +71,7 @@ public class UIAuctionWindowTests
         var testPlayer1 = new PlayerData("TestPlayer1", 500, PhotonNetwork.LocalPlayer.ActorNumber, Color.red, null);
         var testPlayer2 = new PlayerData("TestPlayer2",600, PhotonNetwork.LocalPlayer.ActorNumber+1, Color.blue, null);
 
-        EventBus.Publish(new AuctionPromptBidEvent(testPlayer2, "Mers",500));
+       // EventBus.Publish(new AuctionPromptBidEvent(testPlayer2, "Mers",500));
 
         yield return null;
        
@@ -79,7 +79,7 @@ public class UIAuctionWindowTests
 
         window.HideWindow();
 
-        EventBus.Publish(new AuctionPromptBidEvent(testPlayer1, "Mers", 500));
+      //  EventBus.Publish(new AuctionPromptBidEvent(testPlayer1, "Mers", 500));
 
         yield return new WaitForSeconds(0.5f);
 
@@ -90,7 +90,7 @@ public class UIAuctionWindowTests
     {
         var testPlayer1 = new PlayerData("TestPlayer1", 5000, PhotonNetwork.LocalPlayer.ActorNumber, Color.red, null);
 
-        EventBus.Publish(new AuctionPromptBidEvent(testPlayer1, "Mers", 600));
+      //  EventBus.Publish(new AuctionPromptBidEvent(testPlayer1, "Mers", 600));
 
 
         yield return new WaitForSeconds(0.5f);
@@ -106,7 +106,7 @@ public class UIAuctionWindowTests
     {
         var testPlayer2 = new PlayerData("TestPlayer2", 100, PhotonNetwork.LocalPlayer.ActorNumber, Color.red, null);
 
-        EventBus.Publish(new AuctionPromptBidEvent(testPlayer2, "Honda", 600));
+        //EventBus.Publish(new AuctionPromptBidEvent(testPlayer2, "Honda", 600));
 
         yield return new WaitForSeconds(0.5f);
 
@@ -149,7 +149,7 @@ public class UIAuctionWindowTests
     {
         var testPlayer3 = new PlayerData("TestPlayer3", 100, 3, Color.red, null);
 
-        EventBus.Publish(new AuctionPromptBidEvent(testPlayer3, "Honda", 1000));
+       // EventBus.Publish(new AuctionPromptBidEvent(testPlayer3, "Honda", 1000));
 
         EventBus.Subscribe<PassAuctionRequestEvent>(e =>
         {

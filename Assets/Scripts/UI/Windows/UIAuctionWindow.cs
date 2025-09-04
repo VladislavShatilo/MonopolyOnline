@@ -93,7 +93,7 @@ public class UIAuctionWindow : UIWindowBase<UIAuctionWindow>
     #region Event Handling
     private void OnAuctionPromptBid(AuctionPromptBidEvent e)
     {
-        if (e.Player.id != PhotonNetwork.LocalPlayer.ActorNumber)
+        if (e.PlayerId != PhotonNetwork.LocalPlayer.ActorNumber)
         {
             HideWindow();
             return;
@@ -107,7 +107,7 @@ public class UIAuctionWindow : UIWindowBase<UIAuctionWindow>
     #region UI Logic
     private void UpdateUI(AuctionPromptBidEvent e)
     {
-        bool canAfford = e.Player.Money >= e.MinAllowedBid;
+        bool canAfford = e.Money >= e.MinAllowedBid;
 
         if (playButton != null && cantPlayButton != null)
         {
@@ -123,7 +123,7 @@ public class UIAuctionWindow : UIWindowBase<UIAuctionWindow>
             cantPriceText.text = $"Поднять до {e.MinAllowedBid.ToString("N0", CultureInfo.InvariantCulture)}";
         }
        
-        playerId = e.Player.id;
+        playerId = e.PlayerId;
     }
     #endregion
 

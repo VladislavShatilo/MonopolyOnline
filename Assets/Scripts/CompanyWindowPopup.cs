@@ -29,7 +29,7 @@ public class CompanyWindowPopup : MonoBehaviour
     private void OnClick()
     {
         company = CompanyDatabase.Instance.GetCompanyById(id);
-        if (TradeManager.Instance != null && TradeManager.Instance.IsTradeActive && TradeManager.Instance.CurrentOffer.FromPlayerId == PhotonNetwork.LocalPlayer.ActorNumber)
+        if (TradeManager.Instance != null && TradeManager.Instance.IsTradeActive && TradeManager.Instance.CurrentOffer.FromPlayerData.id == PhotonNetwork.LocalPlayer.ActorNumber)
         {
             Debug.Log("OnClick");
 

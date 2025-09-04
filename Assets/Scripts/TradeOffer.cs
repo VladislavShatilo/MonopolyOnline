@@ -2,8 +2,8 @@ using System.Collections.Generic;
 
 public class TradeOffer
 {
-    public int FromPlayerId { get; }
-    public int ToPlayerId { get; }
+    public PlayerData FromPlayerData { get; }
+    public PlayerData ToPlayerData { get; }
 
     public List<Company> FromCompanies { get; } = new();
     public List<Company> ToCompanies { get; } = new();
@@ -23,12 +23,14 @@ public class TradeOffer
         if (companies != null)
             ToCompanies.AddRange(companies);
     }
-    public TradeOffer(int fromPlayerId, int toPlayerId)
+ 
+    public TradeOffer(int fromPlayerid, int toPlayerId)
     {
-        FromPlayerId = fromPlayerId;
-        ToPlayerId = toPlayerId;
+        PlayerData fromPlayerData = GameManager.Instance.GetPlayerById(fromPlayerid);
+        PlayerData toPlayerData = GameManager.Instance.GetPlayerById(toPlayerId);
+        FromPlayerData = fromPlayerData;
+        ToPlayerData = toPlayerData;
     }
-
     public int GetFromTotalValue()
     {
         int value = FromMoney;

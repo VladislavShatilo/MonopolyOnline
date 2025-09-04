@@ -143,7 +143,7 @@ public class PlayerMove : MonoBehaviourPun
 
             if (currentCellIndex == 0 && !player.IsInJail && !player.NextMoveBackward)
             {
-                Bank.Instance.AddMoney(player, 2_000);
+                Bank.Instance.AddMoney(photonView.Owner.ActorNumber, 2_000);
             }
         }
 

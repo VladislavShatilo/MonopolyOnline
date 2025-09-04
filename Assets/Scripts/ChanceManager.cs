@@ -119,12 +119,12 @@ public class ChanceManager : MonoBehaviourPun
             case ChanceBuff.BuffType.MoneyGainRandom1:
             case ChanceBuff.BuffType.MoneyGainRandom2:
                 int gain = UnityEngine.Random.Range(minAmount, maxAmount + 1);
-                Bank.Instance.AddMoney(player, gain);
+                Bank.Instance.AddMoney(playerID, gain);
                 message = $"получил {gain}k!";
                 break;
 
             case ChanceBuff.BuffType.MoneyGainFixed:
-                Bank.Instance.AddMoney(player, minAmount);
+                Bank.Instance.AddMoney(playerID, minAmount);
                 message = $"получил {minAmount}k!";
 
                 break;
@@ -132,13 +132,13 @@ public class ChanceManager : MonoBehaviourPun
             case ChanceBuff.BuffType.MoneyLoseRandom1:
             case ChanceBuff.BuffType.MoneyLoseRandom2:
                 int lose = UnityEngine.Random.Range(minAmount, maxAmount + 1);
-                Bank.Instance.RemoveMoney(player, lose);
+                Bank.Instance.RemoveMoney(playerID, lose);
                 message = $"потерял {lose}k!";
 
                 break;
 
             case ChanceBuff.BuffType.MoneyLoseFixed:
-                Bank.Instance.RemoveMoney(player, minAmount);
+                Bank.Instance.RemoveMoney(playerID, minAmount);
                 message = $"потерял {minAmount}k!";
 
                 break;
