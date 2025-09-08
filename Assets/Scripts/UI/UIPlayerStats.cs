@@ -41,8 +41,8 @@ public class UIPlayerStats : MonoBehaviour
         EventBus.Subscribe<TurnStartEvent>(OnTurnStarted);
 
         tradeButton.onClick.AddListener(OnTradeButtonClicked);
-        takeLoanButton.onClick.AddListener(() => LoanManager.Instance.TakeLoan(playerData.id));
-        payLoanButton.onClick.AddListener(() => EventBus.Publish(new PayLoanEvent(playerData.id)));
+        takeLoanButton.onClick.AddListener(() => LoanManager.Instance.TakeLoan(playerData.Id));
+        payLoanButton.onClick.AddListener(() => EventBus.Publish(new PayLoanEvent(playerData.Id)));
     }
 
     private void OnDisable()
@@ -89,31 +89,31 @@ public class UIPlayerStats : MonoBehaviour
 
     private void OnTurnTimerUpdated(TurnTimerUpdatedEvent e)
     {
-        if (playerData == null || e.PlayerId != playerData.id) return;
+        if (playerData == null || e.PlayerId != playerData.Id) return;
         UpdateTimerUI(e.IsCurrent, e.TimeLeft, highlightTurnImage);
     }
 
     private void OnAuctionTimerUpdated(AuctionTimerUpdatedEvent e)
     {
-        bool isCurrent = playerData != null && e.PlayerId == playerData.id;
+        bool isCurrent = playerData != null && e.PlayerId == playerData.Id;
         UpdateTimerUI(isCurrent && e.TimeLeft > 0, e.TimeLeft, highlightAuctionImage);
     }
 
     private void OnTradeTimerUpdated(TradeTimerUpdatedEvent e)
     {
-        bool isCurrent = playerData != null && e.PlayerId == playerData.id && e.TimeLeft > 0;
+        bool isCurrent = playerData != null && e.PlayerId == playerData.Id && e.TimeLeft > 0;
         UpdateTimerUI(isCurrent, e.TimeLeft, highlightAuctionImage);
     }
 
     private void OnCapitalUpdated(OnUpdatePlayerCapitalEvent e)
     {
-        if (e.Player.id == playerData.id)
+        if (e.Player.Id == playerData.Id)
             UpdateCapital(e.Player);
     }
 
     private void OnLoanUpdated(OnTakeLoanEvent e)
     {
-        if (e.PlayerData.id != playerData.id) return;
+        if (e.PlayerData.Id != playerData.Id) return;
 
         loanContainer.SetActive(e.PlayerData.HasLoan);
         loanTurnsLeftText.text = e.PlayerData.HasLoan ? e.PlayerData.LoanTurnsLeft.ToString() : "";
@@ -127,7 +127,7 @@ public class UIPlayerStats : MonoBehaviour
         if (playerData == null) return;
 
         bool isLocalTurn = e.PlayerId == PhotonNetwork.LocalPlayer.ActorNumber;
-        bool isThisPlayerLocal = playerData.id == PhotonNetwork.LocalPlayer.ActorNumber;
+        bool isThisPlayerLocal = playerData.Id == PhotonNetwork.LocalPlayer.ActorNumber;
 
         tradeButton.gameObject.SetActive(isLocalTurn && !isThisPlayerLocal);
         if (isThisPlayerLocal)
@@ -141,7 +141,7 @@ public class UIPlayerStats : MonoBehaviour
     {
         if (playerData == null) return;
         UITradeWindow.Instance.ShowWindow();
-        EventBus.Publish(new StartTradeRequestEvent(PhotonNetwork.LocalPlayer.ActorNumber, playerData.id));
+        EventBus.Publish(new StartTradeRequestEvent(PhotonNetwork.LocalPlayer.ActorNumber, playerData.Id));
     }
 }
 

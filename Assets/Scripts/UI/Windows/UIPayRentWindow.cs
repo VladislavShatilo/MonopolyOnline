@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIPayRentWindow : UIWindowBase<UIPayRentWindow>
+public class UIPayRentWindow : UIWindowBase
 {
     [Header("UI Elements")]
     [SerializeField] private Button payRentButton;
@@ -24,18 +24,16 @@ public class UIPayRentWindow : UIWindowBase<UIPayRentWindow>
     public Button CantPayRentButtonSetter { set => cantPayRentButton = value; }
     public TextMeshProUGUI CantPayRentTextSetter { set => cantPayRentText = value; }
     public WindowAnimation WindowAnimationSetter { set => windowAnimation = value; }
-    protected override void OnEnable()
+    protected  void OnEnable()
     {
-        base.OnEnable();
         if (payRentButton != null)
         {
             payRentButton.onClick.AddListener(HandlePayRentClicked);
         }
     }
 
-    protected override void OnDisable()
+    protected  void OnDisable()
     {
-        base.OnDisable(); 
         if (payRentButton != null)
         {
             payRentButton.onClick.RemoveListener(HandlePayRentClicked);

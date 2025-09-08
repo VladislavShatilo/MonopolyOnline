@@ -5,67 +5,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UITurnWindow : UIWindowBase<UITurnWindow>
+public class UITurnWindow : UIWindowBase,ITurnWindow
 {
-
     [Header("UI")]
     [SerializeField] private Button throwDiceButton;
-    private int localPlayerId;
+
     public Button ThrowDiceButton
     {
         get => throwDiceButton;
         set => throwDiceButton = value;
     }
-    protected override void SubscribeEvents()
-    {
-        EventBus.Subscribe<TurnStartEvent>(TurnChangeWindow);
-    }
 
-    protected override void UnsubscribeEvents()
+    public void Show() => ShowWindow();
+    public void Hide() => HideWindow();
+    public void HardHide() => HardHideWindow();
+    public void SetThrowDiceAction(System.Action onClick)
     {
-        EventBus.Unsubscribe<TurnStartEvent>(TurnChangeWindow);
-    }
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-        if(throwDiceButton != null)
+        throwDiceButton.onClick.RemoveAllListeners();
+        if (onClick != null)
         {
-            throwDiceButton.onClick.AddListener(OnThrowButtonClick);
+            throwDiceButton.onClick.AddListener(() => onClick());
         }
-
     }
-
-    protected override void OnDisable()
-    {
-        base.OnDisable();
-        if (throwDiceButton != null)
-        {
-            throwDiceButton.onClick.RemoveListener(OnThrowButtonClick);
-        }
-
-    }
-    private void Start()
-    {
-        localPlayerId = PhotonNetwork.LocalPlayer.ActorNumber;
-    }
-    private void OnThrowButtonClick()
-    {
-        EventBus.Publish(new RollDiceButtonEvent(localPlayerId)); 
-        HideWindow();
-
-    }
-    public void TurnChangeWindow(TurnStartEvent e)
-    {
-        if (e.PlayerId == localPlayerId)
-        {
-            ShowWindow();
-        }
-        else
-        {
-            HardHideWindow();
-        }
-        
-    }
-    
-
 }

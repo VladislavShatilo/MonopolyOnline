@@ -39,8 +39,9 @@ public class UIBuyWindowPlayModeTests : MonoBehaviour
         rectTransform.GetComponent<RectTransform>().position = Vector3.zero;
         anim.WindowRectTransform = rectTransform.GetComponent<RectTransform>();
         window.WindowAnimation = anim;
+        var color = new PlayerColor(1, 0, 0);
 
-        testPlayer = new PlayerData("TestPlayer", 0, 0, Color.red, null);
+        testPlayer = new PlayerData("TestPlayer", 0, 0, color, null);
         EventBus.ClearAll(); // вот это добавь
 
         windowGO.SetActive(true);
@@ -134,7 +135,9 @@ public class UIBuyWindowPlayModeTests : MonoBehaviour
     public IEnumerator ShowBuyWindow_PlayerCanAfford_ShowsBuyButton()
     {
         yield return null;
-        var testPlayer2 = new PlayerData("TestPlayer", 500, 0, Color.red, null);
+        var color = new PlayerColor(1, 0, 0);
+
+        var testPlayer2 = new PlayerData("TestPlayer", 500, 0, color, null);
 
         window.ShowBuyWindow(testPlayer2, 1, 200);
         yield return new WaitForSeconds(0.5f);
@@ -150,7 +153,9 @@ public class UIBuyWindowPlayModeTests : MonoBehaviour
     public IEnumerator ShowBuyWindow_PlayerCannotAfford_ShowsCantBuyButton()
     {
         yield return null;
-        var testPlayer1 = new PlayerData("TestPlayer", 100, 0, Color.red, null);
+        var color = new PlayerColor(1, 0, 0);
+
+        var testPlayer1 = new PlayerData("TestPlayer", 100, 0, color, null);
 
 
         window.ShowBuyWindow(testPlayer1, 2, 3000);

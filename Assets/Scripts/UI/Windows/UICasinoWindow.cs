@@ -4,7 +4,7 @@ using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UICasinoWindow : UIWindowBase<UICasinoWindow>
+public class UICasinoWindow : UIWindowBase
 {
     [SerializeField] private Button cancelButton;
     [SerializeField] private Button playButton;
@@ -86,6 +86,6 @@ public class UICasinoWindow : UIWindowBase<UICasinoWindow>
     private void CancelCasino()
     {
         HideWindow();
-        TurnManager.Instance.RequestEndTurn();
+       // TurnManager.Instance.RequestEndTurn();
     }
 }

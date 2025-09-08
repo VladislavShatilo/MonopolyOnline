@@ -1,11 +1,13 @@
 using Photon.Pun;
 using UnityEngine;
+using Zenject;
 
 
 public class BranchManager : MonoBehaviourPun
 {
     public static BranchManager Instance { get; private set; }
-
+    [Inject] private IPlayerRepository playerRepository;
+    [Inject] private ICompanyUIService companyUIService;
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -87,7 +89,7 @@ public class BranchManager : MonoBehaviourPun
     {
 
 
-        var uiCompany = CellsManager.Instance.GetCompanyUI(companyId);
+        var uiCompany = companyUIService.GetCompanyUI(companyId);
         if (uiCompany == null) return;
 
         var company = CompanyDatabase.Instance.GetCompanyById(companyId);
@@ -118,7 +120,7 @@ public class BranchManager : MonoBehaviourPun
     private void RPC_HideSellButtons(int playerId, int companyId)
     {
         var company = CompanyDatabase.Instance.GetCompanyById(companyId);
-        var ui = CellsManager.Instance.GetCompanyUI(companyId);
+        var ui = companyUIService.GetCompanyUI(companyId);
         if (company == null || ui == null) return;
 
         if (company.RentLevel == 0)
@@ -133,11 +135,7 @@ public class BranchManager : MonoBehaviourPun
 
     private void OnTurnStart(TurnStartEvent e)
     {
-        if (CellsManager.Instance == null)
-        {
-            Debug.LogError("CellsManager.Instance == null!");
-            return;
-        }
+       
 
         if (CompanyManager.Instance == null)
         {
@@ -153,7 +151,7 @@ public class BranchManager : MonoBehaviourPun
                 continue;
             }
 
-            var ui = CellsManager.Instance.GetCompanyUI(company.Id);
+            var ui = companyUIService.GetCompanyUI(company.Id);
             if (ui == null)
             {
                 Debug.LogWarning($"UICompanyCell == null для компании {company.Id}");
@@ -179,7 +177,7 @@ public class BranchManager : MonoBehaviourPun
 
         foreach (var company in CompanyDatabase.Instance.Companies)
         {
-            var ui = CellsManager.Instance.GetCompanyUI(company.Id);
+            var ui = companyUIService.GetCompanyUI(company.Id);
             ui?.HideAllBranchButtons();
         }
     }
@@ -191,21 +189,22 @@ public class BranchManager : MonoBehaviourPun
     private bool TryGetCompanyAndPlayer(int companyId, int playerId, out Company company, out PlayerData player)
     {
         company = CompanyDatabase.Instance.GetCompanyById(companyId);
-        player = GameManager.Instance.GetPlayerById(playerId);
+        
+        player = playerRepository.GetPlayerById(playerId);
 
         return company != null && player != null;
     }
 
     private bool CanBuyBranch(Company company, PlayerData player)
     {
-        return company.OwnerId == player.id &&
+        return company.OwnerId == player.Id &&
                company.RentLevel < 5 &&
-               Bank.Instance.HasEnoughMoney(player.id, company.CompanyData.branchPrice);
+               Bank.Instance.HasEnoughMoney(player.Id, company.CompanyData.branchPrice);
     }
 
     private bool CanSellBranch(Company company, PlayerData player)
     {
-        return company.OwnerId == player.id && company.RentLevel > 0;
+        return company.OwnerId == player.Id && company.RentLevel > 0;
     }
 
     public void ShowBranchButtonsForLevel(UICompanyCell ui, int level)
@@ -226,7 +225,7 @@ public class BranchManager : MonoBehaviourPun
         {
             if (company.Type != CompanyType.Company || company.CompanyData.group != group) continue;
 
-            var ui = CellsManager.Instance.GetCompanyUI(company.Id);
+            var ui = companyUIService.GetCompanyUI(company.Id);
             ui?.HideAllBranchButtons();
         }
     }

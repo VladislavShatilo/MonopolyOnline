@@ -1,6 +1,7 @@
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
+using Zenject;
 
 /// <summary>
 /// Управляет логикой тюрьмы: помещение, проверка бросков, выкуп, выход.
@@ -13,6 +14,7 @@ public class JailManager : MonoBehaviourPun
     [Header("Настройки тюрьмы")]
     [SerializeField] private int jailTurns = 3;          // Кол-во ходов, которые игрок сидит в тюрьме
     [SerializeField] private int jailFine = 500;         // Штраф за выход из тюрьмы
+    [Inject] private IPlayerRepository playerRepository;
 
     private void Awake()
     {
@@ -54,13 +56,13 @@ public class JailManager : MonoBehaviourPun
         if (!PhotonNetwork.IsMasterClient) return;
 
         photonView.RPC(nameof(RPC_SendToJail), PhotonNetwork.CurrentRoom.GetPlayer(playerID), playerID);
-        TurnManager.Instance.RequestEndTurn();
+        //TurnManager.Instance.RequestEndTurn();
     }
 
     [PunRPC]
     private void RPC_SendToJail(int playerID)
     {
-        var player = GameManager.Instance.GetPlayerById(playerID);
+        var player =playerRepository.GetPlayerById(playerID);
         player.IsInJail = true;
         player.JailTurnsLeft = jailTurns;
 
@@ -76,7 +78,7 @@ public class JailManager : MonoBehaviourPun
     public void ReleaseFromJail(ReleaseFromJailEvent e)
     {
         int playerID= e.PlayerID;
-        var player = GameManager.Instance.GetPlayerById(playerID);
+        var player = playerRepository.GetPlayerById(playerID);
 
         player.IsInJail = false;
         player.JailTurnsLeft = 0;
@@ -96,7 +98,7 @@ public class JailManager : MonoBehaviourPun
 
     private void OnStartTurnJail(StartTurnJailEvent e)
     {
-        var player = GameManager.Instance.GetPlayerById(e.PlayerId);
+        var player = playerRepository.GetPlayerById(e.PlayerId);
         if (!player.IsInJail) return;
 
         Debug.Log($"[Jail] Игрок {e.PlayerId} в тюрьме ({player.JailTurnsLeft} ходов осталось)");
@@ -112,8 +114,8 @@ public class JailManager : MonoBehaviourPun
             // Удвоенные кости ? выход
             EventBus.Publish(new ReleaseFromJailEvent(e.PlayerID, false));
 
-            if (PhotonNetwork.LocalPlayer.ActorNumber == e.PlayerID)
-                EventBus.Publish(new OnPlayerMoveEvent(e.FirstDice + e.SecondDice,true));
+            if (PhotonNetwork.LocalPlayer.ActorNumber == e.PlayerID) { }
+             //   EventBus.Publish(new OnPlayerMoveEvent(e.FirstDice + e.SecondDice,true));
         }
         else
         {
@@ -123,7 +125,7 @@ public class JailManager : MonoBehaviourPun
 
     private void HandleJailTurn(int playerID)
     {
-        var player = GameManager.Instance.GetPlayerById(playerID);
+        var player = playerRepository.GetPlayerById(playerID);
         if (!player.IsInJail) return;
 
         if (player.JailTurnsLeft > 0)
@@ -133,12 +135,12 @@ public class JailManager : MonoBehaviourPun
 
             if (player.JailTurnsLeft == 0)
             {
-                photonView.RPC(nameof(RPC_ShowRansomJailOffer), PhotonNetwork.CurrentRoom.GetPlayer(player.id), player.id);
+                photonView.RPC(nameof(RPC_ShowRansomJailOffer), PhotonNetwork.CurrentRoom.GetPlayer(player.Id), player.Id);
                 return;
             }
         }
 
-        TurnManager.Instance.RequestEndTurn();
+        //TurnManager.Instance.RequestEndTurn();
     }
 
     #endregion
@@ -148,16 +150,16 @@ public class JailManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_ShowJailOffer(int playerID)
     {
-        PlayerData player = GameManager.Instance.GetPlayerById(playerID); 
-        UIJailWindow.Instance.ShowWindow(player);
+        PlayerData player = playerRepository.GetPlayerById(playerID); 
+        //UIJailWindow.Instance.ShowWindow(player);
     }
 
 
     [PunRPC]
     private void RPC_ShowRansomJailOffer(int playerID)
     {
-        PlayerData player = GameManager.Instance.GetPlayerById(playerID);
-        UIRansomJailWindow.Instance.ShowWindow(player);
+        PlayerData player = playerRepository.GetPlayerById(playerID);
+       // UIRansomJailWindow.Instance.ShowWindow(player);
     }
 
     #endregion

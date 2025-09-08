@@ -33,12 +33,12 @@ public class AuctionManager : MonoBehaviourPunCallbacks
     private double bidStartTime;
 
     [Inject] private IPlayerRepository playerRepository;
-
+    [Inject] private IBoardService boardService;
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
-        playerRepository = new GameManagerPlayerRepository();
+        playerRepository = new PlayerRepository();
 
     }
 
@@ -73,7 +73,7 @@ public class AuctionManager : MonoBehaviourPunCallbacks
 
     public void StartAuctionRequest(StartAuctionEvent e)
     {
-        photonView.RPC(nameof(RPC_StartAuctionRequest), RpcTarget.MasterClient, e.Player.id, e.CellIndex, e.Price);
+        photonView.RPC(nameof(RPC_StartAuctionRequest), RpcTarget.MasterClient, e.Player.Id, e.CellIndex, e.Price);
 
     }
 
@@ -102,7 +102,7 @@ public class AuctionManager : MonoBehaviourPunCallbacks
         basePrice = companyBasePrice;
         currentPrice = basePrice;
 
-        TurnManager.Instance.SetMode(TurnMode.Auction);
+       // TurnManager.Instance.SetMode(TurnMode.Auction);
         passed.Add(starterActorNumber);
 
         bidders = BuildTurnOrderStartingAfter(starterActorNumber, passed);
@@ -330,7 +330,7 @@ public class AuctionManager : MonoBehaviourPunCallbacks
             ? basePrice + FIRST_BID_INCREMENT // первая ставка
             : currentPrice + FIRST_BID_INCREMENT; // после чьей-то ставки
         bidStartTime = PhotonNetwork.Time;
-        string companyName = CellsManager.Instance.GetCellDataByIndex(companyId).cellName;
+        string companyName = boardService.GetCellData(companyId).cellName;
         
         int money = playerRepository.GetPlayerById(bidder).Money;
 
@@ -363,7 +363,7 @@ public class AuctionManager : MonoBehaviourPunCallbacks
     [PunRPC]
     private void RPC_ResetAuctionTimer(int playerId)
     {
-        UIAuctionWindow.Instance.HideWindow();
+       // UIAuctionWindow.Instance.HideWindow();
         EventBus.Publish(new AuctionTimerUpdatedEvent(playerId, 0f));
     }
 
@@ -393,7 +393,7 @@ public class AuctionManager : MonoBehaviourPunCallbacks
         {
             EventBus.Publish(new AuctionEndedEventWin(winnerActorNumber, finalPrice, companyId, reason));
         }
-        TurnManager.Instance.OnAuctionEnded(starterId);
+       // TurnManager.Instance.OnAuctionEnded(starterId);
 
     }
 

@@ -3,10 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using UnityEngine;
+using Zenject;
 
 public class MortgageManager : MonoBehaviourPun
 {
     public static MortgageManager Instance { get; private set; }
+    [Inject] private ICompanyUIService companyUIService;
     private const int MORTGAGE_TURNS_COUNTS = 7;
 
     private void Awake()
@@ -31,12 +33,7 @@ public class MortgageManager : MonoBehaviourPun
 
     private void OnTurnStart(TurnStartEvent e)
     {
-        if (CellsManager.Instance == null)
-        {
-            Debug.LogError("CellsManager.Instance == null!");
-            return;
-        }
-
+       
         if (CompanyManager.Instance == null)
         {
             Debug.LogError("CompanyManager.Instance == null!");
@@ -51,7 +48,7 @@ public class MortgageManager : MonoBehaviourPun
                 continue;
             }
 
-            var ui = CellsManager.Instance.GetCompanyUI(company.Id);
+            var ui = companyUIService.GetCompanyUI(company.Id);
             if (ui == null)
             {
                 Debug.LogWarning($"UICompanyCell == null для компании {company.Id}");
@@ -111,7 +108,7 @@ public class MortgageManager : MonoBehaviourPun
         var company = CompanyDatabase.Instance.GetCompanyById(companyId);
 
         if (company.OwnerId != playerId) return;
-        var ui = CellsManager.Instance.GetCompanyUI(company.Id);
+        var ui = companyUIService.GetCompanyUI(company.Id);
 
         if (isMortgage)
         {
@@ -166,7 +163,7 @@ public class MortgageManager : MonoBehaviourPun
             if (company.OwnerId == playerID && company.IsMortgaged)
             {
                 company.MortgageTurnsLeft--;
-                var ui = CellsManager.Instance.GetCompanyUI(company.Id);
+                var ui = companyUIService.GetCompanyUI(company.Id);
                 ui.SetTurnsText(company.MortgageTurnsLeft);
                 if (company.MortgageTurnsLeft <= 0)
                 {

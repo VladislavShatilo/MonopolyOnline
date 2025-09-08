@@ -1,23 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
-public class BoardService
+public class BoardService : IBoardService
 {
-    private readonly BoardConfig boardConfig;
-    private readonly Transform parentTransform;
-    private readonly List<Transform> boardCells = new();
+    private IBoardRepository repository;
+    private Transform parentTransform;
+    private List<Transform> boardCells = new();
 
-    public BoardService(BoardConfig config, Transform parent)
+
+    [Inject]
+    public void Construct(IBoardRepository repository, [Inject(Id = "BoardParent")] Transform parent)
     {
-        boardConfig = config;
-        parentTransform = parent;
+        this.repository = repository;
+        this.parentTransform = parent;
     }
 
     public void InitializeBoard()
     {
         CacheBoardCells();
-        RegisterCellsInDatabase();
     }
 
     private void CacheBoardCells()
@@ -26,28 +28,9 @@ public class BoardService
             boardCells.Add(child);
     }
 
-    private void RegisterCellsInDatabase()
-    {
-        for (int i = 0; i < boardConfig.cells.Count; i++)
-        {
-            var cell = boardConfig.cells[i];
-            switch (cell.cellType)
-            {
-                case CellType.Company:
-                    CompanyDatabase.Instance.AddCompanyData(i, cell.companyData);
-                    break;
-                case CellType.FieldCompany:
-                    CompanyDatabase.Instance.AddCompanyData(i, cell.fieldCompanyData);
-                    break;
-                case CellType.DiceCompany:
-                    CompanyDatabase.Instance.AddCompanyData(i, cell.diceCompanyData);
-                    break;
-            }
-        }
-    }
-
-    public Transform GetCellTransform(int index) => index >= 0 && index < boardCells.Count ? boardCells[index] : null;
-    public GameObject GetCellGameObject(int index) => GetCellTransform(index)?.gameObject;
-    public CellData GetCellData(int index) => boardConfig.cells[index];
-    public List<CellData> GetAllCellData() => boardConfig.cells;
+    public RectTransform GetCellRectTransform(int index) => index >= 0 && index < boardCells.Count ? boardCells[index].GetComponent<RectTransform>() : null;
+    public GameObject GetCellGameObject(int index) => GetCellRectTransform(index)?.gameObject;
+    public CellData GetCellData(int index) => repository.GetCell(index);
+    public IReadOnlyList<CellData> GetAllCellData() => repository.GetAllCells();
+    public int CellsCount => boardCells.Count;
 }

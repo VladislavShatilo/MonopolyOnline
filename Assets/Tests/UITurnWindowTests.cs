@@ -41,7 +41,9 @@ public class UITurnWindowTests
 
         EventBus.ClearAll();
         windowGO.SetActive(true);
-        var testPlayer = new PlayerData("Test", 1000, 1, Color.red, null);
+        var color = new PlayerColor(1, 0, 0);
+
+        var testPlayer = new PlayerData("Test", 1000, 1, color, null);
 
 
     }
@@ -116,8 +118,10 @@ public class UITurnWindowTests
     [UnityTest]
     public IEnumerator TurnChangeWindow_ShowsWindow_ForLocalPlayer()
     {
-        var testPlayer1 = new PlayerData("TestPlayer1", 500, PhotonNetwork.LocalPlayer.ActorNumber, Color.red, null);
-        EventBus.Publish(new TurnStartEvent(testPlayer1.id));
+        var color = new PlayerColor(1, 0, 0);
+
+        var testPlayer1 = new PlayerData("TestPlayer1", 500, PhotonNetwork.LocalPlayer.ActorNumber, color, null);
+        EventBus.Publish(new TurnStartEvent(testPlayer1.Id));
         yield return new WaitForSeconds(0.5f);
 
         Assert.AreEqual(Vector3.zero, window.WindowAnimation.WindowRectTransform.position);
@@ -129,9 +133,11 @@ public class UITurnWindowTests
     [UnityTest]
     public IEnumerator TurnChangeWindow_DoesNotShowWindow_ForOtherPlayer()
     {
-        var testPlayer2 = new PlayerData("TestPlayer2", 600, 15, Color.blue, null);
+        var color = new PlayerColor(1, 0, 0);
 
-        EventBus.Publish(new TurnStartEvent(testPlayer2.id));
+        var testPlayer2 = new PlayerData("TestPlayer2", 600, 15,color, null);
+
+        EventBus.Publish(new TurnStartEvent(testPlayer2.Id));
         yield return new WaitForSeconds(0.5f);
 
         Assert.AreEqual(new Vector3(0, 160, 0), window.WindowAnimation.WindowRectTransform.position);

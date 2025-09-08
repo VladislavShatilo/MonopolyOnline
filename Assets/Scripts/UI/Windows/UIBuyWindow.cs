@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIBuyWindow : UIWindowBase<UIBuyWindow>
+public class UIBuyWindow : UIWindowBase
 {
     [Header("Buttons")]
     [SerializeField] private Button buyButton;
@@ -54,9 +54,8 @@ public class UIBuyWindow : UIWindowBase<UIBuyWindow>
         get => cantBuyButtonText;
         set => cantBuyButtonText = value;
     }
-    protected override void OnEnable()
+    protected void OnEnable()
     {
-        base.OnEnable();
 
         if (buyButton != null)
         {
@@ -68,9 +67,8 @@ public class UIBuyWindow : UIWindowBase<UIBuyWindow>
         }
   
     }
-    protected override void OnDisable()
+    protected  void OnDisable()
     {
-        base.OnDisable();
         if (buyButton != null)
         {
             buyButton.onClick.RemoveListener(HandleBuyClicked);

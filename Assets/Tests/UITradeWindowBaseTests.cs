@@ -56,10 +56,12 @@ public class UITradeWindowBaseTests : MonoBehaviour
               .SetValue(window, CreateTMPText("LeftName"));
         window.GetType().GetField("rightPlayerNameText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
               .SetValue(window, CreateTMPText("RightName"));
+        var color1 = new PlayerColor(1, 0, 0);
+        var color2 = new PlayerColor(0, 1, 0);
 
         // Игроки (мок GameManager)
-        leftPlayer = new PlayerData("Left", 1000, 0, Color.red, null);
-        rightPlayer = new PlayerData("Right", 2000, 0, Color.blue, null);
+        leftPlayer = new PlayerData("Left", 1000, 0, color1, null);
+        rightPlayer = new PlayerData("Right", 2000, 0, color2, null);
         //GameManager.Instance = new MockGameManager(leftPlayer, rightPlayer);
     }
 
@@ -156,15 +158,15 @@ public class UITradeWindowBaseTests : MonoBehaviour
     }
 
     // Mock GameManager
-    private class MockGameManager : GameManager
-    {
-        private PlayerData left;
-        private PlayerData right;
-        public MockGameManager(PlayerData left, PlayerData right)
-        {
-            this.left = left;
-            this.right = right;
-        }
+    //private class MockGameManager : GameManager
+    //{
+    //    private PlayerData left;
+    //    private PlayerData right;
+    //    public MockGameManager(PlayerData left, PlayerData right)
+    //    {
+    //        this.left = left;
+    //        this.right = right;
+    //    }
        
-    }
+    //}
 }

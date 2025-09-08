@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIRansomJailWindow : UIWindowBase<UIRansomJailWindow>
+public class UIRansomJailWindow : UIWindowBase
 {
     [Header("Settings")]
     [SerializeField] private int ransomAmount = 500;
@@ -43,7 +43,7 @@ public class UIRansomJailWindow : UIWindowBase<UIRansomJailWindow>
         set => cantRansomText = value;
     }
 
-    protected override void OnEnable()
+    protected  void OnEnable()
     {
         if (ransomButton != null)
         {
@@ -51,7 +51,7 @@ public class UIRansomJailWindow : UIWindowBase<UIRansomJailWindow>
         }
 
     }
-    protected override void OnDisable()
+    protected  void OnDisable()
     {
         if (ransomButton != null)
         {
@@ -63,7 +63,7 @@ public class UIRansomJailWindow : UIWindowBase<UIRansomJailWindow>
     public void ShowWindow(PlayerData player)
     {
         this.player = player;
-        this.playerID = player.id;
+        this.playerID = player.Id;
         UpdateUI();
         windowAnimation.ShowWindow();
     }

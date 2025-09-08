@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 public class MessageLog : MonoBehaviourPun
 {
@@ -14,6 +15,7 @@ public class MessageLog : MonoBehaviourPun
     [SerializeField] private TMP_InputField chatInputField;
     [SerializeField] private Button sendButton;
     [SerializeField] private int maxMessages = 50;
+    [Inject] private IPlayerRepository playerRepository;
 
     private readonly Queue<TextMeshProUGUI> messages = new Queue<TextMeshProUGUI>();
 
@@ -70,9 +72,9 @@ public class MessageLog : MonoBehaviourPun
 
     public void AddMessage(string message, int playerId)
     {
-        PlayerData player = GameManager.Instance.GetPlayerById(playerId);
+        PlayerData player = playerRepository.GetPlayerById(playerId);
         var newMsg = Instantiate(messagePrefab, contentTransform);
-        string coloredName = $"<color=#{ColorUtility.ToHtmlStringRGB(player.playerColor)}>{player.Name}</color>";
+        string coloredName = $"<color=#{ColorUtility.ToHtmlStringRGB(player.PlayerColor.ToUnityColor())}>{player.Name}</color>";
         newMsg.text = $"{coloredName}: {message}";
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(contentTransform);

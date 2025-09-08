@@ -3,10 +3,13 @@ using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public class LoanManager : MonoBehaviourPun
 {
     public static LoanManager Instance;
+    [Inject] private IPlayerRepository playerRepository;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -34,7 +37,7 @@ public class LoanManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_RequestTakeLoan(int playerId)
     {
-        PlayerData player = GameManager.Instance.GetPlayerById(playerId);
+        PlayerData player = playerRepository.GetPlayerById(playerId);
         if (player.HasLoan) return;
 
         Bank.Instance.AddMoney(playerId, 5000);
@@ -53,7 +56,7 @@ public class LoanManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_RequestPayLoan(int playerId)
     {
-        PlayerData player = GameManager.Instance.GetPlayerById(playerId);
+        PlayerData player = playerRepository.GetPlayerById(playerId);
 
         if (!player.HasLoan) return;
         Bank.Instance.RemoveMoney(playerId, 5500);
@@ -67,7 +70,7 @@ public class LoanManager : MonoBehaviourPun
     }
     public void OnPlayerTurnStart(OnStartTurnLoanEvent e)
     {
-        PlayerData player = GameManager.Instance.GetPlayerById(e.PlayerId);
+        PlayerData player = playerRepository.GetPlayerById(e.PlayerId);
 
         if (!player.HasLoan) return;
 
@@ -75,7 +78,7 @@ public class LoanManager : MonoBehaviourPun
 
         if (player.LoanTurnsLeft <= 0)
         {
-            photonView.RPC(nameof(RPC_ShowLoanWindow), PhotonNetwork.CurrentRoom.GetPlayer(player.id), player.id);
+            photonView.RPC(nameof(RPC_ShowLoanWindow), PhotonNetwork.CurrentRoom.GetPlayer(player.Id), player.Id);
 
         }
         else
@@ -86,8 +89,8 @@ public class LoanManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_ShowLoanWindow(int playerId)
     {
-        PlayerData player = GameManager.Instance.GetPlayerById(playerId);
-        UILoanPayWindow.Instance.ShowLoanWindow(player);
+        PlayerData player = playerRepository.GetPlayerById(playerId);
+        //UILoanPayWindow.Instance.ShowLoanWindow(player);
 
     }
 }

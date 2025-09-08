@@ -51,7 +51,9 @@ public class UILoanPayWindowTests
         windowGO.SetActive(true);
 
         // Тестовый игрок
-        testPlayer = new PlayerData("Test", 6000, 15, Color.red, null);
+        var color = new PlayerColor(1, 0, 0);
+
+        testPlayer = new PlayerData("Test", 6000, 15, color, null);
 
         // Настройка PhotonNetwork.LocalPlayer для теста
         if (PhotonNetwork.LocalPlayer == null)

@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIJailWindow : UIWindowBase<UIJailWindow>
+public class UIJailWindow : UIWindowBase
 {
     [Header ("Setting")]
     [SerializeField] private int ransomMoney = 500;
@@ -48,7 +48,7 @@ public class UIJailWindow : UIWindowBase<UIJailWindow>
         get => cantRansomText;
         set => cantRansomText = value;
     }
-    protected override void OnEnable()
+    protected  void OnEnable()
     {
         if(ransomButton != null && throwDiceButton != null)
         {
@@ -58,7 +58,7 @@ public class UIJailWindow : UIWindowBase<UIJailWindow>
        
     }
 
-    protected override void OnDisable()
+    protected  void OnDisable()
     {
         if (ransomButton != null && throwDiceButton != null)
         {
@@ -69,7 +69,7 @@ public class UIJailWindow : UIWindowBase<UIJailWindow>
 
     public void ShowWindow(PlayerData player)
     {
-        this.playerID = player.id;
+        this.playerID = player.Id;
         this.player = player;
         UpdateUI();
         windowAnimation.ShowWindow();

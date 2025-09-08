@@ -27,7 +27,7 @@ public class CasinoManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_ShowPurchaseOffer()
     {
-        UICasinoWindow.Instance.ShowWindow();
+       // UICasinoWindow.Instance.ShowWindow();
     }
 
     public void PlayGame(int[] selectedNumbers)
@@ -43,7 +43,7 @@ public class CasinoManager : MonoBehaviourPun
         // применяем результат к игроку
         photonView.RPC(nameof(RPC_CasinoChangeMoney), RpcTarget.AllBuffered, reward, playerID);
         // завершаем ход
-        TurnManager.Instance.RequestEndTurn();
+       // TurnManager.Instance.RequestEndTurn();
     }
     [PunRPC]
     private void RPC_CasinoChangeMoney(int reward, int playerID)

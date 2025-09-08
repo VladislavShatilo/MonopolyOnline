@@ -54,7 +54,9 @@ public class UIJailWindowTests
         windowGO.SetActive(true); // OnEnable отработает
 
         // Тестовый игрок
-        testPlayer = new PlayerData("Test", 1000, 1, Color.red, null);
+        var color = new PlayerColor(1, 0, 0);
+
+        testPlayer = new PlayerData("Test", 1000, 1, color, null);
     }
 
     [TearDown]
@@ -85,7 +87,7 @@ public class UIJailWindowTests
     [UnityTest]
     public IEnumerator ShowWindow_UpdatesUIAndSetsPlayerID()
     {
-        testPlayer.id = 42;
+        testPlayer.Id = 42;
         window.ShowWindow(testPlayer);
         yield return null;
 
@@ -106,7 +108,7 @@ public class UIJailWindowTests
     public IEnumerator ShowWindow_UpdatesUIAndSetsPlayerIDNoMoney()
     {
         testPlayer.Money = 0;
-        testPlayer.id = 42;
+        testPlayer.Id = 42;
 
         window.ShowWindow(testPlayer);
         yield return null;
@@ -127,7 +129,7 @@ public class UIJailWindowTests
     [UnityTest]
     public IEnumerator ThrowDiceButton_PublishesEventAndHidesWindow()
     {
-        testPlayer.id = 7;
+        testPlayer.Id = 7;
 
         window.ShowWindow(testPlayer);
 
@@ -152,7 +154,7 @@ public class UIJailWindowTests
     [UnityTest]
     public IEnumerator RansomButton_PublishesEventAndHidesWindow()
     {
-        testPlayer.id = 13;
+        testPlayer.Id = 13;
 
         EventBus.Subscribe<ReleaseFromJailEvent>(e =>
         {

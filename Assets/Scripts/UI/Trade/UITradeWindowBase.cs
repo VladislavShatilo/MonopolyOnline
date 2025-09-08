@@ -36,8 +36,8 @@ public class UITradeWindowBase : MonoBehaviour
 
         if (leftPlayer == null || rightPlayer == null) return;
 
-        leftPlayerNameText.text = $"<color=#{ColorUtility.ToHtmlStringRGB(leftPlayer.playerColor)}>{leftPlayer.Name}</color>";
-        rightPlayerNameText.text = $"<color=#{ColorUtility.ToHtmlStringRGB(rightPlayer.playerColor)}>{rightPlayer.Name}</color>";
+        leftPlayerNameText.text = $"<color=#{ColorUtility.ToHtmlStringRGB(leftPlayer.PlayerColor.ToUnityColor())}>{leftPlayer.Name}</color>";
+        rightPlayerNameText.text = $"<color=#{ColorUtility.ToHtmlStringRGB(rightPlayer.PlayerColor.ToUnityColor())}>{rightPlayer.Name}</color>";
 
         int leftSum = currentOffer.FromMoney;
         int rightSum = currentOffer.ToMoney;
@@ -45,8 +45,8 @@ public class UITradeWindowBase : MonoBehaviour
         leftMoneyText.text = leftSum.ToString();
         rightMoneyText.text = rightSum.ToString();
 
-        PopulateCompanies(leftPanel, currentOffer.FromCompanies, currentOffer.FromPlayerData.id, ref leftSum);
-        PopulateCompanies(rightPanel, currentOffer.ToCompanies, currentOffer.ToPlayerData.id, ref rightSum);
+        PopulateCompanies(leftPanel, currentOffer.FromCompanies, currentOffer.FromPlayerData.Id, ref leftSum);
+        PopulateCompanies(rightPanel, currentOffer.ToCompanies, currentOffer.ToPlayerData.Id, ref rightSum);
 
         leftTotalAmountText.text = leftSum.ToString("N0", CultureInfo.InvariantCulture);
         rightTotalAmountText.text = rightSum.ToString("N0", CultureInfo.InvariantCulture);

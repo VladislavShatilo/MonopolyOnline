@@ -55,7 +55,7 @@ public class UIAuctionWindowTests
         window.WindowAnimation = anim;
         EventBus.ClearAll();
 
-        testPlayer = new PlayerData("TestPlayer", 0, 0, Color.red, null);
+        testPlayer = new PlayerData("TestPlayer", 0, 0, new PlayerColor(1f, 0f, 0f), null);
         windowGO.SetActive(true);
     }
     [TearDown]
@@ -68,8 +68,11 @@ public class UIAuctionWindowTests
     [UnityTest]
     public IEnumerator OnAuctionPromptBid_ForOtherPlayer_HidesWindow()
     {
-        var testPlayer1 = new PlayerData("TestPlayer1", 500, PhotonNetwork.LocalPlayer.ActorNumber, Color.red, null);
-        var testPlayer2 = new PlayerData("TestPlayer2",600, PhotonNetwork.LocalPlayer.ActorNumber+1, Color.blue, null);
+        var color1 = new PlayerColor(1, 0, 0);
+        var color2 = new PlayerColor(0, 1, 0);
+
+        var testPlayer1 = new PlayerData("TestPlayer1", 500, PhotonNetwork.LocalPlayer.ActorNumber, color1, null);
+        var testPlayer2 = new PlayerData("TestPlayer2",600, PhotonNetwork.LocalPlayer.ActorNumber+1, color2, null);
 
        // EventBus.Publish(new AuctionPromptBidEvent(testPlayer2, "Mers",500));
 
@@ -88,7 +91,8 @@ public class UIAuctionWindowTests
     [UnityTest]
     public IEnumerator OnAuctionPromptBid_ForLocalPlayer_ShowsWindowAndUpdatesUI_WhenCanAfford()
     {
-        var testPlayer1 = new PlayerData("TestPlayer1", 5000, PhotonNetwork.LocalPlayer.ActorNumber, Color.red, null);
+        var color = new PlayerColor(1, 0, 0);
+        var testPlayer1 = new PlayerData("TestPlayer1", 5000, PhotonNetwork.LocalPlayer.ActorNumber, color, null);
 
       //  EventBus.Publish(new AuctionPromptBidEvent(testPlayer1, "Mers", 600));
 
@@ -104,7 +108,9 @@ public class UIAuctionWindowTests
     [UnityTest]
     public IEnumerator OnAuctionPromptBid_ForLocalPlayer_ShowsCantPlay_WhenNotEnoughMoney()
     {
-        var testPlayer2 = new PlayerData("TestPlayer2", 100, PhotonNetwork.LocalPlayer.ActorNumber, Color.red, null);
+        var color = new PlayerColor(1, 0, 0);
+
+        var testPlayer2 = new PlayerData("TestPlayer2", 100, PhotonNetwork.LocalPlayer.ActorNumber, color, null);
 
         //EventBus.Publish(new AuctionPromptBidEvent(testPlayer2, "Honda", 600));
 
@@ -147,7 +153,9 @@ public class UIAuctionWindowTests
     [UnityTest]
     public IEnumerator CancelButton_PublishesPassAuctionRequestEvent()
     {
-        var testPlayer3 = new PlayerData("TestPlayer3", 100, 3, Color.red, null);
+        var color = new PlayerColor(1, 0, 0);
+
+        var testPlayer3 = new PlayerData("TestPlayer3", 100, 3, color, null);
 
        // EventBus.Publish(new AuctionPromptBidEvent(testPlayer3, "Honda", 1000));
 

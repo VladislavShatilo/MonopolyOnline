@@ -26,8 +26,9 @@ public class UIBuyWindowEditModeTests
         window.CantBuyButtonText = new GameObject("CantBuyText").AddComponent<TextMeshProUGUI>();
         window.WindowAnimation = new GameObject("WindowAnimation").AddComponent<WindowAnimation>();
 
+        var color = new PlayerColor(1, 0, 0);
 
-        testPlayer = new PlayerData("TestPlayer", 0, 0, Color.red, null);
+        testPlayer = new PlayerData("TestPlayer", 0, 0, color, null);
         EventBus.Subscribe<TryBuyCompanyEvent>(OnTryBuyCompany);
         EventBus.Subscribe<StartAuctionEvent>(OnAuctionStart);
         windowGO.SetActive(false);

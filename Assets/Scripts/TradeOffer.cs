@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Zenject;
 
 public class TradeOffer
 {
@@ -10,7 +11,9 @@ public class TradeOffer
 
     public int FromMoney { get; set; }
     public int ToMoney { get; set; }
-    public void SetFromCompanies(List<Company> companies)
+	[Inject] private IPlayerRepository playerRepository;
+
+	public void SetFromCompanies(List<Company> companies)
     {
         FromCompanies.Clear();
         if (companies != null)
@@ -26,8 +29,8 @@ public class TradeOffer
  
     public TradeOffer(int fromPlayerid, int toPlayerId)
     {
-        PlayerData fromPlayerData = GameManager.Instance.GetPlayerById(fromPlayerid);
-        PlayerData toPlayerData = GameManager.Instance.GetPlayerById(toPlayerId);
+        PlayerData fromPlayerData = playerRepository.GetPlayerById(fromPlayerid);
+        PlayerData toPlayerData = playerRepository.GetPlayerById(toPlayerId);
         FromPlayerData = fromPlayerData;
         ToPlayerData = toPlayerData;
     }

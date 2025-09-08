@@ -13,7 +13,9 @@ public class UIPayRentPresenterTests
     public void GetPayRentState_PlayerCanPay_ShouldReturnCanPayTrue()
     {
         // Arrange
-        var player = new PlayerData("Vlad", 200, 0, Color.red);
+        var color = new PlayerColor(1, 0, 0);
+
+        var player = new PlayerData("Vlad", 200, 0, color);
         float rent = 150;
         presenter = new UIPayRentPresenter(player, 15, rent);
 
@@ -29,8 +31,9 @@ public class UIPayRentPresenterTests
     public void GetPayRentState_PlayerCannotPay_ShouldReturnCanPayFalse()
     {
         // Arrange
+        var color = new PlayerColor(1, 0, 0);
 
-        var player = new PlayerData("Vlad", 50, 0, Color.red);
+        var player = new PlayerData("Vlad", 50, 0, color);
         float rent = 100;
         presenter = new UIPayRentPresenter(player, 15, rent);
         // Act

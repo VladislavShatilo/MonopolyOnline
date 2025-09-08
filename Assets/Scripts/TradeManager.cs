@@ -93,8 +93,8 @@ public class TradeManager : MonoBehaviourPun
 
         // Отправка всем через MasterClient
         photonView.RPC(nameof(RPC_SendOfferToAll), RpcTarget.MasterClient,
-            currentOffer.FromPlayerData.id,
-            currentOffer.ToPlayerData.id,
+            currentOffer.FromPlayerData.Id,
+            currentOffer.ToPlayerData.Id,
             SerializeCompanies(currentOffer.FromCompanies),
             SerializeCompanies(currentOffer.ToCompanies),
             currentOffer.FromMoney,
@@ -119,7 +119,7 @@ public class TradeManager : MonoBehaviourPun
         };
         currentOffer.SetFromCompanies(DeserializeCompanies(fromCompaniesJson));
         currentOffer.SetToCompanies(DeserializeCompanies(toCompaniesJson));
-        TurnManager.Instance.SetMode(TurnMode.Trade);
+       // TurnManager.Instance.SetMode(TurnMode.Trade);
 
         EventBus.Publish(new TradeProposalReceivedEvent(currentOffer,fromPlayerId,toPlayerId));
 
@@ -162,7 +162,7 @@ public class TradeManager : MonoBehaviourPun
             ApplyTrade(currentOffer);
         }
 
-        TurnManager.Instance.SetMode(TurnMode.Normal);
+        //TurnManager.Instance.SetMode(TurnMode.Normal);
         EventBus.Publish(new TradeTimerUpdatedEvent(-1, 0));
         EventBus.Publish(new TradeCancelledEvent());
         // Сброс всего состояния трейда
@@ -194,8 +194,8 @@ public class TradeManager : MonoBehaviourPun
     {
         if (currentOffer == null) return;
 
-        if (companyOwnerId == currentOffer.FromPlayerData.id) currentOffer.FromCompanies.Add(company);
-        else if (companyOwnerId == currentOffer.ToPlayerData.id) currentOffer.ToCompanies.Add(company);
+        if (companyOwnerId == currentOffer.FromPlayerData.Id) currentOffer.FromCompanies.Add(company);
+        else if (companyOwnerId == currentOffer.ToPlayerData.Id) currentOffer.ToCompanies.Add(company);
         else return;
 
         EventBus.Publish(new TradeUpdatedEvent(currentOffer));
@@ -205,8 +205,8 @@ public class TradeManager : MonoBehaviourPun
     {
         if (currentOffer == null) return;
 
-        if (companyOwnerId == currentOffer.FromPlayerData.id) currentOffer.FromCompanies.Remove(company);
-        else if (companyOwnerId == currentOffer.ToPlayerData.id) currentOffer.ToCompanies.Remove(company);
+        if (companyOwnerId == currentOffer.FromPlayerData.Id) currentOffer.FromCompanies.Remove(company);
+        else if (companyOwnerId == currentOffer.ToPlayerData.Id) currentOffer.ToCompanies.Remove(company);
         else return;
 
         EventBus.Publish(new TradeUpdatedEvent(currentOffer));
@@ -216,8 +216,8 @@ public class TradeManager : MonoBehaviourPun
     {
         if (currentOffer == null) return;
 
-        if (playerId == currentOffer.FromPlayerData.id) currentOffer.FromMoney = amount;
-        else if (playerId == currentOffer.ToPlayerData.id) currentOffer.ToMoney = amount;
+        if (playerId == currentOffer.FromPlayerData.Id) currentOffer.FromMoney = amount;
+        else if (playerId == currentOffer.ToPlayerData.Id) currentOffer.ToMoney = amount;
 
         EventBus.Publish(new TradeUpdatedEvent(currentOffer));
     }

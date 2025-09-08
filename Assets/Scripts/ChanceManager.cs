@@ -2,6 +2,7 @@ using Photon.Pun;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 using static ChanceBuff;
 
 [Serializable]
@@ -44,6 +45,7 @@ public class ChanceManager : MonoBehaviourPun
     private System.Random random = new System.Random();
 
     private List<ChanceBuff> buffs = new List<ChanceBuff>();
+    [Inject] private IPlayerRepository playerRepository;
 
     private void Awake()
     {
@@ -103,14 +105,14 @@ public class ChanceManager : MonoBehaviourPun
         photonView.RPC(nameof(RPC_ApplyBuff), RpcTarget.AllBuffered, playerID, typeInt, minAmount, maxAmount);
         if (typeInt != (int)BuffType.Jail && typeInt != (int)BuffType.Teleport)
         {
-            TurnManager.Instance.RequestEndTurn();
+           // TurnManager.Instance.RequestEndTurn();
         }
 
     }
     [PunRPC]
     private void RPC_ApplyBuff(int playerID, int typeInt, int minAmount, int maxAmount)
     {
-        var player = GameManager.Instance.GetPlayerById(playerID);
+        var player = playerRepository.GetPlayerById(playerID);
         var type = (ChanceBuff.BuffType)typeInt;
         string message = "";
 
@@ -145,7 +147,7 @@ public class ChanceManager : MonoBehaviourPun
 
             case ChanceBuff.BuffType.Teleport:
                 message = "телепортировался!";
-                EventBus.Publish(new OnPlayerTeleportEvent(player.id));
+                EventBus.Publish(new OnPlayerTeleportEvent(player.Id));
 
                 // TODO: реализовать телепорт игрока
                 break;
@@ -164,7 +166,7 @@ public class ChanceManager : MonoBehaviourPun
                 break;
 
             case ChanceBuff.BuffType.Jail:
-                JailManager.Instance.SendToJail(player.id);
+                JailManager.Instance.SendToJail(player.Id);
 
                 message = "попал в тюрьму!";
                 // TODO: отправить игрока в тюрьму

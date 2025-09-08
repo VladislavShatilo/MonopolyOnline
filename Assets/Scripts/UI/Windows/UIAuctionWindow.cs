@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIAuctionWindow : UIWindowBase<UIAuctionWindow>
+public class UIAuctionWindow : UIWindowBase
 {
     [Header("UI References")]
     [SerializeField] private Button playButton;
@@ -50,18 +50,9 @@ public class UIAuctionWindow : UIWindowBase<UIAuctionWindow>
         set => headerText = value;
     }
     #region Unity Lifecycle
-    protected override void SubscribeEvents()
-    {
-        EventBus.Subscribe<AuctionPromptBidEvent>(OnAuctionPromptBid);
-    }
 
-    protected override void UnsubscribeEvents()
+    protected  void OnEnable()
     {
-        EventBus.Unsubscribe<AuctionPromptBidEvent>(OnAuctionPromptBid);
-    }
-    protected override void OnEnable()
-    {
-        base.OnEnable();
         if (playButton != null && cancelButton != null)
         {
             playButton.onClick.AddListener(HandlePlayClicked);
@@ -77,12 +68,10 @@ public class UIAuctionWindow : UIWindowBase<UIAuctionWindow>
         }
 
     }
-    protected override void OnDisable()
+    protected  void OnDisable()
     {
-        base.OnDisable();
         if (playButton != null && cancelButton != null)
         {
-            Debug.Log(playButton.name);
             playButton.onClick.RemoveListener(HandlePlayClicked);
             cancelButton.onClick.RemoveListener(HandleCancelClicked);
         }

@@ -7,11 +7,12 @@ using UnityEngine;
 [System.Serializable]
 public class PlayerData
 {
-    public int id;               // ActorNumber в Photon
+    public int Id;               // ActorNumber в Photon
     public string Name;
     public int Money;
-    public Color playerColor;
-   
+    public PlayerColor PlayerColor;
+    public int CurrentCellId;
+
     public bool IsInJail = false;
     public int JailTurnsLeft;
     public bool SkipNextTurn = false;
@@ -23,14 +24,15 @@ public class PlayerData
     [System.NonSerialized]
     public Player photonPlayer;
 
-    public PlayerData(string name, int startMoney, int id, Color color, Player photonPlayer = null)
+    public PlayerData(string name, int startMoney, int id, PlayerColor color, Player photonPlayer = null)
     {
         IsInJail = false;
         Name = name;
         Money = startMoney;
-        this.id = id;
-        playerColor = color;
+        this.Id = id;
+        PlayerColor = color;
         this.photonPlayer = photonPlayer;
+        CurrentCellId = 0;
     }
 
     // Видимая капитализация

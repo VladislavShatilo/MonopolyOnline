@@ -20,12 +20,11 @@ public class UIManager : MonoBehaviour
     }
     private void SetPlayerStats(PlayerJoinedEvent e)
     {
-       
         var uiStats = Instantiate(playerStatsPrefab, playersStatsContainer);
         uiStats.SetPlayerStats(e.Player);
         Bank.Instance.OnBalanceChanged += (changedPlayer, money) =>
         {
-            if (changedPlayer.id == e.Player.id)
+            if (changedPlayer.Id == e.Player.Id)
                 uiStats.SetMoney(money);
         };
     }

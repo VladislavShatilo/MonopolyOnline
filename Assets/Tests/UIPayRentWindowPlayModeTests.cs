@@ -66,7 +66,9 @@ public class UIPayRentWindowPlayModeTests
     [UnityTest]
     public IEnumerator Show_WithEnoughMoney_ShowsPayButton()
     {
-        var player = new PlayerData("Vlad", 500, 0, Color.red, photonPlayer: null);
+        var color = new PlayerColor(1, 0, 0);
+
+        var player = new PlayerData("Vlad", 500, 0, color, photonPlayer: null);
 
         window.Show(player, 0, 200);
         yield return null;
@@ -82,7 +84,9 @@ public class UIPayRentWindowPlayModeTests
     [UnityTest]
     public IEnumerator Show_WithNotEnoughMoney_ShowsCantPayButton()
     {
-        var player = new PlayerData("Vlad", 100, 0, Color.red, photonPlayer: null);
+        var color = new PlayerColor(1, 0, 0);
+
+        var player = new PlayerData("Vlad", 100, 0, color, photonPlayer: null);
 
         window.Show(player, 0, 200);
         yield return null;
@@ -97,7 +101,9 @@ public class UIPayRentWindowPlayModeTests
     [UnityTest]
     public IEnumerator ClickPayButton_InvokesPresenterLogic()
     {
-        var player = new PlayerData("Vlad", 500, 0, Color.red, null);
+        var color = new PlayerColor(1, 0, 0);
+
+        var player = new PlayerData("Vlad", 500, 0, color, null);
 
         // показываем окно
         window.Show(player, 7, 200); // cellIndex = 7

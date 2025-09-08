@@ -1,0 +1,51 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Zenject;
+
+public class TurnPresenter : ITurnPresenter,IInitializable, IDisposable
+{
+    private ILocalPlayerService localPlayerService;
+    private  IPhotonDiceManager photonDiceManager;
+
+    private ITurnWindow uiTurnWindow;
+
+    [Inject]
+    public void Construct(ILocalPlayerService localPlayerService, ITurnWindow uiTurnWindow, IPhotonDiceManager photonDiceManager)
+    {
+        this.localPlayerService = localPlayerService;
+        this.uiTurnWindow = uiTurnWindow;
+        this.photonDiceManager = photonDiceManager;
+
+    }
+    void IInitializable.Initialize()
+    {
+        uiTurnWindow.SetThrowDiceAction(OnThrowDiceClicked);
+
+        EventBus.Subscribe<TurnStartEvent>(OnTurnStart);
+    }
+    void IDisposable.Dispose()
+    {
+        EventBus.Unsubscribe<TurnStartEvent>(OnTurnStart);
+    }
+    private void OnTurnStart(TurnStartEvent e)
+    {
+        Debug.Log("OnTurnStart");
+        int localId = localPlayerService.GetLocalPlayerId();
+        Debug.Log(localId);
+        Debug.Log(e.PlayerId);
+
+        if (e.PlayerId == localId)
+            uiTurnWindow.Show();
+        else
+            uiTurnWindow.Hide();
+    }
+    private void OnThrowDiceClicked()
+    {
+        photonDiceManager.RequestDiceRoll(localPlayerService.GetLocalPlayerId(), false);
+        uiTurnWindow.Hide();
+    }
+    public void ShowTurnFor(int playerId) => uiTurnWindow.Show();
+    public void HideTurn() => uiTurnWindow.Hide();
+}

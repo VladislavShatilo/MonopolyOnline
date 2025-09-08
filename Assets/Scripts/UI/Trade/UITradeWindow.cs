@@ -75,7 +75,7 @@ public class UITradeWindow : UITradeWindowBase
     {
         if (int.TryParse(value, out int amount) && currentOffer != null)
         {
-            TradeManager.Instance.SetMoney(currentOffer.FromPlayerData.id, amount);
+            TradeManager.Instance.SetMoney(currentOffer.FromPlayerData.Id, amount);
             currentOffer.FromMoney = amount;
             RefreshUI();
         }
@@ -85,7 +85,7 @@ public class UITradeWindow : UITradeWindowBase
     {
         if (int.TryParse(value, out int amount) && currentOffer != null)
         {
-            TradeManager.Instance.SetMoney(currentOffer.ToPlayerData.id, amount);
+            TradeManager.Instance.SetMoney(currentOffer.ToPlayerData.Id, amount);
             currentOffer.ToMoney = amount;
             RefreshUI();
         }

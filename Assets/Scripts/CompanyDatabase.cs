@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public enum CompanyType
 {
@@ -26,6 +27,8 @@ public class Company
     public FieldCompanyData FieldCompanyData { get; private set; }
     public DiceCompanyData DiceCompanyData { get; private set; }
     public CompanyGroup Group { get; private set; }
+    [Inject] private IPlayerRepository playerRepository;
+    [Inject] private ICompanyUIService companyUIService;
 
     public Company(int id, CompanyData companyData)
     {
@@ -80,14 +83,14 @@ public class Company
 
         // Меняем владельца
         OwnerId = newOwnerId;
-        PlayerData player =  GameManager.Instance.GetPlayerById(OwnerId);
+        PlayerData player =  playerRepository.GetPlayerById(OwnerId);
         player.OwnedCompanies.Add(this);
         EventBus.Publish(new OnUpdatePlayerCapitalEvent(player));
 
         IsMortgaged = IsMortgaged;
         MortgageTurnsLeft = MortgageTurnsLeft;
 
-        var cellUI = CellsManager.Instance.GetCellByIndex(Id).GetComponent<UICompanyCell>();
+        var cellUI = companyUIService.GetCompanyUI(Id);
         cellUI.HandleCompanyBought(Id, newOwnerId);
         // Обновляем аренду для группы
        CompanyManager.Instance.UpdateRent(this);

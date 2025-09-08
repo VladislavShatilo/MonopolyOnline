@@ -7,7 +7,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UILoanPayWindow : UIWindowBase<UILoanPayWindow>
+public class UILoanPayWindow : UIWindowBase
 {
     [Header("Settings")]
     [SerializeField] private int loanAmount = 5500;
@@ -42,7 +42,7 @@ public class UILoanPayWindow : UIWindowBase<UILoanPayWindow>
         set => cantPayLoanText = value;
     }
 
-    protected override void OnEnable()
+    protected void OnEnable()
     {
         if (payLoanButton != null)
         {
@@ -50,7 +50,7 @@ public class UILoanPayWindow : UIWindowBase<UILoanPayWindow>
         }
 
     }
-    protected override void OnDisable()
+    protected  void OnDisable()
     {
         if (payLoanButton != null)
         {

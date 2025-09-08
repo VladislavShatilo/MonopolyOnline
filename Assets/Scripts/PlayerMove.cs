@@ -3,170 +3,73 @@ using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
+using Zenject;
 
-[RequireComponent(typeof(PlayerSkin))]
 public class PlayerMove : MonoBehaviourPun
 {
-    [Header("Move Settings")]
     [SerializeField] private float moveDuration = 0.1f;
-    [SerializeField] private float stackMoveDuration = 0.1f;
+    private IBoardService boardService;
+    private ILocalPlayerService localPlayerService;
 
-    private Transform rootCellsObject;
-    private List<Transform> boardCells = new List<Transform>();
-    private int currentCellIndex = 0;
-    private const int JAIL_CELL_ID = 10;
-    private void Start()
-    {
-        if (GameManager.Instance?.PlayerRoot != null)
-        {
-            transform.SetParent(GameManager.Instance.PlayerRoot, false);
-        }
-
-        if (GameManager.Instance?.PlayerRoot != null)
-            transform.SetParent(GameManager.Instance.PlayerRoot, false);
-
-        var c = GameManager.Instance.GetColorForActor(photonView.Owner.ActorNumber);
-        GetComponent<PlayerSkin>().SetColorDirect(c);
-
-        EnsureBoardCellsInitialized();
-    }
-
+ 
     private void OnEnable()
     {
-        EventBus.Subscribe<OnPlayerMoveEvent>(Move);
-        EventBus.Subscribe<OnPlayerTeleportEvent>(TeleportToRandomCell);
-
-        EventBus.Subscribe<MoveToJailEvent>(MoveToJail);
+        EventBus.Subscribe<MovePlayerEvent>(OnPlayerMove);
+        EventBus.Subscribe<InitializePlayerMoveEvent>(Initialize);
+        EventBus.Subscribe<PlayerMoveRegister>(OnOccupancyRegister);
+        EventBus.Subscribe<PlayerMoveUnregister>(OnOccupancyUnregister);
+        EventBus.Publish(new EnablePlayerMoveEvent());
     }
 
     private void OnDisable()
     {
-        EventBus.Unsubscribe<OnPlayerMoveEvent>(Move);
-        EventBus.Unsubscribe<OnPlayerTeleportEvent>(TeleportToRandomCell);
-
-        EventBus.Unsubscribe<MoveToJailEvent>(MoveToJail);
+        EventBus.Unsubscribe<MovePlayerEvent>(OnPlayerMove);
+        EventBus.Unsubscribe<InitializePlayerMoveEvent>(Initialize);
+        EventBus.Unsubscribe<PlayerMoveRegister>(OnOccupancyRegister);
+        EventBus.Unsubscribe<PlayerMoveUnregister>(OnOccupancyUnregister);
+    }
+    private void Initialize(InitializePlayerMoveEvent e)
+    {
+        boardService = e.BoardService;
+        localPlayerService = e.LocalPlayerService;
     }
 
-    private void Move(OnPlayerMoveEvent e)
+    private void OnOccupancyRegister(PlayerMoveRegister e)
     {
-        if (!photonView.IsMine) return;
-        photonView.RPC(nameof(RPC_MoveSteps), RpcTarget.AllBuffered, e.Steps,e.Forward);
+        EventBus.Publish(new PlayerOccupancyRegisterEvent(e.CellIndex, this));
     }
-    [PunRPC]
-    public void RPC_RegisterOnCell(int cellIndex)
+    private void OnOccupancyUnregister(PlayerMoveUnregister e)
     {
-        // Сохраняем индекс
-        this.currentCellIndex = cellIndex;
-
-
-        // Центр клетки
-        if (GameManager.Instance == null || GameManager.Instance.CellsRoot == null) return;
-        Vector3 center = GameManager.Instance.CellsRoot.GetChild(cellIndex).position;
-
-
-        // Сбросим твины и установим позицию в центр сразу
-        transform.DOKill();
-        transform.position = center;
-
-
-        // Зарегистрируемся в менеджере (это вызовет UpdatePositions и DOTween раздвинет всех)
-        CellOccupancyManager.RegisterPlayerOnCell(cellIndex, this, center);
-
-
-        Debug.Log($"PLAYER_RPC: {gameObject.name} RPC_RegisterOnCell cell={cellIndex} center={center}");
-    }
-    public void TeleportToRandomCell(OnPlayerTeleportEvent e)
-    {
-        if (PhotonNetwork.LocalPlayer.ActorNumber == e.PlayerId)
-        {
-            if (!photonView.IsMine) return;
-            int randomIndex;
-            do
-            {
-                randomIndex = UnityEngine.Random.Range(0, boardCells.Count);
-            } while (randomIndex == currentCellIndex);
-            int steps = 0;
-            if (randomIndex > currentCellIndex)
-            {
-                steps = randomIndex - currentCellIndex;
-            }
-            else
-            {
-                steps = randomIndex + 40 - currentCellIndex;
-            }
-            photonView.RPC(nameof(RPC_MoveSteps), RpcTarget.AllBuffered, steps, true);
-        }
+        EventBus.Publish(new PlayerOccupancyUnregisterEvent(e.CellIndex, this));
 
     }
-
-    [PunRPC]
-    private void RPC_MoveSteps(int steps,bool forward)
+    private void OnPlayerMove(MovePlayerEvent e)
     {
-        if (boardCells.Count == 0)
-        {
-            Debug.LogError("Board cells not initialized, canceling move.");
-            return;
-        }
-
-        StartCoroutine(MoveStepsCoroutine(steps, forward));
+        if (e.PlayerId != localPlayerService.GetLocalPlayerId()) return;
+        StartCoroutine(Move(e.Steps,e.CurrentCellIndex,e.IsForward));
     }
 
-    private IEnumerator MoveStepsCoroutine(int steps,bool forward)
+    private IEnumerator Move( int steps, int currentCellIndex, bool forward)
     {
-
-        int targetIndex = (currentCellIndex + steps) % boardCells.Count;
-        if (!forward)
-        {
-            targetIndex = (currentCellIndex - steps + boardCells.Count) % boardCells.Count;
-        }
-        EventBus.Publish(new DiceFadeEvent(targetIndex, true));
-        yield return new WaitForSeconds(0.8f);
-        CellOccupancyManager.UnregisterPlayerFromCell(currentCellIndex, this);
-
-        // Движение по шагам
+        int cellsCount = boardService.CellsCount;
         for (int i = 0; i < steps; i++)
         {
             if (forward)
             {
-                currentCellIndex = (currentCellIndex + 1) % boardCells.Count;
+                currentCellIndex = (currentCellIndex + 1) % cellsCount;
             }
             else
             {
-                currentCellIndex = (currentCellIndex - 1 + boardCells.Count) % boardCells.Count;
+                currentCellIndex = (currentCellIndex - 1 + cellsCount) % cellsCount;
             }
-            Vector3 stepPos = boardCells[currentCellIndex].position;
+            Vector3 stepPos = boardService.GetCellRectTransform(currentCellIndex).position;
 
             yield return MoveToPosition(stepPos);
 
-            PlayerData player = GameManager.Instance.GetPlayerById(photonView.Owner.ActorNumber);
-
-            if (currentCellIndex == 0 && !player.IsInJail && !player.NextMoveBackward)
-            {
-                Bank.Instance.AddMoney(photonView.Owner.ActorNumber, 2_000);
-            }
+            
         }
-
-        EventBus.Publish(new DiceFadeEvent(targetIndex, false));
-
-        // ⬇️ Сразу регистрируем игрока и он сам плавно встанет на свою позицию в паттерне
-        CellOccupancyManager.RegisterPlayerOnCell(currentCellIndex, this, boardCells[currentCellIndex].position);
-
-        // Запускаем обработку клетки
-        EventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.Owner.ActorNumber));
-    }
-
-    public void SetTargetPosition(Vector3 pos)
-    {
-        if (!photonView.IsMine) return;
-        photonView.RPC(nameof(RPC_SetTargetPosition), RpcTarget.AllBuffered,pos.x,pos.y,pos.z);
-    }
-    [PunRPC]
-    private void RPC_SetTargetPosition(float x, float y, float z)
-    {
-        Vector3 pos = new Vector3(x,y,z);
-        transform.DOMove(pos, stackMoveDuration);
-
     }
 
     private IEnumerator MoveToPosition(Vector3 target)
@@ -183,70 +86,10 @@ public class PlayerMove : MonoBehaviourPun
 
         transform.position = target;
     }
-
-    private void MoveToJail(MoveToJailEvent e)
+    public void SetTargetPosition(Vector3 target)
     {
-        if (!photonView.IsMine) return;
-        photonView.RPC(nameof(RPC_MoveToJail), RpcTarget.AllBuffered);
+        StartCoroutine(MoveToPosition(target));
     }
-
-    [PunRPC]
-    private void RPC_MoveToJail()
-    {
-        if (boardCells.Count == 0)
-        {
-            Debug.LogError("Board cells not initialized, canceling move.");
-            return;
-        }
-
-        StartCoroutine(MoveToJailCoroutine());
-    }
-
-    private IEnumerator MoveToJailCoroutine()
-    {
-        yield return new WaitForSeconds(0.2f);
-        currentCellIndex = JAIL_CELL_ID;
-        Vector3 targetPos = boardCells[JAIL_CELL_ID].position;
-        yield return MoveToPosition(targetPos);
-
-        //EventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.Owner.ActorNumber));
-    }
-
-   
-
-    #region Board Initialization
-
-    private void EnsureBoardCellsInitialized()
-    {
-        if (boardCells.Count > 0) return;
-
-        if (rootCellsObject != null)
-        {
-            BuildBoardCellsFromRoot();
-            if (boardCells.Count > 0) return;
-        }
-
-        if (GameManager.Instance?.CellsRoot != null)
-        {
-            rootCellsObject = GameManager.Instance.CellsRoot;
-            BuildBoardCellsFromRoot();
-            if (boardCells.Count > 0) return;
-        }
-
-        if (boardCells.Count == 0)
-            Debug.LogWarning($"[{name}] Не удалось инициализировать boardCells!");
-    }
-
-    private void BuildBoardCellsFromRoot()
-    {
-        boardCells = new List<Transform>();
-        if (rootCellsObject == null) return;
-
-        foreach (Transform child in rootCellsObject)
-            boardCells.Add(child);
-    }
-
-    #endregion Board Initialization
 }
 
 public class MoveToJailEvent
@@ -269,4 +112,43 @@ public class HandleCellEvent
         CellID = cellID;
         PlayerID = playerId;
     }
+}
+public class PlayerMoveRegister
+{
+    public int CellIndex;
+    public int PlayerId;
+
+    public PlayerMoveRegister(int cellIndex, int playerId)
+    {
+        CellIndex = cellIndex;
+        PlayerId = playerId;
+    }
+
+}
+public class PlayerMoveUnregister
+{
+    public int CellIndex;
+    public int PlayerId;
+
+    public PlayerMoveUnregister(int cellIndex, int playerId)
+    {
+        CellIndex = cellIndex;
+        PlayerId = playerId;
+    }
+
+}
+public class InitializePlayerMoveEvent
+{
+    public IBoardService BoardService;
+    public ILocalPlayerService LocalPlayerService;
+    public InitializePlayerMoveEvent(IBoardService boardService, ILocalPlayerService localPlayerService)
+    {
+        BoardService = boardService;
+        LocalPlayerService = localPlayerService;
+
+    }
+}
+public class EnablePlayerMoveEvent
+{
+    
 }

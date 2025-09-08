@@ -1,6 +1,7 @@
 using Photon.Pun;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public enum BuyReason
 {
@@ -14,8 +15,9 @@ public class CompanyManager : MonoBehaviourPun
 {
     public static CompanyManager Instance { get; private set; }
 
-    private readonly Dictionary<CompanyType, ICellHandler> handlers = new();
-
+    private readonly Dictionary<CompanyType, ICellCompanyHandler> handlers = new();
+    [Inject] private IPlayerRepository playerRepository;
+    [Inject] private ICompanyUIService companyUIService;
     #region События
 
     // Событие: компания куплена (cellIndex, ownerId)
@@ -91,7 +93,7 @@ public class CompanyManager : MonoBehaviourPun
     private void RPC_ShowPurchaseOffer(int cellIndex,int playerId)
     {
         if (!TryGetCompanyAndHandler(cellIndex, out var company, out var handler)) return;
-        PlayerData player = GameManager.Instance.GetPlayerById(playerId);
+        PlayerData player = playerRepository.GetPlayerById(playerId);
 
         handler.ShowPurchaseUI(player, cellIndex);
     }
@@ -125,7 +127,7 @@ public class CompanyManager : MonoBehaviourPun
         photonView.RPC(nameof(RPC_ConfirmPurchase), RpcTarget.All, cellIndex, buyerId,price,buyReason);
         if(buyReason == (int)BuyReason.Buy)
         {
-            TurnManager.Instance.RequestEndTurn();
+           // TurnManager.Instance.RequestEndTurn();
         }
     }
 
@@ -143,18 +145,18 @@ public class CompanyManager : MonoBehaviourPun
             price = handler.GetPrice(cellIndex);
         }
 
-        var buyer = GameManager.Instance.GetPlayerById(ownerId);
+        var buyer = playerRepository.GetPlayerById(ownerId);
         Debug.Log("RPC_ConfirmPurchase" + price);
         buyer.OwnedCompanies.Add(company);
 
         Bank.Instance.RemoveMoney(ownerId, price);
 
 
-        var cellUI = CellsManager.Instance.GetCellByIndex(cellIndex).GetComponent<UICompanyCell>();
+        var cellUI = companyUIService.GetCompanyUI(cellIndex);
         cellUI.HandleCompanyBought(cellIndex, ownerId);
         // Обновляем аренду для группы
         UpdateRent(company);
-        UIBuyWindow.Instance.HideWindow();
+       // UIBuyWindow.Instance.HideWindow();
     }
 
     #endregion
@@ -170,7 +172,7 @@ public class CompanyManager : MonoBehaviourPun
     private void RPC_ShowRentOffer(int cellIndex, int rentPrice,int playerId)
     {
         if (!TryGetCompanyAndHandler(cellIndex, out var company, out var handler)) return;
-        PlayerData player = GameManager.Instance.GetPlayerById(playerId);
+        PlayerData player = playerRepository.GetPlayerById(playerId);
         handler.ShowRentUI(player,cellIndex);
     }
 
@@ -194,7 +196,7 @@ public class CompanyManager : MonoBehaviourPun
         }
 
         photonView.RPC(nameof(RPC_ConfirmRent), RpcTarget.AllBuffered, cellIndex, renterId);
-        TurnManager.Instance.RequestEndTurn();
+        //TurnManager.Instance.RequestEndTurn();
     }
 
     [PunRPC]
@@ -207,7 +209,7 @@ public class CompanyManager : MonoBehaviourPun
 
         Bank.Instance.TransferMoney(renterId, ownerId, rentPrice);
 
-        UIPayRentWindow.Instance.HideWindow();
+        //UIPayRentWindow.Instance.HideWindow();
     }
 
     #endregion
@@ -228,10 +230,10 @@ public class CompanyManager : MonoBehaviourPun
     {
         if (photonView.IsMine)
         {
-            TurnManager.Instance.RequestEndTurn();
+           // TurnManager.Instance.RequestEndTurn();
         }
     }
-    private bool TryGetHandler(int cellIndex, out ICellHandler handler)
+    private bool TryGetHandler(int cellIndex, out ICellCompanyHandler handler)
     {
         handler = null;
         var companyData = CompanyDatabase.Instance.GetCompanyById(cellIndex);
@@ -240,7 +242,7 @@ public class CompanyManager : MonoBehaviourPun
         return handlers.TryGetValue(companyData.Type, out handler);
     }
 
-    private bool TryGetCompanyAndHandler(int cellIndex, out Company company, out ICellHandler handler)
+    private bool TryGetCompanyAndHandler(int cellIndex, out Company company, out ICellCompanyHandler handler)
     {
         handler = null;
         company = null;
@@ -264,9 +266,9 @@ public class CompanyManager : MonoBehaviourPun
                     {
                        // newRent /= TurnManager.Instance.DiceSum;
                     }
-                    if (CellsManager.Instance.GetCellByIndex(c.Id)?.TryGetComponent(out UICompanyCell uiCell) == true)
+                    if (companyUIService.GetCompanyUI(c.Id) != null)
                     {
-                        uiCell.SetRentText(newRent);
+                        companyUIService.GetCompanyUI(c.Id).SetRentText(newRent);
                     }
                 }
             }
@@ -274,10 +276,11 @@ public class CompanyManager : MonoBehaviourPun
         else if (company.Type == CompanyType.Company)
         {
             int baseRent = handlers[company.Type].GetRent(company.Id);
-            if (CellsManager.Instance.GetCellByIndex(company.Id)?.TryGetComponent(out UICompanyCell uiCell) == true)
+            if (companyUIService.GetCompanyUI(company.Id) != null)
             {
-                uiCell.SetRentText(baseRent);
+                companyUIService.GetCompanyUI(company.Id).SetRentText(baseRent);
             }
+           
         }
 
        
@@ -295,7 +298,7 @@ public class CompanyManager : MonoBehaviourPun
         return true;
     }
 
-    public bool TryGetHandler(CompanyType type, out ICellHandler handler) =>
+    public bool TryGetHandler(CompanyType type, out ICellCompanyHandler handler) =>
         handlers.TryGetValue(type, out handler);
 
     #endregion

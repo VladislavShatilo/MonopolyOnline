@@ -48,7 +48,6 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         if (roomUIWindows.ContainsKey(room.Name))
             return; // Уже есть
-        Debug.Log("ПCreateRoomUI");
 
         GameObject go = Instantiate(roomPopupPrefab, roomListContainer);
         roomUIWindows.Add(room.Name, go);
@@ -74,7 +73,6 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     // Коллбэк, когда присоединились к комнате
     public override void OnJoinedRoom()
     {
-        Debug.Log("Присоединились к комнате, загружаем игровую сцену...");
         PhotonNetwork.LoadLevel("GameScene"); // та же игровая сцена
     }
     public void CreateRoom()

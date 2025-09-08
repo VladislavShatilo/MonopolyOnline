@@ -2,13 +2,14 @@ using Photon.Pun;
 using Photon.Realtime;
 using System;
 using UnityEngine;
+using Zenject;
 
 public class Bank : MonoBehaviourPunCallbacks
 {
     public static Bank Instance { get; private set; }
 
     public event Action<PlayerData, int> OnBalanceChanged;
-     
+    [Inject] private IPlayerRepository playerRepository;
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -60,7 +61,7 @@ public class Bank : MonoBehaviourPunCallbacks
     }
     private PlayerData GetPlayerDataById(int playerId)
     {
-       return GameManager.Instance.GetPlayerById(playerId);
+       return playerRepository.GetPlayerById(playerId);
 
     }
     private void UpdatePlayerMoney(PlayerData player, int newAmount)

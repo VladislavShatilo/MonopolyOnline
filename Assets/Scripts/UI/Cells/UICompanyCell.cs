@@ -3,6 +3,7 @@ using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 /// <summary>
 /// UI-компонент для отображения компании и управления кнопками филиалов.
@@ -41,6 +42,9 @@ public class UICompanyCell : UICellBase
     [SerializeField] private Image star3Image;
     [SerializeField] private Image star4Image;
     [SerializeField] private Image goldStarImage;
+	[Inject] private IPlayerRepository playerRepository;
+    [Inject] private IPlayerColorService colorService;
+    [Inject] private IBoardService boardService;
 
     private int companyId;
 
@@ -88,9 +92,9 @@ public class UICompanyCell : UICellBase
                 BGPriceImage.color = GroupColors.Colors[(int)cellData.diceCompanyData.group];
                 break;
         }
-      
-        Debug.Log(GameManager.Instance.GetColorForActor(owner.id));
-        BGImage.color = GameManager.Instance.GetColorForActor(owner.id);
+        var playerColor = colorService.GetColorForPlayer(owner.Id);
+
+        BGImage.color = playerColor.ToUnityColor();
     }
 
     public void SetRentText(int rent)
@@ -246,7 +250,7 @@ public class UICompanyCell : UICellBase
     public void HandleCompanyBought(int cellIndex, int ownerId)
     {
     
-        UpdateUI(CellsManager.Instance.GetCellDataByIndex(companyId), GameManager.Instance.GetPlayerById(ownerId));
+        UpdateUI(boardService.GetCellData(companyId), playerRepository.GetPlayerById(ownerId));
         
     }
 

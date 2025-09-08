@@ -49,7 +49,9 @@ public class UIRansomJailWindowTests
         windowGO.SetActive(true);
 
         // Тестовый игрок
-        testPlayer = new PlayerData("Test", 1000, 1, Color.red, null);
+        var color = new PlayerColor(1, 0, 0);
+
+        testPlayer = new PlayerData("Test", 1000, 1, color, null);
     }
 
     [TearDown]
@@ -107,7 +109,7 @@ public class UIRansomJailWindowTests
         Assert.AreEqual(new Vector3(0, 160, 0), window.WindowAnimation.WindowRectTransform.position);
 
         Assert.IsTrue(ransomEventReceived, "ReleaseFromJailEvent was not published");
-        Assert.AreEqual(testPlayer.id, ransomReceivedPlayerId, "PlayerID in event incorrect");
+        Assert.AreEqual(testPlayer.Id, ransomReceivedPlayerId, "PlayerID in event incorrect");
         Assert.AreNotEqual(Vector3.zero, window.WindowAnimation.WindowRectTransform.position, "Window should be hidden");
     }
 

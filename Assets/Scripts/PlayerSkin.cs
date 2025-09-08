@@ -3,11 +3,13 @@ using Photon.Pun;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 public class PlayerSkin : MonoBehaviourPun
 {
     [SerializeField] private Image playerSkinImage;
     [SerializeField] private TextMeshProUGUI turnJailText;
+
     private void OnEnable()
     {
         EventBus.Subscribe<SetTurnsJailEvent>(SetTurnJain);
@@ -26,8 +28,8 @@ public class PlayerSkin : MonoBehaviourPun
     private void Start()
     {
         turnJailText.gameObject.SetActive(false);
-
     }
+
     [PunRPC]
     private void RPC_SetTurnJain(int turns)
     {

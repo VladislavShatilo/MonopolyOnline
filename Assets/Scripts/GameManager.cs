@@ -1,148 +1,47 @@
 using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using Zenject;
 
-public class GameManager : MonoBehaviourPunCallbacks
+public class GameManager
 {
-    public static GameManager Instance { get; private set; }
+    private IPlayerRepository repository;
+    private IPlayerSpawner spawner;
+    private IPlayerColorService colorService;
 
-    [Header("Root Transforms")]
-    [SerializeField] private Transform playerRoot;
-    [SerializeField] private Transform cellsRoot;
-
-    [Header("Prefabs")]
-    [SerializeField] private GameObject playerPiecePrefab;
-
-    [Header("Settings")]
-    [SerializeField] private Color[] playerColors;
-    [SerializeField] private Vector3 startPlayerPosition = new Vector3(-240f, 390f, 0f);
-
-    private readonly List<PlayerData> players = new();
-    private readonly Dictionary<int, PlayerMove> playerMoves = new();
-
-    public Transform CellsRoot => cellsRoot;
-    public Transform PlayerRoot => playerRoot;
-
-    private void Awake()
+  
+    [Inject]
+    public void Construct(IPlayerRepository repository, IPlayerSpawner spawner, IPlayerColorService colorService)
     {
-        if (Instance != null && Instance != this)
+        this.repository = repository;
+        this.spawner = spawner;
+        this.colorService = colorService;
+    }
+
+    public void Initialize()
+    {
+
+        foreach (var p in Photon.Pun.PhotonNetwork.PlayerList)
         {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-    }
+            if (repository.GetPlayerById(p.ActorNumber) != null) continue;
 
-    private void Start()
-    {
-        InitializeAllPlayers();
-        SpawnLocalPlayerIfNeeded();
-        TryStartGame();
-    }
+            var player = new PlayerData(
+                p.NickName,
+                100_000,
+                p.ActorNumber,
+                colorService.GetColorForPlayer(p.ActorNumber),
+                p);
 
-    #region Photon Callbacks
+            repository.AddPlayer(player);
+            EventBus.Publish(new PlayerJoinedEvent(player));
 
-    public override void OnPlayerEnteredRoom(Player newPlayer)
-    {
-        Debug.Log($"Player {newPlayer.NickName} joined (actor {newPlayer.ActorNumber})");
-        SetupPlayer(newPlayer);
-        TryStartGame();
-    }
-
-    public override void OnPlayerLeftRoom(Player otherPlayer)
-    {
-        Debug.Log($"Player {otherPlayer.NickName} left (actor {otherPlayer.ActorNumber})");
-        RemovePlayer(otherPlayer.ActorNumber);
-    }
-
-    #endregion
-
-    #region Player Management
-
-    private void InitializeAllPlayers()
-    {
-        foreach (var p in PhotonNetwork.PlayerList)
-            SetupPlayer(p);
-    }
-
-    private void SetupPlayer(Player photonPlayer)
-    {
-        int playerId = photonPlayer.ActorNumber;
-        if (players.Exists(p => p.id == playerId)) return;
-
-        PlayerData player = new(photonPlayer.NickName, 100_000, playerId, GetColorForActor(playerId), photonPlayer);
-        players.Add(player);
-
-        // Событие
-        EventBus.Publish(new PlayerJoinedEvent(player));
-    }
-
-    private void SpawnLocalPlayerIfNeeded()
-    {
-        int localId = PhotonNetwork.LocalPlayer.ActorNumber;
-        if (playerMoves.ContainsKey(localId)) return;
-
-        GameObject playerPiece = PhotonNetwork.Instantiate(
-            playerPiecePrefab.name,
-            startPlayerPosition,
-            Quaternion.identity,
-            0,
-            new object[] { localId - 1 }
-        );
-
-        var pm = playerPiece.GetComponent<PlayerMove>();
-        playerMoves[localId] = pm;
-        pm.photonView.RPC(nameof(PlayerMove.RPC_RegisterOnCell), RpcTarget.AllBuffered, 0);
-    }
-
-    private void RemovePlayer(int playerId)
-    {
-        var playerData = GetPlayerById(playerId);
-        if (playerData != null) players.Remove(playerData);
-
-        if (playerMoves.TryGetValue(playerId, out var move))
-        {
-            if (move != null && move.photonView != null && move.photonView.IsMine)
-                PhotonNetwork.Destroy(move.gameObject);
-            else if (move != null)
-                Destroy(move.gameObject);
-
-            playerMoves.Remove(playerId);
         }
 
-        EventBus.Publish(new PlayerLeftEvent(playerId));
+        spawner.SpawnLocalPlayer(Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
     }
 
-    #endregion
-
-    #region Game Flow
-
-    private void TryStartGame()
-    {
-        if (!PhotonNetwork.InRoom) return;
-
-        if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers &&
-            PhotonNetwork.IsMasterClient)
-        {
-            EventBus.Publish(new AllPlayersInitializedEvent(players));
-        }
-    }
-
-    #endregion
-
-    #region Helpers
-
-    public PlayerData GetPlayerById(int id) => players.Find(p => p.id == id);
-    public List<PlayerData> Players() => players;
-
-    public Color GetColorForActor(int actorNumber)
-    {
-        if (playerColors == null || playerColors.Length == 0) return Color.white;
-        return playerColors[actorNumber - 1];
-    }
-
-    #endregion
 }
 public class PlayerJoinedEvent
 {
