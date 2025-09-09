@@ -13,7 +13,7 @@ public class PlayerMove : MonoBehaviourPun
     private IBoardService boardService;
     private ILocalPlayerService localPlayerService;
 
- 
+
     private void OnEnable()
     {
         EventBus.Subscribe<MovePlayerEvent>(OnPlayerMove);
@@ -47,8 +47,11 @@ public class PlayerMove : MonoBehaviourPun
     }
     private void OnPlayerMove(MovePlayerEvent e)
     {
-        if (e.PlayerId != localPlayerService.GetLocalPlayerId()) return;
-        StartCoroutine(Move(e.Steps,e.CurrentCellIndex,e.IsForward));
+        if (e.PlayerId == photonView.OwnerActorNr)
+        {
+            StopAllCoroutines();
+            StartCoroutine(Move(e.Steps, e.CurrentCellIndex, e.IsForward));
+        }
     }
 
     private IEnumerator Move( int steps, int currentCellIndex, bool forward)
@@ -70,6 +73,7 @@ public class PlayerMove : MonoBehaviourPun
 
             
         }
+
     }
 
     private IEnumerator MoveToPosition(Vector3 target)

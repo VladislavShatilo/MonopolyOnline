@@ -19,15 +19,23 @@ public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
     }
     public void RequestDiceRoll(int playerId, bool isForJail)
     {
-        photonView.RPC(nameof(RPC_RequestDiceRoll), RpcTarget.MasterClient, playerId, isForJail);
+        photonView.RPC(nameof(RPC_RequestGetDiceResult), RpcTarget.MasterClient, playerId, isForJail);
     }
 
     [PunRPC]
-    private void RPC_RequestDiceRoll(int playerId, bool isForJail)
+    private void RPC_RequestGetDiceResult(int playerId, bool isForJail)
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-        rollDiceUseCase.Execute(playerId, isForJail);
+        DiceResult diceResult=  rollDiceUseCase.GetDiceResult(playerId, isForJail);
+        photonView.RPC(nameof(RPC_RequestDiceHandle), RpcTarget.All, diceResult.First,diceResult.Second, playerId, isForJail);
+
+    }
+    [PunRPC]
+    private void RPC_RequestDiceHandle(int first,int second,int playerId, bool isForJail)
+    {
+        rollDiceUseCase.HandleDice(first, second, playerId, isForJail);
+
     }
 }
 

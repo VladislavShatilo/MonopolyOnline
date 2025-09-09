@@ -131,6 +131,8 @@ MonoBehaviour:
   - RPC_ReceiveChatMessage
   - RPC_MovePlayer
   - RPC_TeleportPlayer
+  - RPC_RequestDiceHandle
+  - RPC_RequestGetDiceResult
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

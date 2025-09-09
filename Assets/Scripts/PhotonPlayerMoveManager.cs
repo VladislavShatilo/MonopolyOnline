@@ -23,9 +23,10 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
         EventBus.Unsubscribe<OnPlayerMoveEvent>(RequestMove);
 
     }
-    public void RequestMove(OnPlayerMoveEvent e)
+    private void RequestMove(OnPlayerMoveEvent e)
     {
-        photonView.RPC(nameof(RPC_MovePlayer), RpcTarget.AllBuffered, e.PlayerId, e.Steps, e.Forward);
+        Debug.Log("RequestMove");
+        photonView.RPC(nameof(RPC_MovePlayer), RpcTarget.All, e.PlayerId, e.Steps, e.Forward);
     }
 
     [PunRPC]
