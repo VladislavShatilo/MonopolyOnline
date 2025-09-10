@@ -10,10 +10,13 @@ public class GameplayInstaller : MonoInstaller
     [SerializeField] private BoardConfig boardConfig;
     [SerializeField] private Transform parentTransform;
     [SerializeField] private UITurnWindow uiTurnWindow;
+    [SerializeField] private UIBuyWindow uiBuyWindow;
+
     [SerializeField] private DiceManagerPhoton diceManagerPhoton;
     [SerializeField] private DiceManager3D diceManager3D;
     [SerializeField] private PhotonPlayerMoveManager playerMoveManager;
     [SerializeField] private PhotonTurnManager photonTurnManager;
+    [SerializeField] private PhotonCompanyManager photonCompanyManager;
 
     public override void InstallBindings()
     {
@@ -46,7 +49,6 @@ public class GameplayInstaller : MonoInstaller
 
         Container.Bind<ICompanyUIService>().To<CompanyUIService>().AsSingle().NonLazy();
 
-        Container.Bind<ICellHandler>().To<CellHandlerService>().AsSingle().NonLazy();
        // Container.Bind<UITurnWindow>().FromInstance(turnWindow).AsSingle();
         Container.Bind<ILocalPlayerService>().To<PhotonLocalPlayerService>().AsSingle();
 
@@ -64,8 +66,17 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IPlayerMoveUseCase>().To<PlayerMoveUseCase>().AsSingle().NonLazy();
 
         Container.Bind<IPhotonTurnManager>().To<PhotonTurnManager>().FromInstance(photonTurnManager).AsSingle();
+        Container.Bind<IPhotonCompanyManager>().To<PhotonCompanyManager>().FromInstance(photonCompanyManager).AsSingle();
+        Container.Bind<IBuyWindow>().To<UIBuyWindow>().FromInstance(uiBuyWindow).AsSingle();
 
-        
+        Container.Bind<ICompanyRepository>().To<CompanyRepository>().AsSingle().WithArguments(boardConfig);
+
+        Container.Bind<IBankService>().To<BankService>().AsSingle();
+        Container.Bind<IBankNotifier>().To<PhotonBankNotifier>().AsSingle();
+
+
+        Container.BindInterfacesTo<BuyCompanyPresenter>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<CellHandlerService>().AsSingle().NonLazy();
 
     }
 }

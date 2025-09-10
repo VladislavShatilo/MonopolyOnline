@@ -1,24 +1,22 @@
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
-public class CellHandlerService : ICellHandler
+public class CellHandlerService : ICellHandler, IInitializable,IDisposable
 {
-    private readonly IBoardService boardService;
-    private readonly ICompanyService companyService;
-    private readonly IChanceService chanceService;
-    private readonly IJailService jailService;
-    private readonly ICasinoService casinoService;
-    private readonly ITurnService turnService;
+    private IBoardService boardService;
+    private ICompanyService companyService;
+    private IChanceService chanceService;
+    private IJailService jailService;
+    private ICasinoService casinoService;
+    private ITurnService turnService;
 
-    public CellHandlerService(
-        IBoardService boardService,
-        ICompanyService companyService,
-        IChanceService chanceService,
-        IJailService jailService,
-        ICasinoService casinoService,
-        ITurnService turnService)
+    [Inject]
+    public void Construct( IBoardService boardService, ICompanyService companyService,  IChanceService chanceService,
+        IJailService jailService, ICasinoService casinoService, ITurnService turnService)
     {
         this.boardService = boardService;
         this.companyService = companyService;
@@ -27,20 +25,27 @@ public class CellHandlerService : ICellHandler
         this.casinoService = casinoService;
         this.turnService = turnService;
     }
-
+    void IInitializable.Initialize()
+    {
+        EventBus.Subscribe<HandleCellEvent>(OnHandleCell);
+    }
+    void IDisposable.Dispose()
+    {
+        EventBus.Unsubscribe<HandleCellEvent>(OnHandleCell);
+       
+    }
     public void OnHandleCell(HandleCellEvent e)
     {
         int cellIndex = e.CellID;
-        if (cellIndex >= boardService.GetAllCellData().Count) return;
-
+        if (cellIndex >= boardService.CellsCount) return;
+       
         var cellData = boardService.GetCellData(cellIndex);
-
         switch (cellData.cellType)
         {
             case CellType.Company:
             case CellType.FieldCompany:
             case CellType.DiceCompany:
-                companyService.HandleCompanyCell(cellIndex, e.PlayerID);
+                companyService.HandleCell(cellIndex, e.PlayerID);
                 break;
 
             case CellType.Question:

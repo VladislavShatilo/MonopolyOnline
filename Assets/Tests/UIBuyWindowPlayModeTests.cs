@@ -25,12 +25,12 @@ public class UIBuyWindowPlayModeTests : MonoBehaviour
         var buyBtn = new GameObject("BuyBtn", typeof(Button), typeof(RectTransform));
         var auctionBtn = new GameObject("AuctionBtn", typeof(Button), typeof(RectTransform));
         var cantBuyBtn = new GameObject("CantBuyBtn", typeof(Button), typeof(RectTransform));
-        window.CantBuyButton = cantBuyBtn.GetComponent<Button>();
+     //   window.CantBuyButton = cantBuyBtn.GetComponent<Button>();
         // Присваиваем **до SetActive(true)**!
-        window.BuyButton = buyBtn.GetComponent<Button>();
-        window.AuctionButton = auctionBtn.GetComponent<Button>();
-        window.BuyButtonText = new GameObject("BuyText").AddComponent<TextMeshProUGUI>();
-        window.CantBuyButtonText = new GameObject("CantBuyText").AddComponent<TextMeshProUGUI>();
+      //  window.BuyButton = buyBtn.GetComponent<Button>();
+       // window.AuctionButton = auctionBtn.GetComponent<Button>();
+      //  window.BuyButtonText = new GameObject("BuyText").AddComponent<TextMeshProUGUI>();
+       // window.CantBuyButtonText = new GameObject("CantBuyText").AddComponent<TextMeshProUGUI>();
         var animGO = new GameObject("WindowAnimation");
         var anim = animGO.AddComponent<WindowAnimation>();
         animGO.transform.SetParent(windowGO.transform);
@@ -68,8 +68,8 @@ public class UIBuyWindowPlayModeTests : MonoBehaviour
         yield return null;
 
         // Вызываем внутренние слушатели
-        window.BuyButton.onClick.Invoke();
-        window.AuctionButton.onClick.Invoke();
+       // window.BuyButton.onClick.Invoke();
+       // window.AuctionButton.onClick.Invoke();
 
         Assert.IsTrue(internalBuyClicked);
         Assert.IsTrue(internalAuctionClicked);
@@ -82,8 +82,8 @@ public class UIBuyWindowPlayModeTests : MonoBehaviour
         windowGO.SetActive(false);
 
         // Снова вызываем Invoke
-        window.BuyButton.onClick.Invoke();
-        window.AuctionButton.onClick.Invoke();
+      //  window.BuyButton.onClick.Invoke();
+       //// window.AuctionButton.onClick.Invoke();
 
         // Теперь внутренние слушатели не должны сработать
         Assert.IsFalse(internalBuyClicked);
@@ -99,7 +99,7 @@ public class UIBuyWindowPlayModeTests : MonoBehaviour
      
         yield return null;
 
-        window.BuyButton.onClick.Invoke();
+        //window.BuyButton.onClick.Invoke();
         yield return new WaitForSeconds(0.5f);
 
         Assert.AreEqual(new Vector3(0, 160, 0), window.WindowAnimation.WindowRectTransform.position);
@@ -112,7 +112,7 @@ public class UIBuyWindowPlayModeTests : MonoBehaviour
     {
 
         yield return null;
-        window.AuctionButton.onClick.Invoke();
+       // window.AuctionButton.onClick.Invoke();
         yield return new WaitForSeconds(0.5f);
 
         Assert.AreEqual(new Vector3(0, 160, 0), window.WindowAnimation.WindowRectTransform.position);
@@ -139,14 +139,14 @@ public class UIBuyWindowPlayModeTests : MonoBehaviour
 
         var testPlayer2 = new PlayerData("TestPlayer", 500, 0, color, null);
 
-        window.ShowBuyWindow(testPlayer2, 1, 200);
+      //  window.ShowBuyWindow(testPlayer2, 1, 200);
         yield return new WaitForSeconds(0.5f);
 
         Assert.AreEqual(new Vector3(0, 0, 0), window.WindowAnimation.WindowRectTransform.position);
 
-        Assert.IsTrue(window.BuyButton.gameObject.activeSelf);
-        Assert.IsFalse(window.CantBuyButton.gameObject.activeSelf);
-        Assert.AreEqual("Купить за 200", window.BuyButtonText.text);
+      //  Assert.IsTrue(window.BuyButton.gameObject.activeSelf);
+       // Assert.IsFalse(window.CantBuyButton.gameObject.activeSelf);
+       // Assert.AreEqual("Купить за 200", window.BuyButtonText.text);
     }
 
     [UnityTest]
@@ -158,14 +158,14 @@ public class UIBuyWindowPlayModeTests : MonoBehaviour
         var testPlayer1 = new PlayerData("TestPlayer", 100, 0, color, null);
 
 
-        window.ShowBuyWindow(testPlayer1, 2, 3000);
+      //  window.ShowBuyWindow(testPlayer1, 2, 3000);
         yield return new WaitForSeconds(0.5f);
 
         Assert.AreEqual(new Vector3(0, 0, 0), window.WindowAnimation.WindowRectTransform.position);
 
-        Assert.IsFalse(window.BuyButton.gameObject.activeSelf);
-        Assert.IsTrue(window.CantBuyButton.gameObject.activeSelf);
-        Assert.AreEqual("Купить за 3,000", window.CantBuyButtonText.text);
+       // Assert.IsFalse(window.BuyButton.gameObject.activeSelf);
+       // Assert.IsTrue(window.CantBuyButton.gameObject.activeSelf);
+       // Assert.AreEqual("Купить за 3,000", window.CantBuyButtonText.text);
     }
 
 

@@ -1,14 +1,16 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public class BoardRepository : IBoardRepository
 {
-    private readonly List<CellData> cells;
+    private  List<CellData> cells;
 
-    public BoardRepository(BoardConfig config)
+    [Inject]
+    public void Construct (BoardConfig config)
     {
-        // Просто копируем данные из конфигурации
         cells = new List<CellData>(config.cells);
     }
 

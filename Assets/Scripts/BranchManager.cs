@@ -6,8 +6,17 @@ using Zenject;
 public class BranchManager : MonoBehaviourPun
 {
     public static BranchManager Instance { get; private set; }
-    [Inject] private IPlayerRepository playerRepository;
-    [Inject] private ICompanyUIService companyUIService;
+    private IPlayerRepository playerRepository;
+    private ICompanyUIService companyUIService;
+    private ICompanyRepository companyRepository;
+
+    [Inject]
+    public void Construct(IPlayerRepository playerRepository, ICompanyUIService companyUIService, ICompanyRepository companyRepository)
+    {
+        this.companyRepository = companyRepository;
+        this.playerRepository = playerRepository;
+        this.companyUIService = companyUIService;
+    }
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -92,7 +101,7 @@ public class BranchManager : MonoBehaviourPun
         var uiCompany = companyUIService.GetCompanyUI(companyId);
         if (uiCompany == null) return;
 
-        var company = CompanyDatabase.Instance.GetCompanyById(companyId);
+        var company = companyRepository.GetCompanyById(companyId);
         uiCompany.UpdateBranchStars(newLevel);
         uiCompany.SetRentText(company?.CompanyData.rent[newLevel] ?? 0);
         company.RentLevel = newLevel;
@@ -111,7 +120,7 @@ public class BranchManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_HideButtons(int playerId, int companyId)
     {
-        var company = CompanyDatabase.Instance.GetCompanyById(companyId);
+        var company = companyRepository.GetCompanyById(companyId);
         if (company == null) return;
         HideAllBranchButtonsByGroup(playerId, company.Group);
     }
@@ -119,7 +128,7 @@ public class BranchManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_HideSellButtons(int playerId, int companyId)
     {
-        var company = CompanyDatabase.Instance.GetCompanyById(companyId);
+        var company = companyRepository.GetCompanyById(companyId);
         var ui = companyUIService.GetCompanyUI(companyId);
         if (company == null || ui == null) return;
 
@@ -137,13 +146,13 @@ public class BranchManager : MonoBehaviourPun
     {
        
 
-        if (CompanyManager.Instance == null)
-        {
-            Debug.LogError("CompanyManager.Instance == null!");
-            return;
-        }
+        //if (CompanyManager.Instance == null)
+        //{
+        //    Debug.LogError("CompanyManager.Instance == null!");
+        //    return;
+        //}
 
-        foreach (var company in CompanyDatabase.Instance.Companies)
+        foreach (var company in companyRepository.GetAll())
         {
             if (company.CompanyData == null)
             {
@@ -159,13 +168,13 @@ public class BranchManager : MonoBehaviourPun
             }
 
             bool isMyTurn = e.PlayerId == PhotonNetwork.LocalPlayer.ActorNumber;
-            bool ownsGroup = CompanyManager.Instance.PlayerOwnsWholeGroup(company.CompanyData.group, e.PlayerId);
+            //bool ownsGroup = CompanyManager.Instance.PlayerOwnsWholeGroup(company.CompanyData.group, e.PlayerId);
 
-            if (!isMyTurn || !company.IsBought || company.OwnerId != e.PlayerId || !ownsGroup || company.IsMortgaged)
-            {
-                ui.HideAllBranchButtons();
-                continue;
-            }
+            //if (!isMyTurn || !company.IsBought || company.OwnerId != e.PlayerId || !ownsGroup || company.IsMortgaged)
+            //{
+            //    ui.HideAllBranchButtons();
+            //    continue;
+            //}
 
             ShowBranchButtonsForLevel(ui, company.RentLevel);
         }
@@ -175,7 +184,7 @@ public class BranchManager : MonoBehaviourPun
     {
         if (e.PlayerId != PhotonNetwork.LocalPlayer.ActorNumber) return;
 
-        foreach (var company in CompanyDatabase.Instance.Companies)
+        foreach (var company in companyRepository.GetAll())
         {
             var ui = companyUIService.GetCompanyUI(company.Id);
             ui?.HideAllBranchButtons();
@@ -188,7 +197,7 @@ public class BranchManager : MonoBehaviourPun
 
     private bool TryGetCompanyAndPlayer(int companyId, int playerId, out Company company, out PlayerData player)
     {
-        company = CompanyDatabase.Instance.GetCompanyById(companyId);
+        company = companyRepository.GetCompanyById(companyId);
         
         player = playerRepository.GetPlayerById(playerId);
 
@@ -221,7 +230,7 @@ public class BranchManager : MonoBehaviourPun
     {
         if (currentPlayerId != PhotonNetwork.LocalPlayer.ActorNumber) return;
 
-        foreach (var company in CompanyDatabase.Instance.Companies)
+        foreach (var company in companyRepository.GetAll())
         {
             if (company.Type != CompanyType.Company || company.CompanyData.group != group) continue;
 

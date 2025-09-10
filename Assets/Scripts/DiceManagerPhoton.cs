@@ -17,18 +17,18 @@ public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
     {
         this.rollDiceUseCase = rollDiceUseCase;
     }
-    public void RequestDiceRoll(int playerId, bool isForJail)
+    public void RequestDiceRoll(int playerId, bool isForJail,int result)
     {
-        photonView.RPC(nameof(RPC_RequestGetDiceResult), RpcTarget.MasterClient, playerId, isForJail);
+        photonView.RPC(nameof(RPC_RequestGetDiceResult), RpcTarget.MasterClient, playerId, isForJail,result);
     }
 
     [PunRPC]
-    private void RPC_RequestGetDiceResult(int playerId, bool isForJail)
+    private void RPC_RequestGetDiceResult(int playerId, bool isForJail,int result)
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-        DiceResult diceResult=  rollDiceUseCase.GetDiceResult(playerId, isForJail);
-        photonView.RPC(nameof(RPC_RequestDiceHandle), RpcTarget.All, diceResult.First,diceResult.Second, playerId, isForJail);
+      //  DiceResult diceResult=  rollDiceUseCase.GetDiceResult(playerId, isForJail);
+        photonView.RPC(nameof(RPC_RequestDiceHandle), RpcTarget.All, result -1 , 1, playerId, isForJail);
 
     }
     [PunRPC]

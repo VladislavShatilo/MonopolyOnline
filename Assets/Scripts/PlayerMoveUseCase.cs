@@ -26,16 +26,15 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase
 
        // EventBus.Publish(new DiceFadeEvent(targetIndex, true));
       //  EventBus.Publish(new PlayerMoveUnregister(player.CurrentCellId, playerId));
+
         EventBus.Publish(new MovePlayerEvent(playerId, player.CurrentCellId, steps,isForward));
 
         
 
         // Логика изменения позиции в модели
         player.CurrentCellId = targetIndex;
-        photonTurnManager.RequestEndTurn();
        // EventBus.Publish(new DiceFadeEvent(targetIndex, false));
        //EventBus.Publish(new PlayerMoveRegister( playerId, player.CurrentCellId));
-       //  EventBus.Publish(new HandleCellEvent( playerId, player.CurrentCellId));
     }
 
     public void TeleportPlayer(int playerId, int targetCellIndex)

@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIBuyWindow : UIWindowBase
+public class UIBuyWindow : UIWindowBase,IBuyWindow
 {
     [Header("Buttons")]
     [SerializeField] private Button buyButton;
@@ -16,108 +16,36 @@ public class UIBuyWindow : UIWindowBase
     [SerializeField] private TextMeshProUGUI buyButtonText;
     [SerializeField] private TextMeshProUGUI cantBuyButtonText;
 
+    private System.Action<int> onBuyAction;
+    private System.Action onAuctionAction;
     private int currentCellIndex;
-    private int companyPrice;
-    private PlayerData currentPlayer;
 
 
-    public Button BuyButton
+    public void Show(int playerId, int cellIndex, int price, bool canAfford)
     {
-        get => buyButton;
-        set
-        {
-            buyButton = value;
-           
-        }
-    }
-
-    public Button CantBuyButton
-    {
-        get => cantBuyButton;
-        set => cantBuyButton = value;
-    }
-
-    public Button AuctionButton
-    {
-        get => auctionButton;
-        set => auctionButton = value;
-    }
-
-    public TextMeshProUGUI BuyButtonText
-    {
-        get => buyButtonText;
-        set => buyButtonText = value;
-    }
-
-    public TextMeshProUGUI CantBuyButtonText
-    {
-        get => cantBuyButtonText;
-        set => cantBuyButtonText = value;
-    }
-    protected void OnEnable()
-    {
-
-        if (buyButton != null)
-        {
-            buyButton.onClick.AddListener(HandleBuyClicked);
-        }
-        if (auctionButton != null)
-        {
-            auctionButton.onClick.AddListener(HandleAuctionClicked);
-        }
-  
-    }
-    protected  void OnDisable()
-    {
-        if (buyButton != null)
-        {
-            buyButton.onClick.RemoveListener(HandleBuyClicked);
-
-        }
-        if (auctionButton != null)
-        {
-            auctionButton.onClick.RemoveListener(HandleAuctionClicked);
-        }
-    }
-    public void ShowBuyWindow(PlayerData player,int cellIndex, int price)
-    {
-        currentPlayer = player;
         currentCellIndex = cellIndex;
-        companyPrice = price;
-
-        UpdateButtons(price);
-
-        windowAnimation.ShowWindow();
-    }
-
-    private void UpdateButtons(int price)
-    {
-        bool canAfford = currentPlayer.Money >= companyPrice;
 
         buyButton.gameObject.SetActive(canAfford);
-        SetButtonText(buyButtonText, companyPrice);
+        cantBuyButton.gameObject.SetActive(!canAfford);
 
-       cantBuyButton.gameObject.SetActive(!canAfford);
-        SetButtonText(cantBuyButtonText, companyPrice);
-    }
-    private void SetButtonText(TextMeshProUGUI textElement, int price)
-    {
-        textElement.text = $"Купить за {FormatPrice(price)}";
-    }
-    private string FormatPrice(int price) =>
-        price.ToString("N0", CultureInfo.InvariantCulture);
+        buyButtonText.text = $"Купить за {price:N0}";
+        cantBuyButtonText.text = $"Купить за {price:N0}";
 
-    private void HandleBuyClicked()
-    {
-        HideWindow();
-        EventBus.Publish(new TryBuyCompanyEvent(currentCellIndex));
+        ShowWindow();
     }
 
-    private void HandleAuctionClicked()
+    public void Hide() => HideWindow();
+
+    public void SetAuctionAction(System.Action onAuction) => onAuctionAction = onAuction;
+    public void SetBuyAction(System.Action<int> onBuyAction)
     {
-        HideWindow();
-        EventBus.Publish(new StartAuctionEvent(currentPlayer, currentCellIndex, companyPrice));
+        buyButton.onClick.RemoveAllListeners();
+        if (onBuyAction != null)
+        {
+            buyButton.onClick.AddListener(() => onBuyAction(currentCellIndex));
+        }
     }
+    
 }
 public class TryBuyCompanyEvent
 {

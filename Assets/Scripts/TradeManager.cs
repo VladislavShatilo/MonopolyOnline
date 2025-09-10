@@ -262,9 +262,9 @@ public class TradeManager : MonoBehaviourPun
 
         foreach (var id in wrapper.Ids)
         {
-            var company = CompanyDatabase.Instance.GetCompanyById(id);
-            if (company != null)
-                result.Add(company);
+            //var company = CompanyDatabase.Instance.GetCompanyById(id);
+            //if (company != null)
+            //    result.Add(company);
         }
 
         return result;

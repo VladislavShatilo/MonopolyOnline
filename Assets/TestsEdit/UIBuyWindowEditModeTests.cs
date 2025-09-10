@@ -19,12 +19,12 @@ public class UIBuyWindowEditModeTests
         windowGO = new GameObject("UIBuyWindow");
         window = windowGO.AddComponent<UIBuyWindow>();
         //  нопки и тексты через свойства
-        window.BuyButton = new GameObject("BuyBtn").AddComponent<Button>();
-        window.CantBuyButton = new GameObject("CantBuyBtn").AddComponent<Button>();
-        window.AuctionButton = new GameObject("AuctionBtn").AddComponent<Button>();
-        window.BuyButtonText = new GameObject("BuyText").AddComponent<TextMeshProUGUI>();
-        window.CantBuyButtonText = new GameObject("CantBuyText").AddComponent<TextMeshProUGUI>();
-        window.WindowAnimation = new GameObject("WindowAnimation").AddComponent<WindowAnimation>();
+       // window.BuyButton = new GameObject("BuyBtn").AddComponent<Button>();
+       // window.CantBuyButton = new GameObject("CantBuyBtn").AddComponent<Button>();
+       // window.AuctionButton = new GameObject("AuctionBtn").AddComponent<Button>();
+       // window.BuyButtonText = new GameObject("BuyText").AddComponent<TextMeshProUGUI>();
+       // window.CantBuyButtonText = new GameObject("CantBuyText").AddComponent<TextMeshProUGUI>();
+        //window.WindowAnimation = new GameObject("WindowAnimation").AddComponent<WindowAnimation>();
 
         var color = new PlayerColor(1, 0, 0);
 

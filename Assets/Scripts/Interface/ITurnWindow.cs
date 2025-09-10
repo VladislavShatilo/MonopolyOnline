@@ -4,4 +4,5 @@ public interface ITurnWindow
     void Hide();
     void HardHide();
     void SetThrowDiceAction(System.Action onClick);
+    int GetSteps();
 }

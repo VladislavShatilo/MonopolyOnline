@@ -76,6 +76,13 @@ public class Company
         OwnerId = -1;
         RentLevel = 0;
     }
+    public void Buy(int playerId)
+    {
+        IsBought = true;
+        OwnerId = playerId;
+        RentLevel = 0;
+    }
+   
     public void TransferTo(int newOwnerId)
     {
         // Сначала проверяем, что компания вообще куплена
@@ -93,7 +100,7 @@ public class Company
         var cellUI = companyUIService.GetCompanyUI(Id);
         cellUI.HandleCompanyBought(Id, newOwnerId);
         // Обновляем аренду для группы
-       CompanyManager.Instance.UpdateRent(this);
+       //CompanyManager.Instance.UpdateRent(this);
         // MortgageTurnsLeft = 0;
 
         // При передаче можно сбросить уровень ренты (по правилам твоей игры)
@@ -101,53 +108,3 @@ public class Company
     }
 }
 
-public class CompanyDatabase
-{
-    private static CompanyDatabase _instance;
-    public static CompanyDatabase Instance => _instance ??= new CompanyDatabase();
-
-    private readonly List<Company> companies = new List<Company>();
-
-    public IReadOnlyList<Company> Companies => companies.AsReadOnly();
-
-    public bool AddCompanyData(int id, CompanyData companyData)
-    {
-        if (GetCompanyById(id) != null) return false;
-        companies.Add(new Company(id, companyData));
-        return true;
-    }
-
-    public bool AddCompanyData(int id, FieldCompanyData fieldCompanyData)
-    {
-        if (GetCompanyById(id) != null) return false;
-        companies.Add(new Company(id, fieldCompanyData));
-        return true;
-    }
-
-    public bool AddCompanyData(int id, DiceCompanyData diceCompanyData)
-    {
-        if (GetCompanyById(id) != null) return false;
-        companies.Add(new Company(id, diceCompanyData));
-        return true;
-    }
-
-    public Company GetCompanyById(int id)
-    {
-        return companies.Find(c => c.Id == id);
-    }
-
-    public void ResetCompaniesForPlayer(int playerId)
-    {
-        foreach (var company in companies)
-        {
-            if (company.OwnerId == playerId)
-                company.ResetData();
-        }
-    }
-
-    public void ResetAllCompanies()
-    {
-        foreach (var company in companies)
-            company.ResetData();
-    }
-}

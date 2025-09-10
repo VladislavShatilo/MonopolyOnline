@@ -23,8 +23,8 @@ public class UITradeReviewWindow : UITradeWindowBase
 
     private void Start()
     {
-        acceptButton.onClick.AddListener(TradeManager.Instance.AcceptTrade);
-        cancelButton.onClick.AddListener(TradeManager.Instance.DeclineTrade);
+       // acceptButton.onClick.AddListener(TradeManager.Instance.AcceptTrade);
+       // cancelButton.onClick.AddListener(TradeManager.Instance.DeclineTrade);
     }
 
     private void OnEnable()

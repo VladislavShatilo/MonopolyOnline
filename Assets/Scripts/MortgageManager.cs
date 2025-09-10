@@ -8,7 +8,10 @@ using Zenject;
 public class MortgageManager : MonoBehaviourPun
 {
     public static MortgageManager Instance { get; private set; }
-    [Inject] private ICompanyUIService companyUIService;
+    [Inject] private ICompanyUIService companyUIService; 
+    [Inject] private ICompanyRepository companyRepository;
+
+    
     private const int MORTGAGE_TURNS_COUNTS = 7;
 
     private void Awake()
@@ -34,60 +37,60 @@ public class MortgageManager : MonoBehaviourPun
     private void OnTurnStart(TurnStartEvent e)
     {
        
-        if (CompanyManager.Instance == null)
-        {
-            Debug.LogError("CompanyManager.Instance == null!");
-            return;
-        }
+        //if (CompanyManager.Instance == null)
+        //{
+        //    Debug.LogError("CompanyManager.Instance == null!");
+        //    return;
+        //}
 
-        foreach (var company in CompanyDatabase.Instance.Companies)
-        {
-            if (company.CompanyData == null && company.DiceCompanyData == null && company.FieldCompanyData == null)
-            {
-                Debug.LogWarning($"CompanyData == null для компании {company.Id}");
-                continue;
-            }
+        //foreach (var company in CompanyDatabase.Instance.Companies)
+        //{
+        //    if (company.CompanyData == null && company.DiceCompanyData == null && company.FieldCompanyData == null)
+        //    {
+        //        Debug.LogWarning($"CompanyData == null для компании {company.Id}");
+        //        continue;
+        //    }
 
-            var ui = companyUIService.GetCompanyUI(company.Id);
-            if (ui == null)
-            {
-                Debug.LogWarning($"UICompanyCell == null для компании {company.Id}");
-                continue;
-            }
+        //    var ui = companyUIService.GetCompanyUI(company.Id);
+        //    if (ui == null)
+        //    {
+        //        Debug.LogWarning($"UICompanyCell == null для компании {company.Id}");
+        //        continue;
+        //    }
 
-            bool isMyTurn = e.PlayerId == PhotonNetwork.LocalPlayer.ActorNumber;
-            bool ownsGroup = false;
-            if (company.Type == CompanyType.Company)
-            {
-                ownsGroup = CompanyManager.Instance.PlayerOwnsWholeGroup(company.CompanyData.group, e.PlayerId);
+        //    bool isMyTurn = e.PlayerId == PhotonNetwork.LocalPlayer.ActorNumber;
+        //    bool ownsGroup = false;
+        //    if (company.Type == CompanyType.Company)
+        //    {
+        //        ownsGroup = CompanyManager.Instance.PlayerOwnsWholeGroup(company.CompanyData.group, e.PlayerId);
 
-            }
-            else if (company.Type == CompanyType.DiceCompany || company.Type == CompanyType.FieldCompany)
-            {
-                ownsGroup = false;
-            }
+        //    }
+        //    else if (company.Type == CompanyType.DiceCompany || company.Type == CompanyType.FieldCompany)
+        //    {
+        //        ownsGroup = false;
+        //    }
             
-            if (isMyTurn && company.IsBought && company.OwnerId == e.PlayerId && ! ownsGroup)
-            {
-                if (!company.IsMortgaged)
-                {
-                    ui.ShowMortgageButton();
-                }
-                else
-                {
-                    ui.ShowBuyoutButton();
-                }
-            }
-            else if (isMyTurn && company.IsBought && company.OwnerId == e.PlayerId && ownsGroup)
-            {
-               BranchManager.Instance.ShowBranchButtonsForLevel(ui, company.RentLevel);
-            }
-            else
-            {
-                ui.HideAllBranchButtons();
-                ui.HideAllButtnos();
-            }
-        }
+        //    if (isMyTurn && company.IsBought && company.OwnerId == e.PlayerId && ! ownsGroup)
+        //    {
+        //        if (!company.IsMortgaged)
+        //        {
+        //            ui.ShowMortgageButton();
+        //        }
+        //        else
+        //        {
+        //            ui.ShowBuyoutButton();
+        //        }
+        //    }
+        //    else if (isMyTurn && company.IsBought && company.OwnerId == e.PlayerId && ownsGroup)
+        //    {
+        //       BranchManager.Instance.ShowBranchButtonsForLevel(ui, company.RentLevel);
+        //    }
+        //    else
+        //    {
+        //        ui.HideAllBranchButtons();
+        //        ui.HideAllButtnos();
+        //    }
+        //}
     }
 
     public void RequestMortgageCompany(int companyId)
@@ -105,27 +108,27 @@ public class MortgageManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_UpdateMortgageUI(int playerId, int companyId, bool isMortgage)
     {
-        var company = CompanyDatabase.Instance.GetCompanyById(companyId);
+        //var company = CompanyDatabase.Instance.GetCompanyById(companyId);
 
-        if (company.OwnerId != playerId) return;
-        var ui = companyUIService.GetCompanyUI(company.Id);
+        //if (company.OwnerId != playerId) return;
+        //var ui = companyUIService.GetCompanyUI(company.Id);
 
-        if (isMortgage)
-        {
-            company.IsMortgaged = true;
-            company.MortgageTurnsLeft = MORTGAGE_TURNS_COUNTS;
-            Debug.Log(company.MortgagePrice);
-            Bank.Instance.AddMoney(playerId, company.MortgagePrice);
-            ui.SetTurnsText(MORTGAGE_TURNS_COUNTS);
-            ui.MortgageUI();
-        }
-        else
-        {
-            company.IsMortgaged = false;
-            company.MortgageTurnsLeft = 0;
-            Bank.Instance.RemoveMoney(playerId, company.BuyoutPrice);
-            ui.BuyoutUI();
-        }
+        //if (isMortgage)
+        //{
+        //    company.IsMortgaged = true;
+        //    company.MortgageTurnsLeft = MORTGAGE_TURNS_COUNTS;
+        //    Debug.Log(company.MortgagePrice);
+        //    Bank.Instance.AddMoney(playerId, company.MortgagePrice);
+        //    ui.SetTurnsText(MORTGAGE_TURNS_COUNTS);
+        //    ui.MortgageUI();
+        //}
+        //else
+        //{
+        //    company.IsMortgaged = false;
+        //    company.MortgageTurnsLeft = 0;
+        //    Bank.Instance.RemoveMoney(playerId, company.BuyoutPrice);
+        //    ui.BuyoutUI();
+        //}
 
         EventBus.Publish(new CompanyMortgagedEvent(playerId, companyId));
     }
@@ -158,23 +161,23 @@ public class MortgageManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_TickMortgageUI(int playerID)
     {
-        foreach (var company in CompanyDatabase.Instance.Companies)
-        {
-            if (company.OwnerId == playerID && company.IsMortgaged)
-            {
-                company.MortgageTurnsLeft--;
-                var ui = companyUIService.GetCompanyUI(company.Id);
-                ui.SetTurnsText(company.MortgageTurnsLeft);
-                if (company.MortgageTurnsLeft <= 0)
-                {
-                    company.IsMortgaged = false;
-                    company.OwnerId = -1;
-                    company.IsBought = false;
-                    ui.BuyoutUI();
-                    EventBus.Publish(new CompanyFreedFromMortgageEvent(company.Id));
-                }
-            }
-        }
+        //foreach (var company in CompanyDatabase.Instance.Companies)
+        //{
+        //    if (company.OwnerId == playerID && company.IsMortgaged)
+        //    {
+        //        company.MortgageTurnsLeft--;
+        //        var ui = companyUIService.GetCompanyUI(company.Id);
+        //        ui.SetTurnsText(company.MortgageTurnsLeft);
+        //        if (company.MortgageTurnsLeft <= 0)
+        //        {
+        //            company.IsMortgaged = false;
+        //            company.OwnerId = -1;
+        //            company.IsBought = false;
+        //            ui.BuyoutUI();
+        //            EventBus.Publish(new CompanyFreedFromMortgageEvent(company.Id));
+        //        }
+        //    }
+        //}
     }
 }
 

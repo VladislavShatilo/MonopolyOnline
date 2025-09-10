@@ -28,7 +28,8 @@ public class CompanyWindowPopup : MonoBehaviour
     }
     private void OnClick()
     {
-        company = CompanyDatabase.Instance.GetCompanyById(id);
+        //company = CompanyDatabase.Instance.GetCompanyById(id);
+        company = null;
         if (TradeManager.Instance != null && TradeManager.Instance.IsTradeActive && TradeManager.Instance.CurrentOffer.FromPlayerData.Id == PhotonNetwork.LocalPlayer.ActorNumber)
         {
             Debug.Log("OnClick");

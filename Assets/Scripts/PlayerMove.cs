@@ -1,5 +1,6 @@
 ﻿using DG.Tweening;
 using Photon.Pun;
+using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -57,6 +58,7 @@ public class PlayerMove : MonoBehaviourPun
     private IEnumerator Move( int steps, int currentCellIndex, bool forward)
     {
         int cellsCount = boardService.CellsCount;
+
         for (int i = 0; i < steps; i++)
         {
             if (forward)
@@ -73,6 +75,7 @@ public class PlayerMove : MonoBehaviourPun
 
             
         }
+        EventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.OwnerActorNr));
 
     }
 

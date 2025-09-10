@@ -32,10 +32,10 @@ public class RollDiceUseCase : IRollDiceUseCase
         DiceResult diceResult = new DiceResult(first, second);
         EventBus.Publish(new DiceRolledEvent(diceResult, playerId, isForJail));
 
-        if (!isForJail)
-        {
-            turnService.RegisterDouble(playerId, diceResult.IsDouble);
-        }
+        //if (!isForJail)
+        //{
+        //    turnService.RegisterDouble(playerId, diceResult.IsDouble);
+        //}
 
         if (isForJail)
         {
@@ -49,6 +49,7 @@ public class RollDiceUseCase : IRollDiceUseCase
     private void HandlePlayerMove(DiceResult diceResult,int playerId)
     {
         Debug.Log("HandlePlayerMove");
+        Debug.Log(diceResult.Sum);
         PlayerData player = playerRepository.GetPlayerById(playerId);
 
         if (localPlayerService.GetLocalPlayerId() == playerId)

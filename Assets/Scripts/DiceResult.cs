@@ -12,8 +12,8 @@ public class DiceResult
 
     public DiceResult(int first, int second)
     {
-        if (first < 1 || first > 6) throw new ArgumentOutOfRangeException(nameof(first));
-        if (second < 1 || second > 6) throw new ArgumentOutOfRangeException(nameof(second));
+        //if (first < 1 || first > 6) throw new ArgumentOutOfRangeException(nameof(first));
+        //if (second < 1 || second > 6) throw new ArgumentOutOfRangeException(nameof(second));
 
         First = first;
         Second = second;

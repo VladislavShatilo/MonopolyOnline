@@ -148,8 +148,6 @@ public class UIPlayerStats : MonoBehaviour
 public class OnUpdatePlayerCapitalEvent
 {
     public PlayerData Player;
-
-
     public OnUpdatePlayerCapitalEvent(PlayerData player)
     {
         Player = player;

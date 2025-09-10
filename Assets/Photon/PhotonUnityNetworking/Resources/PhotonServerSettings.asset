@@ -133,6 +133,8 @@ MonoBehaviour:
   - RPC_TeleportPlayer
   - RPC_RequestDiceHandle
   - RPC_RequestGetDiceResult
+  - RPC_TryBuyCompany
+  - RPC_TryPayRent
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

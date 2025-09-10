@@ -25,7 +25,9 @@ public class BoardService : IBoardService
     private void CacheBoardCells()
     {
         foreach (Transform child in parentTransform)
+        {
             boardCells.Add(child);
+        }
     }
 
     public RectTransform GetCellRectTransform(int index) => index >= 0 && index < boardCells.Count ? boardCells[index].GetComponent<RectTransform>() : null;

@@ -33,8 +33,6 @@ public class TurnPresenter : ITurnPresenter,IInitializable, IDisposable
     {
         Debug.Log("OnTurnStart");
         int localId = localPlayerService.GetLocalPlayerId();
-        Debug.Log(localId);
-        Debug.Log(e.PlayerId);
 
         if (e.PlayerId == localId)
             uiTurnWindow.Show();
@@ -42,8 +40,9 @@ public class TurnPresenter : ITurnPresenter,IInitializable, IDisposable
             uiTurnWindow.Hide();
     }
     private void OnThrowDiceClicked()
-    {
-        photonDiceManager.RequestDiceRoll(localPlayerService.GetLocalPlayerId(), false);
+    { 
+        int result = uiTurnWindow.GetSteps();
+        photonDiceManager.RequestDiceRoll(localPlayerService.GetLocalPlayerId(), false,result);
         uiTurnWindow.Hide();
     }
     public void ShowTurnFor(int playerId) => uiTurnWindow.Show();
