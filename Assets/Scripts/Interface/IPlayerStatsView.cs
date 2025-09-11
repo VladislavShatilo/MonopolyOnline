@@ -1,18 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class IPlayerStatsView : MonoBehaviour
+public interface IPlayerStatsView
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    void SetName(string name);
+    void SetMoney(int money);
+    void SetCapital(int visibleCapital, int liquidAssets);
+    void SetTimer(bool active, float timeLeft, bool highlightTurn, bool highlightAuction);
+    void SetLoan(bool hasLoan, int turnsLeft, bool isLocal);
+    void SetTradeButtonVisible(bool visible);
+    void SetLoanButtonsVisible(bool canTakeLoan, bool canPayLoan);
+    void SetLeaveButtonVisible(bool visible);
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    void BindTradeAction(System.Action onTrade);
+    void BindTakeLoanAction(System.Action onTakeLoan);
+    void BindPayLoanAction(System.Action onPayLoan);
 }

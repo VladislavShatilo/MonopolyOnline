@@ -8,17 +8,16 @@ public class GameBootstrapper : MonoBehaviour
     private GameManager gameManager;
     private IBoardService boardService;
     private ICompanyUIService companyUIService;
-    private ICellHandler cellEventHandler;
     private IPlayerViewService playerViewService;
     private ICellOccupancyService cellOccupancyService;
+
     [Inject]
-    public void Construct(GameManager gameManager, IBoardService boardService,ICompanyUIService companyUIService, ICellHandler cellEventHandler, IPlayerViewService playerViewService,
+    public void Construct(GameManager gameManager, IBoardService boardService,ICompanyUIService companyUIService, IPlayerViewService playerViewService,
         ICellOccupancyService cellOccupancyService)
     {
         this.gameManager = gameManager;
         this.boardService = boardService;
         this.companyUIService = companyUIService;
-        this.cellEventHandler = cellEventHandler;
         this.playerViewService = playerViewService;
         this.cellOccupancyService = cellOccupancyService;
         //EventBus.Subscribe<HandleCellEvent>(cellEventHandler.OnHandleCell);IBoardService
@@ -37,6 +36,7 @@ public class GameBootstrapper : MonoBehaviour
         companyUIService.InitializeUI();
         playerViewService.InitializePlayer();
         cellOccupancyService.InitializePlayer();
+        //playerStatsService.Initialize();
         // геймплей запускаем только на старте сцены, когда всё точно готово
         gameManager.Initialize();
     }

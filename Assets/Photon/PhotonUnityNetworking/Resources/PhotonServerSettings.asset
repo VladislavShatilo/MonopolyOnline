@@ -135,6 +135,12 @@ MonoBehaviour:
   - RPC_RequestGetDiceResult
   - RPC_TryBuyCompany
   - RPC_TryPayRent
+  - RPC_PayLoan
+  - RPC_SendTradeProposal
+  - RPC_TakeLoan
+  - RPC_UpdateMoney
+  - RPC_SyncCompanyBought
+  - RPC_SyncRentPaid
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

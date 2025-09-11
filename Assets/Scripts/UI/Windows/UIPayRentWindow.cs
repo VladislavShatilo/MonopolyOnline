@@ -1,66 +1,47 @@
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIPayRentWindow : UIWindowBase
+public class UIPayRentWindow : UIWindowBase, IPayRentWindow
 {
-    [Header("UI Elements")]
     [SerializeField] private Button payRentButton;
     [SerializeField] private TextMeshProUGUI payButtonText;
     [SerializeField] private Button cantPayRentButton;
     [SerializeField] private TextMeshProUGUI cantPayRentText;
 
-    private UIPayRentPresenter presenter;
-    public Button PayRentButton => payRentButton;
-    public TextMeshProUGUI PayButtonText => payButtonText;
-    public Button CantPayRentButton => cantPayRentButton;
-    public TextMeshProUGUI CantPayRentText => cantPayRentText;
+    private Action<int> payAction;
 
-    public Button PayRentButtonSetter { set => payRentButton = value; }
-    public TextMeshProUGUI PayButtonTextSetter { set => payButtonText = value; }
-    public Button CantPayRentButtonSetter { set => cantPayRentButton = value; }
-    public TextMeshProUGUI CantPayRentTextSetter { set => cantPayRentText = value; }
-    public WindowAnimation WindowAnimationSetter { set => windowAnimation = value; }
-    protected  void OnEnable()
+    public void SetPayAction(Action payAction)
     {
-        if (payRentButton != null)
+        payRentButton.onClick.RemoveAllListeners();
+        if (payAction != null)
         {
-            payRentButton.onClick.AddListener(HandlePayRentClicked);
+            payRentButton.onClick.AddListener(() => payAction());
         }
+    
     }
+        
 
-    protected  void OnDisable()
-    {
-        if (payRentButton != null)
-        {
-            payRentButton.onClick.RemoveListener(HandlePayRentClicked);
-        }
-    }
+    private void OnEnable() => payRentButton.onClick.AddListener(OnPayClicked);
+    private void OnDisable() => payRentButton.onClick.RemoveListener(OnPayClicked);
 
-    public void Show(PlayerData player, int cellIndex, float rent)
+    public void Show(int playerId, int cellIndex, float rent, bool canPay)
     {
-        presenter = new UIPayRentPresenter(player, cellIndex, rent);
-        ApplyPresenterState();
+        payButtonText.text = $"Заплатите {rent:N0}";
+        cantPayRentText.text = $"Заплатите {rent:N0}";
+
+        payRentButton.gameObject.SetActive(canPay);
+        cantPayRentButton.gameObject.SetActive(!canPay);
+
         windowAnimation.ShowWindow();
     }
 
-    private void ApplyPresenterState()
-    {
-        var state = presenter.GetState();
+    public void Hide() => windowAnimation.HideWindow();
+    public void HardHide() => windowAnimation.HardHideWindow();
 
-        payButtonText.text = state.RentText;
-        cantPayRentText.text = state.RentText;
-
-        payRentButton.gameObject.SetActive(state.CanPay);
-        cantPayRentButton.gameObject.SetActive(!state.CanPay);
-    }
-
-    private void HandlePayRentClicked()
-    {
-        presenter.OnPayRent();
-        HideWindow();
-    }
+    private void OnPayClicked() => payAction?.Invoke(0); // playerId можно передавать через presenter
 }

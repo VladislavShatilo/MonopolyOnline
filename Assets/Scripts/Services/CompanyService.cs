@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
+using Zenject;
 public enum BuyReason
 {
     Buy,
@@ -9,15 +11,18 @@ public enum BuyReason
 
 public class CompanyService : ICompanyService
 {
-    private readonly ICompanyRepository companyRepository;
-    private readonly IBankService bank;
-    private readonly ITurnService turnService;
+    private  ICompanyRepository companyRepository;
+    private  IBankService bank;
+    private IPhotonTurnManager photonTurnManager;
+    private ICompanySyncService companySyncService;
 
-    public CompanyService(ICompanyRepository companyRepository, IBankService bank, ITurnService turnService)
+    [Inject]
+    public void Construct(ICompanyRepository companyRepository, IBankService bank, IPhotonTurnManager photonTurnManager, ICompanySyncService companySyncService)
     {
         this.companyRepository = companyRepository;
         this.bank = bank;
-        this.turnService = turnService;
+        this.photonTurnManager = photonTurnManager;
+        this.companySyncService = companySyncService;
     }
 
     public void HandleCell(int cellIndex, int playerId)
@@ -33,18 +38,18 @@ public class CompanyService : ICompanyService
         }
         else if (company.OwnerId != playerId)
         {
-            EventBus.Publish(new OfferRentEvent(cellIndex, playerId));
+
+            EventBus.Publish(new OfferRentEvent(cellIndex, playerId,company.GetRent()));
 
         }
         else
         {
-            turnService.EndTurn();
+            photonTurnManager.RequestEndTurn();
         }
     }
 
     public void TryBuyCompany(int cellIndex, int playerId, BuyReason reason)
     {
-        Debug.Log(cellIndex + "   " + playerId);
         var company = companyRepository.GetCompanyById(cellIndex);
         if (company == null || company.IsBought) return;
 
@@ -54,6 +59,8 @@ public class CompanyService : ICompanyService
         company.Buy(playerId);
         bank.RemoveMoney(playerId, price);
         EventBus.Publish(new CompanyBoughtEvent(cellIndex, playerId, price, reason));
+        photonTurnManager.RequestEndTurn();
+        companySyncService.SyncCompanyBought(cellIndex,playerId,price, reason);
     }
 
     public void TryPayRent(int cellIndex, int playerId)
@@ -61,41 +68,16 @@ public class CompanyService : ICompanyService
         var company = companyRepository.GetCompanyById(cellIndex);
         if (company == null || !company.IsBought) return;
 
-        int rent = GetRent(company);
+        int rent = company.GetRent();
         if (!bank.HasEnoughMoney(playerId, rent)) return;
 
         bank.TransferMoney(playerId, company.OwnerId, rent);
         EventBus.Publish(new RentPaidEvent(cellIndex, playerId, company.OwnerId, rent));
-    }
-    private int GetRent(Company company)
-    {
-        switch (company.Type)
-        {
-            case CompanyType.Company:
-                return company.CompanyData.rent[company.RentLevel];
-            case CompanyType.FieldCompany:
-                int ownedFieldCount = CountOwnedByPlayer(company.OwnerId, CompanyType.FieldCompany);
-                return company.FieldCompanyData.rentField[ownedFieldCount - 1];
-            case CompanyType.DiceCompany:
-                int ownedDiceCount = CountOwnedByPlayer(company.OwnerId, CompanyType.DiceCompany);
-                return company.DiceCompanyData.rentMultiplier[ownedDiceCount - 1] /** TurnManager.Instance.DiceSum*/;
-               
-        }
-        return 0;
-    }
-    private int CountOwnedByPlayer(int playerId, CompanyType companyType)
-    {
-        int count = 0;
+        companySyncService.SyncRentPaid(cellIndex, playerId, company.OwnerId, rent);
 
-        List<Company> companiesList = new List<Company>(companyRepository.GetAll());
-        for (int i = 0; i < companiesList.Count; i++)
-        {
-            if (companiesList[i].IsBought && companiesList[i].OwnerId == playerId && companiesList[i].Type == companyType)
-                count++;
-        }
-
-        return count;
     }
+
+
 }
 public class OfferPurchaseEvent
 {
@@ -115,10 +97,12 @@ public class OfferRentEvent
 {
     public int CellIndex;
     public int PlayerId;
-    public OfferRentEvent(int cellIndex, int playerId)
+    public int Rent;
+    public OfferRentEvent(int cellIndex, int playerId, int rent)
     {
         CellIndex = cellIndex;
         PlayerId = playerId;
+        Rent = rent;
     }
 }
 public class CompanyBoughtEvent

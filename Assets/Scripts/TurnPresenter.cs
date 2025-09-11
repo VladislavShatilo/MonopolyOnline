@@ -31,7 +31,6 @@ public class TurnPresenter : ITurnPresenter,IInitializable, IDisposable
     }
     private void OnTurnStart(TurnStartEvent e)
     {
-        Debug.Log("OnTurnStart");
         int localId = localPlayerService.GetLocalPlayerId();
 
         if (e.PlayerId == localId)

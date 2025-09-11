@@ -29,7 +29,7 @@ public class Company
     public CompanyGroup Group { get; private set; }
     [Inject] private IPlayerRepository playerRepository;
     [Inject] private ICompanyUIService companyUIService;
-
+    [Inject] private ICompanyRepository companyRepository;
     public Company(int id, CompanyData companyData)
     {
         if (companyData == null) throw new System.ArgumentNullException(nameof(companyData));
@@ -82,7 +82,35 @@ public class Company
         OwnerId = playerId;
         RentLevel = 0;
     }
-   
+   public int GetRent()
+    {
+        switch (Type)
+        {
+            case CompanyType.Company:
+                return CompanyData.rent[RentLevel];
+            case CompanyType.FieldCompany:
+                int ownedFieldCount = CountOwnedByPlayer(OwnerId, CompanyType.FieldCompany);
+                return FieldCompanyData.rentField[ownedFieldCount - 1];
+            case CompanyType.DiceCompany:
+                int ownedDiceCount = CountOwnedByPlayer(OwnerId, CompanyType.DiceCompany);
+                return DiceCompanyData.rentMultiplier[ownedDiceCount - 1] /** TurnManager.Instance.DiceSum*/;
+
+        }
+        return 0;
+    }
+    private int CountOwnedByPlayer(int playerId, CompanyType companyType)
+    {
+        int count = 0;
+
+        List<Company> companiesList = new List<Company>(companyRepository.GetAll());
+        for (int i = 0; i < companiesList.Count; i++)
+        {
+            if (companiesList[i].IsBought && companiesList[i].OwnerId == playerId && companiesList[i].Type == companyType)
+                count++;
+        }
+
+        return count;
+    }
     public void TransferTo(int newOwnerId)
     {
         // Сначала проверяем, что компания вообще куплена
@@ -92,13 +120,13 @@ public class Company
         OwnerId = newOwnerId;
         PlayerData player =  playerRepository.GetPlayerById(OwnerId);
         player.OwnedCompanies.Add(this);
-        EventBus.Publish(new OnUpdatePlayerCapitalEvent(player));
+        EventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
 
         IsMortgaged = IsMortgaged;
         MortgageTurnsLeft = MortgageTurnsLeft;
 
         var cellUI = companyUIService.GetCompanyUI(Id);
-        cellUI.HandleCompanyBought(Id, newOwnerId);
+       // cellUI.HandleCompanyBought(Id, newOwnerId);
         // Обновляем аренду для группы
        //CompanyManager.Instance.UpdateRent(this);
         // MortgageTurnsLeft = 0;

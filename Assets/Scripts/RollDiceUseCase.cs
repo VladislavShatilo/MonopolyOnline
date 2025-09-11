@@ -48,8 +48,6 @@ public class RollDiceUseCase : IRollDiceUseCase
     }
     private void HandlePlayerMove(DiceResult diceResult,int playerId)
     {
-        Debug.Log("HandlePlayerMove");
-        Debug.Log(diceResult.Sum);
         PlayerData player = playerRepository.GetPlayerById(playerId);
 
         if (localPlayerService.GetLocalPlayerId() == playerId)

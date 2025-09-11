@@ -153,11 +153,11 @@ public class TradeManager : MonoBehaviourPun
         {
           
 
-            Bank.Instance.RemoveMoney(senderId, currentOffer.FromMoney);
-            Bank.Instance.AddMoney(receiverId, currentOffer.FromMoney);
+           //Bank.Instance.RemoveMoney(senderId, currentOffer.FromMoney);
+            //Bank.Instance.AddMoney(receiverId, currentOffer.FromMoney);
 
-            Bank.Instance.RemoveMoney(receiverId, currentOffer.ToMoney);
-            Bank.Instance.AddMoney(senderId, currentOffer.ToMoney);
+            ///Bank.Instance.RemoveMoney(receiverId, currentOffer.ToMoney);
+            //Bank.Instance.AddMoney(senderId, currentOffer.ToMoney);
 
             ApplyTrade(currentOffer);
         }

@@ -25,7 +25,6 @@ public class GameStarter : MonoBehaviourPunCallbacks
             return;
         if (Photon.Pun.PhotonNetwork.CurrentRoom.PlayerCount == Photon.Pun.PhotonNetwork.CurrentRoom.MaxPlayers && Photon.Pun.PhotonNetwork.IsMasterClient)
         {
-            Debug.Log("TryStartGame");
             photonTurnManager.RequestStartRandomTurn();
         }
     }

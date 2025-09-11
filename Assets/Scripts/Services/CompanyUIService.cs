@@ -1,13 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public class CompanyUIService : ICompanyUIService
 {
-    private readonly IBoardService boardService;
-    private readonly Dictionary<int, UICompanyCell> companyUIs = new();
+    private IBoardService boardService;
+    private Dictionary<int, UICompanyCell> companyUIs = new();
 
-    public CompanyUIService(IBoardService boardService)
+    [Inject]
+    public void Construct(IBoardService boardService)
     {
         this.boardService = boardService;
     }

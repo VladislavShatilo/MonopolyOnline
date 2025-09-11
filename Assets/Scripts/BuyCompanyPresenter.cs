@@ -7,16 +7,14 @@ using Zenject;
 public class BuyCompanyPresenter : IBuyCompanyPresenter, IInitializable,IDisposable
 {
     private ILocalPlayerService localPlayerService;
-    private IPhotonDiceManager photonDiceManager;
     private IPhotonCompanyManager photonCompanyManager;
     private IBuyWindow buyWindow;
     private int cellIndex;
 
     [Inject]
-    public void Construct(ILocalPlayerService localPlayerService,  IPhotonDiceManager photonDiceManager, IBuyWindow buyWindow, IPhotonCompanyManager photonCompanyManager)
+    public void Construct(ILocalPlayerService localPlayerService, IBuyWindow buyWindow, IPhotonCompanyManager photonCompanyManager)
     {
         this.localPlayerService = localPlayerService;
-        this.photonDiceManager = photonDiceManager;
         this.buyWindow = buyWindow;
         this.photonCompanyManager = photonCompanyManager;
 

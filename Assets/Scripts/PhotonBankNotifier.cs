@@ -1,19 +1,28 @@
+using Photon.Pun;
+using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
-public class PhotonBankNotifier : IBankNotifier
+public class PhotonBankNotifier : MonoBehaviourPun, IBankNotifier
 {
+    private IPlayerRepository playerRepository;
+    [Inject]
+    public void Construct(IPlayerRepository playerRepository)
+    {
+        this.playerRepository = playerRepository;
+    }
+
     public void NotifyBalanceChanged(PlayerData player)
     {
-        // Ћокальное событие (UI / логика)
-        EventBus.Publish(new OnUpdatePlayerCapitalEvent(player));
-
-        //// ≈сли игрок Ч Photon игрок, обновл€ем кастомные свойства
-        //if (player.photonPlayer != null)
-        //{
-        //    var props = new ExitGames.Client.Photon.Hashtable { { "Money", player.Money } };
-        //    player.photonPlayer.SetCustomProperties(props);
-        //}
+        photonView.RPC(nameof(RPC_UpdateMoney), RpcTarget.All, player.Id,player.Money);
+    }
+    [PunRPC]
+    private void RPC_UpdateMoney(int playerId,int money)
+    {
+        PlayerData player = playerRepository.GetPlayerById(playerId);
+        player.Money = money; // обновл€ем локально
+        EventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
     }
 }

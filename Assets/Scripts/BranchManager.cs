@@ -107,12 +107,12 @@ public class BranchManager : MonoBehaviourPun
         company.RentLevel = newLevel;
         if (!isBuy)
         {
-            Bank.Instance.AddMoney(playerId, company.CompanyData.branchPrice);
+            //Bank.Instance.AddMoney(playerId, company.CompanyData.branchPrice);
 
         }
         else
         {
-            Bank.Instance.RemoveMoney(playerId, company.CompanyData.branchPrice);
+           // Bank.Instance.RemoveMoney(playerId, company.CompanyData.branchPrice);
 
         }
     }
@@ -207,8 +207,8 @@ public class BranchManager : MonoBehaviourPun
     private bool CanBuyBranch(Company company, PlayerData player)
     {
         return company.OwnerId == player.Id &&
-               company.RentLevel < 5 &&
-               Bank.Instance.HasEnoughMoney(player.Id, company.CompanyData.branchPrice);
+               company.RentLevel < 5; 
+               //Bank.Instance.HasEnoughMoney(player.Id, company.CompanyData.branchPrice);
     }
 
     private bool CanSellBranch(Company company, PlayerData player)

@@ -42,18 +42,5 @@ public class PlayerViewService : IPlayerViewService, IDisposable
             skin.SetColorDirect(playerColor.ToUnityColor());
         }
     }
-    private void InitializePlayerMove(PlayerSpawnedViewEvent e)
-    {
-        PlayerView view = e.PlayerView;
-        var skin = view.GetComponent<PlayerSkin>();
-
-        view.transform.SetParent(playerRoot, false);
-        view.transform.GetComponent<RectTransform>().anchoredPosition = playerSettings.StartPosition;
-
-        if (view.photonView != null)
-        {
-            var playerColor = colorService.GetColorForPlayer(view.photonView.Owner.ActorNumber);
-            skin.SetColorDirect(playerColor.ToUnityColor());
-        }
-    }
+   
 }

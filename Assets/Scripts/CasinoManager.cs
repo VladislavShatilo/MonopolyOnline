@@ -50,13 +50,13 @@ public class CasinoManager : MonoBehaviourPun
     {
         if(reward > 0)
         {
-            Bank.Instance.AddMoney(playerID, reward);
+           //Bank.Instance.AddMoney(playerID, reward);
 
         }
         else
         {
             reward = Mathf.Abs(reward);
-            Bank.Instance.AddMoney(playerID, reward);
+            //Bank.Instance.AddMoney(playerID, reward);
         }
 
     }

@@ -11,12 +11,24 @@ public class GameplayInstaller : MonoInstaller
     [SerializeField] private Transform parentTransform;
     [SerializeField] private UITurnWindow uiTurnWindow;
     [SerializeField] private UIBuyWindow uiBuyWindow;
+    [SerializeField] private UIPayRentWindow uiPayRentWindow;
 
     [SerializeField] private DiceManagerPhoton diceManagerPhoton;
     [SerializeField] private DiceManager3D diceManager3D;
     [SerializeField] private PhotonPlayerMoveManager playerMoveManager;
     [SerializeField] private PhotonTurnManager photonTurnManager;
     [SerializeField] private PhotonCompanyManager photonCompanyManager;
+    [SerializeField] private PhotonLoanManager photonLoanManager;
+    [SerializeField] private PhotonTradeManager photonTradeManager;
+    [SerializeField] private PhotonBankNotifier photonBankNotifier;
+    [SerializeField] private PhotonCompanySyncManager photonCompanySyncManager;
+
+    [Header("Player Stats UI")]
+    [SerializeField] private UIPlayerStats playerStatsPrefab;
+    [SerializeField] private Transform playersStatsContainer;
+
+    [SerializeField] private UICompanyCell[] companyCells; // сюда в инспекторе закинешь все 28 view
+
 
     public override void InstallBindings()
     {
@@ -68,15 +80,37 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IPhotonTurnManager>().To<PhotonTurnManager>().FromInstance(photonTurnManager).AsSingle();
         Container.Bind<IPhotonCompanyManager>().To<PhotonCompanyManager>().FromInstance(photonCompanyManager).AsSingle();
         Container.Bind<IBuyWindow>().To<UIBuyWindow>().FromInstance(uiBuyWindow).AsSingle();
+        Container.Bind<IPayRentWindow>().To<UIPayRentWindow>().FromInstance(uiPayRentWindow).AsSingle();
 
         Container.Bind<ICompanyRepository>().To<CompanyRepository>().AsSingle().WithArguments(boardConfig);
 
         Container.Bind<IBankService>().To<BankService>().AsSingle();
-        Container.Bind<IBankNotifier>().To<PhotonBankNotifier>().AsSingle();
 
 
         Container.BindInterfacesTo<BuyCompanyPresenter>().AsSingle().NonLazy();
         Container.BindInterfacesTo<CellHandlerService>().AsSingle().NonLazy();
 
+        Container.Bind<UIPlayerStats>().WithId("PlayerStatsPrefab").FromInstance(playerStatsPrefab);
+        Container.Bind<Transform>().WithId("PlayerStatsContainer").FromInstance(playersStatsContainer);
+        Container.Bind<IPhotonLoanManager>().To<PhotonLoanManager>().FromInstance(photonLoanManager).AsSingle();
+        Container.Bind<IPhotonTradeManager>().To<PhotonTradeManager>().FromInstance(photonTradeManager).AsSingle();
+        Container.Bind<IBankNotifier>().To<PhotonBankNotifier>().FromInstance(photonBankNotifier).AsSingle();
+        Container.Bind<ICompanySyncService>().To<PhotonCompanySyncManager>().FromInstance(photonCompanySyncManager).AsSingle();
+
+        Container.Bind<ILoanService>().To<LoanService>().AsSingle();
+
+        Container.Bind<ITradeService>().To<TradeService>().AsSingle();
+        Container.BindInterfacesTo<PlayerStatsService>()
+                 .FromComponentInHierarchy()
+                 .AsSingle();
+
+        Container.BindInterfacesTo<UICompanyCellPresenter>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<PayRentPresenter>().AsSingle().NonLazy();
+
+        Container.Bind<IUICompanyCellRepository>().To<UICompanyCellRepository>().AsSingle();
+
+        Container.BindInterfacesAndSelfTo<UICompanyCell>()
+     .FromComponentsInHierarchy()
+     .AsTransient();
     }
 }

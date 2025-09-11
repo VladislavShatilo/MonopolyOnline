@@ -4,14 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
-public class PhotonCompanyManager : MonoBehaviourPun,IPhotonCompanyManager
+public class PhotonCompanyManager : MonoBehaviourPun, IPhotonCompanyManager
 {
     private ICompanyService companyService;
-
+   
     [Inject]
-    public void Construct(ICompanyService service)
+    public void Construct(ICompanyService companyService)
     {
-        companyService = service;
+        this.companyService = companyService;
+      
     }
 
     [PunRPC]
@@ -25,6 +26,7 @@ public class PhotonCompanyManager : MonoBehaviourPun,IPhotonCompanyManager
     {
         companyService.TryPayRent(cellIndex, playerId);
     }
+  
 
     public void RequestBuyCompany(int cellIndex, int playerId, BuyReason reason)
     {

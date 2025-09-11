@@ -95,20 +95,20 @@ public class BoardGeneratorEditor : EditorWindow
                     UICompanyCell uiCompanyCell = cellGO.GetComponent<UICompanyCell>();
                     if (i > 10 && i < 20)
                     {
-                        uiCompanyCell.RotateBranchButtonIcons(90);
+                        ///uiCompanyCell.RotateBranchButtonIcons(90);
                     }
                     if (i > 20 &&  i < 30)
                     {
-                        uiCompanyCell.ChangeBuySellBranchButtons();
-                        uiCompanyCell.RotateLogoText(270);                   
-                        uiCompanyCell.RotatePriceText();
-                        uiCompanyCell.RotateBranchButtonIcons(180);
+                        //uiCompanyCell.ChangeBuySellBranchButtons();
+                       // uiCompanyCell.RotateLogoText(270);                   
+                       // uiCompanyCell.RotatePriceText();
+                        //uiCompanyCell.RotateBranchButtonIcons(180);
                     }
                     if(i > 30 && i < 40)
                     {
-                        uiCompanyCell.ChangeBuySellBranchButtons();
-                        uiCompanyCell.RotateLogoText(270);
-                        uiCompanyCell.RotateBranchButtonIcons(270);
+                       // uiCompanyCell.ChangeBuySellBranchButtons();
+                       // uiCompanyCell.RotateLogoText(270);
+                       //uiCompanyCell.RotateBranchButtonIcons(270);
 
                     }
                     break;
