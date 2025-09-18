@@ -29,16 +29,16 @@ public class UIBuyWindowEditModeTests
         var color = new PlayerColor(1, 0, 0);
 
         testPlayer = new PlayerData("TestPlayer", 0, 0, color, null);
-        EventBus.Subscribe<TryBuyCompanyEvent>(OnTryBuyCompany);
-        EventBus.Subscribe<StartAuctionEvent>(OnAuctionStart);
+       // EventBus.Subscribe<TryBuyCompanyEvent>(OnTryBuyCompany);
+       // EventBus.Subscribe<StartAuctionEvent>(OnAuctionStart);
         windowGO.SetActive(false);
         windowGO.SetActive(true);
     }
     [TearDown]
     public void Teardown()
     {
-        EventBus.Unsubscribe<TryBuyCompanyEvent>(OnTryBuyCompany);
-        EventBus.Unsubscribe<StartAuctionEvent>(OnAuctionStart);
+        //EventBus.Unsubscribe<TryBuyCompanyEvent>(OnTryBuyCompany);
+        //EventBus.Unsubscribe<StartAuctionEvent>(OnAuctionStart);
     }
     private void OnTryBuyCompany(TryBuyCompanyEvent e)
     {

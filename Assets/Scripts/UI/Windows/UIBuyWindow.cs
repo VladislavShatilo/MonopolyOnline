@@ -35,7 +35,14 @@ public class UIBuyWindow : UIWindowBase,IBuyWindow
 
     public void Hide() => HideWindow();
 
-    public void SetAuctionAction(System.Action onAuction) => onAuctionAction = onAuction;
+    public void SetAuctionAction(System.Action<int> onAuction)
+    {
+        auctionButton.onClick.RemoveAllListeners();
+        if (onAuction != null)
+        {
+            auctionButton.onClick.AddListener(() => onAuction(currentCellIndex));
+        }
+    }
     public void SetBuyAction(System.Action<int> onBuyAction)
     {
         buyButton.onClick.RemoveAllListeners();
@@ -55,17 +62,4 @@ public class TryBuyCompanyEvent
     }
 
 }
-public class StartAuctionEvent
-{
-    public PlayerData Player;
-    public int CellIndex;
-    public int Price;
 
-    public StartAuctionEvent(PlayerData player, int cellIndex, int price)
-    {
-        Player = player;
-        CellIndex = cellIndex;
-        Price = price;
-    }
-
-}

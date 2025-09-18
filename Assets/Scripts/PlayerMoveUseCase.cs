@@ -2,19 +2,24 @@ using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public class PlayerMoveUseCase : IPlayerMoveUseCase
 {
-    private readonly IPlayerRepository playerRepository;
-    private readonly IBoardService boardService;
-    private readonly IPhotonTurnManager photonTurnManager;
+    private IPlayerRepository playerRepository;
+    private IBoardService boardService;
+    private IPhotonTurnManager photonTurnManager;
+    private IEventBus eventBus;
 
-    public PlayerMoveUseCase(IPlayerRepository playerRepository, IBoardService boardService,
-        IPhotonTurnManager photonTurnManager)
+
+    [Inject]
+    public void Construct(IPlayerRepository playerRepository, IBoardService boardService,
+        IPhotonTurnManager photonTurnManager, IEventBus eventBus)
     {
         this.playerRepository = playerRepository;
         this.boardService = boardService;
         this.photonTurnManager = photonTurnManager;
+        this.eventBus = eventBus;
     }
 
     public void MovePlayer(int playerId, int steps, bool isForward)
@@ -24,10 +29,10 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase
             ? (player.CurrentCellId + steps) % boardService.CellsCount
             : (player.CurrentCellId - steps + boardService.CellsCount) % boardService.CellsCount;
 
-       // EventBus.Publish(new DiceFadeEvent(targetIndex, true));
-      //  EventBus.Publish(new PlayerMoveUnregister(player.CurrentCellId, playerId));
+        // EventBus.Publish(new DiceFadeEvent(targetIndex, true));
+        //  EventBus.Publish(new PlayerMoveUnregister(player.CurrentCellId, playerId));
 
-        EventBus.Publish(new MovePlayerEvent(playerId, player.CurrentCellId, steps,isForward));
+        eventBus.Publish(new MovePlayerEvent(playerId, player.CurrentCellId, steps,isForward));
 
         
 
@@ -41,10 +46,10 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase
     {
         PlayerData player = playerRepository.GetPlayerById(playerId);
 
-        EventBus.Publish(new PlayerMoveUnregister(player.CurrentCellId, playerId));
+        eventBus.Publish(new PlayerMoveUnregister(player.CurrentCellId, playerId));
         player.CurrentCellId = targetCellIndex;
-        EventBus.Publish(new PlayerMoveRegister(playerId, player.CurrentCellId));
-        EventBus.Publish(new HandleCellEvent(playerId, player.CurrentCellId));
+        eventBus.Publish(new PlayerMoveRegister(playerId, player.CurrentCellId));
+        eventBus.Publish(new HandleCellEvent(playerId, player.CurrentCellId));
     }
 
     public void MovePlayerToJail(int playerId)

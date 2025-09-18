@@ -8,26 +8,26 @@ public class TurnPresenter : ITurnPresenter,IInitializable, IDisposable
 {
     private ILocalPlayerService localPlayerService;
     private  IPhotonDiceManager photonDiceManager;
-
     private ITurnWindow uiTurnWindow;
-
+    private IEventBus eventBus;
     [Inject]
-    public void Construct(ILocalPlayerService localPlayerService, ITurnWindow uiTurnWindow, IPhotonDiceManager photonDiceManager)
+    public void Construct(ILocalPlayerService localPlayerService, ITurnWindow uiTurnWindow, IPhotonDiceManager photonDiceManager, IEventBus eventBus)
     {
         this.localPlayerService = localPlayerService;
         this.uiTurnWindow = uiTurnWindow;
         this.photonDiceManager = photonDiceManager;
+        this.eventBus = eventBus;
 
     }
     void IInitializable.Initialize()
     {
         uiTurnWindow.SetThrowDiceAction(OnThrowDiceClicked);
 
-        EventBus.Subscribe<TurnStartEvent>(OnTurnStart);
+        eventBus.Subscribe<TurnStartEvent>(OnTurnStart);
     }
     void IDisposable.Dispose()
     {
-        EventBus.Unsubscribe<TurnStartEvent>(OnTurnStart);
+        eventBus.Unsubscribe<TurnStartEvent>(OnTurnStart);
     }
     private void OnTurnStart(TurnStartEvent e)
     {

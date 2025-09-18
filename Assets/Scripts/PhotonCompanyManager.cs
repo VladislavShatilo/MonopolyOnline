@@ -18,7 +18,7 @@ public class PhotonCompanyManager : MonoBehaviourPun, IPhotonCompanyManager
     [PunRPC]
     private void RPC_TryBuyCompany(int cellIndex, int playerId, int reason)
     {
-        companyService.TryBuyCompany(cellIndex, playerId, (BuyReason)reason);
+        companyService.TryBuyCompany(cellIndex, playerId, 0,(BuyReason)reason);
     }
 
     [PunRPC]

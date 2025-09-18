@@ -7,24 +7,25 @@ public class PlayerMoveInitService : IPlayerMoveInitService,IInitializable,ILate
 {
     private IBoardService boardService;
     private ILocalPlayerService localPlayerService;
-
+    private IEventBus eventBus;
     [Inject]
-    public void Construct(IBoardService boardService, ILocalPlayerService localPlayerService)
+    public void Construct(IBoardService boardService, ILocalPlayerService localPlayerService, IEventBus eventBus)
     {
         this.boardService = boardService;
         this.localPlayerService = localPlayerService;
+        this.eventBus = eventBus;
     }
     void IInitializable.Initialize()
     {
-        EventBus.Subscribe<EnablePlayerMoveEvent>(_ => Init());
+        eventBus.Subscribe<EnablePlayerMoveEvent>(_ => Init());
     }
     void ILateDisposable.LateDispose()
     {
-        EventBus.Unsubscribe<EnablePlayerMoveEvent>(_ => Init());
+        eventBus.Unsubscribe<EnablePlayerMoveEvent>(_ => Init());
     }
     public void Init() 
     {
-        EventBus.Publish(new InitializePlayerMoveEvent(boardService, localPlayerService));
+        eventBus.Publish(new InitializePlayerMoveEvent(boardService, localPlayerService, eventBus));
     }
 
 

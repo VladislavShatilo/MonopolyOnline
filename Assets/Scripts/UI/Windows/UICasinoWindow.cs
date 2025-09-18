@@ -79,7 +79,7 @@ public class UICasinoWindow : UIWindowBase
     {
         if (selectedNumbers.Count == 0) return;
 
-        CasinoManager.Instance.PlayGame(selectedNumbers.ToArray());
+       // CasinoManager.Instance.PlayGame(selectedNumbers.ToArray());
         HideWindow();
     }
 

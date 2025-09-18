@@ -11,14 +11,16 @@ public class RollDiceUseCase : IRollDiceUseCase
     private ITurnService turnService; 
     private IPlayerRepository playerRepository; 
     private ILocalPlayerService localPlayerService;
+    private IEventBus eventBus;
 
     [Inject]
-    public void Construct(IDiceService diceService, ITurnService turnService, IPlayerRepository playerRepository, ILocalPlayerService localPlayerService)
+    public void Construct(IDiceService diceService, ITurnService turnService, IPlayerRepository playerRepository, ILocalPlayerService localPlayerService, IEventBus eventBus)
     {
         this.diceService = diceService;
         this.turnService = turnService;
         this.playerRepository = playerRepository;
         this.localPlayerService = localPlayerService;
+        this.eventBus = eventBus;
     }
 
     public DiceResult GetDiceResult(int playerId, bool isForJail)
@@ -30,7 +32,7 @@ public class RollDiceUseCase : IRollDiceUseCase
     public void HandleDice(int first,int second, int playerId, bool isForJail)
     {
         DiceResult diceResult = new DiceResult(first, second);
-        EventBus.Publish(new DiceRolledEvent(diceResult, playerId, isForJail));
+        eventBus.Publish(new DiceRolledEvent(diceResult, playerId, isForJail));
 
         //if (!isForJail)
         //{
@@ -39,7 +41,7 @@ public class RollDiceUseCase : IRollDiceUseCase
 
         if (isForJail)
         {
-            EventBus.Publish(new CheckDiceJailEvent(diceResult.First, diceResult.Second, playerId));
+            eventBus.Publish(new CheckDiceJailEvent(diceResult.First, diceResult.Second, playerId));
         }
         else
         {
@@ -55,16 +57,16 @@ public class RollDiceUseCase : IRollDiceUseCase
             if (player.NextMoveBackward)
             {
                 player.NextMoveBackward = false; // сбросим, чтобы только один ход был назад
-                EventBus.Publish(new OnPlayerMoveEvent(playerId,diceResult.Sum, false));
+                eventBus.Publish(new OnPlayerMoveEvent(playerId,diceResult.Sum, false));
             }
             else
             {
 
-                EventBus.Publish(new OnPlayerMoveEvent(playerId, diceResult.Sum, true));
+                eventBus.Publish(new OnPlayerMoveEvent(playerId, diceResult.Sum, true));
             }
             if (diceResult.IsDouble)
             {
-                EventBus.Publish(new PlayerRolledDoubleEvent(playerId, diceResult.IsDouble));
+                eventBus.Publish(new PlayerRolledDoubleEvent(playerId, diceResult.IsDouble));
             }
         }
 

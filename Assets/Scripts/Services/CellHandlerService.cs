@@ -13,10 +13,11 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
     private IJailService jailService;
     private ICasinoService casinoService;
     private ITurnService turnService;
+    private IEventBus eventBus;
 
     [Inject]
     public void Construct( IBoardService boardService, ICompanyService companyService,  IChanceService chanceService,
-        IJailService jailService, ICasinoService casinoService, ITurnService turnService)
+        IJailService jailService, ICasinoService casinoService, ITurnService turnService, IEventBus eventBus)
     {
         this.boardService = boardService;
         this.companyService = companyService;
@@ -24,14 +25,15 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
         this.jailService = jailService;
         this.casinoService = casinoService;
         this.turnService = turnService;
+        this.eventBus = eventBus;
     }
     void IInitializable.Initialize()
     {
-        EventBus.Subscribe<HandleCellEvent>(OnHandleCell);
+        eventBus.Subscribe<HandleCellEvent>(OnHandleCell);
     }
     void IDisposable.Dispose()
     {
-        EventBus.Unsubscribe<HandleCellEvent>(OnHandleCell);
+        eventBus.Unsubscribe<HandleCellEvent>(OnHandleCell);
        
     }
     public void OnHandleCell(HandleCellEvent e)

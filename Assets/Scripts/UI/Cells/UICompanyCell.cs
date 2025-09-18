@@ -56,6 +56,7 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
     [Inject]
     public void Construct(IUICompanyCellRepository repository)
     {
+
         this.repository = repository;
     }
     public int CompanyId()
@@ -64,8 +65,6 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
     }
     void IInitializable.Initialize()
     {
-        Debug.Log("repository.Register(this);");
-
         repository.Register(this);
     }
     void IDisposable.Dispose()

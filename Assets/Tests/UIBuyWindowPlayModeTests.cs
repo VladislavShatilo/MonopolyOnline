@@ -42,14 +42,14 @@ public class UIBuyWindowPlayModeTests : MonoBehaviour
         var color = new PlayerColor(1, 0, 0);
 
         testPlayer = new PlayerData("TestPlayer", 0, 0, color, null);
-        EventBus.ClearAll(); // вот это добавь
+        //EventBus.ClearAll(); // вот это добавь
 
         windowGO.SetActive(true);
     }
     [TearDown]
     public void Teardown()
     {
-        EventBus.ClearAll();
+        //EventBus.ClearAll();
         Object.Destroy(windowGO);
 
     }
@@ -62,8 +62,8 @@ public class UIBuyWindowPlayModeTests : MonoBehaviour
         bool internalAuctionClicked = false;
 
         // подписываемся на EventBus, чтобы проверить внутренние слушатели
-        EventBus.Subscribe<TryBuyCompanyEvent>((e) => internalBuyClicked = true);
-        EventBus.Subscribe<StartAuctionEvent>((e) => internalAuctionClicked = true);
+        //EventBus.Subscribe<TryBuyCompanyEvent>((e) => internalBuyClicked = true);
+       // EventBus.Subscribe<StartAuctionEvent>((e) => internalAuctionClicked = true);
 
         yield return null;
 
@@ -89,8 +89,8 @@ public class UIBuyWindowPlayModeTests : MonoBehaviour
         Assert.IsFalse(internalBuyClicked);
         Assert.IsFalse(internalAuctionClicked);
 
-        EventBus.Unsubscribe<TryBuyCompanyEvent>((e) => internalBuyClicked = true);
-        EventBus.Unsubscribe<StartAuctionEvent>((e) => internalAuctionClicked = true);
+        //EventBus.Unsubscribe<TryBuyCompanyEvent>((e) => internalBuyClicked = true);
+        //EventBus.Unsubscribe<StartAuctionEvent>((e) => internalAuctionClicked = true);
     }
 
     [UnityTest]

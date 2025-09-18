@@ -8,10 +8,12 @@ using Zenject;
 public class PhotonBankNotifier : MonoBehaviourPun, IBankNotifier
 {
     private IPlayerRepository playerRepository;
+    private IEventBus eventBus;
     [Inject]
-    public void Construct(IPlayerRepository playerRepository)
+    public void Construct(IPlayerRepository playerRepository, IEventBus eventBus)
     {
         this.playerRepository = playerRepository;
+        this.eventBus = eventBus;   
     }
 
     public void NotifyBalanceChanged(PlayerData player)
@@ -23,6 +25,6 @@ public class PhotonBankNotifier : MonoBehaviourPun, IBankNotifier
     {
         PlayerData player = playerRepository.GetPlayerById(playerId);
         player.Money = money; // обновляем локально
-        EventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
+        eventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
     }
 }

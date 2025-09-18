@@ -1,50 +1,49 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Zenject;
 
-public class AuthUI : MonoBehaviour
+public class AuthUI :MonoBehaviour, IInitializable,IDisposable
 {
     [SerializeField] private TMP_InputField nicknameField;
     [SerializeField] private TMP_InputField passwordField;
     [SerializeField] private Button loginButton;
 
-    private void Start()
+    private IAuthService authService;
+
+    [Inject]
+    public void Construct(IAuthService authService)
     {
-        // При изменении текста будем проверять
+        this.authService = authService;
+    }
+    void IInitializable.Initialize()
+    {
         nicknameField.onValueChanged.AddListener(_ => CheckFields());
         passwordField.onValueChanged.AddListener(_ => CheckFields());
-        loginButton.onClick.AddListener(() => OnLoginButtonClick());
-        // Сразу выключим кнопку
+        loginButton.onClick.AddListener(OnLoginButtonClick);
+
         loginButton.interactable = false;
     }
+    void IDisposable.Dispose()
+    {
+        nicknameField.onValueChanged.RemoveListener(_ => CheckFields());
+        passwordField.onValueChanged.RemoveListener(_ => CheckFields());
+        loginButton.onClick.RemoveListener(OnLoginButtonClick);
 
+    }
     private void CheckFields()
     {
-        bool nicknameFilled = !string.IsNullOrWhiteSpace(nicknameField.text);
-        bool passwordFilled = !string.IsNullOrWhiteSpace(passwordField.text);
-
-        loginButton.interactable = nicknameFilled && passwordFilled;
+        loginButton.interactable = !string.IsNullOrWhiteSpace(nicknameField.text) &&
+                                   !string.IsNullOrWhiteSpace(passwordField.text);
     }
 
-    public void OnLoginButtonClick()
+    private void OnLoginButtonClick()
     {
-        PlayerAuthData.Nickname = nicknameField.text.Trim();
-        PlayerAuthData.Password = passwordField.text;
-
-        Debug.Log($"Логин: {PlayerAuthData.Nickname}, Пароль: {PlayerAuthData.Password}");
-
-        Photon.Pun.PhotonNetwork.NickName = PlayerAuthData.Nickname;
-
-        if (SceneFadeManager.instance != null)
-        {
-            SceneFadeManager.instance.LoadLobbyScene();
-        }
-        else
-        {
-            SceneManager.LoadScene("LobbyScene");
-        }
+        authService.Login(nicknameField.text, passwordField.text);
+        SceneManager.LoadScene("LobbyScene");
     }
 }

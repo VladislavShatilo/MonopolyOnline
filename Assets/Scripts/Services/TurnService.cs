@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,12 +8,14 @@ using Zenject;
 public class TurnService : ITurnService
 {
     private  IPlayerRepository playerRepository;
+    private IPhotonTurnSynchronizer photonTurnSynchronizer;
     private  Turn turn;
 
     [Inject]
-    public void Construct(IPlayerRepository playerRepository)
+    public void Construct(IPlayerRepository playerRepository, IPhotonTurnSynchronizer photonTurnSynchronizer)
     {
         this.playerRepository = playerRepository;
+        this.photonTurnSynchronizer = photonTurnSynchronizer;
         turn = new Turn();
     }
 
@@ -21,28 +24,14 @@ public class TurnService : ITurnService
         var players = playerRepository.GetAllPlayers();
         if (players.Count == 0) return;
         var randomPlayer = players[UnityEngine.Random.Range(0, players.Count)];
-        Debug.Log(randomPlayer.Id);
         StartTurn(randomPlayer.Id, true);
     }
 
     public void StartTurn(int playerId, bool isNext)
     {
         turn.StartTurn(playerId);
+        photonTurnSynchronizer.RequestStartTurn(playerId, isNext);
 
-        var player = playerRepository.GetPlayerById(playerId);
-        if (player.IsInJail)
-        {
-            EventBus.Publish(new StartTurnJailEvent(playerId));
-        }
-        else
-        {
-            EventBus.Publish(new TurnStartEvent(playerId));
-        }
-
-        if (isNext && player.HasLoan)
-        {
-            EventBus.Publish(new OnStartTurnLoanEvent(playerId));
-        }
     }
 
     public void EndTurn()
@@ -65,8 +54,8 @@ public class TurnService : ITurnService
                 return;
             }
         }
-
         int nextId = playerRepository.GetNextPlayerId(currentId).Id;
+
         StartTurn(nextId, true);
     }
 

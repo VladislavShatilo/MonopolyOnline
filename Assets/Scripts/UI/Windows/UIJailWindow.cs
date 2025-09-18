@@ -91,13 +91,13 @@ public class UIJailWindow : UIWindowBase
     private void OnThrowDiceClicked()
     {
         HideWindow();
-        EventBus.Publish(new RollDiceJailButtonEvent(playerID));
+        //EventBus.Publish(new RollDiceJailButtonEvent(playerID));
         
       
     }
     private void OnRansomClicked()
     {
-        EventBus.Publish(new ReleaseFromJailEvent(playerID, true));
+      //  EventBus.Publish(new ReleaseFromJailEvent(playerID, true));
         HideWindow();
     }
 }

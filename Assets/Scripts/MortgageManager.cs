@@ -26,12 +26,12 @@ public class MortgageManager : MonoBehaviourPun
 
     private void OnEnable()
     {
-        EventBus.Subscribe<TurnStartEvent>(OnTurnStart);
+       // EventBus.Subscribe<TurnStartEvent>(OnTurnStart);
     }
 
     private void OnDisable()
     {
-        EventBus.Unsubscribe<TurnStartEvent>(OnTurnStart);
+        //EventBus.Unsubscribe<TurnStartEvent>(OnTurnStart);
     }
 
     private void OnTurnStart(TurnStartEvent e)
@@ -130,7 +130,7 @@ public class MortgageManager : MonoBehaviourPun
         //    ui.BuyoutUI();
         //}
 
-        EventBus.Publish(new CompanyMortgagedEvent(playerId, companyId));
+        //EventBus.Publish(new CompanyMortgagedEvent(playerId, companyId));
     }
 
     public void RequestBuyoutCompany(int companyId)

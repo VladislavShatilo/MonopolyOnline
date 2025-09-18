@@ -10,30 +10,30 @@ public class PlayerStatsService : MonoBehaviour, IDisposable
 {
     private IPhotonLoanManager photonLoanManager;
     private ITradeService tradeService;
+    private IEventBus eventBus;
     private UIPlayerStats playerStatsPrefab;
     private Transform playersStatsContainer;
     private List<PlayerStatsPresenter> presenters = new List<PlayerStatsPresenter>();
 
     [Inject]
     public void Construct(IPhotonLoanManager photonLoanManager, ITradeService tradeService, [Inject(Id = "PlayerStatsContainer")] Transform playersStatsContainer,
-        [Inject(Id = "PlayerStatsPrefab")] UIPlayerStats playerStatsPrefab)
+        [Inject(Id = "PlayerStatsPrefab")] UIPlayerStats playerStatsPrefab, IEventBus eventBus)
     {
 
         this.photonLoanManager = photonLoanManager;
         this.tradeService = tradeService;
         this.playerStatsPrefab = playerStatsPrefab;
         this.playersStatsContainer = playersStatsContainer;
+        this.eventBus = eventBus;
     }
-
-    public void OnEnable()
+    public void Initialize()
     {
-
-        EventBus.Subscribe<PlayerJoinedEvent>(OnPlayerJoined);
+        eventBus.Subscribe<PlayerJoinedEvent>(OnPlayerJoined);
     }
-
+   
     void IDisposable.Dispose()
     {
-        EventBus.Unsubscribe<PlayerJoinedEvent>(OnPlayerJoined);
+        eventBus.Unsubscribe<PlayerJoinedEvent>(OnPlayerJoined);
         foreach (var presenter in presenters)
         {
             presenter.Dispose();
@@ -49,7 +49,7 @@ public class PlayerStatsService : MonoBehaviour, IDisposable
         // Зарегистрируем View как IPlayerStatsView
         var view = uiStats as IPlayerStatsView;
 
-        var presenter = new PlayerStatsPresenter(view, photonLoanManager, tradeService);
+        var presenter = new PlayerStatsPresenter(view, photonLoanManager, tradeService,eventBus);
         presenter.Init(e.Player);
         presenters.Add(presenter);
 

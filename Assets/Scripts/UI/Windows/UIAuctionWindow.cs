@@ -1,10 +1,11 @@
 using Photon.Pun;
+using System;
 using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIAuctionWindow : UIWindowBase
+public class UIAuctionWindow : UIWindowBase, IAuctionWindow
 {
     [Header("UI References")]
     [SerializeField] private Button playButton;
@@ -15,123 +16,53 @@ public class UIAuctionWindow : UIWindowBase
     [SerializeField] private TextMeshProUGUI headerText;
 
     private int playerId;
-    public Button PlayButton
+    private Action<int> onPlay;
+    private Action<int> onPass;
+
+    protected void OnEnable()
     {
-        get => playButton;
-        set => playButton = value;
+        playButton.onClick.AddListener(HandlePlayClicked);
+        cancelButton.onClick.AddListener(HandlePassClicked);
     }
 
-    public Button CantPlayButton
+    protected void OnDisable()
     {
-        get => cantPlayButton;
-        set => cantPlayButton = value;
+        playButton.onClick.RemoveListener(HandlePlayClicked);
+        cancelButton.onClick.RemoveListener(HandlePassClicked);
     }
 
-    public Button CancelButton
+    public void Show(int playerId, string companyName, int minAllowedBid, int money)
     {
-        get => cancelButton;
-        set => cancelButton = value;
-    }
+        this.playerId = playerId;
 
-    public TextMeshProUGUI PlayPriceText
-    {
-        get => playPriceText;
-        set => playPriceText = value;
-    }
+        bool canAfford = money >= minAllowedBid;
 
-    public TextMeshProUGUI CantPriceText
-    {
-        get => cantPriceText;
-        set => cantPriceText = value;
-    }
-    public TextMeshProUGUI HeaderText
-    {
-        get => headerText;
-        set => headerText = value;
-    }
-    #region Unity Lifecycle
+        playButton.gameObject.SetActive(canAfford);
+        cantPlayButton.gameObject.SetActive(!canAfford);
 
-    protected  void OnEnable()
-    {
-        if (playButton != null && cancelButton != null)
-        {
-            playButton.onClick.AddListener(HandlePlayClicked);
-            cancelButton.onClick.AddListener(HandleCancelClicked);
-        }
-        else
-        {
-            if (playButton == null)
-            {
-                Debug.Log(playButton.name + "is null"); 
-            }
+        headerText.text = $"На аукционе {companyName}";
+        playPriceText.text = $"Поднять до {minAllowedBid.ToString("N0", CultureInfo.InvariantCulture)}";
+        cantPriceText.text = $"Поднять до {minAllowedBid.ToString("N0", CultureInfo.InvariantCulture)}";
 
-        }
-
-    }
-    protected  void OnDisable()
-    {
-        if (playButton != null && cancelButton != null)
-        {
-            playButton.onClick.RemoveListener(HandlePlayClicked);
-            cancelButton.onClick.RemoveListener(HandleCancelClicked);
-        }
-    }
-
-    #endregion
-
-    #region Event Handling
-    private void OnAuctionPromptBid(AuctionPromptBidEvent e)
-    {
-        if (e.PlayerId != PhotonNetwork.LocalPlayer.ActorNumber)
-        {
-            HideWindow();
-            return;
-        }
-
-        UpdateUI(e);
         ShowWindow();
     }
-    #endregion
 
-    #region UI Logic
-    private void UpdateUI(AuctionPromptBidEvent e)
-    {
-        bool canAfford = e.Money >= e.MinAllowedBid;
+    public void Hide() => HideWindow();
 
-        if (playButton != null && cantPlayButton != null)
-        {
-            playButton.gameObject.SetActive(canAfford);
-            cantPlayButton.gameObject.SetActive(!canAfford);
-        }
-          
-
-        if (headerText != null && playPriceText != null && cantPriceText!=null)
-        {
-            headerText.text = $"На аукционе {e.CompanyName}";
-            playPriceText.text = $"Поднять до {e.MinAllowedBid.ToString("N0", CultureInfo.InvariantCulture)}";
-            cantPriceText.text = $"Поднять до {e.MinAllowedBid.ToString("N0", CultureInfo.InvariantCulture)}";
-        }
-       
-        playerId = e.PlayerId;
-    }
-    #endregion
-
-    #region Button Callbacks
-    private void HandleCancelClicked()
-    {
-        Debug.Log("HandleCancelClicked");
-        HideWindow();
-        EventBus.Publish(new PassAuctionRequestEvent(playerId));
-    }
+    public void SetPlayAction(Action<int> onPlay) => this.onPlay = onPlay;
+    public void SetPassAction(Action<int> onPass) => this.onPass = onPass;
 
     private void HandlePlayClicked()
     {
-        HideWindow(); 
-        Debug.Log("HandlePlayClicked");
-
-        EventBus.Publish(new PlayAuctionRequestEvent(playerId));
+        HideWindow();
+        onPlay?.Invoke(playerId);
     }
-    #endregion
+
+    private void HandlePassClicked()
+    {
+        HideWindow();
+        onPass?.Invoke(playerId);
+    }
 }
 public class PassAuctionRequestEvent
 {

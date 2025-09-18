@@ -5,49 +5,54 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.LowLevel;
 using Zenject;
 
 public class PlayerMove : MonoBehaviourPun
 {
     [SerializeField] private float moveDuration = 0.1f;
+
     private IBoardService boardService;
-    private ILocalPlayerService localPlayerService;
-
-
-    private void OnEnable()
+    private int cellsCount;
+    private IEventBus eventBus;
+ 
+    
+    public void Initialize(IBoardService boardService, IEventBus eventBus)
     {
-        EventBus.Subscribe<MovePlayerEvent>(OnPlayerMove);
-        EventBus.Subscribe<InitializePlayerMoveEvent>(Initialize);
-        EventBus.Subscribe<PlayerMoveRegister>(OnOccupancyRegister);
-        EventBus.Subscribe<PlayerMoveUnregister>(OnOccupancyUnregister);
-        EventBus.Publish(new EnablePlayerMoveEvent());
+       
+        this.boardService = boardService;
+        this.eventBus = eventBus;
+        eventBus.Subscribe<MovePlayerEvent>(OnPlayerMove);
+        eventBus.Subscribe<PlayerMoveRegister>(OnOccupancyRegister);
+        eventBus.Subscribe<PlayerMoveUnregister>(OnOccupancyUnregister);
+
+        cellsCount = boardService.CellsCount;
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
-        EventBus.Unsubscribe<MovePlayerEvent>(OnPlayerMove);
-        EventBus.Unsubscribe<InitializePlayerMoveEvent>(Initialize);
-        EventBus.Unsubscribe<PlayerMoveRegister>(OnOccupancyRegister);
-        EventBus.Unsubscribe<PlayerMoveUnregister>(OnOccupancyUnregister);
-    }
-    private void Initialize(InitializePlayerMoveEvent e)
-    {
-        boardService = e.BoardService;
-        localPlayerService = e.LocalPlayerService;
+       
+            eventBus.Unsubscribe<MovePlayerEvent>(OnPlayerMove);
+            eventBus.Unsubscribe<PlayerMoveRegister>(OnOccupancyRegister);
+            eventBus.Unsubscribe<PlayerMoveUnregister>(OnOccupancyUnregister);
+        
     }
 
     private void OnOccupancyRegister(PlayerMoveRegister e)
     {
-        EventBus.Publish(new PlayerOccupancyRegisterEvent(e.CellIndex, this));
+        eventBus.Publish(new PlayerOccupancyRegisterEvent(e.CellIndex, this));
     }
+
     private void OnOccupancyUnregister(PlayerMoveUnregister e)
     {
-        EventBus.Publish(new PlayerOccupancyUnregisterEvent(e.CellIndex, this));
-
+        eventBus.Publish(new PlayerOccupancyUnregisterEvent(e.CellIndex, this));
     }
+
     private void OnPlayerMove(MovePlayerEvent e)
     {
+       
         if (e.PlayerId == photonView.OwnerActorNr)
         {
             StopAllCoroutines();
@@ -55,9 +60,8 @@ public class PlayerMove : MonoBehaviourPun
         }
     }
 
-    private IEnumerator Move( int steps, int currentCellIndex, bool forward)
+    private IEnumerator Move(int steps, int currentCellIndex, bool forward)
     {
-        int cellsCount = boardService.CellsCount;
 
         for (int i = 0; i < steps; i++)
         {
@@ -72,11 +76,8 @@ public class PlayerMove : MonoBehaviourPun
             Vector3 stepPos = boardService.GetCellRectTransform(currentCellIndex).position;
 
             yield return MoveToPosition(stepPos);
-
-            
         }
-        EventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.OwnerActorNr));
-
+        eventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.OwnerActorNr));
     }
 
     private IEnumerator MoveToPosition(Vector3 target)
@@ -93,6 +94,7 @@ public class PlayerMove : MonoBehaviourPun
 
         transform.position = target;
     }
+
     public void SetTargetPosition(Vector3 target)
     {
         StartCoroutine(MoveToPosition(target));
@@ -120,6 +122,7 @@ public class HandleCellEvent
         PlayerID = playerId;
     }
 }
+
 public class PlayerMoveRegister
 {
     public int CellIndex;
@@ -130,8 +133,8 @@ public class PlayerMoveRegister
         CellIndex = cellIndex;
         PlayerId = playerId;
     }
-
 }
+
 public class PlayerMoveUnregister
 {
     public int CellIndex;
@@ -142,20 +145,22 @@ public class PlayerMoveUnregister
         CellIndex = cellIndex;
         PlayerId = playerId;
     }
-
 }
+
 public class InitializePlayerMoveEvent
 {
     public IBoardService BoardService;
     public ILocalPlayerService LocalPlayerService;
-    public InitializePlayerMoveEvent(IBoardService boardService, ILocalPlayerService localPlayerService)
+    public IEventBus eventBus;
+
+    public InitializePlayerMoveEvent(IBoardService boardService, ILocalPlayerService localPlayerService, IEventBus eventBus)
     {
         BoardService = boardService;
         LocalPlayerService = localPlayerService;
-
+        this.eventBus = eventBus;
     }
 }
+
 public class EnablePlayerMoveEvent
 {
-    
 }

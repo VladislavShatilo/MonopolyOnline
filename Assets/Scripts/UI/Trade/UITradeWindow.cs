@@ -35,9 +35,9 @@ public class UITradeWindow : UITradeWindowBase
         leftMoneyInputField.onEndEdit.AddListener(OnLeftMoneyChanged);
         rightMoneyInputField.onEndEdit.AddListener(OnRightMoneyChanged);
 
-        EventBus.Subscribe<TradeStartedEvent>(OnTradeStarted);
-        EventBus.Subscribe<TradeUpdatedEvent>(OnTradeUpdated);
-        EventBus.Subscribe<TradeCancelledEvent>(_ => ClearUI());
+       // EventBus.Subscribe<TradeStartedEvent>(OnTradeStarted);
+       // EventBus.Subscribe<TradeUpdatedEvent>(OnTradeUpdated);
+       // EventBus.Subscribe<TradeCancelledEvent>(_ => ClearUI());
 
         offerButton.onClick.AddListener(OnOffer);
         closeButton.onClick.AddListener(OnClose);
@@ -48,9 +48,9 @@ public class UITradeWindow : UITradeWindowBase
         leftMoneyInputField.onEndEdit.RemoveListener(OnLeftMoneyChanged);
         rightMoneyInputField.onEndEdit.RemoveListener(OnRightMoneyChanged);
 
-        EventBus.Unsubscribe<TradeStartedEvent>(OnTradeStarted);
-        EventBus.Unsubscribe<TradeUpdatedEvent>(OnTradeUpdated);
-        EventBus.Unsubscribe<TradeCancelledEvent>(_ => ClearUI());
+       // EventBus.Unsubscribe<TradeStartedEvent>(OnTradeStarted);
+       // EventBus.Unsubscribe<TradeUpdatedEvent>(OnTradeUpdated);
+       // EventBus.Unsubscribe<TradeCancelledEvent>(_ => ClearUI());
 
         offerButton.onClick.AddListener(OnOffer);
         closeButton.onClick.AddListener(OnClose);
@@ -94,13 +94,13 @@ public class UITradeWindow : UITradeWindowBase
     private void OnOffer()
     {
         if (currentOffer == null || !currentOffer.IsValid()) return;
-        EventBus.Publish(new OfferTradeEvent());
+        //EventBus.Publish(new OfferTradeEvent());
         HideWindow();
     }
 
     private void OnClose()
     {
-        EventBus.Publish(new CancelTradeEvent());
+       // EventBus.Publish(new CancelTradeEvent());
         HideWindow();
     }
 }

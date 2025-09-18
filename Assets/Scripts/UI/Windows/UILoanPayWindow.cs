@@ -84,7 +84,7 @@ public class UILoanPayWindow : UIWindowBase
     }
     private void OnPayLoanClicked()
     {
-        EventBus.Publish(new PayLoanEvent(PhotonNetwork.LocalPlayer.ActorNumber));
+        //EventBus.Publish(new PayLoanEvent(PhotonNetwork.LocalPlayer.ActorNumber));
         HideWindow();
 
     }

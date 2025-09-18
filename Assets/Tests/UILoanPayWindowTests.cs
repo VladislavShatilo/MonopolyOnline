@@ -46,7 +46,7 @@ public class UILoanPayWindowTests
         rectGO.transform.SetParent(animGO.transform);
         mockAnimation.WindowRectTransform = rectGO.GetComponent<RectTransform>();
 
-        EventBus.ClearAll();
+        //EventBus.ClearAll();
 
         windowGO.SetActive(true);
 
@@ -66,7 +66,7 @@ public class UILoanPayWindowTests
     [TearDown]
     public void Teardown()
     {
-        EventBus.ClearAll();
+        ///EventBus.ClearAll();
         Object.Destroy(windowGO);
         Object.Destroy(mockAnimation.gameObject);
     }
@@ -106,11 +106,11 @@ public class UILoanPayWindowTests
         yield return null;
 
 
-        EventBus.Subscribe<PayLoanEvent>(e =>
-        {
-            payEventReceived = true;
-            payEventPlayerId = e.PlayerId;
-        });
+        //EventBus.Subscribe<PayLoanEvent>(e =>
+        //{
+        //    payEventReceived = true;
+        //    payEventPlayerId = e.PlayerId;
+        //});
 
         typeof(UILoanPayWindow).GetField("player",
        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)

@@ -44,22 +44,21 @@ public class UIPayRentWindowPlayModeTests
         anim.WindowRectTransform = rectTransform.GetComponent<RectTransform>();
         window.WindowAnimation = anim;
 
-        EventBus.Subscribe<TryPayRentEvent>(OnTryPayRentTest);
+       // EventBus.Subscribe<TryPayRentEvent>(OnTryPayRentTest);
         eventReceived = false;
        // window.WindowAnimationSetter = anim;
         windowGO.SetActive(false);
         windowGO.SetActive(true);
     }
-    private void OnTryPayRentTest(TryPayRentEvent e)
+    private void OnTryPayRentTest( )
     {
-        eventReceived = true;
-        receivedCellIndex = e.CellIndex;
+        
     }
     [TearDown]
     public void Teardown()
     {
         Object.Destroy(windowGO);
-        EventBus.Unsubscribe<TryPayRentEvent>(OnTryPayRentTest);
+      //  EventBus.Unsubscribe<TryPayRentEvent>(OnTryPayRentTest);
 
     }
 

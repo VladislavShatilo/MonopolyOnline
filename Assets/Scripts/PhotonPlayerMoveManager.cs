@@ -7,25 +7,25 @@ using Zenject;
 public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManager
 {
     private IPlayerMoveUseCase playerMoveUseCase;
-
+    private IEventBus eventBus;
     [Inject]
-    public void Construct(IPlayerMoveUseCase playerMoveUseCase)
+    public void Construct(IPlayerMoveUseCase playerMoveUseCase, IEventBus eventBus)
     {
         this.playerMoveUseCase = playerMoveUseCase;
+        this.eventBus = eventBus;
     }
 
     private void OnEnable()
     {
-        EventBus.Subscribe<OnPlayerMoveEvent>(RequestMove);
+        eventBus.Subscribe<OnPlayerMoveEvent>(RequestMove);
     }
     private void OnDisable()
     {
-        EventBus.Unsubscribe<OnPlayerMoveEvent>(RequestMove);
+        eventBus.Unsubscribe<OnPlayerMoveEvent>(RequestMove);
 
     }
     private void RequestMove(OnPlayerMoveEvent e)
     {
-        Debug.Log("RequestMove");
         photonView.RPC(nameof(RPC_MovePlayer), RpcTarget.All, e.PlayerId, e.Steps, e.Forward);
     }
 

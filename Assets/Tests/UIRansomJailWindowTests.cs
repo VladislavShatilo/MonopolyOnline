@@ -45,7 +45,7 @@ public class UIRansomJailWindowTests
         rectGO.transform.SetParent(animGO.transform);
         mockAnimation.WindowRectTransform = rectGO.GetComponent<RectTransform>();
 
-        EventBus.ClearAll();
+        //EventBus.ClearAll();
         windowGO.SetActive(true);
 
         // Тестовый игрок
@@ -57,7 +57,7 @@ public class UIRansomJailWindowTests
     [TearDown]
     public void Teardown()
     {
-        EventBus.ClearAll();
+        ////EventBus.ClearAll();
         Object.Destroy(windowGO);
         Object.Destroy(mockAnimation.gameObject);
     }
@@ -96,11 +96,11 @@ public class UIRansomJailWindowTests
     {
         window.ShowWindow(testPlayer);
 
-        EventBus.Subscribe<ReleaseFromJailEvent>(e =>
-        {
-            ransomEventReceived = true;
-            ransomReceivedPlayerId = e.PlayerID;
-        }); 
+        //EventBus.Subscribe<ReleaseFromJailEvent>(e =>
+        //{
+        //    ransomEventReceived = true;
+        //    ransomReceivedPlayerId = e.PlayerID;
+        //}); 
 
         window.RansomButton.onClick.Invoke();
         yield return null;

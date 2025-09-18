@@ -7,32 +7,34 @@ public class PayRentPresenter : IPayRentPresenter, IInitializable, IDisposable
     private  IPhotonCompanyManager photonCompanyManager;
     private  IPlayerRepository playerRepository;
     private ILocalPlayerService localPlayerService;
+    private IEventBus eventBus;
 
     private int currentPlayerId;
     private int currentCellIndex;
 
     [Inject]
-    public void Construct(IPayRentWindow window, IPhotonCompanyManager photonCompanyManager, IPlayerRepository playerRepository, ILocalPlayerService localPlayerService)
+    public void Construct(IPayRentWindow window, IPhotonCompanyManager photonCompanyManager, IPlayerRepository playerRepository, ILocalPlayerService localPlayerService, IEventBus eventBus)
     {
         this.window = window;
         this.photonCompanyManager = photonCompanyManager;
         this.playerRepository = playerRepository;
         this.localPlayerService = localPlayerService;
+        this.eventBus = eventBus;
     }
 
     void IInitializable.Initialize()
     {
         window.SetPayAction(OnPayClicked);
-        EventBus.Subscribe<OfferRentEvent>(ShowRentFor);
+        eventBus.Subscribe<OfferRentEvent>(ShowRentFor);
 
-        EventBus.Subscribe<RentPaidEvent>(OnRentPaid);
+        eventBus.Subscribe<RentPaidEvent>(OnRentPaid);
         //EventBus.Subscribe<RentFailedEvent>(OnRentFailed);
     }
 
     void IDisposable.Dispose()
     {
-        EventBus.Unsubscribe<RentPaidEvent>(OnRentPaid);
-        EventBus.Unsubscribe<OfferRentEvent>(ShowRentFor);
+        eventBus.Unsubscribe<RentPaidEvent>(OnRentPaid);
+        eventBus.Unsubscribe<OfferRentEvent>(ShowRentFor);
 
         //EventBus.Unsubscribe<RentFailedEvent>(OnRentFailed);
     }
@@ -61,7 +63,7 @@ public class PayRentPresenter : IPayRentPresenter, IInitializable, IDisposable
 
     private void OnPayClicked()
     {
-        photonCompanyManager.RequestPayRent(currentPlayerId, currentCellIndex);
+        photonCompanyManager.RequestPayRent( currentCellIndex, currentPlayerId);
     }
 
     private void OnRentPaid(RentPaidEvent e)

@@ -2,12 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using Zenject;
 
-public class LobbyUI : MonoBehaviour
+public class LobbyUI : MonoBehaviour,IInitializable
 {
     [SerializeField] private TextMeshProUGUI nicknameText;
-    void Start()
+
+    private IAuthService authService;
+
+    [Inject]
+    public void Construct(IAuthService authService)
     {
-        nicknameText.text = PlayerAuthData.Nickname;
+        this.authService = authService;
     }
+    void IInitializable.Initialize()
+    {
+        nicknameText.text = authService.GetPlayerData().Nickname;
+    }
+   
 }

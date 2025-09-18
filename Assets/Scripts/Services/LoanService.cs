@@ -7,7 +7,7 @@ public class LoanService : ILoanService
 {
     private IPlayerRepository playerRepository;
     private IPhotonLoanManager photonLoanManager;
-
+    private IEventBus eventBus;
     [Inject]
     public void Construct(IPlayerRepository playerRepository, IPhotonLoanManager network)
     {
@@ -44,7 +44,7 @@ public class LoanService : ILoanService
         }
         else
         {
-            EventBus.Publish(new OnTakeLoanEvent(player));
+            eventBus.Publish(new OnTakeLoanEvent(player));
         }
     }
 
@@ -56,8 +56,8 @@ public class LoanService : ILoanService
         player.HasLoan = true;
         player.LoanTurnsLeft = 1;
 
-        EventBus.Publish(new OnTakeLoanEvent(player));
-        EventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
+        eventBus.Publish(new OnTakeLoanEvent(player));
+        eventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
     }
 
     public void PayLoanConfirmed(int playerId)
@@ -68,7 +68,7 @@ public class LoanService : ILoanService
         player.HasLoan = false;
         player.LoanTurnsLeft = 0;
 
-        EventBus.Publish(new OnTakeLoanEvent(player));
-        EventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
+        eventBus.Publish(new OnTakeLoanEvent(player));
+        eventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
     }
 }

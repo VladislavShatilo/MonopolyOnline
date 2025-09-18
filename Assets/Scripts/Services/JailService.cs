@@ -6,6 +6,6 @@ public class JailService : IJailService
 {
     public void SendToJail(int playerId)
     {
-        JailManager.Instance.SendToJail(playerId);
+       // JailManager.Instance.SendToJail(playerId);
     }
 }

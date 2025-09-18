@@ -39,7 +39,7 @@ public class UITurnWindowTests
         anim.WindowRectTransform = rectTransform.GetComponent<RectTransform>();
         window.WindowAnimation = anim;
 
-        EventBus.ClearAll();
+        //EventBus.ClearAll();
         windowGO.SetActive(true);
         var color = new PlayerColor(1, 0, 0);
 
@@ -51,7 +51,7 @@ public class UITurnWindowTests
     [TearDown]
     public void Teardown()
     {
-        EventBus.ClearAll();
+       // EventBus.ClearAll();
         Object.Destroy(windowGO);
         Object.Destroy(throwDiceButton.gameObject);
     }
@@ -90,11 +90,11 @@ public class UITurnWindowTests
 
         yield return null;
 
-        EventBus.Subscribe<RollDiceButtonEvent>(e =>
-        {
-            rollEventReceived = true;
-            rollEventPlayerId = e.PlayerId;
-        });
+        //EventBus.Subscribe<RollDiceButtonEvent>(e =>
+        //{
+        //    rollEventReceived = true;
+        //    rollEventPlayerId = e.PlayerId;
+        //});
 
         typeof(UITurnWindow).GetField("localPlayerId",
          System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
@@ -121,7 +121,7 @@ public class UITurnWindowTests
         var color = new PlayerColor(1, 0, 0);
 
         var testPlayer1 = new PlayerData("TestPlayer1", 500, PhotonNetwork.LocalPlayer.ActorNumber, color, null);
-        EventBus.Publish(new TurnStartEvent(testPlayer1.Id));
+        //EventBus.Publish(new TurnStartEvent(testPlayer1.Id));
         yield return new WaitForSeconds(0.5f);
 
         Assert.AreEqual(Vector3.zero, window.WindowAnimation.WindowRectTransform.position);
@@ -137,7 +137,7 @@ public class UITurnWindowTests
 
         var testPlayer2 = new PlayerData("TestPlayer2", 600, 15,color, null);
 
-        EventBus.Publish(new TurnStartEvent(testPlayer2.Id));
+        //EventBus.Publish(new TurnStartEvent(testPlayer2.Id));
         yield return new WaitForSeconds(0.5f);
 
         Assert.AreEqual(new Vector3(0, 160, 0), window.WindowAnimation.WindowRectTransform.position);

@@ -11,23 +11,25 @@ public class CellOccupancyService : ICellOccupancyService, IDisposable
     private  HashSet<int> pendingCells = new HashSet<int>();
     private  IBoardService boardService;
     private IPlayerRepository playerRepository;
+    private IEventBus eventBus;
 
     [Inject] 
-    public void Construct(IBoardService boardService, IPlayerRepository playerRepository)
+    public void Construct(IBoardService boardService, IPlayerRepository playerRepository, IEventBus eventBus)
     {
         this.boardService = boardService;
         this.playerRepository = playerRepository;
+        this.eventBus = eventBus;
     }
     public void InitializePlayer()
     {
-        EventBus.Subscribe<PlayerOccupancyRegisterEvent>(RegisterPlayerOnCell);
-        EventBus.Subscribe<PlayerOccupancyUnregisterEvent>(UnregisterPlayerFromCell);
+        eventBus.Subscribe<PlayerOccupancyRegisterEvent>(RegisterPlayerOnCell);
+        eventBus.Subscribe<PlayerOccupancyUnregisterEvent>(UnregisterPlayerFromCell);
     }
 
     public void Dispose()
     {
-        EventBus.Unsubscribe<PlayerOccupancyRegisterEvent>(RegisterPlayerOnCell);
-        EventBus.Unsubscribe<PlayerOccupancyUnregisterEvent>(UnregisterPlayerFromCell);
+        eventBus.Unsubscribe<PlayerOccupancyRegisterEvent>(RegisterPlayerOnCell);
+        eventBus.Unsubscribe<PlayerOccupancyUnregisterEvent>(UnregisterPlayerFromCell);
     }
     // Вызов при том как игрок встал на клетку (вызывается на всех клиентах через buffered RPC)
     public void RegisterPlayerOnCell(PlayerOccupancyRegisterEvent e)

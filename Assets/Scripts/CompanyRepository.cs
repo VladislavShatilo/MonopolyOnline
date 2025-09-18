@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
@@ -38,7 +39,10 @@ public class CompanyRepository : ICompanyRepository
             }
         }
     }
-
+    public int CountOwnedByPlayer(int playerId, CompanyType type)
+    {
+        return companies.Values.Count(c => c.OwnerId == playerId && c.Type == type);
+    }
     public Company GetCompanyById(int id) => companies.ContainsKey(id) ? companies[id] : null;
 
     public IEnumerable<Company> GetAll() => companies.Values;

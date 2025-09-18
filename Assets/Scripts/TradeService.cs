@@ -8,6 +8,7 @@ public class TradeService : ITradeService
 {
     private  IPhotonTradeManager photonTradeManager;
     private IBankService bankService;
+    private IEventBus eventBus;
     private const float TRADE_DURATION = 15f;
 
     public TradeOffer CurrentOffer { get; private set; }
@@ -17,10 +18,11 @@ public class TradeService : ITradeService
     private double tradeStartTime;
 
     [Inject]
-    public void Construct(IPhotonTradeManager photonTradeManager, IBankService bankService)
+    public void Construct(IPhotonTradeManager photonTradeManager, IBankService bankService, IEventBus eventBus)
     {
         this.photonTradeManager = photonTradeManager;
         this.bankService = bankService;
+        this.eventBus = eventBus;
     }
 
     public void StartTrade(int fromPlayerId, int toPlayerId)
@@ -93,7 +95,7 @@ public class TradeService : ITradeService
         senderId = offer.FromPlayerData.Id;
         receiverId = offer.ToPlayerData.Id;
         tradeStartTime = PhotonNetwork.Time;
-        EventBus.Publish(new TradeProposalReceivedEvent(offer, senderId, receiverId));
+        eventBus.Publish(new TradeProposalReceivedEvent(offer, senderId, receiverId));
     }
 
     public void OnTradeCompleted(bool accepted)
@@ -102,7 +104,7 @@ public class TradeService : ITradeService
         {
             ApplyTrade(CurrentOffer);
         }
-        EventBus.Publish(new TradeEndedEvent(accepted, senderId, receiverId));
+        eventBus.Publish(new TradeEndedEvent(accepted, senderId, receiverId));
         CancelTrade();
     }
 

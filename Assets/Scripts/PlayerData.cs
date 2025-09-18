@@ -46,7 +46,7 @@ public class PlayerData
                 capital += OwnedCompanies[i].Price;
                 if(OwnedCompanies[i].Type == CompanyType.Company)
                 {
-                    capital += OwnedCompanies[i].CompanyData.branchPrice * OwnedCompanies[i].RentLevel;
+                   // capital += OwnedCompanies[i].CompanyData.branchPrice * OwnedCompanies[i].RentLevel;
                 }
 
             }
@@ -69,7 +69,7 @@ public class PlayerData
                 }
                 if (OwnedCompanies[i].Type == CompanyType.Company)
                 {
-                    liquid += OwnedCompanies[i].CompanyData.branchPrice * OwnedCompanies[i].RentLevel;
+                   // liquid += OwnedCompanies[i].branchPrice * OwnedCompanies[i].RentLevel;
                 }
 
             }      

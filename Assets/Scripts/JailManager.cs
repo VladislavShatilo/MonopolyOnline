@@ -9,7 +9,7 @@ using Zenject;
 /// </summary>
 public class JailManager : MonoBehaviourPun
 {
-    public static JailManager Instance { get; private set; }
+    //public static JailManager Instance { get; private set; }
 
     [Header("Настройки тюрьмы")]
     [SerializeField] private int jailTurns = 3;          // Кол-во ходов, которые игрок сидит в тюрьме
@@ -18,33 +18,33 @@ public class JailManager : MonoBehaviourPun
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
+        //if (Instance != null && Instance != this)
+        //{
+        //    Destroy(gameObject);
+        //    return;
+        //}
+        //Instance = this;
     }
 
     private void Start()
     {
         // Инициализация статуса для локального игрока
-        EventBus.Publish(new SetTurnsJailEvent(PhotonNetwork.LocalPlayer.ActorNumber, 0));
+       // EventBus.Publish(new SetTurnsJailEvent(PhotonNetwork.LocalPlayer.ActorNumber, 0));
     }
 
     private void OnEnable()
     {
-        EventBus.Subscribe<StartTurnJailEvent>(OnStartTurnJail);
-        EventBus.Subscribe<CheckDiceJailEvent>(OnCheckDiceJail);
-        EventBus.Subscribe<ReleaseFromJailEvent>(ReleaseFromJail);
+      ///  EventBus.Subscribe<StartTurnJailEvent>(OnStartTurnJail);
+       // EventBus.Subscribe<CheckDiceJailEvent>(OnCheckDiceJail);
+       // EventBus.Subscribe<ReleaseFromJailEvent>(ReleaseFromJail);
         
     }
 
     private void OnDisable()
     {
-        EventBus.Unsubscribe<StartTurnJailEvent>(OnStartTurnJail);
-        EventBus.Unsubscribe<CheckDiceJailEvent>(OnCheckDiceJail);
-        EventBus.Unsubscribe<ReleaseFromJailEvent>(ReleaseFromJail);
+      //  EventBus.Unsubscribe<StartTurnJailEvent>(OnStartTurnJail);
+      //  EventBus.Unsubscribe<CheckDiceJailEvent>(OnCheckDiceJail);
+      //  EventBus.Unsubscribe<ReleaseFromJailEvent>(ReleaseFromJail);
 
     }
 
@@ -68,8 +68,8 @@ public class JailManager : MonoBehaviourPun
 
         if (PhotonNetwork.LocalPlayer.ActorNumber == playerID)
         {
-            EventBus.Publish(new MoveToJailEvent(playerID));
-            EventBus.Publish(new SetTurnsJailEvent(playerID, player.JailTurnsLeft));
+           // EventBus.Publish(new MoveToJailEvent(playerID));
+           // EventBus.Publish(new SetTurnsJailEvent(playerID, player.JailTurnsLeft));
         }
        
     }
@@ -83,12 +83,12 @@ public class JailManager : MonoBehaviourPun
         player.IsInJail = false;
         player.JailTurnsLeft = 0;
 
-        EventBus.Publish(new SetTurnsJailEvent(playerID, player.JailTurnsLeft));
+       // EventBus.Publish(new SetTurnsJailEvent(playerID, player.JailTurnsLeft));
 
         if (e.IsPaidExit)
         {
             //Bank.Instance.RemoveMoney(playerID, jailFine);
-            EventBus.Publish(new RollDiceButtonEvent(playerID)); // сразу бросаем кубики
+          //  EventBus.Publish(new RollDiceButtonEvent(playerID)); // сразу бросаем кубики
         }
     }
 
@@ -104,7 +104,7 @@ public class JailManager : MonoBehaviourPun
         Debug.Log($"[Jail] Игрок {e.PlayerId} в тюрьме ({player.JailTurnsLeft} ходов осталось)");
 
         photonView.RPC(nameof(RPC_ShowJailOffer), PhotonNetwork.CurrentRoom.GetPlayer(e.PlayerId), e.PlayerId);
-        EventBus.Publish(new SetTurnsJailEvent(e.PlayerId, player.JailTurnsLeft));
+       // EventBus.Publish(new SetTurnsJailEvent(e.PlayerId, player.JailTurnsLeft));
     }
 
     private void OnCheckDiceJail(CheckDiceJailEvent e)
@@ -112,7 +112,7 @@ public class JailManager : MonoBehaviourPun
         if (e.FirstDice == e.SecondDice)
         {
             // Удвоенные кости ? выход
-            EventBus.Publish(new ReleaseFromJailEvent(e.PlayerID, false));
+           // EventBus.Publish(new ReleaseFromJailEvent(e.PlayerID, false));
 
             if (PhotonNetwork.LocalPlayer.ActorNumber == e.PlayerID) { }
              //   EventBus.Publish(new OnPlayerMoveEvent(e.FirstDice + e.SecondDice,true));
@@ -131,7 +131,7 @@ public class JailManager : MonoBehaviourPun
         if (player.JailTurnsLeft > 0)
         {
             player.JailTurnsLeft--;
-            EventBus.Publish(new SetTurnsJailEvent(playerID, player.JailTurnsLeft));
+           // EventBus.Publish(new SetTurnsJailEvent(playerID, player.JailTurnsLeft));
 
             if (player.JailTurnsLeft == 0)
             {

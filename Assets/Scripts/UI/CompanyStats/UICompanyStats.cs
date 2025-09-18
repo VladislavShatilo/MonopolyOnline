@@ -27,7 +27,7 @@ public class UICompanyStats : UIBaseCompanyStats, ICompanyStatsUI<CompanyData>
     {
         SetCompanyName(data.name);
         SetGroupName(data.group.ToString());
-        SetTopBarColor(GroupColors.Colors[(int)data.group]);
+       // SetTopBarColor(GroupColors.Colors[(int)data.group]);
 
         SetRentPrices(data.rent);
         SetCellPrice(data.price);

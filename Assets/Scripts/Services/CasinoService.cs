@@ -6,6 +6,6 @@ public class CasinoService : ICasinoService
 {
     public void OfferCasino(int playerId)
     {
-        CasinoManager.Instance.CasinoOffer(playerId);
+        //CasinoManager.Instance.CasinoOffer(playerId);
     }
 }

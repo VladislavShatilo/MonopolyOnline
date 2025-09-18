@@ -10,12 +10,14 @@ public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
 {
     private ITradeService tradeService;
     private ICompanyRepository companyRepository;
+    private IEventBus eventBus;
 
     [Inject]
-    public void Construct(ITradeService tradeService, ICompanyRepository companyRepository)
+    public void Construct(ITradeService tradeService, ICompanyRepository companyRepository, IEventBus eventBus)
     {
         this.tradeService = tradeService;
         this.companyRepository = companyRepository;
+        this.eventBus = eventBus;
     }
 
     public void SendTradeRequest(int fromPlayerId, int toPlayerId)
@@ -86,7 +88,7 @@ public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
     [PunRPC]
     private void RPC_UpdateTradeTimer(int playerId, float timeLeft)
     {
-        EventBus.Publish(new TradeTimerUpdatedEvent(playerId, timeLeft));
+        eventBus.Publish(new TradeTimerUpdatedEvent(playerId, timeLeft));
     }
 
     private List<Company> DeserializeCompanies(string json)

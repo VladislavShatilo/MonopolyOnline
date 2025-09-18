@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8513493030455798458}
   - component: {fileID: 2907814123687108556}
   - component: {fileID: 5574768138571873342}
-  - component: {fileID: 1231249419178229379}
   m_Layer: 5
   m_Name: FadeCanvas
   m_TagString: Untagged
@@ -83,19 +82,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &1231249419178229379
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6448842239459826036}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ab6f33352458e543989ba4c7ac5335b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  animator: {fileID: 5574768138571873342}
 --- !u!1 &7316710230523736499
 GameObject:
   m_ObjectHideFlags: 0

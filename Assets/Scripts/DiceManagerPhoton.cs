@@ -58,7 +58,7 @@ public class OnPlayerMoveEvent
     public int PlayerId { get; }
     public int Steps { get; }
     public bool Forward { get; }
-    public OnPlayerMoveEvent(int playerId,int steps,bool forward)
+    public  OnPlayerMoveEvent(int playerId,int steps,bool forward)
     {
         PlayerId= playerId;
         Steps = steps;

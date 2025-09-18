@@ -5,16 +5,16 @@ using UnityEngine;
 
 public class CasinoManager : MonoBehaviourPun
 {
-    public static CasinoManager Instance { get; private set; }
+  //  public static CasinoManager Instance { get; private set; }
     private int playerID;
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
+        //if (Instance != null && Instance != this)
+        //{
+        //    Destroy(gameObject);
+        //    return;
+        //}
+        //Instance = this;
     }
 
     public void CasinoOffer(int playerId)

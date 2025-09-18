@@ -5,7 +5,7 @@ using Zenject;
 
 public class BranchManager : MonoBehaviourPun
 {
-    public static BranchManager Instance { get; private set; }
+   // public static BranchManager Instance { get; private set; }
     private IPlayerRepository playerRepository;
     private ICompanyUIService companyUIService;
     private ICompanyRepository companyRepository;
@@ -19,26 +19,26 @@ public class BranchManager : MonoBehaviourPun
     }
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        //if (Instance != null && Instance != this)
+        //{
+        //    Destroy(gameObject);
+        //    return;
+        //}
 
-        Instance = this;
+        //Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
     private void OnEnable()
     {
-        EventBus.Subscribe<TurnStartEvent>(OnTurnStart);
-        EventBus.Subscribe<RollDiceButtonEvent>(OnRollDice);
+       // EventBus.Subscribe<TurnStartEvent>(OnTurnStart);
+        //EventBus.Subscribe<RollDiceButtonEvent>(OnRollDice);
     }
 
     private void OnDisable()
     {
-        EventBus.Unsubscribe<TurnStartEvent>(OnTurnStart);
-        EventBus.Unsubscribe<RollDiceButtonEvent>(OnRollDice);
+       // EventBus.Unsubscribe<TurnStartEvent>(OnTurnStart);
+       // EventBus.Unsubscribe<RollDiceButtonEvent>(OnRollDice);
     }
 
     #region Public Requests
@@ -69,7 +69,7 @@ public class BranchManager : MonoBehaviourPun
 
         if (!CanBuyBranch(company, player)) return;
 
-        company.RentLevel++;
+        //company.RentLevel++;
 
         photonView.RPC(nameof(RPC_UpdateBranchUI), RpcTarget.All,
             playerId, companyId, company.RentLevel, true);
@@ -86,7 +86,7 @@ public class BranchManager : MonoBehaviourPun
 
         if (!CanSellBranch(company, player)) return;
 
-        company.RentLevel--;
+        //company.RentLevel--;
 
         photonView.RPC(nameof(RPC_UpdateBranchUI), RpcTarget.All,
             playerId, companyId, company.RentLevel, false);
@@ -103,8 +103,8 @@ public class BranchManager : MonoBehaviourPun
 
         var company = companyRepository.GetCompanyById(companyId);
         uiCompany.UpdateBranchStars(newLevel);
-        uiCompany.SetRentText(company?.CompanyData.rent[newLevel] ?? 0);
-        company.RentLevel = newLevel;
+        //uiCompany.SetRentText(company?.CompanyData.rent[newLevel] ?? 0);
+      //  company.RentLevel = newLevel;
         if (!isBuy)
         {
             //Bank.Instance.AddMoney(playerId, company.CompanyData.branchPrice);
@@ -154,7 +154,7 @@ public class BranchManager : MonoBehaviourPun
 
         foreach (var company in companyRepository.GetAll())
         {
-            if (company.CompanyData == null)
+            if (company == null)
             {
                 Debug.LogWarning($"CompanyData == null для компании {company.Id}");
                 continue;
@@ -232,7 +232,7 @@ public class BranchManager : MonoBehaviourPun
 
         foreach (var company in companyRepository.GetAll())
         {
-            if (company.Type != CompanyType.Company || company.CompanyData.group != group) continue;
+            if (company.Type != CompanyType.Company || company.Group != group) continue;
 
             var ui = companyUIService.GetCompanyUI(company.Id);
             ui?.HideAllBranchButtons();

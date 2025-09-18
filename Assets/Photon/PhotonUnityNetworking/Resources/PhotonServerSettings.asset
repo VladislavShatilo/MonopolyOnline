@@ -141,6 +141,17 @@ MonoBehaviour:
   - RPC_UpdateMoney
   - RPC_SyncCompanyBought
   - RPC_SyncRentPaid
+  - RPC_AuctionEnd
+  - RPC_UpdateBid
+  - RPC_EndAuction_Internal
+  - RPC_PromptBid_Internal
+  - RPC_UpdatePass
+  - RPC_ChangePlayerView
+  - RaiseSpawnedEvent
+  - SpawnRemotePlayerRPC
+  - RaiseSpawnEventRPC
+  - RPC_Notify
+  - RPC_UpdateAllViews
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

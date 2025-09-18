@@ -29,14 +29,14 @@ public class UITradeReviewWindow : UITradeWindowBase
 
     private void OnEnable()
     {
-        EventBus.Subscribe<TradeCancelledEvent>(_ => ClearUI());
-        EventBus.Subscribe<TradeProposalReceivedEvent>(OnTradeProposalReceived);
+       // EventBus.Subscribe<TradeCancelledEvent>(_ => ClearUI());
+       // EventBus.Subscribe<TradeProposalReceivedEvent>(OnTradeProposalReceived);
     }
 
     private void OnDisable()
     {
-        EventBus.Unsubscribe<TradeCancelledEvent>(_ => ClearUI());
-        EventBus.Unsubscribe<TradeProposalReceivedEvent>(OnTradeProposalReceived);
+       // EventBus.Unsubscribe<TradeCancelledEvent>(_ => ClearUI());
+        //EventBus.Unsubscribe<TradeProposalReceivedEvent>(OnTradeProposalReceived);
     }
 
     private void OnTradeProposalReceived(TradeProposalReceivedEvent e)

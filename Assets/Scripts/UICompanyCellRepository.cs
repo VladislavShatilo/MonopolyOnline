@@ -7,7 +7,6 @@ public class UICompanyCellRepository : IUICompanyCellRepository
 
     public void Register(IUICompanyCellView view)
     {
-        Debug.Log(" Register(IUICompanyCellView view)");
         if (views.ContainsKey(view.CompanyId()))
         {
             Debug.LogWarning($"UICompanyCell с id {view.CompanyId()} уже зарегистрирован");

@@ -7,17 +7,17 @@ using Zenject;
 
 public class LoanManager : MonoBehaviourPun
 {
-    public static LoanManager Instance;
+   // public static LoanManager Instance;
     [Inject] private IPlayerRepository playerRepository;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
+        //if (Instance != null && Instance != this)
+        //{
+        //    Destroy(gameObject);
+        //    return;
+        //}
+        //Instance = this;
     }
     public void TakeLoan(int playerId)
     {
@@ -25,13 +25,13 @@ public class LoanManager : MonoBehaviourPun
     }
     private void OnEnable()
     {
-        EventBus.Subscribe<OnStartTurnLoanEvent>(OnPlayerTurnStart);
-        EventBus.Subscribe<PayLoanEvent>(PayLoan);
+       // EventBus.Subscribe<OnStartTurnLoanEvent>(OnPlayerTurnStart);
+      //  EventBus.Subscribe<PayLoanEvent>(PayLoan);
     }
     private void OnDisable()
     {
-        EventBus.Unsubscribe<OnStartTurnLoanEvent>(OnPlayerTurnStart);
-        EventBus.Unsubscribe<PayLoanEvent>(PayLoan);
+      //  EventBus.Unsubscribe<OnStartTurnLoanEvent>(OnPlayerTurnStart);
+       // EventBus.Unsubscribe<PayLoanEvent>(PayLoan);
 
     }
     [PunRPC]
@@ -43,8 +43,8 @@ public class LoanManager : MonoBehaviourPun
         //Bank.Instance.AddMoney(playerId, 5000);
         player.HasLoan = true;
         player.LoanTurnsLeft = 1;
-        EventBus.Publish(new OnTakeLoanEvent(player));
-        EventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
+     //   EventBus.Publish(new OnTakeLoanEvent(player));
+       // EventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
 
     }
 
@@ -63,8 +63,8 @@ public class LoanManager : MonoBehaviourPun
 
         player.HasLoan = false;
         player.LoanTurnsLeft = 0;
-        EventBus.Publish(new OnTakeLoanEvent(player));
-        EventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
+      //  EventBus.Publish(new OnTakeLoanEvent(player));
+        //EventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
 
 
     }
@@ -83,7 +83,7 @@ public class LoanManager : MonoBehaviourPun
         }
         else
         {
-            EventBus.Publish(new OnTakeLoanEvent(player));
+           // EventBus.Publish(new OnTakeLoanEvent(player));
         }
     }
     [PunRPC]

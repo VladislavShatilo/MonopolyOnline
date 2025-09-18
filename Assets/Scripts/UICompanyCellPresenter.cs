@@ -11,23 +11,25 @@ public class UICompanyCellPresenter : IInitializable, IDisposable
     private IPlayerRepository playerRepository;
     private ICompanyRepository companyRepository;  
     private IUICompanyCellRepository uiRepository;
-
-
+    private ICompanyService companyService;
+    private IEventBus eventBus;
+    private IGroupColors groupColors;
     [Inject]
-    public void Construct(
-        IPlayerRepository playerRepository,
-        ICompanyRepository companyRepository, IUICompanyCellRepository uiRepository)
+    public void Construct( IPlayerRepository playerRepository,ICompanyRepository companyRepository, IUICompanyCellRepository uiRepository,
+        ICompanyService companyService, IEventBus eventBus, IGroupColors groupColors)
     {
-       
+
         this.playerRepository = playerRepository;
         this.companyRepository = companyRepository;
         this.uiRepository = uiRepository;
+        this.companyService = companyService;
+        this.eventBus = eventBus;   
+        this.groupColors = groupColors;
     }
 
     void IInitializable.Initialize()
     {
-        Debug.Log("Initialize");
-        EventBus.Subscribe<CompanyBoughtEvent>(CompanyBoughtUpdate);
+        eventBus.Subscribe<CompanyBoughtEvent>(CompanyBoughtUpdate);
 
        // view.OnBuyBranchClicked += HandleBuyBranch;
        // view.OnSellBranchClicked += HandleSellBranch;
@@ -37,9 +39,8 @@ public class UICompanyCellPresenter : IInitializable, IDisposable
 
     void IDisposable.Dispose()
     {
-        Debug.Log("Dispose");
 
-        EventBus.Unsubscribe<CompanyBoughtEvent>(CompanyBoughtUpdate);
+        eventBus.Unsubscribe<CompanyBoughtEvent>(CompanyBoughtUpdate);
 
       //  view.OnBuyBranchClicked -= HandleBuyBranch;
       //  view.OnSellBranchClicked -= HandleSellBranch;
@@ -56,7 +57,7 @@ public class UICompanyCellPresenter : IInitializable, IDisposable
         if (company == null)
             return;
        
-        var groupColor = GroupColors.Colors[(int)company.Group];
+        var groupColor = groupColors.Colors[(int)company.Group];
 
         view.UpdateUI(company.Name, company.Price, groupColor);
     }
@@ -67,13 +68,15 @@ public class UICompanyCellPresenter : IInitializable, IDisposable
         if (view == null) return;
      
         var owner = playerRepository.GetPlayerById(e.PlayerId);
+        
+
         var ownerColor = owner != null ? owner.PlayerColor.ToUnityColor() : Color.white;
         view.UpdateOwner(ownerColor);
 
         var company = companyRepository.GetCompanyById(e.CellIndex);
         if (company == null) return;
 
-        view.SetRentText(company.GetRent());
+        view.SetRentText(companyService.CalculateRent(company));
     }
     private void HandleBuyBranch(int companyId) { }
     // companyService.BuyBranch(companyId);

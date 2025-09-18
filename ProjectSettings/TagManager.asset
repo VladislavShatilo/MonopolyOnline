@@ -6,6 +6,8 @@ TagManager:
   tags:
   - LeftMoney
   - RightMoney
+  - PlayerRoot
+  - Bullet
   layers:
   - Default
   - TransparentFX

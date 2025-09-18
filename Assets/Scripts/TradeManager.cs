@@ -25,16 +25,16 @@ public class TradeManager : MonoBehaviourPun
     }
     private void OnEnable()
     {
-        EventBus.Subscribe<OfferTradeEvent>(_ => OfferTrade());
-        EventBus.Subscribe<CancelTradeEvent>(_ => CancelTrade());
-        EventBus.Subscribe<StartTradeRequestEvent>(StartTradeRequest);
+        //EventBus.Subscribe<OfferTradeEvent>(_ => OfferTrade());
+        //EventBus.Subscribe<CancelTradeEvent>(_ => CancelTrade());
+        //EventBus.Subscribe<StartTradeRequestEvent>(StartTradeRequest);
 
     }
     private void OnDisable()
     {
-        EventBus.Unsubscribe<OfferTradeEvent>(_ => OfferTrade());
-        EventBus.Unsubscribe<CancelTradeEvent>(_ => CancelTrade());
-        EventBus.Unsubscribe<StartTradeRequestEvent>(StartTradeRequest);
+        //EventBus.Unsubscribe<OfferTradeEvent>(_ => OfferTrade());
+        //EventBus.Unsubscribe<CancelTradeEvent>(_ => CancelTrade());
+        //EventBus.Unsubscribe<StartTradeRequestEvent>(StartTradeRequest);
 
     }
     private void Update()
@@ -56,7 +56,7 @@ public class TradeManager : MonoBehaviourPun
 
     public void StartTradeRequest(StartTradeRequestEvent e)
     {
-        EventBus.Publish(new CancelTradeEvent());
+        //EventBus.Publish(new CancelTradeEvent());
         photonView.RPC(nameof(RPC_StartTradeRequest), RpcTarget.All, e.FromId, e.ToId);
     }
     [PunRPC]
@@ -67,7 +67,7 @@ public class TradeManager : MonoBehaviourPun
         isTradeActive = true;
         currentOffer = new TradeOffer(senderId, receiverId);
 
-        EventBus.Publish(new TradeStartedEvent(senderId, receiverId, currentOffer));
+      //  EventBus.Publish(new TradeStartedEvent(senderId, receiverId, currentOffer));
     }
     public void UpdateMoneyFromUI(int amount, UIMoneyTrade source)
     {
@@ -85,7 +85,7 @@ public class TradeManager : MonoBehaviourPun
 
         // Обновляем окно трейда
         UITradeWindow.Instance.RefreshUI();
-        EventBus.Publish(new TradeUpdatedEvent(currentOffer));
+      //  EventBus.Publish(new TradeUpdatedEvent(currentOffer));
     }
     public void OfferTrade()
     {
@@ -121,7 +121,7 @@ public class TradeManager : MonoBehaviourPun
         currentOffer.SetToCompanies(DeserializeCompanies(toCompaniesJson));
        // TurnManager.Instance.SetMode(TurnMode.Trade);
 
-        EventBus.Publish(new TradeProposalReceivedEvent(currentOffer,fromPlayerId,toPlayerId));
+       // EventBus.Publish(new TradeProposalReceivedEvent(currentOffer,fromPlayerId,toPlayerId));
 
         // Таймер стартует только у получателя
        // if (PhotonNetwork.LocalPlayer.ActorNumber == toPlayerId)
@@ -163,8 +163,8 @@ public class TradeManager : MonoBehaviourPun
         }
 
         //TurnManager.Instance.SetMode(TurnMode.Normal);
-        EventBus.Publish(new TradeTimerUpdatedEvent(-1, 0));
-        EventBus.Publish(new TradeCancelledEvent());
+       // EventBus.Publish(new TradeTimerUpdatedEvent(-1, 0));
+       // EventBus.Publish(new TradeCancelledEvent());
         // Сброс всего состояния трейда
         currentOffer = null;
         isTradeActive = false;
@@ -198,7 +198,7 @@ public class TradeManager : MonoBehaviourPun
         else if (companyOwnerId == currentOffer.ToPlayerData.Id) currentOffer.ToCompanies.Add(company);
         else return;
 
-        EventBus.Publish(new TradeUpdatedEvent(currentOffer));
+       // EventBus.Publish(new TradeUpdatedEvent(currentOffer));
     }
 
     public void RemoveCompanyFromOffer(int companyOwnerId, Company company)
@@ -209,7 +209,7 @@ public class TradeManager : MonoBehaviourPun
         else if (companyOwnerId == currentOffer.ToPlayerData.Id) currentOffer.ToCompanies.Remove(company);
         else return;
 
-        EventBus.Publish(new TradeUpdatedEvent(currentOffer));
+       // EventBus.Publish(new TradeUpdatedEvent(currentOffer));
     }
 
     public void SetMoney(int playerId, int amount)
@@ -218,8 +218,7 @@ public class TradeManager : MonoBehaviourPun
 
         if (playerId == currentOffer.FromPlayerData.Id) currentOffer.FromMoney = amount;
         else if (playerId == currentOffer.ToPlayerData.Id) currentOffer.ToMoney = amount;
-
-        EventBus.Publish(new TradeUpdatedEvent(currentOffer));
+//EventBus.Publish(new TradeUpdatedEvent(currentOffer));
     }
 
     public void CancelTrade()
@@ -236,7 +235,7 @@ public class TradeManager : MonoBehaviourPun
     [PunRPC]
     private void RPC_UpdateTradeTimer(int currentReceiverId, float timeLeft)
     {
-        EventBus.Publish(new TradeTimerUpdatedEvent(currentReceiverId, timeLeft));
+       // EventBus.Publish(new TradeTimerUpdatedEvent(currentReceiverId, timeLeft));
     }
 
     #endregion

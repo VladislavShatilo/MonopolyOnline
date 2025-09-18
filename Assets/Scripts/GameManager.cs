@@ -1,8 +1,4 @@
-using Photon.Pun;
-using Photon.Realtime;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 using Zenject;
 
 public class GameManager
@@ -10,19 +6,19 @@ public class GameManager
     private IPlayerRepository repository;
     private IPlayerSpawner spawner;
     private IPlayerColorService colorService;
-
-  
+    private IEventBus eventBus;
     [Inject]
-    public void Construct(IPlayerRepository repository, IPlayerSpawner spawner, IPlayerColorService colorService)
+    public void Construct(IPlayerRepository repository, IPlayerSpawner spawner, IPlayerColorService colorService,
+        IEventBus eventBus)
     {
         this.repository = repository;
         this.spawner = spawner;
         this.colorService = colorService;
+        this.eventBus = eventBus;
     }
 
     public void Initialize()
     {
-
         foreach (var p in Photon.Pun.PhotonNetwork.PlayerList)
         {
             if (repository.GetPlayerById(p.ActorNumber) != null) continue;
@@ -35,14 +31,14 @@ public class GameManager
                 p);
 
             repository.AddPlayer(player);
-            EventBus.Publish(new PlayerJoinedEvent(player));
-
+            eventBus.Publish(new PlayerJoinedEvent(player));
         }
-
+        
         spawner.SpawnLocalPlayer(Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
-    }
 
+    }
 }
+
 public class PlayerJoinedEvent
 {
     public PlayerData Player { get; }
@@ -73,5 +69,5 @@ public class AllPlayersInitializedEvent
     }
 }
 
-
-public class TryStartGameEvent { }
+public class TryStartGameEvent
+{ }

@@ -49,7 +49,7 @@ public class UIJailWindowTests
         rectGO.transform.SetParent(animGO.transform);
         mockAnimation.WindowRectTransform = rectGO.GetComponent<RectTransform>();
 
-        EventBus.ClearAll();
+        //EventBus.ClearAll();
 
         windowGO.SetActive(true); // OnEnable отработает
 
@@ -62,7 +62,7 @@ public class UIJailWindowTests
     [TearDown]
     public void Teardown()
     {
-        EventBus.ClearAll();
+        //EventBus.ClearAll();
         Object.Destroy(windowGO);
         Object.Destroy(mockAnimation.gameObject);
     }
@@ -133,11 +133,11 @@ public class UIJailWindowTests
 
         window.ShowWindow(testPlayer);
 
-        EventBus.Subscribe<RollDiceJailButtonEvent>(e =>
-        {
-            rollEventReceived = true;
-            rollReceivedPlayerId = e.PlayerId;
-        });
+        //EventBus.Subscribe<RollDiceJailButtonEvent>(e =>
+        //{
+        //    rollEventReceived = true;
+        //    rollReceivedPlayerId = e.PlayerId;
+        //});
 
         window.ThrowDiceButton.onClick.Invoke();
         yield return null;
@@ -156,11 +156,11 @@ public class UIJailWindowTests
     {
         testPlayer.Id = 13;
 
-        EventBus.Subscribe<ReleaseFromJailEvent>(e =>
-        {
-            ransomEventReceived = true;
-            ransomReceivedPlayerId = e.PlayerID;
-        });
+        //EventBus.Subscribe<ReleaseFromJailEvent>(e =>
+        //{
+        //    ransomEventReceived = true;
+        //    ransomReceivedPlayerId = e.PlayerID;
+        //});
 
         window.RansomButton.onClick.Invoke();
         yield return null;

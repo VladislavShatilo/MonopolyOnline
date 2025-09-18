@@ -3,10 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Zenject;
 
 public class ConnectToServer : MonoBehaviourPunCallbacks
 {
     [SerializeField] string region;
+    private ISceneLoader sceneLoader;
+
+    [Inject]
+    public void Construct(ISceneLoader sceneLoader)
+    {
+        this.sceneLoader = sceneLoader;
+    }
     void Start()
     {
         PhotonNetwork.ConnectUsingSettings();
@@ -15,9 +23,9 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
     }
     public override void OnConnectedToMaster()
     {
-        if (SceneFadeManager.instance != null)
+        if (sceneLoader != null)
         {
-            SceneFadeManager.instance.LoadAutorizationScene();
+            //SceneFadeManager.instance.LoadAutorizationScene();
 
         }
         else

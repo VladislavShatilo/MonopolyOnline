@@ -21,7 +21,7 @@ public class UIDiceStats : UIBaseCompanyStats,ICompanyStatsUI<DiceCompanyData>
     {
         SetCompanyName(data.name);
         SetGroupName(data.group.ToString());
-        SetTopBarColor(GroupColors.Colors[(int)data.group]);
+       // SetTopBarColor(GroupColors.Colors[(int)data.group]);
 
         SetDiceFieldMultiTexts(data.rentMultiplier);
         SetCellPrice(data.price);

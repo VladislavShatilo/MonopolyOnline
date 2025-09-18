@@ -8,36 +8,25 @@ public class GameBootstrapper : MonoBehaviour
     private GameManager gameManager;
     private IBoardService boardService;
     private ICompanyUIService companyUIService;
-    private IPlayerViewService playerViewService;
     private ICellOccupancyService cellOccupancyService;
-
+    private PlayerStatsService playerStatsService;
     [Inject]
-    public void Construct(GameManager gameManager, IBoardService boardService,ICompanyUIService companyUIService, IPlayerViewService playerViewService,
-        ICellOccupancyService cellOccupancyService)
+    public void Construct(GameManager gameManager, IBoardService boardService, ICompanyUIService companyUIService,
+        ICellOccupancyService cellOccupancyService, PlayerStatsService playerStatsService)
     {
         this.gameManager = gameManager;
         this.boardService = boardService;
         this.companyUIService = companyUIService;
-        this.playerViewService = playerViewService;
         this.cellOccupancyService = cellOccupancyService;
-        //EventBus.Subscribe<HandleCellEvent>(cellEventHandler.OnHandleCell);IBoardService
-
-        //gameManager.Initialize();
+        this.playerStatsService = playerStatsService;
     }
-    private void OnDestroy()
-    {
-        //if (cellEventHandler != null)
-        //    EventBus.Unsubscribe<HandleCellEvent>(cellEventHandler.OnHandleCell);
-    }
-    private void Start()
-    {
 
+    private void Awake()
+    {
         boardService.InitializeBoard();
         companyUIService.InitializeUI();
-        playerViewService.InitializePlayer();
         cellOccupancyService.InitializePlayer();
-        //playerStatsService.Initialize();
-        // геймплей запускаем только на старте сцены, когда всё точно готово
+        playerStatsService.Initialize();
         gameManager.Initialize();
     }
 }

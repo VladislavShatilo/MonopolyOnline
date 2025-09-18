@@ -85,7 +85,7 @@ public class UIRansomJailWindow : UIWindowBase
     private void HandleRansomClicked()
     {
 
-        EventBus.Publish(new ReleaseFromJailEvent(playerID, true));
+        //EventBus.Publish(new ReleaseFromJailEvent(playerID, true));
         HideWindow();
     }
 }

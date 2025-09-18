@@ -6,17 +6,20 @@ using Zenject;
 
 public class PlayerStatsPresenter
 {
-    private  IPlayerStatsView view;
-    private  IPhotonLoanManager photonLoanManager;
-    private  ITradeService tradeService;
+    private IPlayerStatsView view;
+    private IPhotonLoanManager photonLoanManager;
+    private ITradeService tradeService;
+    private IEventBus eventBus;
+
     private PlayerData playerData;
     private bool _isSubscribed = false;
 
-    public PlayerStatsPresenter(IPlayerStatsView view, IPhotonLoanManager photonLoanManager, ITradeService tradeService)
+    public PlayerStatsPresenter(IPlayerStatsView view, IPhotonLoanManager photonLoanManager, ITradeService tradeService, IEventBus eventBus)
     {
         this.view = view;
         this.photonLoanManager = photonLoanManager;
         this.tradeService = tradeService;
+        this.eventBus = eventBus;
 
         // Привязка кнопок
         view.BindTradeAction(OnTrade);
@@ -29,11 +32,11 @@ public class PlayerStatsPresenter
     {
         if (_isSubscribed) return;
 
-        EventBus.Subscribe<OnUpdatePlayerMoneyEvent>(OnMoneyUpdate);
-        EventBus.Subscribe<TurnStartEvent>(OnTurnStarted);
-        EventBus.Subscribe<TurnTimerUpdatedEvent>(OnTurnTimerUpdated);
-        EventBus.Subscribe<AuctionTimerUpdatedEvent>(OnAuctionTimerUpdated);
-        EventBus.Subscribe<OnTakeLoanEvent>(OnLoanUpdated);
+        eventBus.Subscribe<OnUpdatePlayerMoneyEvent>(OnMoneyUpdate);
+        eventBus.Subscribe<TurnStartEvent>(OnTurnStarted);
+        eventBus.Subscribe<TurnTimerUpdatedEvent>(OnTurnTimerUpdated);
+        eventBus.Subscribe<AuctionTimerUpdatedEvent>(OnAuctionTimerUpdated);
+        eventBus.Subscribe<OnTakeLoanEvent>(OnLoanUpdated);
 
         _isSubscribed = true;
     }
@@ -42,11 +45,11 @@ public class PlayerStatsPresenter
     {
         if (!_isSubscribed) return;
 
-        EventBus.Unsubscribe<OnUpdatePlayerMoneyEvent>(OnMoneyUpdate);
-        EventBus.Unsubscribe<TurnStartEvent>(OnTurnStarted);
-        EventBus.Unsubscribe<TurnTimerUpdatedEvent>(OnTurnTimerUpdated);
-        EventBus.Unsubscribe<AuctionTimerUpdatedEvent>(OnAuctionTimerUpdated);
-        EventBus.Unsubscribe<OnTakeLoanEvent>(OnLoanUpdated);
+        eventBus.Unsubscribe<OnUpdatePlayerMoneyEvent>(OnMoneyUpdate);
+        eventBus.Unsubscribe<TurnStartEvent>(OnTurnStarted);
+        eventBus.Unsubscribe<TurnTimerUpdatedEvent>(OnTurnTimerUpdated);
+        eventBus.Unsubscribe<AuctionTimerUpdatedEvent>(OnAuctionTimerUpdated);
+        eventBus.Unsubscribe<OnTakeLoanEvent>(OnLoanUpdated);
 
         _isSubscribed = false;
     }
@@ -66,7 +69,6 @@ public class PlayerStatsPresenter
 
     private void OnMoneyUpdate(OnUpdatePlayerMoneyEvent e)
     {
-        Debug.Log("OnMoneyUpdate()");
         if (playerData.Id == e.Player.Id)
             view.SetMoney(e.Player.Money);
     }
@@ -105,5 +107,16 @@ public class PlayerStatsPresenter
     private void OnTrade()
     {
        // tradeService.SendTradeRequest(playerData.Id);
+    }
+}
+
+public class AuctionTimerUpdatedEvent
+{
+    public int PlayerId { get; }
+    public float TimeLeft { get; }
+    public AuctionTimerUpdatedEvent(int playerId, float timeLeft)
+    {
+        PlayerId = playerId;
+        TimeLeft = timeLeft;
     }
 }

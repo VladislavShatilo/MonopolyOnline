@@ -12,6 +12,7 @@ public class GameplayInstaller : MonoInstaller
     [SerializeField] private UITurnWindow uiTurnWindow;
     [SerializeField] private UIBuyWindow uiBuyWindow;
     [SerializeField] private UIPayRentWindow uiPayRentWindow;
+    [SerializeField] private UIAuctionWindow uiAuctionWindow;
 
     [SerializeField] private DiceManagerPhoton diceManagerPhoton;
     [SerializeField] private DiceManager3D diceManager3D;
@@ -22,19 +23,20 @@ public class GameplayInstaller : MonoInstaller
     [SerializeField] private PhotonTradeManager photonTradeManager;
     [SerializeField] private PhotonBankNotifier photonBankNotifier;
     [SerializeField] private PhotonCompanySyncManager photonCompanySyncManager;
-
+    [SerializeField] private PhotonAuctionManager photonAuctionManager;
+    [SerializeField] private PhotonTurnSynchronizer photonTurnSynchronizer;
+    [SerializeField] private PhotonPlayerSpawner photonPlayerSpawner;
     [Header("Player Stats UI")]
     [SerializeField] private UIPlayerStats playerStatsPrefab;
     [SerializeField] private Transform playersStatsContainer;
 
     [SerializeField] private UICompanyCell[] companyCells; // сюда в инспекторе закинешь все 28 view
 
-
     public override void InstallBindings()
     {
+        
         Container.Bind<IBoardService>().To<BoardService>().AsSingle().NonLazy();
         Container.Bind<ICellOccupancyService>().To<CellOccupancyService>().AsSingle().NonLazy();
-        Container.BindInterfacesAndSelfTo<PlayerViewService>().AsSingle().NonLazy();
         Container.Bind<IPlayerRepository>().To<PlayerRepository>().AsSingle().NonLazy();
 
         Container.Bind<IPlayerColorService>().To<UnityPlayerColorService>().AsSingle()
@@ -47,15 +49,11 @@ public class GameplayInstaller : MonoInstaller
 
         Container.BindInstance(parentTransform).WithId("BoardParent");
         Container.BindInstance(playerRoot).WithId("PlayerRoot").NonLazy(); // сцена передает Transform
-
-
-        Container.Bind<ICompanyService>().To<CompanyService>().AsSingle().NonLazy();
         Container.Bind<IChanceService>().To<ChanceService>().AsSingle().NonLazy();
         Container.Bind<IJailService>().To<JailService>().AsSingle().NonLazy();
         Container.Bind<ICasinoService>().To<CasinoService>().AsSingle().NonLazy();
         Container.Bind<ITurnService>().To<TurnService>().AsSingle().NonLazy();
         Container.BindInstance(playerSettings).WithId("PlayerSettings").AsSingle().NonLazy();
-        Container.Bind<IPlayerSpawner>().To<PhotonPlayerSpawner>().AsSingle().NonLazy();
         // Container.BindInterfacesAndSelfTo<PlayerMove>().FromComponentInHierarchy().AsTransient();
         // Container.BindInterfacesAndSelfTo<PlayerSkin>().FromComponentInHierarchy().AsTransient();
 
@@ -80,12 +78,15 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IPhotonTurnManager>().To<PhotonTurnManager>().FromInstance(photonTurnManager).AsSingle();
         Container.Bind<IPhotonCompanyManager>().To<PhotonCompanyManager>().FromInstance(photonCompanyManager).AsSingle();
         Container.Bind<IBuyWindow>().To<UIBuyWindow>().FromInstance(uiBuyWindow).AsSingle();
+        Container.Bind<IAuctionWindow>().To<UIAuctionWindow>().FromInstance(uiAuctionWindow).AsSingle();
+
+        
         Container.Bind<IPayRentWindow>().To<UIPayRentWindow>().FromInstance(uiPayRentWindow).AsSingle();
 
         Container.Bind<ICompanyRepository>().To<CompanyRepository>().AsSingle().WithArguments(boardConfig);
 
         Container.Bind<IBankService>().To<BankService>().AsSingle();
-
+        Container.Bind<IEventBus>().To<EventBus>().AsSingle().NonLazy();
 
         Container.BindInterfacesTo<BuyCompanyPresenter>().AsSingle().NonLazy();
         Container.BindInterfacesTo<CellHandlerService>().AsSingle().NonLazy();
@@ -96,21 +97,35 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IPhotonTradeManager>().To<PhotonTradeManager>().FromInstance(photonTradeManager).AsSingle();
         Container.Bind<IBankNotifier>().To<PhotonBankNotifier>().FromInstance(photonBankNotifier).AsSingle();
         Container.Bind<ICompanySyncService>().To<PhotonCompanySyncManager>().FromInstance(photonCompanySyncManager).AsSingle();
+        Container.Bind<IPhotonAuctionManager>().To<PhotonAuctionManager>().FromInstance(photonAuctionManager).AsSingle();
+        Container.Bind<IPhotonTurnSynchronizer>().To<PhotonTurnSynchronizer>().FromInstance(photonTurnSynchronizer).AsSingle();
+        Container.Bind<IPlayerSpawner>().To<PhotonPlayerSpawner>().FromInstance(photonPlayerSpawner).AsSingle();
+
 
         Container.Bind<ILoanService>().To<LoanService>().AsSingle();
+        Container.Bind<IAuctionService>().To<AuctionService>().AsSingle();
 
+        
         Container.Bind<ITradeService>().To<TradeService>().AsSingle();
-        Container.BindInterfacesTo<PlayerStatsService>()
-                 .FromComponentInHierarchy()
-                 .AsSingle();
+        Container.BindInterfacesAndSelfTo<PlayerStatsService>()
+          .FromComponentInHierarchy()
+          .AsSingle();
 
         Container.BindInterfacesTo<UICompanyCellPresenter>().AsSingle().NonLazy();
         Container.BindInterfacesTo<PayRentPresenter>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<AuctionUseCase>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<AuctionPresenter>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<CompanyService>().AsSingle().NonLazy();
 
         Container.Bind<IUICompanyCellRepository>().To<UICompanyCellRepository>().AsSingle();
+        Container.Bind<IGroupColors>().To<GroupColorsService>().AsSingle();
+        //   Container.BindInterfacesAndSelfTo<UICompanyCell>()
+        //.FromComponentsInHierarchy()
+        //.AsTransient();
+        foreach (var cell in companyCells)
+        {
+            Container.BindInterfacesAndSelfTo<UICompanyCell>().FromInstance(cell) .AsCached();
+        }
 
-        Container.BindInterfacesAndSelfTo<UICompanyCell>()
-     .FromComponentsInHierarchy()
-     .AsTransient();
     }
 }

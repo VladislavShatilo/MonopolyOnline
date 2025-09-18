@@ -7,6 +7,7 @@ using Zenject;
 public class PhotonTurnManager : MonoBehaviourPun, IPhotonTurnManager
 {
     private ITurnService turnService;
+
     [Inject]
     public void Construct(ITurnService turnService)
     {
@@ -15,12 +16,7 @@ public class PhotonTurnManager : MonoBehaviourPun, IPhotonTurnManager
     public void RequestStartRandomTurn()
     {
         if (!PhotonNetwork.IsMasterClient) return;
-
-        var players = PhotonNetwork.PlayerList;
-        if (players.Length == 0) return;
-
-        var randomPlayer = players[UnityEngine.Random.Range(0, players.Length)];
-        photonView.RPC(nameof(RPC_StartTurn), RpcTarget.All, randomPlayer.ActorNumber, true);
+        turnService.StartRandomTurn();
     }
 
     public void RequestEndTurn()
@@ -30,13 +26,7 @@ public class PhotonTurnManager : MonoBehaviourPun, IPhotonTurnManager
         else
             photonView.RPC(nameof(RPC_RequestEndTurn), RpcTarget.MasterClient);
     }
-
-    [PunRPC]
-    private void RPC_StartTurn(int playerId, bool isNext)
-    {
-        turnService.StartTurn(playerId, isNext);
-    }
-
+  
     [PunRPC]
     private void RPC_RequestEndTurn()
     {

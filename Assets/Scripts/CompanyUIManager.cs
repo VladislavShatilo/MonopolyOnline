@@ -33,16 +33,16 @@ public class CompanyUIManager : MonoBehaviour
     }
     private void OnEnable()
     {
-        EventBus.Subscribe<ShowCompanyWindowEvent>(OnShowCompanyWindow);
-        EventBus.Subscribe<ShowFieldCompanyWindowEvent>(OnShowFieldCompanyWindow);
-        EventBus.Subscribe<ShowDiceCompanyWindowEvent>(OnShowDiceCompanyWindow);
+       // EventBus.Subscribe<ShowCompanyWindowEvent>(OnShowCompanyWindow);
+       // EventBus.Subscribe<ShowFieldCompanyWindowEvent>(OnShowFieldCompanyWindow);
+       // EventBus.Subscribe<ShowDiceCompanyWindowEvent>(OnShowDiceCompanyWindow);
     }
 
     private void OnDisable()
     {
-        EventBus.Unsubscribe<ShowCompanyWindowEvent>(OnShowCompanyWindow);
-        EventBus.Unsubscribe<ShowFieldCompanyWindowEvent>(OnShowFieldCompanyWindow);
-        EventBus.Unsubscribe<ShowDiceCompanyWindowEvent>(OnShowDiceCompanyWindow);
+       // EventBus.Unsubscribe<ShowCompanyWindowEvent>(OnShowCompanyWindow);
+      //  EventBus.Unsubscribe<ShowFieldCompanyWindowEvent>(OnShowFieldCompanyWindow);
+       // EventBus.Unsubscribe<ShowDiceCompanyWindowEvent>(OnShowDiceCompanyWindow);
     }
     private void HandleClick(Vector2 screenPosition)
     {

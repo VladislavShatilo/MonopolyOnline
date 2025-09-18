@@ -12,11 +12,11 @@ public class PlayerSkin : MonoBehaviourPun
 
     private void OnEnable()
     {
-        EventBus.Subscribe<SetTurnsJailEvent>(SetTurnJain);
+        //EventBus.Subscribe<SetTurnsJailEvent>(SetTurnJain);
     }
     private void OnDisable()
     {
-        EventBus.Unsubscribe<SetTurnsJailEvent>(SetTurnJain);
+        //EventBus.Unsubscribe<SetTurnsJailEvent>(SetTurnJain);
 
     }
     private void SetTurnJain(SetTurnsJailEvent e)

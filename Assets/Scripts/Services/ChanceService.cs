@@ -6,6 +6,6 @@ public class ChanceService : IChanceService
 {
     public void GiveRandomBuff(int playerId)
     {
-        ChanceManager.Instance.GiveRandomBuff(playerId);
+        //ChanceManager.Instance.GiveRandomBuff(playerId);
     }
 }
