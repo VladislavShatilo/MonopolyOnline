@@ -48,9 +48,11 @@ public class GameStarter : MonoBehaviourPunCallbacks
     {
         yield return new WaitForSeconds(0.5f);
         var players = GameObject.FindGameObjectsWithTag("Player");
-        foreach (var pm in players)
+        foreach (var player in players)
         {
-            pm.GetComponent<PlayerMove>().Initialize(boardService, eventBus);
+            player.GetComponent<PlayerMove>().Initialize(boardService, eventBus);
+            player.GetComponent<PlayerSkin>().Initialize(eventBus);
+
         }
     }
 }

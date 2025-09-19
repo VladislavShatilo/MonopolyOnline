@@ -17,27 +17,30 @@ public class PlayerMove : MonoBehaviourPun
     private IBoardService boardService;
     private int cellsCount;
     private IEventBus eventBus;
- 
-    
+
     public void Initialize(IBoardService boardService, IEventBus eventBus)
     {
-       
         this.boardService = boardService;
         this.eventBus = eventBus;
         eventBus.Subscribe<MovePlayerEvent>(OnPlayerMove);
         eventBus.Subscribe<PlayerMoveRegister>(OnOccupancyRegister);
         eventBus.Subscribe<PlayerMoveUnregister>(OnOccupancyUnregister);
+        eventBus.Subscribe<MoveToJailEvent>(MoveToJail);
+
 
         cellsCount = boardService.CellsCount;
     }
 
     private void OnDestroy()
     {
-       
+        if (eventBus != null)
+        {
             eventBus.Unsubscribe<MovePlayerEvent>(OnPlayerMove);
             eventBus.Unsubscribe<PlayerMoveRegister>(OnOccupancyRegister);
             eventBus.Unsubscribe<PlayerMoveUnregister>(OnOccupancyUnregister);
-        
+            eventBus.Unsubscribe<MoveToJailEvent>(MoveToJail);
+
+        }
     }
 
     private void OnOccupancyRegister(PlayerMoveRegister e)
@@ -52,7 +55,6 @@ public class PlayerMove : MonoBehaviourPun
 
     private void OnPlayerMove(MovePlayerEvent e)
     {
-       
         if (e.PlayerId == photonView.OwnerActorNr)
         {
             StopAllCoroutines();
@@ -62,7 +64,6 @@ public class PlayerMove : MonoBehaviourPun
 
     private IEnumerator Move(int steps, int currentCellIndex, bool forward)
     {
-
         for (int i = 0; i < steps; i++)
         {
             if (forward)
@@ -97,8 +98,28 @@ public class PlayerMove : MonoBehaviourPun
 
     public void SetTargetPosition(Vector3 target)
     {
-        StartCoroutine(MoveToPosition(target));
+       
+            StartCoroutine(MoveToPosition(target));
     }
+    private void MoveToJail(MoveToJailEvent e)
+    {
+        if (e.PlayerID == photonView.OwnerActorNr)
+        {
+            StopAllCoroutines();
+            StartCoroutine(MoveToJailCoroutine());
+        }
+    }
+
+
+    private IEnumerator MoveToJailCoroutine()
+    {
+        yield return new WaitForSeconds(0.2f);
+        Vector3 targetPos = boardService.GetCellRectTransform(10).position;
+        yield return MoveToPosition(targetPos);
+
+        //EventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.Owner.ActorNumber));
+    }
+
 }
 
 public class MoveToJailEvent

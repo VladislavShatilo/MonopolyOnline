@@ -81,7 +81,24 @@ public class PlayerData
             return liquid;
         }
     }
+    public void SendToJail(JailRules rules)
+    {
+        IsInJail = true;
+        CurrentCellId = 10;
+        JailTurnsLeft = rules.MaxTurns;
+    }
 
+    public void Release()
+    {
+        IsInJail = false;
+        JailTurnsLeft = 0;
+    }
+
+    public void DecreaseTurn()
+    {
+        if (JailTurnsLeft > 0)
+            JailTurnsLeft--;
+    }
     bool CanPay(int amount)
     {
         return LiquidAssets >= amount;

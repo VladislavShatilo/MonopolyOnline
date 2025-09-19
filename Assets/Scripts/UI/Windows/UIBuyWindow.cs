@@ -16,7 +16,6 @@ public class UIBuyWindow : UIWindowBase,IBuyWindow
     [SerializeField] private TextMeshProUGUI buyButtonText;
     [SerializeField] private TextMeshProUGUI cantBuyButtonText;
 
-    private System.Action onAuctionAction;
     private int currentCellIndex;
 
 

@@ -5,11 +5,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIJailWindow : UIWindowBase
+public class UIJailWindow : UIWindowBase, IJailWindow
 {
-    [Header ("Setting")]
-    [SerializeField] private int ransomMoney = 500;
-
     [Header("Buttons")]
     [SerializeField] private Button ransomButton;
     [SerializeField] private Button cantRansomButton;
@@ -19,86 +16,40 @@ public class UIJailWindow : UIWindowBase
     [SerializeField] private TextMeshProUGUI ransomText;
     [SerializeField] private TextMeshProUGUI cantRansomText;
 
-    private int playerID;
-    private PlayerData player;
+    private int currentPlayerId;
 
-    public Button RansomButton
+    public void Show(int playerId, int ransomMoney, bool canAfford)
     {
-        get => ransomButton;
-        set => ransomButton = value;
-    }
-
-    public Button ThrowDiceButton
-    {
-        get => throwDiceButton;
-        set => throwDiceButton = value;
-    }
-    public Button CantRansomButton
-    {
-        get => cantRansomButton;
-        set => cantRansomButton = value;
-    }
-    public TextMeshProUGUI RansomText
-    {
-        get => ransomText;
-        set => ransomText = value;
-    }
-    public TextMeshProUGUI CantRansomText
-    {
-        get => cantRansomText;
-        set => cantRansomText = value;
-    }
-    protected  void OnEnable()
-    {
-        if(ransomButton != null && throwDiceButton != null)
-        {
-            throwDiceButton.onClick.AddListener(OnThrowDiceClicked);
-            ransomButton.onClick.AddListener(OnRansomClicked);
-        }
-       
-    }
-
-    protected  void OnDisable()
-    {
-        if (ransomButton != null && throwDiceButton != null)
-        {
-            throwDiceButton.onClick.RemoveListener(OnThrowDiceClicked);
-            ransomButton.onClick.RemoveListener(OnRansomClicked);
-        }
-    }
-
-    public void ShowWindow(PlayerData player)
-    {
-        this.playerID = player.Id;
-        this.player = player;
-        UpdateUI();
-        windowAnimation.ShowWindow();
-    }
-    private void UpdateUI()
-    {
-        bool canAfford = player.Money >= ransomMoney;
+        currentPlayerId = playerId;
 
         ransomButton.gameObject.SetActive(canAfford);
         cantRansomButton.gameObject.SetActive(!canAfford);
 
-        if(ransomText != null && cantRansomText != null)
+        string ransomString = $"Заплатите {ransomMoney.ToString("N0", CultureInfo.InvariantCulture)}";
+        ransomText.text = ransomString;
+        cantRansomText.text = ransomString;
+
+        ShowWindow();
+    }
+
+    public void Hide() => HideWindow();
+    public void HardHide() => HardHideWindow();
+    public void SetThrowDiceAction(System.Action<int> onThrowDice)
+    {
+        throwDiceButton.onClick.RemoveAllListeners();
+        if (onThrowDice != null)
         {
-            ransomText.text = "Заплатите " + ransomMoney.ToString("N0", CultureInfo.InvariantCulture);
-            cantRansomText.text = "Заплатите " + ransomMoney.ToString("N0", CultureInfo.InvariantCulture);
+            throwDiceButton.onClick.AddListener(() => onThrowDice(currentPlayerId));
         }
-      
     }
-    private void OnThrowDiceClicked()
+
+    public void SetRansomAction(System.Action<int> onRansom)
     {
-        HideWindow();
-        //EventBus.Publish(new RollDiceJailButtonEvent(playerID));
-        
-      
-    }
-    private void OnRansomClicked()
-    {
-      //  EventBus.Publish(new ReleaseFromJailEvent(playerID, true));
-        HideWindow();
+        ransomButton.onClick.RemoveAllListeners();
+        if (onRansom != null)
+        {
+            ransomButton.onClick.AddListener(() => onRansom(currentPlayerId));
+        }
     }
 }
 public class ReleaseFromJailEvent

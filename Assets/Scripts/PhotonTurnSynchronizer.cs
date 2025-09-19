@@ -16,12 +16,16 @@ public class PhotonTurnSynchronizer : MonoBehaviourPun,IPhotonTurnSynchronizer
     }
     public void RequestStartTurn(int playerId, bool isNext)
     {
+        Debug.Log("    public void RequestStartTurn(int playerId, bool isNext)\r\n");
+
         photonView.RPC(nameof(RPC_StartTurn), RpcTarget.All, playerId, isNext);
     }
     [PunRPC]
     private void RPC_StartTurn(int playerId, bool isNext)
     {
+        Debug.Log($"[TURN] Player {playerId} turn started. LocalPlayer: {PhotonNetwork.LocalPlayer.ActorNumber}");
         var player = playerRepository.GetPlayerById(playerId);
+      
         if (player.IsInJail)
         {
             eventBus.Publish(new StartTurnJailEvent(playerId));

@@ -10,21 +10,21 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
     private IBoardService boardService;
     private ICompanyService companyService;
     private IChanceService chanceService;
-    private IJailService jailService;
+    private IPhotonJailManager photonJailManager;
     private ICasinoService casinoService;
-    private ITurnService turnService;
+    private IPhotonTurnManager photonTurnManager;
     private IEventBus eventBus;
 
     [Inject]
     public void Construct( IBoardService boardService, ICompanyService companyService,  IChanceService chanceService,
-        IJailService jailService, ICasinoService casinoService, ITurnService turnService, IEventBus eventBus)
+        IPhotonJailManager photonJailManager, ICasinoService casinoService, IPhotonTurnManager photonTurnManager, IEventBus eventBus)
     {
         this.boardService = boardService;
         this.companyService = companyService;
         this.chanceService = chanceService;
-        this.jailService = jailService;
+        this.photonJailManager = photonJailManager;
         this.casinoService = casinoService;
-        this.turnService = turnService;
+        this.photonTurnManager = photonTurnManager;
         this.eventBus = eventBus;
     }
     void IInitializable.Initialize()
@@ -60,7 +60,7 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
                 {
                     case CornerType.Start:
                     case CornerType.ChillJail:
-                        turnService.EndTurn();
+                        photonTurnManager.RequestEndTurn();
                         break;
 
                     case CornerType.Caisno:
@@ -68,7 +68,7 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
                         break;
 
                     case CornerType.Police:
-                        jailService.SendToJail(e.PlayerID);
+                        photonJailManager.SendToJail(e.PlayerID);
                         break;
                 }
                 break;

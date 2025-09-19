@@ -6,86 +6,38 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIRansomJailWindow : UIWindowBase
+public class UIRansomJailWindow : UIWindowBase,IRansomJailWindow
 {
-    [Header("Settings")]
-    [SerializeField] private int ransomAmount = 500;
-
-    [Header("Buttons")]
+    [Header("Button")]
     [SerializeField] private Button ransomButton;
     [SerializeField] private Button cantRansomButton;
 
-    [Header("Texts")]
+    [Header("Text")]
     [SerializeField] private TextMeshProUGUI ransomText;
     [SerializeField] private TextMeshProUGUI cantRansomText;
 
-    private int playerID;
-    private PlayerData player;
+    private int currentPlayerId;
 
-    public Button RansomButton
+    public void Show(int playerId, int fine, bool canAfford)
     {
-        get => ransomButton;
-        set => ransomButton = value;
-    }
-    public Button CantRansomButton
-    {
-        get => cantRansomButton;
-        set => cantRansomButton = value;
-    }
-    public TextMeshProUGUI RansomText
-    {
-        get => ransomText;
-        set => ransomText = value;
-    }
-    public TextMeshProUGUI CantRansomText
-    {
-        get => cantRansomText;
-        set => cantRansomText = value;
+        currentPlayerId = playerId;
+
+        ransomButton.gameObject.SetActive(canAfford);
+        cantRansomButton.gameObject.SetActive(!canAfford);
+        ransomText.text = $"Заплатите {fine.ToString("N0", CultureInfo.InvariantCulture)}";
+        cantRansomText.text = $"Заплатите {fine.ToString("N0", CultureInfo.InvariantCulture)}";
+
+        ShowWindow();
     }
 
-    protected  void OnEnable()
-    {
-        if (ransomButton != null)
-        {
-            ransomButton.onClick.AddListener(() => HandleRansomClicked());
-        }
+    public void Hide() => HideWindow();
 
-    }
-    protected  void OnDisable()
-    {
-        if (ransomButton != null)
-        {
-            ransomButton.onClick.RemoveListener(() => HandleRansomClicked());
-        }
+    public void HardHide() => HardHideWindow();
 
-    }
-  
-    public void ShowWindow(PlayerData player)
+    public void SetRansomAction(System.Action<int> onRansom)
     {
-        this.player = player;
-        this.playerID = player.Id;
-        UpdateUI();
-        windowAnimation.ShowWindow();
-    }
-    private void UpdateUI()
-    {
-        bool canAfford = player.Money >= ransomAmount;
-        if (ransomButton != null && cantRansomButton != null)
-        {
-            ransomButton.gameObject.SetActive(canAfford);
-            cantRansomButton.gameObject.SetActive(!canAfford);
-        }
-           
-        if (ransomText != null && cantRansomText != null)
-        {
-            ransomText.text = "Заплатите " + ransomAmount.ToString("N0", CultureInfo.InvariantCulture);
-            cantRansomText.text = "Заплатите " + ransomAmount.ToString("N0", CultureInfo.InvariantCulture);
-        }
-    }
-    private void HandleRansomClicked()
-    {
-
-        //EventBus.Publish(new ReleaseFromJailEvent(playerID, true));
-        HideWindow();
+        ransomButton.onClick.RemoveAllListeners();
+        if (onRansom != null)
+            ransomButton.onClick.AddListener(() => onRansom(currentPlayerId));
     }
 }

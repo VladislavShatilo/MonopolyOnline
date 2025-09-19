@@ -11,25 +11,56 @@ using Zenject;
 public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
 {
     private IRollDiceUseCase rollDiceUseCase;
-
+    public static bool AllowCheats = true;
     [Inject]
     public void Construct(IRollDiceUseCase rollDiceUseCase)
     {
         this.rollDiceUseCase = rollDiceUseCase;
     }
-    public void RequestDiceRoll(int playerId, bool isForJail,int result)
+    public void RequestDiceRoll(int playerId, bool isForJail, int cheatFirst = -1, int cheatSecond = -1)
     {
-        photonView.RPC(nameof(RPC_RequestGetDiceResult), RpcTarget.MasterClient, playerId, isForJail,result);
+        // посылаем запрос мастеру с возможными override (чита)
+        photonView.RPC(nameof(RPC_RequestGetDiceResult), RpcTarget.MasterClient, playerId, isForJail, cheatFirst, cheatSecond);
     }
+    private void Update()
+    {
+        if (Input.GetKeyUp(KeyCode.C))
+        {
+            AllowCheats = true;
+            Debug.Log(AllowCheats);
+        }
+        else if (Input.GetKeyUp(KeyCode.V))
+        {
+            AllowCheats = false;
+            Debug.Log(AllowCheats);
 
+
+        }
+    }
     [PunRPC]
-    private void RPC_RequestGetDiceResult(int playerId, bool isForJail,int result)
+    private void RPC_RequestGetDiceResult(int playerId, bool isForJail, int cheatFirst, int cheatSecond)
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-      //  DiceResult diceResult=  rollDiceUseCase.GetDiceResult(playerId, isForJail);
-        photonView.RPC(nameof(RPC_RequestDiceHandle), RpcTarget.All, result -1 , 1, playerId, isForJail);
+        int first, second;
+        // Доп: используем флаг AllowCheats, чтобы разрешать только на мастере и только при включенном флаге
+        if (AllowCheats && cheatFirst > -1 && cheatSecond > -1)
+        {
+            first = cheatFirst;
+            second = cheatSecond;
+            Debug.Log($"[CHEAT] Master uses override dice: {first}, {second} for player {playerId}");
+        }
+        else
+        {
+            // честный бросок — можно использовать rollDiceUseCase для консистентности
+            var diceResult = rollDiceUseCase.GetDiceResult(playerId, isForJail);
+            // предполагаю, что DiceResult хранит First и Second
+            first = diceResult.First;
+            second = diceResult.Second;
+        }
 
+        // рассылаем всем единый результат
+        photonView.RPC(nameof(RPC_RequestDiceHandle), RpcTarget.All, first, second, playerId, isForJail);
     }
     [PunRPC]
     private void RPC_RequestDiceHandle(int first,int second,int playerId, bool isForJail)
@@ -40,18 +71,6 @@ public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
 }
 
 #region Events
-
-public class RollDiceButtonEvent
-{
-    public int PlayerId { get; }
-    public RollDiceButtonEvent(int playerId) => PlayerId = playerId;
-}
-
-public class RollDiceJailButtonEvent
-{
-    public int PlayerId { get; }
-    public RollDiceJailButtonEvent(int playerId) => PlayerId = playerId;
-}
 
 public class OnPlayerMoveEvent
 {

@@ -29,6 +29,8 @@ public class TurnService : ITurnService
 
     public void StartTurn(int playerId, bool isNext)
     {
+        Debug.Log("StartTurn(int playerId, bool isNext)  "  + playerId+"  "+ isNext);
+
         turn.StartTurn(playerId);
         photonTurnSynchronizer.RequestStartTurn(playerId, isNext);
 
@@ -36,27 +38,39 @@ public class TurnService : ITurnService
 
     public void EndTurn()
     {
+        Debug.Log("EndTurn\n" + System.Environment.StackTrace);
         if (!turn.IsActive) return;
 
         var currentId = turn.CurrentPlayerId;
 
+        // Проверка на дополнительный ход
         if (turn.HasExtraTurn(currentId))
         {
+            Debug.Log("HasExtraTurn");
             var pd = playerRepository.GetPlayerById(currentId);
+
+            // Если нужно пропустить ход – просто убираем extra
             if (pd.SkipNextTurn)
             {
                 turn.RemoveExtraTurn(currentId);
             }
             else
             {
+                // Даём дополнительный ход и выходим
                 turn.RemoveExtraTurn(currentId);
                 StartTurn(currentId, false);
                 return;
             }
         }
-        int nextId = playerRepository.GetNextPlayerId(currentId).Id;
 
-        StartTurn(nextId, true);
+        // Если дополнительного хода не было – передаём ход следующему
+        var nextPlayer = playerRepository.GetNextPlayerId(currentId);
+        if (nextPlayer != null)
+        {
+            Debug.Log("Next player is " +nextPlayer.Id);
+
+            StartTurn(nextPlayer.Id, true);
+        }
     }
 
     public void RegisterDouble(int playerId, bool isDouble)

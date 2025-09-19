@@ -12,7 +12,9 @@ public class UITurnWindow : UIWindowBase,ITurnWindow
     [SerializeField] private Button throwDiceButton;
 
     [Header("Cheat")]
-    [SerializeField] private TMP_InputField inputField;
+    [SerializeField] private TMP_InputField inputField1;
+    [SerializeField] private TMP_InputField inputField2;
+
     public Button ThrowDiceButton
     {
         get => throwDiceButton;
@@ -31,12 +33,21 @@ public class UITurnWindow : UIWindowBase,ITurnWindow
             throwDiceButton.onClick.AddListener(() => onClick());
         }
     }
-    public int GetSteps()
+    public int GetSteps1()
     {
         int steps = 0;
-        if (inputField.text != "")
+        if (inputField1.text != "")
         {
-            steps = int.Parse(inputField.text);
+            steps = int.Parse(inputField1.text);
+        }
+        return steps;
+    }
+    public int GetSteps2()
+    {
+        int steps = 0;
+        if (inputField2.text != "")
+        {
+            steps = int.Parse(inputField2.text);
         }
         return steps;
     }

@@ -9,8 +9,7 @@ public class UIBuyWindowEditModeTests
     private UIBuyWindow window;
     private PlayerData testPlayer;
     private GameObject windowGO;
-    bool buyEventReceived = false;
-    bool auctionEventReceived = false;
+   
 
 
     [SetUp]
@@ -42,12 +41,12 @@ public class UIBuyWindowEditModeTests
     }
     private void OnTryBuyCompany(TryBuyCompanyEvent e)
     {
-        buyEventReceived = true;
+        //buyEventReceived = true;
 
     }
     private void OnAuctionStart(StartAuctionEvent e)
     {
-        auctionEventReceived = true;
+        //auctionEventReceived = true;
     }
 
 }

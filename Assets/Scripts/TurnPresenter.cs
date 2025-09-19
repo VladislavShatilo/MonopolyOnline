@@ -40,8 +40,9 @@ public class TurnPresenter : ITurnPresenter,IInitializable, IDisposable
     }
     private void OnThrowDiceClicked()
     { 
-        int result = uiTurnWindow.GetSteps();
-        photonDiceManager.RequestDiceRoll(localPlayerService.GetLocalPlayerId(), false,result);
+        int result1 = uiTurnWindow.GetSteps1();
+        int result2 = uiTurnWindow.GetSteps2();
+        photonDiceManager.RequestDiceRoll(localPlayerService.GetLocalPlayerId(), false, result1, result2);
         uiTurnWindow.Hide();
     }
     public void ShowTurnFor(int playerId) => uiTurnWindow.Show();

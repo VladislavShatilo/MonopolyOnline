@@ -8,19 +8,19 @@ using static UnityEngine.ParticleSystem;
 public class RollDiceUseCase : IRollDiceUseCase
 {
     private IDiceService diceService;
-    private ITurnService turnService; 
+    private IPhotonJailManager photonJailManager;
     private IPlayerRepository playerRepository; 
     private ILocalPlayerService localPlayerService;
     private IEventBus eventBus;
 
     [Inject]
-    public void Construct(IDiceService diceService, ITurnService turnService, IPlayerRepository playerRepository, ILocalPlayerService localPlayerService, IEventBus eventBus)
+    public void Construct(IDiceService diceService, IPhotonJailManager photonJailManager, IPlayerRepository playerRepository, ILocalPlayerService localPlayerService, IEventBus eventBus)
     {
         this.diceService = diceService;
-        this.turnService = turnService;
         this.playerRepository = playerRepository;
         this.localPlayerService = localPlayerService;
         this.eventBus = eventBus;
+        this.photonJailManager = photonJailManager;
     }
 
     public DiceResult GetDiceResult(int playerId, bool isForJail)
@@ -29,19 +29,19 @@ public class RollDiceUseCase : IRollDiceUseCase
         return diceResult;
     }
 
-    public void HandleDice(int first,int second, int playerId, bool isForJail)
+    public void HandleDice(int first, int second, int playerId, bool isForJail)
     {
         DiceResult diceResult = new DiceResult(first, second);
         eventBus.Publish(new DiceRolledEvent(diceResult, playerId, isForJail));
 
-        //if (!isForJail)
-        //{
-        //    turnService.RegisterDouble(playerId, diceResult.IsDouble);
-        //}
-
         if (isForJail)
         {
-            eventBus.Publish(new CheckDiceJailEvent(diceResult.First, diceResult.Second, playerId));
+          
+            photonJailManager.CheckDice(playerId, first, second);
+            if(first == second)
+            {
+                HandlePlayerMove(diceResult, playerId);
+            }
         }
         else
         {
@@ -61,7 +61,6 @@ public class RollDiceUseCase : IRollDiceUseCase
             }
             else
             {
-
                 eventBus.Publish(new OnPlayerMoveEvent(playerId, diceResult.Sum, true));
             }
             if (diceResult.IsDouble)

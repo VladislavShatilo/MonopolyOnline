@@ -25,6 +25,7 @@ public class BankService : IBankService
 
     public bool RemoveMoney(int playerId, int amount)
     {
+        Debug.Log("500");
         if (amount <= 0) return false;
         var player = playerRepository.GetPlayerById(playerId);
 

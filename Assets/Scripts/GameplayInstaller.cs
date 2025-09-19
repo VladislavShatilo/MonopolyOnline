@@ -1,19 +1,32 @@
-
 using UnityEngine;
 using Zenject;
 
 public class GameplayInstaller : MonoInstaller
 {
+    [Header("Settings")]
     [SerializeField] private PlayerSettings playerSettings;
-    [SerializeField] private Transform playerRoot;
     [SerializeField] private Color[] playerColors;
     [SerializeField] private BoardConfig boardConfig;
+    [SerializeField] private int jailTurnsCount =3;
+    [SerializeField] private int jailRansom =500;
+
+    [Header("Transforms")]
+    [SerializeField] private Transform playerRoot;
     [SerializeField] private Transform parentTransform;
+    [SerializeField] private Transform playersStatsContainer;
+
+    [Header("UI Windows")]
     [SerializeField] private UITurnWindow uiTurnWindow;
     [SerializeField] private UIBuyWindow uiBuyWindow;
     [SerializeField] private UIPayRentWindow uiPayRentWindow;
     [SerializeField] private UIAuctionWindow uiAuctionWindow;
+    [SerializeField] private UIJailWindow uiJailWindow;
+    [SerializeField] private UIRansomJailWindow uiRansomJailWindow;
 
+    [SerializeField] private UIPlayerStats playerStatsPrefab;
+    [SerializeField] private UICompanyCell[] companyCells; // все 28 view
+
+    [Header("Photon Managers")]
     [SerializeField] private DiceManagerPhoton diceManagerPhoton;
     [SerializeField] private DiceManager3D diceManager3D;
     [SerializeField] private PhotonPlayerMoveManager playerMoveManager;
@@ -26,15 +39,10 @@ public class GameplayInstaller : MonoInstaller
     [SerializeField] private PhotonAuctionManager photonAuctionManager;
     [SerializeField] private PhotonTurnSynchronizer photonTurnSynchronizer;
     [SerializeField] private PhotonPlayerSpawner photonPlayerSpawner;
-    [Header("Player Stats UI")]
-    [SerializeField] private UIPlayerStats playerStatsPrefab;
-    [SerializeField] private Transform playersStatsContainer;
-
-    [SerializeField] private UICompanyCell[] companyCells; // сюда в инспекторе закинешь все 28 view
+    [SerializeField] private PhotonJailManager photonJailManager;
 
     public override void InstallBindings()
     {
-        
         Container.Bind<IBoardService>().To<BoardService>().AsSingle().NonLazy();
         Container.Bind<ICellOccupancyService>().To<CellOccupancyService>().AsSingle().NonLazy();
         Container.Bind<IPlayerRepository>().To<PlayerRepository>().AsSingle().NonLazy();
@@ -48,9 +56,8 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IBoardRepository>().To<BoardRepository>().AsSingle().WithArguments(boardConfig).NonLazy();
 
         Container.BindInstance(parentTransform).WithId("BoardParent");
-        Container.BindInstance(playerRoot).WithId("PlayerRoot").NonLazy(); // сцена передает Transform
+        Container.BindInstance(playerRoot).WithId("PlayerRoot").NonLazy(); 
         Container.Bind<IChanceService>().To<ChanceService>().AsSingle().NonLazy();
-        Container.Bind<IJailService>().To<JailService>().AsSingle().NonLazy();
         Container.Bind<ICasinoService>().To<CasinoService>().AsSingle().NonLazy();
         Container.Bind<ITurnService>().To<TurnService>().AsSingle().NonLazy();
         Container.BindInstance(playerSettings).WithId("PlayerSettings").AsSingle().NonLazy();
@@ -59,7 +66,7 @@ public class GameplayInstaller : MonoInstaller
 
         Container.Bind<ICompanyUIService>().To<CompanyUIService>().AsSingle().NonLazy();
 
-       // Container.Bind<UITurnWindow>().FromInstance(turnWindow).AsSingle();
+        // Container.Bind<UITurnWindow>().FromInstance(turnWindow).AsSingle();
         Container.Bind<ILocalPlayerService>().To<PhotonLocalPlayerService>().AsSingle();
 
         Container.Bind<ITurnWindow>().To<UITurnWindow>().FromInstance(uiTurnWindow).AsSingle();
@@ -80,7 +87,7 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IBuyWindow>().To<UIBuyWindow>().FromInstance(uiBuyWindow).AsSingle();
         Container.Bind<IAuctionWindow>().To<UIAuctionWindow>().FromInstance(uiAuctionWindow).AsSingle();
 
-        
+
         Container.Bind<IPayRentWindow>().To<UIPayRentWindow>().FromInstance(uiPayRentWindow).AsSingle();
 
         Container.Bind<ICompanyRepository>().To<CompanyRepository>().AsSingle().WithArguments(boardConfig);
@@ -105,7 +112,6 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<ILoanService>().To<LoanService>().AsSingle();
         Container.Bind<IAuctionService>().To<AuctionService>().AsSingle();
 
-        
         Container.Bind<ITradeService>().To<TradeService>().AsSingle();
         Container.BindInterfacesAndSelfTo<PlayerStatsService>()
           .FromComponentInHierarchy()
@@ -124,8 +130,16 @@ public class GameplayInstaller : MonoInstaller
         //.AsTransient();
         foreach (var cell in companyCells)
         {
-            Container.BindInterfacesAndSelfTo<UICompanyCell>().FromInstance(cell) .AsCached();
+            Container.BindInterfacesAndSelfTo<UICompanyCell>().FromInstance(cell).AsCached();
         }
 
+        Container.Bind<IPhotonJailManager>().To<PhotonJailManager>().FromInstance(photonJailManager).AsSingle();
+        Container.BindInterfacesTo<JailPresenter>().AsSingle().NonLazy();
+
+        Container.Bind<IJailWindow>().To<UIJailWindow>().FromInstance(uiJailWindow).AsSingle();
+        Container.Bind<IRansomJailWindow>().To<UIRansomJailWindow>().FromInstance(uiRansomJailWindow).AsSingle();
+        Container.Bind<IJailService>().To<JailService>().AsSingle();
+        Container.Bind<JailRules>().AsSingle().WithArguments(jailTurnsCount, jailRansom).NonLazy();
+        
     }
 }
