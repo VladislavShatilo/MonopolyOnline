@@ -45,7 +45,6 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase
  
     public void TeleportPlayer(int playerId,int randomIndex, int currentCellIndex)
     {
-        Debug.Log(randomIndex);
         int steps = 0;
         if (randomIndex > currentCellIndex)
         {
@@ -55,7 +54,6 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase
         {
             steps = randomIndex + 40 - currentCellIndex;
         }
-        Debug.Log(steps);
 
         MovePlayer(playerId, steps, true);
     }

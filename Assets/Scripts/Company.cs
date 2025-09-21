@@ -14,11 +14,12 @@ public class Company
     public string Name { get; }
     public int Price { get; }
     public int OwnerId { get; private set; } = -1;
-    public int RentLevel { get; private set; } = 0;
+    public int RentLevel { get;  set; } = 0;
     public bool IsMortgaged { get; private set; }
     public int MortgageTurnsLeft { get; private set; }
     public int MortgagePrice { get; }
     public int BuyoutPrice { get; }
+    public int BranchPrice { get; }
     public CompanyType Type { get; }
     public CompanyGroup Group { get; }
 
@@ -36,6 +37,7 @@ public class Company
         BuyoutPrice = data.buyoutPrice;
         Name = data.name;
         Price = data.price;
+        BranchPrice = data.branchPrice;
     }
 
     public Company(int id, FieldCompanyData data)
@@ -48,6 +50,7 @@ public class Company
         BuyoutPrice = data.buyoutPrice;
         Name = data.name;
         Price = data.price;
+      
     }
 
     public Company(int id, DiceCompanyData data)

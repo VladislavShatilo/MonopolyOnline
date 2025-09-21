@@ -59,4 +59,8 @@ public class CompanyRepository : ICompanyRepository
             company.ResetData();
         }
     }
+    public IEnumerable<Company> GetByGroup(CompanyGroup group)
+    {
+        return companies.Values.Where(c => c.Group == group);
+    }
 }

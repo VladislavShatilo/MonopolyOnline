@@ -8,14 +8,12 @@ public class PhotonCompanySyncManager : MonoBehaviourPun, ICompanySyncService
 {
     private ICompanyRepository companyRepository;
     private IPlayerRepository playerRepository;
-    private IBankService bankService;
     private IEventBus eventBus;
     [Inject]
-    public void Construct( ICompanyRepository companyRepository, IPlayerRepository playerRepository,IBankService bankService, IEventBus eventBus)
+    public void Construct( ICompanyRepository companyRepository, IPlayerRepository playerRepository, IEventBus eventBus)
     {
         this.companyRepository = companyRepository;
         this.playerRepository = playerRepository;
-        this.bankService = bankService;
         this.eventBus = eventBus;
     }
     [PunRPC]

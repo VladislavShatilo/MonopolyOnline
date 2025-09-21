@@ -68,7 +68,6 @@ public class TurnService : ITurnService
             // проверка на SkipNextTurn
             if (nextPlayer.SkipNextTurn)
             {
-                Debug.Log($"Игрок {nextPlayer.Id} пропускает ход");
                 nextPlayer.SkipNextTurn = false; // сбрасываем
                 StartTurn(currentId, true);
                 //EndTurn(); // сразу завершаем его ход и передаём дальше

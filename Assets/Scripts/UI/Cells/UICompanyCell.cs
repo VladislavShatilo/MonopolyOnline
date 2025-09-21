@@ -43,21 +43,17 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
     [SerializeField] private Image star4Image;
     [SerializeField] private Image goldStarImage;
 
-    private int companyId;
-
-    // --- События, чтобы Presenter мог подписаться ---
-    public event Action<int> OnBuyBranchClicked;
-    public event Action<int> OnSellBranchClicked;
-    public event Action<int> OnMortgageClicked;
-    public event Action<int> OnBuyoutClicked;
+    private int companyId; 
 
     private IUICompanyCellRepository repository;
+    private IPhotonBranchManager photonBranchManager;
 
     [Inject]
-    public void Construct(IUICompanyCellRepository repository)
+    public void Construct(IUICompanyCellRepository repository, IPhotonBranchManager photonBranchManager)
     {
 
         this.repository = repository;
+        this.photonBranchManager = photonBranchManager;
     }
     public int CompanyId()
     {
@@ -79,12 +75,12 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
         HideAllBranchButtons();
         HideStars();
 
-        buyFirstBranchButton.onClick.AddListener(() => OnBuyBranchClicked?.Invoke(companyId));
-        buyBranchButton.onClick.AddListener(() => OnBuyBranchClicked?.Invoke(companyId));
-        sellBranchButton.onClick.AddListener(() => OnSellBranchClicked?.Invoke(companyId));
-        sellFirstBranchButton.onClick.AddListener(() => OnSellBranchClicked?.Invoke(companyId));
-        mortgageButton.onClick.AddListener(() => OnMortgageClicked?.Invoke(companyId));
-        buyoutButton.onClick.AddListener(() => OnBuyoutClicked?.Invoke(companyId));
+        buyFirstBranchButton.onClick.AddListener(() => photonBranchManager.RequestBuyBranch(companyId));
+        buyBranchButton.onClick.AddListener(() => photonBranchManager.RequestBuyBranch(companyId));
+        sellBranchButton.onClick.AddListener(() => photonBranchManager.RequestSellBranch(companyId));
+        sellFirstBranchButton.onClick.AddListener(() => photonBranchManager.RequestSellBranch(companyId));
+       // mortgageButton.onClick.AddListener(() => OnMortgageClicked?.Invoke(companyId));
+        //buyoutButton.onClick.AddListener(() => OnBuyoutClicked?.Invoke(companyId));
     }
 
     public void UpdateUI(string name, int price, Color groupColor)

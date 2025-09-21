@@ -153,6 +153,8 @@ MonoBehaviour:
   - RPC_Notify
   - RPC_UpdateAllViews
   - RPC_TeleportPlayerBroadcast
+  - RPC_BuyBranch
+  - RPC_SellBranch
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

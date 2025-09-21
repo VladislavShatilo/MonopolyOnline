@@ -40,7 +40,6 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
 
     public void RequestTeleport(int playerId)
     {
-        Debug.Log("RequestTeleport");
         if (!PhotonNetwork.IsMasterClient) return;
 
         photonView.RPC(nameof(RPC_TeleportPlayer), RpcTarget.MasterClient, playerId);
@@ -49,7 +48,6 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
     [PunRPC]
     private void RPC_TeleportPlayer(int playerId)
     {
-        Debug.Log("RPC_TeleportPlayer");
 
         if (!PhotonNetwork.IsMasterClient) return;
 
@@ -59,8 +57,6 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
         {
             randomIndex = UnityEngine.Random.Range(0, 41); // можно заменить на boardService.CellsCount
         } while (randomIndex == player.CurrentCellId);
-
-        Debug.Log($"[MASTER] Teleport target for player {playerId}: {randomIndex}");
     
         photonView.RPC(nameof(RPC_TeleportPlayerBroadcast), RpcTarget.All, playerId, randomIndex, player.CurrentCellId);
     }

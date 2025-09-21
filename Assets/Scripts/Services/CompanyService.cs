@@ -95,6 +95,8 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
 
         bank.TransferMoney(playerId, company.OwnerId, rent);
         eventBus.Publish(new RentPaidEvent(cellIndex, playerId, company.OwnerId, rent));
+        photonTurnManager.RequestEndTurn();
+
         companySyncService.SyncRentPaid(cellIndex, playerId, company.OwnerId, rent);
 
     }

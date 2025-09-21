@@ -41,7 +41,7 @@ public class GameplayInstaller : MonoInstaller
     [SerializeField] private PhotonPlayerSpawner photonPlayerSpawner;
     [SerializeField] private PhotonJailManager photonJailManager;
     [SerializeField] private PhotonChanceManager photonChanceManager;
-
+    [SerializeField] private PhotonBranchManager photonBranchManager;
     public override void InstallBindings()
     {
         Container.Bind<IBoardService>().To<BoardService>().AsSingle().NonLazy();
@@ -109,10 +109,16 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IPhotonTurnSynchronizer>().To<PhotonTurnSynchronizer>().FromInstance(photonTurnSynchronizer).AsSingle();
         Container.Bind<IPlayerSpawner>().To<PhotonPlayerSpawner>().FromInstance(photonPlayerSpawner).AsSingle();
         Container.Bind<IPhotonChanceManager>().To<PhotonChanceManager>().FromInstance(photonChanceManager).AsSingle();
+        Container.Bind<IPhotonBranchManager>().To<PhotonBranchManager>().FromInstance(photonBranchManager).AsSingle();
 
 
         Container.Bind<ILoanService>().To<LoanService>().AsSingle();
+        Container.Bind<IBranchService>().To<BranchService>().AsSingle();
+        Container.Bind<IBranchUseCase>().To<BranchUseCase>().AsSingle();
         Container.Bind<IAuctionService>().To<AuctionService>().AsSingle();
+
+        Container.Bind<IGroupOwnershipService>().To<GroupOwnershipService>().AsSingle();
+        Container.Bind<IBranchTurnHandler>().To<BranchTurnHandler>().AsSingle();
 
         Container.Bind<ITradeService>().To<TradeService>().AsSingle();
         Container.BindInterfacesAndSelfTo<PlayerStatsService>()
@@ -142,6 +148,7 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IRansomJailWindow>().To<UIRansomJailWindow>().FromInstance(uiRansomJailWindow).AsSingle();
         Container.Bind<IJailService>().To<JailService>().AsSingle();
         Container.Bind<JailRules>().AsSingle().WithArguments(jailTurnsCount, jailRansom).NonLazy();
-        
+        Container.Bind<BranchRules>().AsSingle().NonLazy();
+        Container.Bind<TurnBranchAdapter>().FromComponentInHierarchy().AsSingle();
     }
 }
