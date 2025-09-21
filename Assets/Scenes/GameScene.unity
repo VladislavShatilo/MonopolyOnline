@@ -1993,6 +1993,7 @@ MonoBehaviour:
   photonTurnSynchronizer: {fileID: 1399714528}
   photonPlayerSpawner: {fileID: 1127120015}
   photonJailManager: {fileID: 601542752}
+  photonChanceManager: {fileID: 1850932183}
 --- !u!1001 &102672639
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26427,12 +26428,12 @@ GameObject:
   - component: {fileID: 1850932182}
   - component: {fileID: 1850932183}
   m_Layer: 0
-  m_Name: ChanceManager
+  m_Name: PhotonChanceManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1850932181
 Transform:
   m_ObjectHideFlags: 0
@@ -30382,9 +30383,8 @@ SceneRoots:
   - {fileID: 456273708}
   - {fileID: 202444996}
   - {fileID: 1355578821}
-  - {fileID: 2038016545}
-  - {fileID: 1850932181}
   - {fileID: 1054705960}
+  - {fileID: 2038016545}
   - {fileID: 486951061}
   - {fileID: 1295211667}
   - {fileID: 1911457287}
@@ -30405,3 +30405,4 @@ SceneRoots:
   - {fileID: 1399714529}
   - {fileID: 1127120016}
   - {fileID: 601542753}
+  - {fileID: 1850932181}

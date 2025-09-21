@@ -29,8 +29,6 @@ public class TurnService : ITurnService
 
     public void StartTurn(int playerId, bool isNext)
     {
-        Debug.Log("StartTurn(int playerId, bool isNext)  "  + playerId+"  "+ isNext);
-
         turn.StartTurn(playerId);
         photonTurnSynchronizer.RequestStartTurn(playerId, isNext);
 
@@ -38,7 +36,6 @@ public class TurnService : ITurnService
 
     public void EndTurn()
     {
-        Debug.Log("EndTurn\n" + System.Environment.StackTrace);
         if (!turn.IsActive) return;
 
         var currentId = turn.CurrentPlayerId;
@@ -52,6 +49,7 @@ public class TurnService : ITurnService
             // Если нужно пропустить ход – просто убираем extra
             if (pd.SkipNextTurn)
             {
+                pd.SkipNextTurn = false; // сброс флага после пропуска
                 turn.RemoveExtraTurn(currentId);
             }
             else
@@ -67,7 +65,15 @@ public class TurnService : ITurnService
         var nextPlayer = playerRepository.GetNextPlayerId(currentId);
         if (nextPlayer != null)
         {
-            Debug.Log("Next player is " +nextPlayer.Id);
+            // проверка на SkipNextTurn
+            if (nextPlayer.SkipNextTurn)
+            {
+                Debug.Log($"Игрок {nextPlayer.Id} пропускает ход");
+                nextPlayer.SkipNextTurn = false; // сбрасываем
+                StartTurn(currentId, true);
+                //EndTurn(); // сразу завершаем его ход и передаём дальше
+                return;
+            }
 
             StartTurn(nextPlayer.Id, true);
         }

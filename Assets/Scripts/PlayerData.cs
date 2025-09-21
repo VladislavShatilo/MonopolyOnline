@@ -15,7 +15,7 @@ public class PlayerData
 
     public bool IsInJail = false;
     public int JailTurnsLeft;
-    public bool SkipNextTurn = false;
+    public bool SkipNextTurn { get; set; } = false;
     public bool NextMoveBackward { get; set; } = false;
     public bool HasLoan = false;
     public int LoanTurnsLeft;

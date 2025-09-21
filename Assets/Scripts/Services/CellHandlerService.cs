@@ -9,19 +9,19 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
 {
     private IBoardService boardService;
     private ICompanyService companyService;
-    private IChanceService chanceService;
+    private IPhotonChanceManager photonChanceManager;
     private IPhotonJailManager photonJailManager;
     private ICasinoService casinoService;
     private IPhotonTurnManager photonTurnManager;
     private IEventBus eventBus;
 
     [Inject]
-    public void Construct( IBoardService boardService, ICompanyService companyService,  IChanceService chanceService,
+    public void Construct( IBoardService boardService, ICompanyService companyService, IPhotonChanceManager photonChanceManager,
         IPhotonJailManager photonJailManager, ICasinoService casinoService, IPhotonTurnManager photonTurnManager, IEventBus eventBus)
     {
         this.boardService = boardService;
         this.companyService = companyService;
-        this.chanceService = chanceService;
+        this.photonChanceManager = photonChanceManager;
         this.photonJailManager = photonJailManager;
         this.casinoService = casinoService;
         this.photonTurnManager = photonTurnManager;
@@ -52,7 +52,7 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
 
             case CellType.Question:
             case CellType.Spend:
-                chanceService.GiveRandomBuff(e.PlayerID);
+                photonChanceManager.GiveRandomBuff(e.PlayerID);
                 break;
 
             case CellType.Corner:
@@ -60,7 +60,10 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
                 {
                     case CornerType.Start:
                     case CornerType.ChillJail:
-                        photonTurnManager.RequestEndTurn();
+                        if (PhotonNetwork.IsMasterClient)
+                        {
+                            photonTurnManager.RequestEndTurn();
+                        }
                         break;
 
                     case CornerType.Caisno:

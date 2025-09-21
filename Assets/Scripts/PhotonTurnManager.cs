@@ -7,10 +7,7 @@ using Zenject;
 public class PhotonTurnManager : MonoBehaviourPun, IPhotonTurnManager
 {
     private ITurnService turnService;
-    private void Awake()
-    {
-        Debug.Log($"PhotonTurnManager created on {gameObject.name}, ViewID={photonView.ViewID}");
-    }
+   
     [Inject]
     public void Construct(ITurnService turnService)
     {
@@ -24,7 +21,6 @@ public class PhotonTurnManager : MonoBehaviourPun, IPhotonTurnManager
 
     public void RequestEndTurn()
     {
-        Debug.Log("RequestEndTurn CALLED\n" + System.Environment.StackTrace);
         photonView.RPC(nameof(RPC_RequestEndTurn), RpcTarget.MasterClient);
 
     }

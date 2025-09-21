@@ -64,6 +64,7 @@ public class PlayerMove : MonoBehaviourPun
 
     private IEnumerator Move(int steps, int currentCellIndex, bool forward)
     {
+        yield return new WaitForSeconds(0.1f);
         for (int i = 0; i < steps; i++)
         {
             if (forward)
@@ -80,7 +81,7 @@ public class PlayerMove : MonoBehaviourPun
         }
         eventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.OwnerActorNr));
     }
-
+   
     private IEnumerator MoveToPosition(Vector3 target)
     {
         Vector3 start = transform.position;
@@ -110,7 +111,7 @@ public class PlayerMove : MonoBehaviourPun
         }
     }
 
-
+  
     private IEnumerator MoveToJailCoroutine()
     {
         yield return new WaitForSeconds(0.2f);

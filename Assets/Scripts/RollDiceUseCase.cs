@@ -61,6 +61,7 @@ public class RollDiceUseCase : IRollDiceUseCase
             }
             else
             {
+
                 eventBus.Publish(new OnPlayerMoveEvent(playerId, diceResult.Sum, true));
             }
             if (diceResult.IsDouble)

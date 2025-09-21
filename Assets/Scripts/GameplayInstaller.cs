@@ -40,6 +40,7 @@ public class GameplayInstaller : MonoInstaller
     [SerializeField] private PhotonTurnSynchronizer photonTurnSynchronizer;
     [SerializeField] private PhotonPlayerSpawner photonPlayerSpawner;
     [SerializeField] private PhotonJailManager photonJailManager;
+    [SerializeField] private PhotonChanceManager photonChanceManager;
 
     public override void InstallBindings()
     {
@@ -107,6 +108,7 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IPhotonAuctionManager>().To<PhotonAuctionManager>().FromInstance(photonAuctionManager).AsSingle();
         Container.Bind<IPhotonTurnSynchronizer>().To<PhotonTurnSynchronizer>().FromInstance(photonTurnSynchronizer).AsSingle();
         Container.Bind<IPlayerSpawner>().To<PhotonPlayerSpawner>().FromInstance(photonPlayerSpawner).AsSingle();
+        Container.Bind<IPhotonChanceManager>().To<PhotonChanceManager>().FromInstance(photonChanceManager).AsSingle();
 
 
         Container.Bind<ILoanService>().To<LoanService>().AsSingle();

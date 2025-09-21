@@ -21,7 +21,6 @@ public class JailPresenter : IInitializable, IDisposable
     public void Construct(IJailWindow jailWindow, ILocalPlayerService localPlayerService, IEventBus eventBus, IPlayerRepository playerRepository,
         IRansomJailWindow ransomJailWindow, IPhotonDiceManager photonDiceManager, IJailService jailService, IBankService bankService)
     {
-        Debug.Log("Construct");
 
         this.jailWindow = jailWindow;
         this.localPlayerService = localPlayerService;
@@ -35,7 +34,6 @@ public class JailPresenter : IInitializable, IDisposable
 
     void IInitializable.Initialize()
     {
-        Debug.Log("Init");
         //eventBus.Subscribe<OfferJailEvent>(ShowJailWindow);
         eventBus.Subscribe<StartTurnJailEvent>(OnStartTurn);
 

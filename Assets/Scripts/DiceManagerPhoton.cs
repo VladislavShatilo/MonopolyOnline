@@ -48,7 +48,6 @@ public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
         {
             first = cheatFirst;
             second = cheatSecond;
-            Debug.Log($"[CHEAT] Master uses override dice: {first}, {second} for player {playerId}");
         }
         else
         {

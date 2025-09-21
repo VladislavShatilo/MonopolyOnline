@@ -1,6 +1,7 @@
 using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using Zenject;
 
@@ -41,21 +42,25 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase
        // EventBus.Publish(new DiceFadeEvent(targetIndex, false));
        //EventBus.Publish(new PlayerMoveRegister( playerId, player.CurrentCellId));
     }
-
-    public void TeleportPlayer(int playerId, int targetCellIndex)
+ 
+    public void TeleportPlayer(int playerId,int randomIndex, int currentCellIndex)
     {
-        PlayerData player = playerRepository.GetPlayerById(playerId);
+        Debug.Log(randomIndex);
+        int steps = 0;
+        if (randomIndex > currentCellIndex)
+        {
+            steps = randomIndex - currentCellIndex;
+        }
+        else
+        {
+            steps = randomIndex + 40 - currentCellIndex;
+        }
+        Debug.Log(steps);
 
-        eventBus.Publish(new PlayerMoveUnregister(player.CurrentCellId, playerId));
-        player.CurrentCellId = targetCellIndex;
-        eventBus.Publish(new PlayerMoveRegister(playerId, player.CurrentCellId));
-        eventBus.Publish(new HandleCellEvent(playerId, player.CurrentCellId));
+        MovePlayer(playerId, steps, true);
     }
 
-    public void MovePlayerToJail(int playerId)
-    {
-        MovePlayer(playerId, 10, true); // JAIL_CELL_ID = 10
-    }
+  
 }
 public class MovePlayerEvent
 {

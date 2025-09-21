@@ -1,0 +1,150 @@
+using Photon.Pun;
+using Photon.Realtime;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using Zenject;
+
+[Serializable]
+public enum BuffType
+{
+    MoneyGainRandom1,   // +250-1000 (2 шт)
+    MoneyGainRandom2,   // +500-1500 (3 шт)
+    MoneyGainFixed,     // +1500 (1 шт)
+    MoneyLoseRandom1,   // -250-1000 (2 шт)
+    MoneyLoseRandom2,   // -500-1500 (2 шт)
+    MoneyLoseFixed,     // -1500 (2 шт)
+    Teleport,           // 2 шт
+    SkipTurn,           // 2 шт
+    ReverseMove,        // 1 шт
+    Jail                // 1 шт
+}
+
+public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
+{
+    private IChanceService chanceService;
+    private IPlayerRepository playerRepository;
+    private IBankService bankService;
+    private IPhotonTurnManager photonTurnManager;
+    private IPhotonPlayerMoveManager photonPlayerMove;
+    private IPhotonJailManager photonJailManager;
+    [Inject]
+    public void Construct(IChanceService chanceService, IPlayerRepository playerRepository, IBankService bankService, IPhotonTurnManager photonTurnManager, 
+        IPhotonPlayerMoveManager photonPlayerMove, IPhotonJailManager photonJailManager)
+    { 
+        this.chanceService = chanceService;
+        this.playerRepository = playerRepository;
+        this.bankService = bankService;
+        this.photonTurnManager = photonTurnManager;
+        this.photonPlayerMove = photonPlayerMove;
+        this.photonJailManager = photonJailManager;
+
+
+    }
+    public void GiveRandomBuff(int playerId)
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+
+        ChanceBuff buff = chanceService.GetRandomBuff();
+        photonView.RPC(nameof(RPC_ApplyBuff), RpcTarget.All, playerId, (int)buff.Type, buff.MinAmount, buff.MaxAmount);
+        if (buff.Type != BuffType.Jail && buff.Type != BuffType.Teleport)
+        {
+            photonTurnManager.RequestEndTurn();
+        }
+      
+
+    }
+    private string ApplyMoneyChange(PlayerData player, int min, int max, bool gain, bool fixedAmount = false)
+    {
+        if (!PhotonNetwork.IsMasterClient) return "";
+        int amount = fixedAmount ? max : UnityEngine.Random.Range(min, max + 1);
+        if (gain)
+        {
+            bankService.AddMoney(player.Id, amount);
+        }
+        else
+        {
+            bankService.RemoveMoney(player.Id, amount);
+        }
+
+        return gain ? $"получил {amount}k!" : $"потерял {amount}k!";
+    }
+    [PunRPC]
+    private void RPC_ApplyBuff(int playerId, int typeInt, int minAmount, int maxAmount)
+    {
+       
+      
+
+        var player = playerRepository.GetPlayerById(playerId);
+        var type = (BuffType)typeInt;
+
+        string message;
+
+        switch (type)
+        {
+            case BuffType.MoneyGainRandom1:
+            case BuffType.MoneyGainRandom2:
+                message = ApplyMoneyChange(player, minAmount, maxAmount, true);
+                break;
+
+            case BuffType.MoneyGainFixed:
+                message = ApplyMoneyChange(player, minAmount, maxAmount, true, fixedAmount: true);
+                break;
+
+            case BuffType.MoneyLoseRandom1:
+            case BuffType.MoneyLoseRandom2:
+                message = ApplyMoneyChange(player, minAmount, maxAmount, false);
+                break;
+
+            case BuffType.MoneyLoseFixed:
+                message = ApplyMoneyChange(player, minAmount, maxAmount, false, fixedAmount: true);
+                break;
+
+            case BuffType.Teleport:
+
+                photonPlayerMove.RequestTeleport(playerId);
+                message = "телепортировался!";
+                break;
+
+            case BuffType.SkipTurn:
+                player.SkipNextTurn = true;
+                message = "пропускает ход!";
+                break;
+
+            case BuffType.ReverseMove:
+                player.NextMoveBackward = true;
+                message = "идёт в обратную сторону!";
+                break;
+
+            case BuffType.Jail:
+                photonJailManager.SendToJail(playerId);
+                message = "попал в тюрьму!";
+                break;
+
+            default:
+                message = "";
+                break;
+        }
+        Debug.Log(playerId+"  "+ type + "  "+ message);
+
+        // Чтобы было видно, что вызвалось
+        //MessageLog.Instance.AddMessage("Тестовый телепорт!", playerId);
+        //photonPlayerMove.RequestTeleport(playerId);
+        //MessageLog.Instance.AddMessage(message, playerId);
+    }
+
+
+}
+
+public class OnPlayerTeleportEvent
+{
+    public int PlayerId { get; }
+    public int RandomIndex { get; }
+    public int CurrentCellIndex { get; }
+    public OnPlayerTeleportEvent(int playerId, int randomIndex, int currentCellIndex)
+    {
+        PlayerId = playerId;
+        RandomIndex = randomIndex;
+        CurrentCellIndex = currentCellIndex;
+    }
+}

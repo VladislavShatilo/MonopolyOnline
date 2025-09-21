@@ -1,4 +1,4 @@
 public interface IChanceService
 {
-    void GiveRandomBuff(int playerId);
+    ChanceBuff GetRandomBuff();
 }
