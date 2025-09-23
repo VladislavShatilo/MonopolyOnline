@@ -22,6 +22,7 @@ public class GameplayInstaller : MonoInstaller
     [SerializeField] private UIAuctionWindow uiAuctionWindow;
     [SerializeField] private UIJailWindow uiJailWindow;
     [SerializeField] private UIRansomJailWindow uiRansomJailWindow;
+    [SerializeField] private UILoanPayWindow uiLoanPayWindow;
 
     [SerializeField] private UIPlayerStats playerStatsPrefab;
     [SerializeField] private UICompanyCell[] companyCells; // все 28 view
@@ -111,8 +112,6 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IPhotonChanceManager>().To<PhotonChanceManager>().FromInstance(photonChanceManager).AsSingle();
         Container.Bind<IPhotonBranchManager>().To<PhotonBranchManager>().FromInstance(photonBranchManager).AsSingle();
 
-
-        Container.Bind<ILoanService>().To<LoanService>().AsSingle();
         Container.Bind<IBranchService>().To<BranchService>().AsSingle();
         Container.Bind<IBranchUseCase>().To<BranchUseCase>().AsSingle();
         Container.Bind<IAuctionService>().To<AuctionService>().AsSingle();
@@ -146,13 +145,18 @@ public class GameplayInstaller : MonoInstaller
 
         Container.Bind<IJailWindow>().To<UIJailWindow>().FromInstance(uiJailWindow).AsSingle();
         Container.Bind<IRansomJailWindow>().To<UIRansomJailWindow>().FromInstance(uiRansomJailWindow).AsSingle();
+        Container.Bind<ILoanPayWindow>().To<UILoanPayWindow>().FromInstance(uiLoanPayWindow).AsSingle();
+
         Container.Bind<IJailService>().To<JailService>().AsSingle();
         Container.Bind<JailRules>().AsSingle().WithArguments(jailTurnsCount, jailRansom).NonLazy();
         Container.Bind<BranchRules>().AsSingle().NonLazy();
         Container.Bind<TurnBranchAdapter>().FromComponentInHierarchy().AsSingle();
         Container.Bind<PhotonTimerUpdater>().FromComponentInHierarchy().AsSingle();
         Container.Bind<ITimerManager>().To<TimerManager>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<LoanService>().AsSingle().NonLazy();
 
-        
+        Container.BindInterfacesTo<LoanPayPresenter>().AsSingle().NonLazy();
+
+
     }
 }

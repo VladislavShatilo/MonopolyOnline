@@ -1,5 +1,6 @@
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -7,11 +8,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UILoanPayWindow : UIWindowBase
+public class UILoanPayWindow : UIWindowBase, ILoanPayWindow
 {
-    [Header("Settings")]
-    [SerializeField] private int loanAmount = 5500;
-
     [Header("Buttons")]
     [SerializeField] private Button payLoanButton;
     [SerializeField] private Button cantPayLoanButton;
@@ -20,73 +18,31 @@ public class UILoanPayWindow : UIWindowBase
     [SerializeField] private TextMeshProUGUI payLoanText;
     [SerializeField] private TextMeshProUGUI cantPayLoanText;
 
-    private PlayerData player;
-    public Button PayLoanButton
-    {
-        get => payLoanButton;
-        set => payLoanButton = value;
-    }
-    public Button CantPayLoanButton
-    {
-        get => cantPayLoanButton;
-        set => cantPayLoanButton = value;
-    }
-    public TextMeshProUGUI PayLoanText
-    {
-        get => payLoanText;
-        set => payLoanText = value;
-    }
-    public TextMeshProUGUI CantPayLoanText
-    {
-        get => cantPayLoanText;
-        set => cantPayLoanText = value;
-    }
+    private int currentPlayerId;
 
-    protected void OnEnable()
+    public void Show(int playerId, int loanAmount, bool canAfford)
     {
-        if (payLoanButton != null)
-        {
-            payLoanButton.onClick.AddListener(() => OnPayLoanClicked());
-        }
+        currentPlayerId = playerId;
 
-    }
-    protected  void OnDisable()
-    {
-        if (payLoanButton != null)
-        {
-            payLoanButton.onClick.RemoveListener(() => OnPayLoanClicked());
-        }
+        payLoanButton.gameObject.SetActive(canAfford);
+        cantPayLoanButton.gameObject.SetActive(!canAfford);
 
-    }
-    public void ShowLoanWindow(PlayerData player)
-    {
-        this.player = player;
-        UpdateUI();
+        string text = $"Заплатите банку {loanAmount.ToString("N0", CultureInfo.InvariantCulture)}";
+        payLoanText.text = text;
+        cantPayLoanText.text = text;
+
         ShowWindow();
     }
 
-    private void UpdateUI()
+    public void Hide() => HideWindow();
+
+    public void SetPayLoanAction(Action<int> onPayLoan)
     {
-        bool canAfford = player.Money >= loanAmount;
-        if (payLoanButton != null && cantPayLoanButton != null)
+        payLoanButton.onClick.RemoveAllListeners();
+        if (onPayLoan != null)
         {
-            payLoanButton.gameObject.SetActive(canAfford);
-            cantPayLoanButton.gameObject.SetActive(!canAfford);
+            payLoanButton.onClick.AddListener(() => onPayLoan(currentPlayerId));
         }
-           
-
-        if (payLoanText != null && cantPayLoanText != null)
-        {
-            payLoanText.text = "Заплатите банку " + loanAmount.ToString("N0", CultureInfo.InvariantCulture);
-            cantPayLoanText.text = "Заплатите банку " + loanAmount.ToString("N0", CultureInfo.InvariantCulture);
-        }
-
-    }
-    private void OnPayLoanClicked()
-    {
-        //EventBus.Publish(new PayLoanEvent(PhotonNetwork.LocalPlayer.ActorNumber));
-        HideWindow();
-
     }
 }
 public class PayLoanEvent 

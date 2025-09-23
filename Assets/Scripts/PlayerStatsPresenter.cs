@@ -22,8 +22,8 @@ public class PlayerStatsPresenter
 
         // Привязка кнопок
         view.BindTradeAction(OnTrade);
-        view.BindTakeLoanAction(() => photonLoanManager.SendTakeLoan(playerData.Id));
-        view.BindPayLoanAction(() => photonLoanManager.SendPayLoan(playerData.Id));
+        view.BindTakeLoanAction(() => photonLoanManager.TakeLoanRequest(playerData.Id));
+        view.BindPayLoanAction(() => photonLoanManager.PayLoanRequest(playerData.Id));
 
        
     }
@@ -95,7 +95,6 @@ public class PlayerStatsPresenter
 
     private void OnAuctionTimerUpdated(TimerUpdatedEvent e)
     {
-        Debug.Log("OnAuctionTimerUpdated");
         if (e.Type != TimerType.Auction) return;
         if (playerData.Id == e.PlayerId)
         {
@@ -139,6 +138,12 @@ public class PlayerStatsPresenter
             if (!playerData.HasLoan)
             {
                 view.SetLoanButtonsVisible(true, false);
+            }
+            else
+            {
+                view.SetLoanButtonsVisible(false, true);
+
+
             }
 
         }

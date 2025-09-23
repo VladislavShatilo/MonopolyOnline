@@ -43,7 +43,6 @@ public class UIPlayerStats : MonoBehaviour, IPlayerStatsView
 
     public void SetTimer(bool active, float timeLeft, bool highlightTurn, bool highlightAuction)
     {
-        Debug.Log(active + "  " + highlightTurn + "  " + highlightAuction);
         timerGO.SetActive(active);
         timerText.gameObject.SetActive(active);
         highlightTurnImage.gameObject.SetActive(active && highlightTurn);
