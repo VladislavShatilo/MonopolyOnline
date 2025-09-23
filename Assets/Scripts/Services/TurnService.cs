@@ -7,15 +7,17 @@ using Zenject;
 
 public class TurnService : ITurnService
 {
-    private  IPlayerRepository playerRepository;
+    private IPlayerRepository playerRepository;
     private IPhotonTurnSynchronizer photonTurnSynchronizer;
-    private  Turn turn;
+    private ITimerManager timerManager;
+    private Turn turn;
 
     [Inject]
-    public void Construct(IPlayerRepository playerRepository, IPhotonTurnSynchronizer photonTurnSynchronizer)
+    public void Construct(IPlayerRepository playerRepository, IPhotonTurnSynchronizer photonTurnSynchronizer, ITimerManager timerManager)
     {
         this.playerRepository = playerRepository;
         this.photonTurnSynchronizer = photonTurnSynchronizer;
+        this.timerManager = timerManager;
         turn = new Turn();
     }
 
@@ -30,8 +32,8 @@ public class TurnService : ITurnService
     public void StartTurn(int playerId, bool isNext)
     {
         turn.StartTurn(playerId);
+        timerManager.StartTurnTimer(playerId, 90);
         photonTurnSynchronizer.RequestStartTurn(playerId, isNext);
-
     }
 
     public void EndTurn()
@@ -90,6 +92,7 @@ public class TurnService : ITurnService
 
     public void SetMode(TurnMode mode) => turn.SetMode(mode);
 }
+
 public enum TurnMode
 {
     Normal,

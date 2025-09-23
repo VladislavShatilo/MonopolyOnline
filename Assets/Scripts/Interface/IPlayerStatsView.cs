@@ -8,7 +8,10 @@ public interface IPlayerStatsView
     void SetTradeButtonVisible(bool visible);
     void SetLoanButtonsVisible(bool canTakeLoan, bool canPayLoan);
     void SetLeaveButtonVisible(bool visible);
-
+    void SetTurnHighlightVisible(bool visible);
+    void SetAuctionHighlightVisible(bool visible);
+    void SetLoanContainerVisible(bool visible);
+    void SetTimerGOVisible(bool visible);
     void BindTradeAction(System.Action onTrade);
     void BindTakeLoanAction(System.Action onTakeLoan);
     void BindPayLoanAction(System.Action onPayLoan);

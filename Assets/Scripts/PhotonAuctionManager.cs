@@ -74,6 +74,18 @@ public class PhotonAuctionManager : MonoBehaviourPun, IPhotonAuctionManager
 
         eventBus.Publish(new PlayerPassAuction(playerId));
     }
+
+    public void CloseAuctionWindowRequest(int playerId)
+    {
+        photonView.RPC(nameof(RPC_CloseAuctionWindow), PhotonNetwork.CurrentRoom.GetPlayer(playerId));
+    }
+
+    [PunRPC]
+    private void RPC_CloseAuctionWindow()
+    {
+        eventBus.Publish(new AuctionEndEvent());
+
+    }
     //public void BroadcastAuctionEnd(int winnerId, int finalPrice)
     //{
     //    photonView.RPC(nameof(RPC_AuctionEnd), RpcTarget.All, winnerId, finalPrice);
@@ -108,6 +120,10 @@ public class AuctionPromptBidEvent
         Bid = bid;
         CompanyId = companyId;
     }
+}
+public class AuctionEndEvent
+{
+  
 }
 public class PlayerPassAuction
 {

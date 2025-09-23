@@ -24,15 +24,17 @@ public class AuctionService : IAuctionService
     private IPhotonAuctionManager photonAuctionManager;
     private IPhotonTurnManager photonTurnManager;
     private IEventBus eventBus;
+    private ITimerManager timerManager;
 
     [Inject]
-    public void Construct(IPhotonAuctionManager photonAuctionManager, IPhotonTurnManager photonTurnManager, IEventBus eventBus)
+    public void Construct(IPhotonAuctionManager photonAuctionManager, IPhotonTurnManager photonTurnManager, IEventBus eventBus, ITimerManager timerManager)
     {
         this.photonAuctionManager = photonAuctionManager;
         this.photonTurnManager = photonTurnManager;
         this.eventBus = eventBus;
+        this.timerManager = timerManager;
     }
-
+   
     public void StartAuction(int starterActorNumber, int companyId, int basePrice)
     {
         this.starterActorNumber = starterActorNumber;
@@ -52,7 +54,6 @@ public class AuctionService : IAuctionService
             EndAuction_NoWinner();
             return;
         }
-
         PromptCurrentBidder();
     }
 
@@ -65,13 +66,12 @@ public class AuctionService : IAuctionService
 
         MoveToNextBidderOrEnd();
     }
-
     public void PassBid(int playerId)
     {
         if (!IsPlayerTurn(playerId)) return;
 
         passed.Add(playerId);
-
+        photonAuctionManager.CloseAuctionWindowRequest(playerId);
         MoveToNextBidderOrEnd();
     }
 
@@ -128,6 +128,7 @@ public class AuctionService : IAuctionService
 
         int currentBidder = bidders[currentBidderIndex];
         if (passed.Contains(currentBidder)) return;
+        timerManager.StartAuctionTimer(currentBidder, 15);
 
         int minAllowedBid = (lastBidder == -1) ? basePrice + FIRST_BID_INCREMENT : currentPrice + FIRST_BID_INCREMENT;
 
@@ -138,11 +139,16 @@ public class AuctionService : IAuctionService
     {
         Debug.Log("EndAuction_NoWinner()");
         photonTurnManager.RequestEndTurn();
+       // eventBus.Publish(new AuctionEndEvent());
+
+
     }
 
     private void EndAuction_WithWinner(int winnerId, int finalPrice)
     {
         eventBus.Publish(new EndAuctionWithWinnerEvent(winnerId, finalPrice, companyId));
+        //eventBus.Publish(new AuctionEndEvent());
+
     }
 
     private List<int> BuildTurnOrderStartingAfter(int starterActorNumber, HashSet<int> excludedPlayers)

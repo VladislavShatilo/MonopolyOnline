@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,19 +8,17 @@ using Zenject;
 public class PlayerStatsPresenter
 {
     private IPlayerStatsView view;
-    private IPhotonLoanManager photonLoanManager;
-    private ITradeService tradeService;
     private IEventBus eventBus;
+    private ILocalPlayerService localPlayerService;
 
     private PlayerData playerData;
     private bool _isSubscribed = false;
 
-    public PlayerStatsPresenter(IPlayerStatsView view, IPhotonLoanManager photonLoanManager, ITradeService tradeService, IEventBus eventBus)
+    public PlayerStatsPresenter(IPlayerStatsView view, IPhotonLoanManager photonLoanManager, IEventBus eventBus, ILocalPlayerService localPlayerService)
     {
         this.view = view;
-        this.photonLoanManager = photonLoanManager;
-        this.tradeService = tradeService;
         this.eventBus = eventBus;
+        this.localPlayerService = localPlayerService;
 
         // Привязка кнопок
         view.BindTradeAction(OnTrade);
@@ -34,8 +33,8 @@ public class PlayerStatsPresenter
 
         eventBus.Subscribe<OnUpdatePlayerMoneyEvent>(OnMoneyUpdate);
         eventBus.Subscribe<TurnStartEvent>(OnTurnStarted);
-        eventBus.Subscribe<TurnTimerUpdatedEvent>(OnTurnTimerUpdated);
-        eventBus.Subscribe<AuctionTimerUpdatedEvent>(OnAuctionTimerUpdated);
+        eventBus.Subscribe<TimerUpdatedEvent>(OnTurnTimerUpdated);
+        eventBus.Subscribe<TimerUpdatedEvent>(OnAuctionTimerUpdated);
         eventBus.Subscribe<OnTakeLoanEvent>(OnLoanUpdated);
 
         _isSubscribed = true;
@@ -47,8 +46,8 @@ public class PlayerStatsPresenter
 
         eventBus.Unsubscribe<OnUpdatePlayerMoneyEvent>(OnMoneyUpdate);
         eventBus.Unsubscribe<TurnStartEvent>(OnTurnStarted);
-        eventBus.Unsubscribe<TurnTimerUpdatedEvent>(OnTurnTimerUpdated);
-        eventBus.Unsubscribe<AuctionTimerUpdatedEvent>(OnAuctionTimerUpdated);
+        eventBus.Unsubscribe<TimerUpdatedEvent>(OnTurnTimerUpdated);
+        eventBus.Unsubscribe<TimerUpdatedEvent>(OnAuctionTimerUpdated);
         eventBus.Unsubscribe<OnTakeLoanEvent>(OnLoanUpdated);
 
         _isSubscribed = false;
@@ -64,6 +63,12 @@ public class PlayerStatsPresenter
         view.SetMoney(data.Money);
         view.SetCapital(data.VisibleCapital, data.LiquidAssets);
         view.SetLeaveButtonVisible(data.photonPlayer.IsLocal);
+        view.SetLoanButtonsVisible(false,false);
+        view.SetTradeButtonVisible(false);
+        view.SetAuctionHighlightVisible(false);
+        view.SetTurnHighlightVisible(false);
+        view.SetLoanContainerVisible(false);
+        view.SetTimerGOVisible(false);
         SubscribeEvents();
     }
 
@@ -73,16 +78,36 @@ public class PlayerStatsPresenter
             view.SetMoney(e.Player.Money);
     }
 
-    private void OnTurnTimerUpdated(TurnTimerUpdatedEvent e)
+    private void OnTurnTimerUpdated(TimerUpdatedEvent e)
     {
+        if(e.Type != TimerType.Turn) return;
         if (playerData.Id == e.PlayerId)
-            view.SetTimer(e.IsCurrent, e.TimeLeft, true, false);
+        {
+            view.SetTimer(e.IsActive, e.TimeLeft, true, false);
+
+        }
+        else
+        {
+            view.SetTurnHighlightVisible(false);
+            view.SetTimer(false, 0, false, false);
+        }
     }
 
-    private void OnAuctionTimerUpdated(AuctionTimerUpdatedEvent e)
+    private void OnAuctionTimerUpdated(TimerUpdatedEvent e)
     {
+        Debug.Log("OnAuctionTimerUpdated");
+        if (e.Type != TimerType.Auction) return;
         if (playerData.Id == e.PlayerId)
-            view.SetTimer(true, e.TimeLeft, false, true);
+        {
+            view.SetTimer(e.IsActive, e.TimeLeft, false, true);
+
+        }
+        else
+        {
+            view.SetTurnHighlightVisible(false);
+            view.SetTimer(false, 0, false, false);
+        }
+       
     }
 
     private void OnLoanUpdated(OnTakeLoanEvent e)
@@ -93,15 +118,41 @@ public class PlayerStatsPresenter
 
     private void OnTurnStarted(TurnStartEvent e)
     {
-        //if (playerData == null) return;
+        if (playerData == null) return;
 
-        //bool isLocalTurn = tradeService.IsLocalTurn(e.PlayerId);
-        //bool isThisLocal = tradeService.IsLocalPlayer(playerData.Id);
+        int currentTurnPlayerId = e.PlayerId;
+        int localPlayerId = localPlayerService.GetLocalPlayerId();
+        // 1. Если это НЕ мой ход  скрыть все кнопки
+        if (currentTurnPlayerId != localPlayerId)
+        {
+           
+            view.SetTradeButtonVisible(false);
+            view.SetLoanButtonsVisible(false, false);
+            return;
+        }
 
-        //view.SetTradeButtonVisible(isLocalTurn && !isThisLocal);
+        // 2. Если это МОЙ ход  показывать кнопки только на других игроков
+        if (playerData.Id == localPlayerId)
+        {
+            view.SetTradeButtonVisible(false);
 
-        //if (isThisLocal)
-        //    view.SetLoanButtonsVisible(!playerData.HasLoan, playerData.HasLoan);
+            if (!playerData.HasLoan)
+            {
+                view.SetLoanButtonsVisible(true, false);
+            }
+
+        }
+        else
+        {
+            view.SetTradeButtonVisible(true);
+
+            if (!playerData.HasLoan)
+            {
+                view.SetLoanButtonsVisible(false, false);
+
+            }
+        }
+        
     }
 
     private void OnTrade()
@@ -118,5 +169,23 @@ public class AuctionTimerUpdatedEvent
     {
         PlayerId = playerId;
         TimeLeft = timeLeft;
+    }
+}
+public class OnTakeLoanEvent
+{
+    public PlayerData PlayerData;
+
+    public OnTakeLoanEvent(PlayerData playerData)
+    {
+        PlayerData = playerData;
+    }
+}
+public class OnStartTurnLoanEvent
+{
+    public int PlayerId;
+
+    public OnStartTurnLoanEvent(int playerId)
+    {
+        PlayerId = playerId;
     }
 }

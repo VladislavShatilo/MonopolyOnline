@@ -43,10 +43,11 @@ public class UIPlayerStats : MonoBehaviour, IPlayerStatsView
 
     public void SetTimer(bool active, float timeLeft, bool highlightTurn, bool highlightAuction)
     {
+        Debug.Log(active + "  " + highlightTurn + "  " + highlightAuction);
         timerGO.SetActive(active);
         timerText.gameObject.SetActive(active);
-        highlightTurnImage.enabled = active && highlightTurn;
-        highlightAuctionImage.enabled = active && highlightAuction;
+        highlightTurnImage.gameObject.SetActive(active && highlightTurn);
+        highlightAuctionImage.gameObject.SetActive(active && highlightAuction);
 
         if (active)
             timerText.text = Mathf.Ceil(timeLeft).ToString();
@@ -60,7 +61,14 @@ public class UIPlayerStats : MonoBehaviour, IPlayerStatsView
         takeLoanButton.gameObject.SetActive(!hasLoan && isLocal);
         payLoanButton.gameObject.SetActive(hasLoan && isLocal);
     }
-
+    public void SetTimerGOVisible(bool visible) =>
+     timerGO.SetActive(visible);
+    public void SetLoanContainerVisible(bool visible) =>
+       loanContainer.SetActive(visible);
+    public void SetTurnHighlightVisible(bool visible) =>
+        highlightTurnImage.gameObject.SetActive(visible);
+    public void SetAuctionHighlightVisible(bool visible) =>
+        highlightAuctionImage.gameObject.SetActive(visible);
     public void SetTradeButtonVisible(bool visible) =>
         tradeButton.gameObject.SetActive(visible);
 

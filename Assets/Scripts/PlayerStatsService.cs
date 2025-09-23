@@ -10,6 +10,7 @@ public class PlayerStatsService : MonoBehaviour, IDisposable
 {
     private IPhotonLoanManager photonLoanManager;
     private ITradeService tradeService;
+    private ILocalPlayerService localPlayerService;
     private IEventBus eventBus;
     private UIPlayerStats playerStatsPrefab;
     private Transform playersStatsContainer;
@@ -17,7 +18,7 @@ public class PlayerStatsService : MonoBehaviour, IDisposable
 
     [Inject]
     public void Construct(IPhotonLoanManager photonLoanManager, ITradeService tradeService, [Inject(Id = "PlayerStatsContainer")] Transform playersStatsContainer,
-        [Inject(Id = "PlayerStatsPrefab")] UIPlayerStats playerStatsPrefab, IEventBus eventBus)
+        [Inject(Id = "PlayerStatsPrefab")] UIPlayerStats playerStatsPrefab, IEventBus eventBus, ILocalPlayerService localPlayerService)
     {
 
         this.photonLoanManager = photonLoanManager;
@@ -25,6 +26,7 @@ public class PlayerStatsService : MonoBehaviour, IDisposable
         this.playerStatsPrefab = playerStatsPrefab;
         this.playersStatsContainer = playersStatsContainer;
         this.eventBus = eventBus;
+        this.localPlayerService = localPlayerService;
     }
     public void Initialize()
     {
@@ -49,7 +51,7 @@ public class PlayerStatsService : MonoBehaviour, IDisposable
         // Зарегистрируем View как IPlayerStatsView
         var view = uiStats as IPlayerStatsView;
 
-        var presenter = new PlayerStatsPresenter(view, photonLoanManager, tradeService,eventBus);
+        var presenter = new PlayerStatsPresenter(view, photonLoanManager,eventBus, localPlayerService);
         presenter.Init(e.Player);
         presenters.Add(presenter);
 

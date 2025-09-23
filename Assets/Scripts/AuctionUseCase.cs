@@ -24,6 +24,7 @@ public class AuctionUseCase : IInitializable,IDisposable
         eventBus.Subscribe<StartAuctionEvent>(StartAuction);
         eventBus.Subscribe<PlayerBidAuction>(PlayerBid);
         eventBus.Subscribe<PlayerPassAuction>(PlayerPass);
+        eventBus.Subscribe<TimerExpiredEvent>(TimerExpiredEvent);
 
         //auctionService.OnBidUpdated += (playerId, newPrice) =>
         //{
@@ -41,6 +42,8 @@ public class AuctionUseCase : IInitializable,IDisposable
         eventBus.Unsubscribe<StartAuctionEvent>(StartAuction);
         eventBus.Unsubscribe<PlayerBidAuction>(PlayerBid);
         eventBus.Unsubscribe<PlayerPassAuction>(PlayerPass);
+        eventBus.Unsubscribe<TimerExpiredEvent>(TimerExpiredEvent);
+
 
         //auctionService.OnBidUpdated -= (playerId, newPrice) =>
         //{
@@ -65,6 +68,11 @@ public class AuctionUseCase : IInitializable,IDisposable
 
     public void PlayerPass(PlayerPassAuction e)
     {
+        auctionService.PassBid(e.PlayerId);
+    }
+    public void TimerExpiredEvent(TimerExpiredEvent e)
+    {
+        if (e.Type != TimerType.Auction) return;
         auctionService.PassBid(e.PlayerId);
     }
 }

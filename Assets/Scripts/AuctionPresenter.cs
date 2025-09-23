@@ -27,14 +27,19 @@ public class AuctionPresenter : IInitializable,IDisposable
     void IInitializable.Initialize()
     {
         eventBus.Subscribe<AuctionPromptBidEvent>(OnAuctionPromptBid);
+        eventBus.Subscribe<AuctionEndEvent>(_ => auctionWindow.Hide());
+
+        
         auctionWindow.SetPlayAction(OnPlayClicked);
         auctionWindow.SetPassAction(OnPassClicked);
     }
     void IDisposable.Dispose()
     {
         eventBus.Unsubscribe<AuctionPromptBidEvent>(OnAuctionPromptBid);
+        eventBus.Unsubscribe<AuctionEndEvent>(_ => auctionWindow.Hide());
+
     }
-   
+
 
     private void OnAuctionPromptBid(AuctionPromptBidEvent e)
     {
@@ -50,7 +55,7 @@ public class AuctionPresenter : IInitializable,IDisposable
             auctionWindow.Hide();
         }
     }
-
+ 
     private void OnPlayClicked(int playerId)
     {
        photonAuctionManager.PlayerBidRequest(playerId);

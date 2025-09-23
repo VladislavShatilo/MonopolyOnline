@@ -150,5 +150,9 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<JailRules>().AsSingle().WithArguments(jailTurnsCount, jailRansom).NonLazy();
         Container.Bind<BranchRules>().AsSingle().NonLazy();
         Container.Bind<TurnBranchAdapter>().FromComponentInHierarchy().AsSingle();
+        Container.Bind<PhotonTimerUpdater>().FromComponentInHierarchy().AsSingle();
+        Container.Bind<ITimerManager>().To<TimerManager>().AsSingle().NonLazy();
+
+        
     }
 }

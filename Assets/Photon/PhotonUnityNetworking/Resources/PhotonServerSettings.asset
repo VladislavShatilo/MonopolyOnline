@@ -155,6 +155,8 @@ MonoBehaviour:
   - RPC_TeleportPlayerBroadcast
   - RPC_BuyBranch
   - RPC_SellBranch
+  - RPC_SyncTimer
+  - RPC_CloseAuctionWindow
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

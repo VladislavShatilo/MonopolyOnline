@@ -7,4 +7,5 @@ public interface IPhotonAuctionManager
     ///void BroadcastAuctionEnd(int winnerId, int finalPrice);
     void StartAuctionRequest(int starterActorNumber, int companyId, int companyBasePrice);
     void PlayerPassRequest(int playerId);
+    void CloseAuctionWindowRequest(int playerId);
 }
