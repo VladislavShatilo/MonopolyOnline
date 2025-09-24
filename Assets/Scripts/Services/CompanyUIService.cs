@@ -6,20 +6,48 @@ using Zenject;
 public class CompanyUIService : ICompanyUIService
 {
     private IBoardService boardService;
+    private IEventBus eventBus;
     private Dictionary<int, UICompanyCell> companyUIs = new();
+    private readonly Dictionary<int, CompanyWindowPopup> popups = new();
+
 
     [Inject]
-    public void Construct(IBoardService boardService)
+    public void Construct(IBoardService boardService, IEventBus eventBus)
     {
         this.boardService = boardService;
+        this.eventBus = eventBus;
     }
 
     public void InitializeUI()
     {
         var allCells = boardService.GetAllCellData();
+
         for (int i = 0; i < allCells.Count; i++)
         {
+            var cell = allCells[i];
+
             var cellTransform = boardService.GetCellRectTransform(i);
+            if (cellTransform.TryGetComponent(out CompanyWindowPopup popup))
+            {
+                popup.Init(i);
+                popups[i] = popup;
+
+                popup.OnCompanyClicked += (id) =>
+                {
+                    switch (cell.cellType)
+                    {
+                        case CellType.Company:
+                            eventBus.Publish(new ShowCompanyWindowEvent(cellTransform, cell.companyData.popupData, cell.companyData));
+                            break;
+                        case CellType.FieldCompany:
+                            eventBus.Publish(new ShowFieldCompanyWindowEvent(cellTransform, cell.fieldCompanyData.popupData, cell.fieldCompanyData));
+                            break;
+                        case CellType.DiceCompany:
+                            eventBus.Publish(new ShowDiceCompanyWindowEvent(cellTransform, cell.diceCompanyData.popupData, cell.diceCompanyData));
+                            break;
+                    }
+                };
+            }
             if (cellTransform.TryGetComponent(out UICompanyCell companyUI))
             {
                 companyUI.Init(i);

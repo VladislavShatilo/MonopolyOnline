@@ -14,7 +14,6 @@ public class LoanPayPresenter : IInitializable, IDisposable
     [Inject]
     public void Construct(ILoanPayWindow loanPayWindow, ILocalPlayerService localPlayerService,IEventBus eventBus, IBankService bankService, IPhotonLoanManager photonLoanManager)
     {
-        Debug.Log("Construct");
         this.loanPayWindow = loanPayWindow;
         this.localPlayerService = localPlayerService;
         this.eventBus = eventBus;
@@ -24,8 +23,6 @@ public class LoanPayPresenter : IInitializable, IDisposable
 
     void IInitializable.Initialize()
     {
-        Debug.Log("Initialize");
-
         eventBus.Subscribe<OfferLoanPayEvent>(ShowLoanWindow);
         loanPayWindow.SetPayLoanAction(OnPayLoan);
     }

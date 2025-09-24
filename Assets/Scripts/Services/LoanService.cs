@@ -11,13 +11,15 @@ public class LoanService : ILoanService,IInitializable,IDisposable
     private IPhotonLoanManager photonLoanManager;
     private IBankService bankService;
     private IEventBus eventBus;
+    private GameSettings gameSettings;
     [Inject]
-    public void Construct(IPlayerRepository playerRepository, IPhotonLoanManager network, IBankService bankService, IEventBus eventBus)
+    public void Construct(IPlayerRepository playerRepository, IPhotonLoanManager network, IBankService bankService, IEventBus eventBus, GameSettings gameSettings)
     {
         this.playerRepository = playerRepository;
         this.photonLoanManager = network;
         this.bankService = bankService; 
         this.eventBus = eventBus;
+        this.gameSettings = gameSettings;
     }
     void IInitializable.Initialize()
     {
@@ -47,20 +49,15 @@ public class LoanService : ILoanService,IInitializable,IDisposable
     {
         var player = playerRepository.GetPlayerById(e.PlayerId);
         if (!player.HasLoan) return;
-        Debug.Log(player.LoanTurnsLeft);
 
         player.LoanTurnsLeft--;
-        Debug.Log(player.LoanTurnsLeft);
 
         if (player.LoanTurnsLeft <= 0)
         {
-            Debug.Log(player.LoanTurnsLeft);
-            photonLoanManager.ShowLoanWindow(e.PlayerId,5500);
+            photonLoanManager.ShowLoanWindow(e.PlayerId, gameSettings.loanAmountBack);
         }
         else
         {
-            Debug.Log(player.LoanTurnsLeft);
-
             eventBus.Publish(new OnTakeLoanEvent(player));
         }
     }
@@ -70,7 +67,7 @@ public class LoanService : ILoanService,IInitializable,IDisposable
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            bankService.AddMoney(playerId, 5000);
+            bankService.AddMoney(playerId, gameSettings.loanAmount);
         }
         var player = playerRepository.GetPlayerById(playerId);
 
@@ -85,7 +82,7 @@ public class LoanService : ILoanService,IInitializable,IDisposable
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            bankService.RemoveMoney(playerId, 5500);
+            bankService.RemoveMoney(playerId, gameSettings.loanAmountBack);
         }
         var player = playerRepository.GetPlayerById(playerId);
 

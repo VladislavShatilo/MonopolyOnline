@@ -10,13 +10,13 @@ public enum CompanyType
 public class Company
 {
     public int Id { get; }
-    public bool IsBought { get; private set; }
+    public bool IsBought { get; set; }
     public string Name { get; }
     public int Price { get; }
-    public int OwnerId { get; private set; } = -1;
+    public int OwnerId { get; set; } = -1;
     public int RentLevel { get;  set; } = 0;
-    public bool IsMortgaged { get; private set; }
-    public int MortgageTurnsLeft { get; private set; }
+    public bool IsMortgaged { get; set; }
+    public int MortgageTurnsLeft { get; set; }
     public int MortgagePrice { get; }
     public int BuyoutPrice { get; }
     public int BranchPrice { get; }

@@ -7,14 +7,17 @@ public class GameManager
     private IPlayerSpawner spawner;
     private IPlayerColorService colorService;
     private IEventBus eventBus;
+    private GameSettings gameSettings;
+
     [Inject]
     public void Construct(IPlayerRepository repository, IPlayerSpawner spawner, IPlayerColorService colorService,
-        IEventBus eventBus)
+        IEventBus eventBus, GameSettings gameSettings)
     {
         this.repository = repository;
         this.spawner = spawner;
         this.colorService = colorService;
         this.eventBus = eventBus;
+        this.gameSettings = gameSettings;
     }
 
     public void Initialize()
@@ -25,9 +28,10 @@ public class GameManager
 
             var player = new PlayerData(
                 p.NickName,
-                100_000,
+                gameSettings.startPlayerMoney,
                 p.ActorNumber,
                 colorService.GetColorForPlayer(p.ActorNumber),
+                 gameSettings.loanAmount,
                 p);
 
             repository.AddPlayer(player);

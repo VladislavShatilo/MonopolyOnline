@@ -9,4 +9,6 @@ public interface ICompanyRepository
     void Save(Company company);
     void ResetAll();
     IEnumerable<Company> GetByGroup(CompanyGroup group);
+    IEnumerable<Company> GetByOwner(int ownerId);
+
 }

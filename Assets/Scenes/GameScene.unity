@@ -1933,6 +1933,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerSettings: {fileID: 11400000, guid: b02e6b68628a69741ba37f85b6cf0d63, type: 2}
+  gameSettings: {fileID: 11400000, guid: fa1e3db5b4f0c5548b0946f702f4fb38, type: 2}
   playerColors:
   - {r: 0.9528302, g: 0.04045032, b: 0.04045032, a: 1}
   - {r: 0.14122522, g: 1, b: 0, a: 1}
@@ -1996,6 +1997,7 @@ MonoBehaviour:
   photonJailManager: {fileID: 601542752}
   photonChanceManager: {fileID: 1850932183}
   photonBranchManager: {fileID: 229214245}
+  photonMortgageManager: {fileID: 313872971}
 --- !u!1001 &102672639
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4797,6 +4799,73 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 242051801}
   m_CullTransparentMesh: 1
+--- !u!1 &277640160
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 277640163}
+  - component: {fileID: 277640162}
+  - component: {fileID: 277640161}
+  m_Layer: 0
+  m_Name: PhotonMortgageSync
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &277640161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277640160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 11
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &277640162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277640160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dde4381627bb6924f8071e1a0b909aca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &277640163
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277640160}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 649, y: 995, z: -170.08002}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &278802935
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5391,6 +5460,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowRectTransform: {fileID: 311009687}
   animationDuration: 0.2
+  animationOffset: 160
 --- !u!114 &311009691
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5497,6 +5567,73 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 960, y: 540, z: -500}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &313872969
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 313872972}
+  - component: {fileID: 313872971}
+  - component: {fileID: 313872970}
+  m_Layer: 0
+  m_Name: PhotonMortgageManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &313872970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 313872969}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 22
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &313872971
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 313872969}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f49f252a523c524e8124611a9845bb3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &313872972
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 313872969}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 649, y: 995, z: -170.08002}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8279,6 +8416,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowRectTransform: {fileID: 505861981}
   animationDuration: 0.2
+  animationOffset: 160
 --- !u!114 &505861983
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11694,6 +11832,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowRectTransform: {fileID: 746849915}
   animationDuration: 0.2
+  animationOffset: 160
 --- !u!114 &746849917
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13088,6 +13227,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowRectTransform: {fileID: 870302630}
   animationDuration: 0.5
+  animationOffset: 160
 --- !u!114 &870302633
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17071,6 +17211,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowRectTransform: {fileID: 1126649301}
   animationDuration: 0.2
+  animationOffset: 160
 --- !u!114 &1126649305
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19068,73 +19209,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1288557158}
   m_CullTransparentMesh: 1
---- !u!1 &1295211664
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1295211667}
-  - component: {fileID: 1295211666}
-  - component: {fileID: 1295211665}
-  m_Layer: 0
-  m_Name: MortgageManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &1295211665
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1295211664}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  observableSearch: 2
-  ObservedComponents: []
-  sceneViewId: 11
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
---- !u!114 &1295211666
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1295211664}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe071d40583d5bc419438af080e74ce5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &1295211667
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1295211664}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -257.54626, y: 389.71002, z: -0.30888185}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1297187930
 GameObject:
   m_ObjectHideFlags: 0
@@ -25857,50 +25931,6 @@ RectTransform:
   m_AnchoredPosition: {x: 4.9999847, y: -10}
   m_SizeDelta: {x: -10.000034, y: 60}
   m_Pivot: {x: 0.5, y: 1}
---- !u!1 &1781891846
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1781891848}
-  - component: {fileID: 1781891847}
-  m_Layer: 0
-  m_Name: TurnBranchAdapter
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1781891847
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1781891846}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5673a9ccd01df0c4195e4b44901d18d5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &1781891848
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1781891846}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1226.2943, y: 614.53174, z: -172.08327}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1786861477
 GameObject:
   m_ObjectHideFlags: 0
@@ -27231,6 +27261,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowRectTransform: {fileID: 1905090710}
   animationDuration: 0.2
+  animationOffset: 160
 --- !u!114 &1905090712
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28006,6 +28037,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowRectTransform: {fileID: 1965371224}
   animationDuration: 0.2
+  animationOffset: 160
 --- !u!114 &1965371226
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30020,6 +30052,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowRectTransform: {fileID: 2093619819}
   animationDuration: 0.5
+  animationOffset: 160
 --- !u!114 &2093619823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30709,9 +30742,7 @@ SceneRoots:
   - {fileID: 1355578821}
   - {fileID: 2038016545}
   - {fileID: 486951061}
-  - {fileID: 1295211667}
   - {fileID: 1911457287}
-  - {fileID: 1781891848}
   - {fileID: 401622155}
   - {fileID: 1997305230}
   - {fileID: 341810153}
@@ -30731,3 +30762,5 @@ SceneRoots:
   - {fileID: 1850932181}
   - {fileID: 229214246}
   - {fileID: 920208045}
+  - {fileID: 313872972}
+  - {fileID: 277640163}

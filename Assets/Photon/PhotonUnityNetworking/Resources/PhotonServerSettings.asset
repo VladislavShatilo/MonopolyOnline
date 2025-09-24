@@ -157,6 +157,11 @@ MonoBehaviour:
   - RPC_SellBranch
   - RPC_SyncTimer
   - RPC_CloseAuctionWindow
+  - RPC_SyncMortgageUI
+  - RPC_SyncMortgage
+  - RPC_SetMortgage
+  - RPC_CompanyTickUI
+  - RPC_CompanyFreed
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

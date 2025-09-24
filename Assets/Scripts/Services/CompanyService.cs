@@ -48,7 +48,7 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
             eventBus.Publish(new OfferPurchaseEvent(cellIndex, playerId,company.Price, canAfford));
 
         }
-        else if (company.OwnerId != playerId)
+        else if (company.OwnerId != playerId && !company.IsMortgaged)
         {
 
             eventBus.Publish(new OfferRentEvent(cellIndex, playerId, CalculateRent(company)));

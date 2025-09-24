@@ -22,7 +22,7 @@ public class UIFieldCompanyStats : UIBaseCompanyStats, ICompanyStatsUI<FieldComp
     {
         SetCompanyName(data.name);
         SetGroupName(data.group.ToString());
-       // SetTopBarColor(GroupColors.Colors[(int)data.group]);
+        SetTopBarColor((int)data.group);
 
         SetFieldPrices(data.rentField);
         SetCellPrice(data.price);

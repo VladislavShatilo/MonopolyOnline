@@ -14,6 +14,7 @@ public class UICompanyStats : UIBaseCompanyStats, ICompanyStatsUI<CompanyData>
     [Header("Branch Price")]
     [SerializeField] private TextMeshProUGUI branchPriceText;
 
+    
     public void SetRentPrices(int[] values)
     {
         if (rentPriceTexts == null) return;
@@ -27,7 +28,7 @@ public class UICompanyStats : UIBaseCompanyStats, ICompanyStatsUI<CompanyData>
     {
         SetCompanyName(data.name);
         SetGroupName(data.group.ToString());
-       // SetTopBarColor(GroupColors.Colors[(int)data.group]);
+        SetTopBarColor((int)data.group);
 
         SetRentPrices(data.rent);
         SetCellPrice(data.price);

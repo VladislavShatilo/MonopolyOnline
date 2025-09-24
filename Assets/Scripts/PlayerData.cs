@@ -21,10 +21,12 @@ public class PlayerData
     public int LoanTurnsLeft;
 
     public List<Company> OwnedCompanies = new List<Company>();
+
     [System.NonSerialized]
     public Player photonPlayer;
 
-    public PlayerData(string name, int startMoney, int id, PlayerColor color, Player photonPlayer = null)
+    private int loanAmount;
+    public PlayerData(string name, int startMoney, int id, PlayerColor color, int loanAmount, Player photonPlayer = null)
     {
         IsInJail = false;
         Name = name;
@@ -33,6 +35,7 @@ public class PlayerData
         PlayerColor = color;
         this.photonPlayer = photonPlayer;
         CurrentCellId = 0;
+        this.loanAmount = loanAmount;
     }
 
     // ¬идима€ капитализаци€
@@ -44,11 +47,10 @@ public class PlayerData
             for (int i = 0; i < OwnedCompanies.Count; i++)
             {
                 capital += OwnedCompanies[i].Price;
-                if(OwnedCompanies[i].Type == CompanyType.Company)
+                if (OwnedCompanies[i].Type == CompanyType.Company)
                 {
-                   // capital += OwnedCompanies[i].CompanyData.branchPrice * OwnedCompanies[i].RentLevel;
+                    // capital += OwnedCompanies[i].CompanyData.branchPrice * OwnedCompanies[i].RentLevel;
                 }
-
             }
             return capital;
         }
@@ -65,27 +67,25 @@ public class PlayerData
                 if (!OwnedCompanies[i].IsMortgaged)
                 {
                     liquid += OwnedCompanies[i].MortgagePrice;
-
                 }
                 if (OwnedCompanies[i].Type == CompanyType.Company)
                 {
-                   // liquid += OwnedCompanies[i].branchPrice * OwnedCompanies[i].RentLevel;
+                    // liquid += OwnedCompanies[i].branchPrice * OwnedCompanies[i].RentLevel;
                 }
-
-            }      
+            }
             if (!HasLoan)
             {
-                liquid += 5000; // кредиты
-
+                liquid += loanAmount; // кредиты
             }
             return liquid;
         }
     }
-    public void SendToJail(JailRules rules)
+
+    public void SendToJail(GameSettings gameSettings)
     {
         IsInJail = true;
-        CurrentCellId = 10;
-        JailTurnsLeft = rules.MaxTurns;
+        CurrentCellId = gameSettings.jailCellId;
+        JailTurnsLeft = gameSettings.jailTurns;
     }
 
     public void Release()
@@ -99,13 +99,11 @@ public class PlayerData
         if (JailTurnsLeft > 0)
             JailTurnsLeft--;
     }
-    bool CanPay(int amount)
+
+    private bool CanPay(int amount)
     {
         return LiquidAssets >= amount;
     }
 
     // —сылка на Photon игрока (можно не хранить, если достаточно id)
-  
-
-   
 }

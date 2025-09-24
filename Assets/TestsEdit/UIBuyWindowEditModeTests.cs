@@ -27,7 +27,7 @@ public class UIBuyWindowEditModeTests
 
         var color = new PlayerColor(1, 0, 0);
 
-        testPlayer = new PlayerData("TestPlayer", 0, 0, color, null);
+       // testPlayer = new PlayerData("TestPlayer", 0, 0, color, null);
        // EventBus.Subscribe<TryBuyCompanyEvent>(OnTryBuyCompany);
        // EventBus.Subscribe<StartAuctionEvent>(OnAuctionStart);
         windowGO.SetActive(false);

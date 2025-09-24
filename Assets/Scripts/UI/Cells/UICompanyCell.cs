@@ -32,7 +32,7 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
     [Header("Mortgage")]
     [SerializeField] private Button mortgageButton;
     [SerializeField] private Button buyoutButton;
-    [SerializeField] private TextMeshProUGUI turnsText;
+    [SerializeField] private TextMeshProUGUI mortgageTurnsText;
     [SerializeField] private GameObject mortgageStatsGO;
     [SerializeField] private Image mortgageFadeImage;
 
@@ -47,13 +47,14 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
 
     private IUICompanyCellRepository repository;
     private IPhotonBranchManager photonBranchManager;
+    private IPhotonMortgageManager photonMortgageManager;
 
     [Inject]
-    public void Construct(IUICompanyCellRepository repository, IPhotonBranchManager photonBranchManager)
+    public void Construct(IUICompanyCellRepository repository, IPhotonBranchManager photonBranchManager, IPhotonMortgageManager photonMortgageManager)
     {
-
         this.repository = repository;
         this.photonBranchManager = photonBranchManager;
+        this.photonMortgageManager = photonMortgageManager;
     }
     public int CompanyId()
     {
@@ -79,8 +80,8 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
         buyBranchButton.onClick.AddListener(() => photonBranchManager.RequestBuyBranch(companyId));
         sellBranchButton.onClick.AddListener(() => photonBranchManager.RequestSellBranch(companyId));
         sellFirstBranchButton.onClick.AddListener(() => photonBranchManager.RequestSellBranch(companyId));
-       // mortgageButton.onClick.AddListener(() => OnMortgageClicked?.Invoke(companyId));
-        //buyoutButton.onClick.AddListener(() => OnBuyoutClicked?.Invoke(companyId));
+        mortgageButton.onClick.AddListener(() => photonMortgageManager.RequestMortgageCompany(companyId));
+        buyoutButton.onClick.AddListener(() => photonMortgageManager.RequestBuyoutCompany(companyId));
     }
 
     public void UpdateUI(string name, int price, Color groupColor)
@@ -150,7 +151,14 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
         BGPriceImage.gameObject.SetActive(true);
         priceText.gameObject.SetActive(true);
     }
-
+    public void HideAllMortgageButtons()
+    {
+        mortgageButton.gameObject.SetActive(false);
+        buyoutButton.gameObject.SetActive(false);
+       
+        BGPriceImage.gameObject.SetActive(true);
+        priceText.gameObject.SetActive(true);
+    }
     public void ShowMortgageButton() => ShowButton(true);
     public void ShowBuyoutButton() => ShowButton(false);
 
@@ -165,7 +173,13 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
 
     public void MortgageUI() => MortgageUIChange(true);
     public void BuyoutUI() => MortgageUIChange(false);
+    public void LoseCompanyUI(Company company)
+    {
+        MortgageUIChange(false);
+        UpdateOwner(Color.white);
 
+        SetRentText(company.GetRent(0, 0));
+    }
     private void MortgageUIChange(bool isMortgage)
     {
         HideAllBranchButtons();
@@ -175,6 +189,6 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
         mortgageFadeImage.gameObject.SetActive(isMortgage);
     }
 
-    public void SetTurnsText(int turns) =>
-        turnsText.text = turns.ToString();
+    public void SetMortgageTurnsText(int turns) =>
+        mortgageTurnsText.text = turns.ToString();
 }

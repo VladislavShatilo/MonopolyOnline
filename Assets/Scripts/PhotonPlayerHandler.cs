@@ -10,21 +10,24 @@ public class PhotonPlayerHandler : Photon.Pun.MonoBehaviourPunCallbacks
     private IPlayerRepository repository;
     private IPlayerColorService colorService;
     private IEventBus eventBus;
+    private GameSettings gameSettings;
     [Inject]
-    public void Construct(IPlayerRepository repository, IPlayerColorService colorService, IEventBus eventBus)
+    public void Construct(IPlayerRepository repository, IPlayerColorService colorService, IEventBus eventBus, GameSettings gameSettings)
     {
         this.repository = repository;
         this.colorService = colorService;
         this.eventBus = eventBus;
+        this.gameSettings = gameSettings;   
     }
 
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
     {
         var player = new PlayerData(
             newPlayer.NickName,
-            100_000,
+            gameSettings.startPlayerMoney,
             newPlayer.ActorNumber,
             colorService.GetColorForPlayer(newPlayer.ActorNumber),
+            gameSettings.loanAmount,
             newPlayer);
 
         repository.AddPlayer(player);

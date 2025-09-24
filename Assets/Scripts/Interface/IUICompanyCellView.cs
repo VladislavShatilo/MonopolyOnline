@@ -29,5 +29,7 @@ public interface IUICompanyCellView
 
     void BuyoutUI();
 
-    void SetTurnsText(int turns);
+    void SetMortgageTurnsText(int turns);
+    void HideAllMortgageButtons();
+    void LoseCompanyUI(Company company);
 }

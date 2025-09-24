@@ -7,6 +7,7 @@ public class WindowAnimation : MonoBehaviour
 {
     [SerializeField] private RectTransform windowRectTransform;
     [SerializeField] private float animationDuration = 0.5f;
+    [SerializeField] private float animationOffset = 160f;
     public RectTransform WindowRectTransform
     {
         get => windowRectTransform;
@@ -18,10 +19,10 @@ public class WindowAnimation : MonoBehaviour
     }
     public void HideWindow()
     {
-        windowRectTransform.DOAnchorPos(new Vector2(0, 160), animationDuration);
+        windowRectTransform.DOAnchorPos(new Vector2(0, animationOffset), animationDuration);
     }
     public void HardHideWindow()
     {
-        windowRectTransform.anchoredPosition = new Vector2(0, 160);
+        windowRectTransform.anchoredPosition = new Vector2(0, animationOffset);
     }
 }

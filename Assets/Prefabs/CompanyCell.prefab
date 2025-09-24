@@ -2715,7 +2715,7 @@ MonoBehaviour:
   sellFirstBranchIcon: {fileID: 2237316492376864035}
   mortgageButton: {fileID: 649429190709767887}
   buyoutButton: {fileID: 1305708483470052471}
-  turnsText: {fileID: 1701143175596023235}
+  mortgageTurnsText: {fileID: 1701143175596023235}
   mortgageStatsGO: {fileID: 5786377261955522467}
   mortgageFadeImage: {fileID: 5409608390121988265}
   star1Image: {fileID: 1638050835806599384}

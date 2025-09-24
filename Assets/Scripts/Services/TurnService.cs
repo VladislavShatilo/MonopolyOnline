@@ -10,14 +10,17 @@ public class TurnService : ITurnService
     private IPlayerRepository playerRepository;
     private IPhotonTurnSynchronizer photonTurnSynchronizer;
     private ITimerManager timerManager;
+    private GameSettings gameSettings;
+
     private Turn turn;
 
     [Inject]
-    public void Construct(IPlayerRepository playerRepository, IPhotonTurnSynchronizer photonTurnSynchronizer, ITimerManager timerManager)
+    public void Construct(IPlayerRepository playerRepository, IPhotonTurnSynchronizer photonTurnSynchronizer, ITimerManager timerManager, GameSettings gameSettings)
     {
         this.playerRepository = playerRepository;
         this.photonTurnSynchronizer = photonTurnSynchronizer;
         this.timerManager = timerManager;
+        this.gameSettings = gameSettings;
         turn = new Turn();
     }
 
@@ -32,7 +35,7 @@ public class TurnService : ITurnService
     public void StartTurn(int playerId, bool isNext)
     {
         turn.StartTurn(playerId);
-        timerManager.StartTurnTimer(playerId, 90);
+        timerManager.StartTurnTimer(playerId, gameSettings.turnTime);
         photonTurnSynchronizer.RequestStartTurn(playerId, isNext);
     }
 

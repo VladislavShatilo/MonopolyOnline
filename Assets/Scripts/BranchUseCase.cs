@@ -58,7 +58,6 @@ public class BranchUseCase : IBranchUseCase
         company.RentLevel = newRentLevel;
         var ui = companyUIService.GetCompanyUI(company.Id);
       
-        Debug.Log("Company id " + company.Id + " " + ui.name);
         ui.UpdateBranchStars(company.RentLevel);
 
         var ownedCount = companyRepository.CountOwnedByPlayer(company.OwnerId, company.Type);

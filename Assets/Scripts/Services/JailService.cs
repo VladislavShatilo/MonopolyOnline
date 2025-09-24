@@ -9,23 +9,22 @@ public class JailService : IJailService
     private IPlayerRepository playerRepository;
     private IPhotonTurnManager photonTurnManager;
     private IEventBus eventBus;
-
-    private JailRules rules;
+    private GameSettings gameSettings;
 
     [Inject]
-    public void Construct(IPlayerRepository playerRepository, JailRules rules, IEventBus eventBus, IPhotonTurnManager photonTurnManager)
+    public void Construct(IPlayerRepository playerRepository, IEventBus eventBus, IPhotonTurnManager photonTurnManager, GameSettings gameSettings)
     {
         this.playerRepository = playerRepository;
         this.eventBus = eventBus;
-        this.rules = rules;
         this.photonTurnManager = photonTurnManager;
+        this.gameSettings = gameSettings;
     }
 
     public void SendPlayerToJail(int playerId)
     {
         var player = playerRepository.GetPlayerById(playerId);
         player.CurrentCellId = 10;
-        player.SendToJail(rules);
+        player.SendToJail(gameSettings);
         eventBus.Publish(new SetTurnsJailEvent(playerId, player.JailTurnsLeft));
 
     }

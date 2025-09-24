@@ -14,12 +14,12 @@ public class JailPresenter : IInitializable, IDisposable
     private ILocalPlayerService localPlayerService;
     private IEventBus eventBus;
     private IPhotonDiceManager photonDiceManager;
+    private GameSettings gameSettings;
 
-    private readonly int ransomMoney = 500;
-
+    
     [Inject]
     public void Construct(IJailWindow jailWindow, ILocalPlayerService localPlayerService, IEventBus eventBus, IPlayerRepository playerRepository,
-        IRansomJailWindow ransomJailWindow, IPhotonDiceManager photonDiceManager, IJailService jailService, IBankService bankService)
+        IRansomJailWindow ransomJailWindow, IPhotonDiceManager photonDiceManager, IJailService jailService, IBankService bankService, GameSettings gameSettings)
     {
 
         this.jailWindow = jailWindow;
@@ -57,8 +57,8 @@ public class JailPresenter : IInitializable, IDisposable
         {
             if (e.PlayerId == localId)
             {
-                bool canAfford = player.Money >= ransomMoney;
-                jailWindow.Show(e.PlayerId, ransomMoney, canAfford);
+                bool canAfford = player.Money >= gameSettings.jailRansom;
+                jailWindow.Show(e.PlayerId, gameSettings.jailRansom, canAfford);
             }
             else
             {
@@ -69,8 +69,8 @@ public class JailPresenter : IInitializable, IDisposable
         {
             if (e.PlayerId == localId)
             {
-                bool canAfford = player.Money >= ransomMoney;
-                ransomJailWindow.Show(e.PlayerId, ransomMoney,canAfford);
+                bool canAfford = player.Money >= gameSettings.jailRansom;
+                ransomJailWindow.Show(e.PlayerId, gameSettings.jailRansom, canAfford);
             }
             else
             {
@@ -90,7 +90,7 @@ public class JailPresenter : IInitializable, IDisposable
     {
         jailService.ReleasePlayer(playerId, true);
         photonDiceManager.RequestDiceRoll(localPlayerService.GetLocalPlayerId(), false);
-        bankService.RemoveMoney(playerId, ransomMoney);
+        bankService.RemoveMoney(playerId, gameSettings.jailRansom);
         //eventBus.Publish(new ReleaseFromJailEvent(playerId, true));
         jailWindow.Hide();
         ransomJailWindow.Hide();

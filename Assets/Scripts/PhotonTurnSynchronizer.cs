@@ -8,11 +8,13 @@ public class PhotonTurnSynchronizer : MonoBehaviourPun,IPhotonTurnSynchronizer
 {
     private IPlayerRepository playerRepository;
     private IEventBus eventBus;
+    private IMortgageService mortgageService;
     [Inject]
-    public void Construct(IPlayerRepository playerRepository, IEventBus eventBus)
+    public void Construct(IPlayerRepository playerRepository, IEventBus eventBus, IMortgageService mortgageService)
     {
         this.playerRepository = playerRepository;
         this.eventBus = eventBus;
+        this.mortgageService = mortgageService;
     }
     public void RequestStartTurn(int playerId, bool isNext)
     {
@@ -36,6 +38,10 @@ public class PhotonTurnSynchronizer : MonoBehaviourPun,IPhotonTurnSynchronizer
         if (isNext && player.HasLoan)
         {
             eventBus.Publish(new OnStartTurnLoanEvent(playerId));
+        }
+        if (PhotonNetwork.IsMasterClient)
+        {
+            mortgageService.TickTurn(playerId);
         }
     }
 

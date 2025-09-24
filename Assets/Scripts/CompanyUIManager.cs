@@ -1,6 +1,7 @@
 using System.Globalization;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Zenject;
 public interface ICompanyStatsUI<TData>
 {
     void SetData(TData data);
@@ -21,6 +22,15 @@ public class CompanyUIManager : MonoBehaviour
     [SerializeField] private float cellWidth = 70;
     [SerializeField] private float offset = 80;
 
+    private IEventBus eventBus;
+
+    [Inject]
+    public void Construct(IEventBus eventBus)
+    {
+        this.eventBus = eventBus;
+    }
+
+
     private void Update()
     {
 #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_WEBGL
@@ -33,16 +43,16 @@ public class CompanyUIManager : MonoBehaviour
     }
     private void OnEnable()
     {
-       // EventBus.Subscribe<ShowCompanyWindowEvent>(OnShowCompanyWindow);
-       // EventBus.Subscribe<ShowFieldCompanyWindowEvent>(OnShowFieldCompanyWindow);
-       // EventBus.Subscribe<ShowDiceCompanyWindowEvent>(OnShowDiceCompanyWindow);
+        eventBus.Subscribe<ShowCompanyWindowEvent>(OnShowCompanyWindow);
+        eventBus.Subscribe<ShowFieldCompanyWindowEvent>(OnShowFieldCompanyWindow);
+        eventBus.Subscribe<ShowDiceCompanyWindowEvent>(OnShowDiceCompanyWindow);
     }
 
     private void OnDisable()
     {
-       // EventBus.Unsubscribe<ShowCompanyWindowEvent>(OnShowCompanyWindow);
-      //  EventBus.Unsubscribe<ShowFieldCompanyWindowEvent>(OnShowFieldCompanyWindow);
-       // EventBus.Unsubscribe<ShowDiceCompanyWindowEvent>(OnShowDiceCompanyWindow);
+        eventBus.Unsubscribe<ShowCompanyWindowEvent>(OnShowCompanyWindow);
+        eventBus.Unsubscribe<ShowFieldCompanyWindowEvent>(OnShowFieldCompanyWindow);
+        eventBus.Unsubscribe<ShowDiceCompanyWindowEvent>(OnShowDiceCompanyWindow);
     }
     private void HandleClick(Vector2 screenPosition)
     {

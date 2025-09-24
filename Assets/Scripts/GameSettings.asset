@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f94d78cc70b882d48a393900b47b0921, type: 3}
+  m_Name: GameSettings
+  m_EditorClassIdentifier: 
+  startPlayerMoney: 100000
+  mortgageTurns: 7
+  turnTime: 90
+  auctionTime: 15
+  tradeTime: 15
+  jailTurns: 3
+  jailRansom: 500
+  jailCellId: 10
+  maxBranchLevel: 5
+  loanAmount: 5000
+  loanAmountBack: 5500

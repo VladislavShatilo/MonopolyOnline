@@ -16,45 +16,25 @@ public enum StatsWindowPosition
 public class CompanyWindowPopup : MonoBehaviour
 {
     [SerializeField] private Button showWindowButton;
-    private Company company;
-    private int id;
 
-    public event Action<int> OnCompanyClicked;
+    private int companyId;
+    private CompanyOfferInteractor interactor;
+
+    public event Action<int> OnCompanyClicked; // если не в трейде
 
     public void Init(int id)
     {
-        this.id = id;
+        companyId = id;
         showWindowButton.onClick.AddListener(OnClick);
     }
+
     private void OnClick()
     {
-        //company = CompanyDatabase.Instance.GetCompanyById(id);
-        company = null;
-        if (TradeManager.Instance != null && TradeManager.Instance.IsTradeActive && TradeManager.Instance.CurrentOffer.FromPlayerData.Id == PhotonNetwork.LocalPlayer.ActorNumber)
+       // bool handled = interactor.TryToggleCompanyInOffer(companyId);
+
+       // if (!handled)
         {
-            Debug.Log("OnClick");
-
-            int ownerId = company.OwnerId;
-
-            // Проверяем, есть ли компания уже в текущем предложении
-            bool isAlreadyInOffer = TradeManager.Instance.CurrentOffer != null &&
-                                    (TradeManager.Instance.CurrentOffer.FromCompanies.Contains(company) ||
-                                     TradeManager.Instance.CurrentOffer.ToCompanies.Contains(company));
-
-            if (isAlreadyInOffer)
-            {
-                // Если есть — удаляем
-                TradeManager.Instance.RemoveCompanyFromOffer(ownerId, company);
-            }
-            else
-            {
-                // Если нет — добавляем
-                TradeManager.Instance.AddCompanyToOffer(ownerId, company);
-            }
-        }
-        else
-        {
-            OnCompanyClicked?.Invoke(id);
+            OnCompanyClicked?.Invoke(companyId);
         }
     }
 }

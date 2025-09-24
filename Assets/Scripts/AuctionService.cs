@@ -25,14 +25,18 @@ public class AuctionService : IAuctionService
     private IPhotonTurnManager photonTurnManager;
     private IEventBus eventBus;
     private ITimerManager timerManager;
+    private GameSettings gameSettings;
+
 
     [Inject]
-    public void Construct(IPhotonAuctionManager photonAuctionManager, IPhotonTurnManager photonTurnManager, IEventBus eventBus, ITimerManager timerManager)
+    public void Construct(IPhotonAuctionManager photonAuctionManager, IPhotonTurnManager photonTurnManager, IEventBus eventBus,
+        ITimerManager timerManager, GameSettings gameSettings)
     {
         this.photonAuctionManager = photonAuctionManager;
         this.photonTurnManager = photonTurnManager;
         this.eventBus = eventBus;
         this.timerManager = timerManager;
+        this.gameSettings = gameSettings;
     }
    
     public void StartAuction(int starterActorNumber, int companyId, int basePrice)
@@ -97,14 +101,12 @@ public class AuctionService : IAuctionService
 
             if (lastBidder != -1)
             {
-                // Уже кто-то делал ставку → он победитель
                 int winner = lastBidder;
                 int price = currentPrice;
                 EndAuction_WithWinner(winner, price);
             }
             else
             {
-                // Остался один, но ставок ещё не было → даём ему шанс поставить
                 currentBidderIndex = bidders.IndexOf(lastActive);
                 PromptCurrentBidder();
             }
@@ -128,7 +130,7 @@ public class AuctionService : IAuctionService
 
         int currentBidder = bidders[currentBidderIndex];
         if (passed.Contains(currentBidder)) return;
-        timerManager.StartAuctionTimer(currentBidder, 15);
+        timerManager.StartAuctionTimer(currentBidder, gameSettings.auctionTime);
 
         int minAllowedBid = (lastBidder == -1) ? basePrice + FIRST_BID_INCREMENT : currentPrice + FIRST_BID_INCREMENT;
 
@@ -137,11 +139,8 @@ public class AuctionService : IAuctionService
 
     private void EndAuction_NoWinner()
     {
-        Debug.Log("EndAuction_NoWinner()");
         photonTurnManager.RequestEndTurn();
        // eventBus.Publish(new AuctionEndEvent());
-
-
     }
 
     private void EndAuction_WithWinner(int winnerId, int finalPrice)

@@ -52,7 +52,7 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase
         }
         else
         {
-            steps = randomIndex + 40 - currentCellIndex;
+            steps = randomIndex + boardService.CellsCount - currentCellIndex;
         }
 
         MovePlayer(playerId, steps, true);

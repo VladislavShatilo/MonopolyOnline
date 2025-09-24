@@ -63,4 +63,8 @@ public class CompanyRepository : ICompanyRepository
     {
         return companies.Values.Where(c => c.Group == group);
     }
+    public IEnumerable<Company> GetByOwner(int ownerId)
+    {
+        return companies.Values.Where(c => c.OwnerId == ownerId);
+    }
 }

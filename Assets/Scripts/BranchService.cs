@@ -7,12 +7,13 @@ public class BranchService : IBranchService
 {
     private ICompanyRepository companyRepository;
     private IPlayerRepository playerRepository;
-
+    private GameSettings gameSettings;
     [Inject]
-    public void Construct(ICompanyRepository companyRepository, IPlayerRepository playerRepository)
+    public void Construct(ICompanyRepository companyRepository, IPlayerRepository playerRepository, GameSettings gameSettings)
     {
         this.companyRepository = companyRepository;
         this.playerRepository = playerRepository;
+        this.gameSettings = gameSettings;
     }
 
     public bool TryBuyBranch(int companyId, int playerId, out Company company)
@@ -22,7 +23,7 @@ public class BranchService : IBranchService
 
         if (company == null || player == null) return false;
         if (company.OwnerId != player.Id) return false;
-        if (company.RentLevel >= 5) return false;
+        if (company.RentLevel >= gameSettings.maxBranchLevel) return false;
 
         company.RentLevel++;
         return true;
