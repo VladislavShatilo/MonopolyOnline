@@ -4,6 +4,7 @@ using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 public class UICompanyTrade : MonoBehaviour
 {
@@ -11,8 +12,15 @@ public class UICompanyTrade : MonoBehaviour
     [SerializeField] private TextMeshProUGUI companyPrice;
     [SerializeField] private Button removeCompanyButton;
 
-    public Company company;
-    public int ownerId;
+    private ITradeService tradeService;
+    private Company company;
+    private int ownerId;
+
+    [Inject]
+    public void Construct(ITradeService tradeService)
+    {
+        this.tradeService = tradeService;
+    }
     public void SetCompanyTradeUI(Company company,int ownerId)
     {
         this.company = company; 
@@ -32,12 +40,11 @@ public class UICompanyTrade : MonoBehaviour
     }
     private void OnRemoveClicked()
     {
-        if (TradeManager.Instance != null && TradeManager.Instance.IsTradeActive)
+        if (tradeService.IsTradeActive)
         {
-            // Удаляем компанию из текущего предложения
-            TradeManager.Instance.RemoveCompanyFromOffer(ownerId, company);
+            tradeService.RemoveCompanyFromOffer(ownerId, company);
+        
         }
-        // Можно сразу уничтожить карточку из UI
         Destroy(gameObject);
     }
 }

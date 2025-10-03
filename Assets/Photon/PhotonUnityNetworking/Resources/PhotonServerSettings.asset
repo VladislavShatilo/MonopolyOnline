@@ -162,6 +162,7 @@ MonoBehaviour:
   - RPC_SetMortgage
   - RPC_CompanyTickUI
   - RPC_CompanyFreed
+  - RPC_SendTradeOffer
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

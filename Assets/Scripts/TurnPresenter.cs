@@ -45,6 +45,18 @@ public class TurnPresenter : ITurnPresenter,IInitializable, IDisposable
         photonDiceManager.RequestDiceRoll(localPlayerService.GetLocalPlayerId(), false, result1, result2);
         uiTurnWindow.Hide();
     }
-    public void ShowTurnFor(int playerId) => uiTurnWindow.Show();
+    public void ShowTurnFor(int playerId)
+    {
+        int localId = localPlayerService.GetLocalPlayerId();
+
+        if (playerId == localId)
+        {
+            uiTurnWindow.Show();
+        }
+        else
+        {
+            uiTurnWindow.Hide();
+        }
+    }
     public void HideTurn() => uiTurnWindow.Hide();
 }

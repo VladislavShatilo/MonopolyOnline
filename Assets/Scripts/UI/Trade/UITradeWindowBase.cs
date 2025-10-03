@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using TMPro;
 using UnityEngine;
+using Zenject;
 
 public class UITradeWindowBase : MonoBehaviour
 {
+
     [Header("Panels & Prefabs")]
     [SerializeField] protected Transform leftPanel;
     [SerializeField] protected Transform rightPanel;
@@ -22,6 +24,12 @@ public class UITradeWindowBase : MonoBehaviour
     [SerializeField] protected TextMeshProUGUI leftPlayerNameText;
     [SerializeField] protected TextMeshProUGUI rightPlayerNameText;
 
+    private DiContainer _container;
+    [Inject]
+    public void Construct(DiContainer container)
+    {
+        _container = container;
+    }
     protected TradeOffer currentOffer;
 
     public virtual void RefreshUI()
@@ -32,7 +40,7 @@ public class UITradeWindowBase : MonoBehaviour
         ClearCompanies(rightPanel);
 
         PlayerData leftPlayer = currentOffer.FromPlayerData;
-        PlayerData rightPlayer =currentOffer.ToPlayerData;
+        PlayerData rightPlayer = currentOffer.ToPlayerData;
 
         if (leftPlayer == null || rightPlayer == null) return;
 
@@ -58,11 +66,13 @@ public class UITradeWindowBase : MonoBehaviour
         foreach (var company in companies)
         {
             if (company == null) continue;
-            var card = Instantiate(companyCardPrefab, panel);
-            card.SetActive(false);
+            var card = _container.InstantiatePrefabForComponent<UICompanyTrade>(companyCardPrefab, panel);
+
+            // var card = Instantiate(companyCardPrefab, panel);
+            card.gameObject.SetActive(false);
             if (card.TryGetComponent<UICompanyTrade>(out var uiCompany))
                 uiCompany.SetCompanyTradeUI(company, playerId);
-            card.SetActive(true);
+            card.gameObject.SetActive(true);
             sum += company.Price;
         }
     }
@@ -78,9 +88,13 @@ public class UITradeWindowBase : MonoBehaviour
 
     protected void ClearCompanies(Transform panel)
     {
-        foreach (Transform child in panel)
+        int childCount = panel.childCount;
+        for (int i = childCount - 1; i >= 0; i--)
         {
-            Destroy(child.gameObject);
+            if (i > 0) // Удаляем всех, кроме первого (индекс 0)
+            {
+                Destroy(panel.GetChild(i).gameObject);
+            }
         }
     }
 

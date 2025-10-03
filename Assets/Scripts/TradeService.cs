@@ -1,54 +1,77 @@
-using Photon.Pun;
+ï»¿using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
-public class TradeService : ITradeService 
+public class TradeService : ITradeService,IInitializable,IDisposable
 {
-    private  IPhotonTradeManager photonTradeManager;
+    private IPhotonTradeManager photonTradeManager;
     private IBankService bankService;
     private IEventBus eventBus;
-    private const float TRADE_DURATION = 15f;
+    private IPlayerRepository playerRepository;
+    private ITimerManager timerManager;
+    private GameSettings gameSettings;
+    private ITurnPresenter turnPresenter;
+    private int turnTimeLeft;
 
     public TradeOffer CurrentOffer { get; private set; }
     public bool IsTradeActive { get; private set; }
     private int senderId;
     private int receiverId;
-    private double tradeStartTime;
 
     [Inject]
-    public void Construct(IPhotonTradeManager photonTradeManager, IBankService bankService, IEventBus eventBus)
+    public void Construct(IPhotonTradeManager photonTradeManager, IBankService bankService, IEventBus eventBus, IPlayerRepository playerRepository
+         , ITimerManager timerManager, GameSettings gameSettings, ITurnPresenter turnPresenter)
     {
         this.photonTradeManager = photonTradeManager;
         this.bankService = bankService;
         this.eventBus = eventBus;
+        this.playerRepository = playerRepository;   
+        this.timerManager = timerManager;
+        this.gameSettings = gameSettings;
+        this.turnPresenter = turnPresenter;
     }
-
+    void IInitializable.Initialize()
+    {
+        Debug.Log("Initialize");
+        eventBus.Subscribe<TimerExpiredEvent>(TimerExpiredEvent);
+    }
+    void IDisposable.Dispose()
+    {
+        eventBus.Subscribe<TimerExpiredEvent>(TimerExpiredEvent);
+    }
     public void StartTrade(int fromPlayerId, int toPlayerId)
     {
         CancelTrade();
         senderId = fromPlayerId;
         receiverId = toPlayerId;
         IsTradeActive = true;
-        CurrentOffer = new TradeOffer(senderId, receiverId);
-        photonTradeManager.SendTradeRequest(fromPlayerId, toPlayerId);
+        PlayerData playerFrom = playerRepository.GetPlayerById(fromPlayerId);
+        PlayerData playerTo = playerRepository.GetPlayerById(toPlayerId);
+        CurrentOffer = new TradeOffer(playerFrom, playerTo);
+        eventBus.Publish(new TradeStartedEvent(fromPlayerId, toPlayerId, CurrentOffer));
+      //  photonTradeManager.SendTradeRequest(fromPlayerId, toPlayerId);
     }
 
     public void OfferTrade()
     {
         if (CurrentOffer == null || !CurrentOffer.IsValid()) return;
-        photonTradeManager.SendTradeProposal(CurrentOffer);
+        photonTradeManager.SendTradeOffer(CurrentOffer);
     }
+    public void TimerExpiredEvent(TimerExpiredEvent e)
+    {
+        if (e.Type != TimerType.Trade) return;
 
-    public void AcceptTrade() => photonTradeManager.SendTradeResult(true);
-    public void DeclineTrade() => photonTradeManager.SendTradeResult(false);
+        photonTradeManager.SendTradeResult(false);
+       
+    }
 
     public void CancelTrade()
     {
         CurrentOffer = null;
         IsTradeActive = false;
-        tradeStartTime = 0;
         senderId = -1;
         receiverId = -1;
     }
@@ -58,6 +81,9 @@ public class TradeService : ITradeService
         if (CurrentOffer == null) return;
         if (playerId == CurrentOffer.FromPlayerData.Id) CurrentOffer.FromCompanies.Add(company);
         else if (playerId == CurrentOffer.ToPlayerData.Id) CurrentOffer.ToCompanies.Add(company);
+
+        eventBus.Publish(new TradeUpdatedEvent(CurrentOffer));
+
     }
 
     public void RemoveCompanyFromOffer(int playerId, Company company)
@@ -65,36 +91,29 @@ public class TradeService : ITradeService
         if (CurrentOffer == null) return;
         if (playerId == CurrentOffer.FromPlayerData.Id) CurrentOffer.FromCompanies.Remove(company);
         else if (playerId == CurrentOffer.ToPlayerData.Id) CurrentOffer.ToCompanies.Remove(company);
+
+        eventBus.Publish(new TradeUpdatedEvent(CurrentOffer));
+
     }
 
-    public void SetMoney(int playerId, int amount)
-    {
-        if (CurrentOffer == null) return;
-        if (playerId == CurrentOffer.FromPlayerData.Id) CurrentOffer.FromMoney = amount;
-        else if (playerId == CurrentOffer.ToPlayerData.Id) CurrentOffer.ToMoney = amount;
-    }
-
-    public void UpdateTimer()
-    {
-        if (!IsTradeActive || tradeStartTime <= 0) return;
-
-        double elapsed = PhotonNetwork.Time - tradeStartTime;
-        float timeLeft = Mathf.Max(0f, TRADE_DURATION - (float)elapsed);
-
-        photonTradeManager.UpdateTradeTimer(receiverId, timeLeft);
-
-        if (timeLeft <= 0f)
-            DeclineTrade(); // Àâòî-îòêàç
-    }
-
-    // Âûçûâàåòñÿ èç ñåòåâîãî ñëîÿ
     public void OnTradeProposalReceived(TradeOffer offer)
     {
         CurrentOffer = offer;
         IsTradeActive = true;
         senderId = offer.FromPlayerData.Id;
         receiverId = offer.ToPlayerData.Id;
-        tradeStartTime = PhotonNetwork.Time;
+
+        var tick = timerManager.Tick();
+        if (tick.HasValue)
+        {
+            turnTimeLeft = (int)tick.Value.timeLeft;
+        }
+        else
+        {
+            // Ñ‚Ð°Ð¹Ð¼ÐµÑ€ Ð½ÐµÐ°ÐºÑ‚Ð¸Ð²ÐµÐ½ â†’ Ð¼Ð¾Ð¶Ð½Ð¾ Ð·Ð°Ð´Ð°Ñ‚ÑŒ Ð·Ð°Ð¿Ð°ÑÐ½Ð¾Ðµ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ
+            turnTimeLeft = gameSettings.turnTime;
+        }
+        timerManager.StartTradeTimer(receiverId, gameSettings.tradeTime);
         eventBus.Publish(new TradeProposalReceivedEvent(offer, senderId, receiverId));
     }
 
@@ -104,21 +123,41 @@ public class TradeService : ITradeService
         {
             ApplyTrade(CurrentOffer);
         }
+        timerManager.StartTurnTimer(senderId, turnTimeLeft);
+        turnPresenter.ShowTurnFor(senderId);
         eventBus.Publish(new TradeEndedEvent(accepted, senderId, receiverId));
         CancelTrade();
     }
 
     private void ApplyTrade(TradeOffer offer)
     {
-        foreach (var c in offer.FromCompanies) c.TransferTo(receiverId);
-        foreach (var c in offer.ToCompanies) c.TransferTo(senderId);
+      
+        foreach (var c in offer.FromCompanies)
+        {
+            c.TransferTo(receiverId);
+            eventBus.Publish(new CompanyBoughtEvent(c.Id, receiverId));
+            eventBus.Publish(new HideButtonsTradeEvent(c.Id));
 
-        bankService.RemoveMoney(senderId, offer.FromMoney);
-        bankService.AddMoney(receiverId, offer.FromMoney);
 
-        bankService.RemoveMoney(receiverId, offer.ToMoney);
-        bankService.AddMoney(senderId, offer.ToMoney);
+        }
+        foreach (var c in offer.ToCompanies)
+        {
+            c.TransferTo(senderId);
+            eventBus.Publish(new CompanyBoughtEvent(c.Id, senderId));
+            eventBus.Publish(new HideButtonsTradeEvent(c.Id));
 
-        
+        }
+
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+
+            bankService.RemoveMoney(senderId, offer.FromMoney);
+            bankService.AddMoney(receiverId, offer.FromMoney);
+
+            bankService.RemoveMoney(receiverId, offer.ToMoney);
+            bankService.AddMoney(senderId, offer.ToMoney);
+        }
+
     }
 }

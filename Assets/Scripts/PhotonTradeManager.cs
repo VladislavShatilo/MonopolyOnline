@@ -11,13 +11,15 @@ public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
     private ITradeService tradeService;
     private ICompanyRepository companyRepository;
     private IEventBus eventBus;
+    private IPlayerRepository playerRepository;
 
     [Inject]
-    public void Construct(ITradeService tradeService, ICompanyRepository companyRepository, IEventBus eventBus)
+    public void Construct(ITradeService tradeService, ICompanyRepository companyRepository, IEventBus eventBus, IPlayerRepository playerRepository)
     {
         this.tradeService = tradeService;
         this.companyRepository = companyRepository;
         this.eventBus = eventBus;
+        this.playerRepository = playerRepository;
     }
 
     public void SendTradeRequest(int fromPlayerId, int toPlayerId)
@@ -25,19 +27,21 @@ public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
         photonView.RPC(nameof(RPC_StartTradeRequest), RpcTarget.All, fromPlayerId, toPlayerId);
     }
 
-    public void SendTradeProposal(TradeOffer offer)
+    public void SendTradeOffer(TradeOffer offer)
     {
-        photonView.RPC(nameof(RPC_SendTradeProposal), RpcTarget.MasterClient,
+        photonView.RPC(nameof(RPC_SendTradeOffer), RpcTarget.All,
             offer.FromPlayerData.Id, offer.ToPlayerData.Id,
             JsonUtility.ToJson(new CompanyIdListWrapper { Ids = offer.FromCompanies.ConvertAll(c => c.Id) }),
             JsonUtility.ToJson(new CompanyIdListWrapper { Ids = offer.ToCompanies.ConvertAll(c => c.Id) }),
             offer.FromMoney, offer.ToMoney
         );
     }
+
     public void CompleteTrade(bool accepted)
     {
         photonView.RPC(nameof(RPC_CompleteTrade), RpcTarget.All, accepted);
     }
+
     public void SendTradeResult(bool accepted)
     {
         photonView.RPC(nameof(RPC_CompleteTrade), RpcTarget.All, accepted);
@@ -53,22 +57,14 @@ public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
     {
         tradeService.StartTrade(fromPlayerId, toPlayerId);
     }
-    public void ReceiveTradeProposal(TradeOffer offer)
-    {
-        // Вызываем RPC на всех для получения трейда
-        photonView.RPC(nameof(RPC_SendTradeProposal), RpcTarget.All,
-            offer.FromPlayerData.Id,
-            offer.ToPlayerData.Id,
-            JsonUtility.ToJson(new CompanyIdListWrapper { Ids = offer.FromCompanies.ConvertAll(c => c.Id) }),
-            JsonUtility.ToJson(new CompanyIdListWrapper { Ids = offer.ToCompanies.ConvertAll(c => c.Id) }),
-            offer.FromMoney,
-            offer.ToMoney
-        );
-    }
+
+  
     [PunRPC]
-    private void RPC_SendTradeProposal(int fromId, int toId, string fromJson, string toJson, int fromMoney, int toMoney)
+    private void RPC_SendTradeOffer(int fromId, int toId, string fromJson, string toJson, int fromMoney, int toMoney)
     {
-        var offer = new TradeOffer(fromId, toId)
+        PlayerData playerFrom = playerRepository.GetPlayerById(fromId);
+        PlayerData playerTo = playerRepository.GetPlayerById(toId);
+        var offer = new TradeOffer(playerFrom, playerTo)
         {
             FromMoney = fromMoney,
             ToMoney = toMoney

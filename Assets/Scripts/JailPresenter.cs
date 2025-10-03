@@ -30,6 +30,7 @@ public class JailPresenter : IInitializable, IDisposable
         this.photonDiceManager = photonDiceManager;
         this.jailService = jailService;
         this.bankService = bankService;
+        this.gameSettings = gameSettings;
     }
 
     void IInitializable.Initialize()

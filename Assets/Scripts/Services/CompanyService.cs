@@ -78,9 +78,9 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
 
         company.Buy(playerId);
         bank.RemoveMoney(playerId, price);
-        eventBus.Publish(new CompanyBoughtEvent(cellIndex, playerId, price, reason));
+        eventBus.Publish(new CompanyBoughtEvent(cellIndex, playerId));
         photonTurnManager.RequestEndTurn();
-        companySyncService.SyncCompanyBought(cellIndex,playerId,price, reason);
+        companySyncService.SyncCompanyBought(cellIndex,playerId,price);
 
     }
 
@@ -149,14 +149,10 @@ public class CompanyBoughtEvent
 {
     public int CellIndex;
     public int PlayerId;
-    public int Price;
-    public BuyReason Reason;
-    public CompanyBoughtEvent(int cellIndex, int playerId, int price, BuyReason reason)
+    public CompanyBoughtEvent(int cellIndex, int playerId)
     {
         CellIndex =cellIndex;
         PlayerId = playerId;
-        Price = price;
-        Reason = reason;
     }
 }
 public class RentPaidEvent

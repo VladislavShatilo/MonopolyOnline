@@ -30,22 +30,12 @@ public class UICompanyCellPresenter : IInitializable, IDisposable
     void IInitializable.Initialize()
     {
         eventBus.Subscribe<CompanyBoughtEvent>(CompanyBoughtUpdate);
-
-       // view.OnBuyBranchClicked += HandleBuyBranch;
-       // view.OnSellBranchClicked += HandleSellBranch;
-       // view.OnMortgageClicked += HandleMortgage;
-       // view.OnBuyoutClicked += HandleBuyout;
     }
 
     void IDisposable.Dispose()
     {
 
         eventBus.Unsubscribe<CompanyBoughtEvent>(CompanyBoughtUpdate);
-
-      //  view.OnBuyBranchClicked -= HandleBuyBranch;
-      //  view.OnSellBranchClicked -= HandleSellBranch;
-       // view.OnMortgageClicked -= HandleMortgage;
-        //view.OnBuyoutClicked -= HandleBuyout;
     }
     public void InitCompany(int companyId)
     {
@@ -78,15 +68,5 @@ public class UICompanyCellPresenter : IInitializable, IDisposable
 
         view.SetRentText(companyService.CalculateRent(company));
     }
-    private void HandleBuyBranch(int companyId) { }
-    // companyService.BuyBranch(companyId);
-
-    private void HandleSellBranch(int companyId) {}
-      //  companyService.SellBranch(companyId);
-
-    private void HandleMortgage(int companyId) { }
-       // companyService.Mortgage(companyId);
-
-    private void HandleBuyout(int companyId) { }
-        //companyService.Buyout(companyId);
+ 
 }

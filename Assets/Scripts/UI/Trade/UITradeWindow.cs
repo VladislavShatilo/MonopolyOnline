@@ -6,39 +6,25 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UITradeWindow : UITradeWindowBase
+public class UITradeWindow : UITradeWindowBase, ITradeWindow
 {
-    public static UITradeWindow Instance { get; private set; }
 
     [Header("ButtonsInputs")]
     [SerializeField] private Button offerButton;
-
     [SerializeField] private Button closeButton;
 
     [Header("Inputs")]
     [SerializeField] private TMP_InputField leftMoneyInputField;
-
     [SerializeField] private TMP_InputField rightMoneyInputField;
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-    }
-
+    [SerializeField] private UIMoneyTrade leftUIMoneyTrade;
+    [SerializeField] private UIMoneyTrade rightUIMoneyTrade;
     private void OnEnable()
     {
+        offerButton.interactable = false;
+
         leftMoneyInputField.onEndEdit.AddListener(OnLeftMoneyChanged);
         rightMoneyInputField.onEndEdit.AddListener(OnRightMoneyChanged);
-
-       // EventBus.Subscribe<TradeStartedEvent>(OnTradeStarted);
-       // EventBus.Subscribe<TradeUpdatedEvent>(OnTradeUpdated);
-       // EventBus.Subscribe<TradeCancelledEvent>(_ => ClearUI());
-
+  
         offerButton.onClick.AddListener(OnOffer);
         closeButton.onClick.AddListener(OnClose);
     }
@@ -48,36 +34,57 @@ public class UITradeWindow : UITradeWindowBase
         leftMoneyInputField.onEndEdit.RemoveListener(OnLeftMoneyChanged);
         rightMoneyInputField.onEndEdit.RemoveListener(OnRightMoneyChanged);
 
-       // EventBus.Unsubscribe<TradeStartedEvent>(OnTradeStarted);
-       // EventBus.Unsubscribe<TradeUpdatedEvent>(OnTradeUpdated);
-       // EventBus.Unsubscribe<TradeCancelledEvent>(_ => ClearUI());
 
         offerButton.onClick.AddListener(OnOffer);
         closeButton.onClick.AddListener(OnClose);
     }
-
-    private void OnTradeStarted(TradeStartedEvent e)
+    void ITradeWindow.Show(TradeOffer tradeOffer)
     {
-        if (PhotonNetwork.LocalPlayer.ActorNumber != e.FromPlayerId) return;
+        ValidateOfferButton();
         ClearUI();
-        currentOffer = e.Offer;
+        currentOffer = tradeOffer;
         RefreshUI();
         ShowWindow();
     }
-
-    private void OnTradeUpdated(TradeUpdatedEvent e)
+    void ITradeWindow.Hide()
     {
-        currentOffer = e.Offer;
-        RefreshUI();
+        OnClose();
     }
-
+    void ITradeWindow.Clear()
+    {
+        throw new System.NotImplementedException();
+    }
+    public void SetOfferAction(System.Action onAuction)
+    {
+        offerButton.onClick.RemoveAllListeners();
+        if (onAuction != null)
+        {
+            offerButton.onClick.AddListener(() => onAuction());
+        }
+    }
+    public void SetCloseAction(System.Action onBuyAction)
+    {
+        closeButton.onClick.RemoveAllListeners();
+        if (onBuyAction != null)
+        {
+            closeButton.onClick.AddListener(() => onBuyAction());
+        }
+    }
+    void ITradeWindow.UpdateTrade(TradeOffer tradeOffer)
+    {
+        currentOffer = tradeOffer;
+        RefreshUI();
+        ValidateOfferButton();
+    }
+ 
     private void OnLeftMoneyChanged(string value)
     {
         if (int.TryParse(value, out int amount) && currentOffer != null)
         {
-            TradeManager.Instance.SetMoney(currentOffer.FromPlayerData.Id, amount);
+           // TradeManager.Instance.SetMoney(currentOffer.FromPlayerData.Id, amount);
             currentOffer.FromMoney = amount;
             RefreshUI();
+            ValidateOfferButton();
         }
     }
 
@@ -85,9 +92,35 @@ public class UITradeWindow : UITradeWindowBase
     {
         if (int.TryParse(value, out int amount) && currentOffer != null)
         {
-            TradeManager.Instance.SetMoney(currentOffer.ToPlayerData.Id, amount);
+            //TradeManager.Instance.SetMoney(currentOffer.ToPlayerData.Id, amount);
             currentOffer.ToMoney = amount;
             RefreshUI();
+            ValidateOfferButton();
+        }
+    }
+    private void ValidateOfferButton()
+    {
+        if (currentOffer != null)
+        {
+            Debug.Log("ValidateOfferButton");
+            int leftAmount = currentOffer.GetFromTotalValue();
+            int rightAmount = currentOffer.GetToTotalValue();
+            if(leftAmount ==0 || rightAmount == 0)
+            {
+                offerButton.interactable = false;
+            }
+            if (leftAmount > 2 * rightAmount || rightAmount > 2 * leftAmount)
+            {
+                Debug.Log("leftAmount " + leftAmount + "  " + "rightAmount " + rightAmount);
+
+                offerButton.interactable = false;
+            }
+            else
+            {
+                Debug.Log("leftAmount " + leftAmount + "  " + "rightAmount " + rightAmount);
+
+                offerButton.interactable = true;
+            }
         }
     }
 
@@ -100,11 +133,17 @@ public class UITradeWindow : UITradeWindowBase
 
     private void OnClose()
     {
-       // EventBus.Publish(new CancelTradeEvent());
+        // EventBus.Publish(new CancelTradeEvent());
+
         HideWindow();
+        leftMoneyInputField.text = "0";
+        rightMoneyInputField.text = "0";
+        leftUIMoneyTrade.RefreshUI();
+        rightUIMoneyTrade.RefreshUI();
+
     }
 }
 
-public class OfferTradeEvent{}
+public class OfferTradeEvent { }
 
-public class CancelTradeEvent{}
+public class CancelTradeEvent { }

@@ -16,7 +16,7 @@ MonoBehaviour:
   mortgageTurns: 7
   turnTime: 90
   auctionTime: 15
-  tradeTime: 15
+  tradeTime: 5
   jailTurns: 3
   jailRansom: 500
   jailCellId: 10

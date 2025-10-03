@@ -7,49 +7,40 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UITradeReviewWindow : UITradeWindowBase
+public class UITradeReviewWindow : UITradeWindowBase, ITradeReviewWindow
 {
-    public static UITradeReviewWindow Instance { get; private set; }
-
-    [Header("Buttons")]
     [SerializeField] private Button acceptButton;
     [SerializeField] private Button cancelButton;
 
-    private void Awake()
+    public void Show(bool isRecipient,TradeOffer tradeOffer)
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-        Instance = this;
-    }
-
-    private void Start()
-    {
-       // acceptButton.onClick.AddListener(TradeManager.Instance.AcceptTrade);
-       // cancelButton.onClick.AddListener(TradeManager.Instance.DeclineTrade);
-    }
-
-    private void OnEnable()
-    {
-       // EventBus.Subscribe<TradeCancelledEvent>(_ => ClearUI());
-       // EventBus.Subscribe<TradeProposalReceivedEvent>(OnTradeProposalReceived);
-    }
-
-    private void OnDisable()
-    {
-       // EventBus.Unsubscribe<TradeCancelledEvent>(_ => ClearUI());
-        //EventBus.Unsubscribe<TradeProposalReceivedEvent>(OnTradeProposalReceived);
-    }
-
-    private void OnTradeProposalReceived(TradeProposalReceivedEvent e)
-    {
-        if (PhotonNetwork.LocalPlayer.ActorNumber == e.FromPlayerId) return;
-
-        currentOffer = e.Offer;
-        ShowWindow();
-
-        bool isRecipient = PhotonNetwork.LocalPlayer.ActorNumber == currentOffer.ToPlayerData.Id;
         acceptButton.gameObject.SetActive(isRecipient);
         cancelButton.gameObject.SetActive(isRecipient);
-
+        currentOffer = tradeOffer;
+        ShowWindow();
         RefreshUI();
     }
+    public void SetAcceptAction(System.Action onAccept)
+    {
+        acceptButton.onClick.RemoveAllListeners();
+        if (onAccept != null)
+        {
+            acceptButton.onClick.AddListener(() => onAccept());
+        }
+    }
+    public void SetCancelAction(System.Action onCancelAction)
+    {
+        cancelButton.onClick.RemoveAllListeners();
+        if (onCancelAction != null)
+        {
+            cancelButton.onClick.AddListener(() => onCancelAction());
+        }
+    }
+    public void Hide()
+    {
+        ClearUI();
+        HideWindow();
+
+    }
+
 }

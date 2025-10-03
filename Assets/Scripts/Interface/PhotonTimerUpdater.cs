@@ -36,7 +36,10 @@ public class PhotonTimerUpdater : MonoBehaviourPun
             }
 
             if (expired)
+            {
                 eventBus.Publish(new TimerExpiredEvent(type, playerId));
+
+            }
         }
 
     }

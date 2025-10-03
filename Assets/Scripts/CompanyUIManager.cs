@@ -56,12 +56,6 @@ public class CompanyUIManager : MonoBehaviour
     }
     private void HandleClick(Vector2 screenPosition)
     {
-        if (!IsPointerOverUI(screenPosition))
-        {
-            HideAllWindows();
-            return;
-        }
-
         if (!IsInsideAnyWindow(screenPosition))
         {
             HideAllWindows();
@@ -78,18 +72,12 @@ public class CompanyUIManager : MonoBehaviour
     private bool IsPointerInsideWindow(RectTransform window, Vector2 screenPosition)
     {
         if (!window.gameObject.activeSelf) return false;
-        return RectTransformUtility.RectangleContainsScreenPoint(window, screenPosition);
-    }
 
-    private bool IsPointerOverUI(Vector2 screenPosition)
-    {
-#if UNITY_EDITOR || UNITY_STANDALONE || UNITY_WEBGL
-        return EventSystem.current.IsPointerOverGameObject();
-#elif UNITY_IOS || UNITY_ANDROID
-        return Input.touchCount > 0 && EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId);
-#else
-        return false;
-#endif
+        return RectTransformUtility.RectangleContainsScreenPoint(
+            window,
+            screenPosition,
+            Camera.main   // указываем камеру канваса
+        );
     }
 
     private void ConfigureWindowPosition(RectTransform window, RectTransform companyCell, StatsWindowPosition position)

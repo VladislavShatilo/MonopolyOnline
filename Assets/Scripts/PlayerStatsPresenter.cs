@@ -10,15 +10,16 @@ public class PlayerStatsPresenter
     private IPlayerStatsView view;
     private IEventBus eventBus;
     private ILocalPlayerService localPlayerService;
-
+    private IPhotonTradeManager photonTradeManager;
     private PlayerData playerData;
     private bool _isSubscribed = false;
 
-    public PlayerStatsPresenter(IPlayerStatsView view, IPhotonLoanManager photonLoanManager, IEventBus eventBus, ILocalPlayerService localPlayerService)
+    public PlayerStatsPresenter(IPlayerStatsView view, IPhotonLoanManager photonLoanManager, IEventBus eventBus, ILocalPlayerService localPlayerService, IPhotonTradeManager photonTradeManager)
     {
         this.view = view;
         this.eventBus = eventBus;
         this.localPlayerService = localPlayerService;
+        this.photonTradeManager = photonTradeManager;
 
         // Привязка кнопок
         view.BindTradeAction(OnTrade);
@@ -35,6 +36,8 @@ public class PlayerStatsPresenter
         eventBus.Subscribe<TurnStartEvent>(OnTurnStarted);
         eventBus.Subscribe<TimerUpdatedEvent>(OnTurnTimerUpdated);
         eventBus.Subscribe<TimerUpdatedEvent>(OnAuctionTimerUpdated);
+        eventBus.Subscribe<TimerUpdatedEvent>(OnTradeTimerUpdated);
+
         eventBus.Subscribe<OnTakeLoanEvent>(OnLoanUpdated);
 
         _isSubscribed = true;
@@ -48,6 +51,8 @@ public class PlayerStatsPresenter
         eventBus.Unsubscribe<TurnStartEvent>(OnTurnStarted);
         eventBus.Unsubscribe<TimerUpdatedEvent>(OnTurnTimerUpdated);
         eventBus.Unsubscribe<TimerUpdatedEvent>(OnAuctionTimerUpdated);
+        eventBus.Unsubscribe<TimerUpdatedEvent>(OnTradeTimerUpdated);
+
         eventBus.Unsubscribe<OnTakeLoanEvent>(OnLoanUpdated);
 
         _isSubscribed = false;
@@ -108,7 +113,21 @@ public class PlayerStatsPresenter
         }
        
     }
+    private void OnTradeTimerUpdated(TimerUpdatedEvent e)
+    {
+        if (e.Type != TimerType.Trade) return;
+        if (playerData.Id == e.PlayerId)
+        {
+            view.SetTimer(e.IsActive, e.TimeLeft, false, true);
 
+        }
+        else
+        {
+            view.SetTurnHighlightVisible(false);
+            view.SetTimer(false, 0, false, false);
+        }
+
+    }
     private void OnLoanUpdated(OnTakeLoanEvent e)
     {
         if (e.PlayerData.Id == playerData.Id)
@@ -162,6 +181,7 @@ public class PlayerStatsPresenter
 
     private void OnTrade()
     {
+        photonTradeManager.SendTradeRequest(localPlayerService.GetLocalPlayerId(), playerData.Id);
        // tradeService.SendTradeRequest(playerData.Id);
     }
 }

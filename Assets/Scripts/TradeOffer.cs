@@ -11,9 +11,8 @@ public class TradeOffer
 
     public int FromMoney { get; set; }
     public int ToMoney { get; set; }
-	[Inject] private IPlayerRepository playerRepository;
 
-	public void SetFromCompanies(List<Company> companies)
+    public void SetFromCompanies(List<Company> companies)
     {
         FromCompanies.Clear();
         if (companies != null)
@@ -26,11 +25,9 @@ public class TradeOffer
         if (companies != null)
             ToCompanies.AddRange(companies);
     }
- 
-    public TradeOffer(int fromPlayerid, int toPlayerId)
+
+    public TradeOffer(PlayerData fromPlayerData, PlayerData toPlayerData)
     {
-        PlayerData fromPlayerData = playerRepository.GetPlayerById(fromPlayerid);
-        PlayerData toPlayerData = playerRepository.GetPlayerById(toPlayerId);
         FromPlayerData = fromPlayerData;
         ToPlayerData = toPlayerData;
     }

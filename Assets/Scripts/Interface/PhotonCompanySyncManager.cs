@@ -17,14 +17,14 @@ public class PhotonCompanySyncManager : MonoBehaviourPun, ICompanySyncService
         this.eventBus = eventBus;
     }
     [PunRPC]
-    private void RPC_SyncCompanyBought(int companyId, int playerId, int price, int reason)
+    private void RPC_SyncCompanyBought(int companyId, int playerId, int price)
     {
         var company = companyRepository.GetCompanyById(companyId);
         company.Buy(playerId);
 
         var player = playerRepository.GetPlayerById(playerId);
         player.Money -= price; // синхронизация, не логика банка
-        eventBus.Publish(new CompanyBoughtEvent(companyId, playerId, price, (BuyReason)reason));
+        eventBus.Publish(new CompanyBoughtEvent(companyId, playerId));
     }
     [PunRPC]
     private void RPC_SyncRentPaid(int companyId, int playerId, int ownerId, int rent)
@@ -37,14 +37,11 @@ public class PhotonCompanySyncManager : MonoBehaviourPun, ICompanySyncService
         renter.Money -= rent;
 
         eventBus.Publish(new RentPaidEvent(companyId, playerId, company.OwnerId, rent));
-
-      
-
     }
-    public void SyncCompanyBought(int companyId, int playerId, int price, BuyReason reason)
+    public void SyncCompanyBought(int companyId, int playerId, int price)
     {
 
-        photonView.RPC(nameof(RPC_SyncCompanyBought), RpcTarget.Others, companyId, playerId, price, (int)reason);
+        photonView.RPC(nameof(RPC_SyncCompanyBought), RpcTarget.Others, companyId, playerId, price);
     }
 
     public void SyncRentPaid(int companyId, int playerId, int ownerId, int rent)
