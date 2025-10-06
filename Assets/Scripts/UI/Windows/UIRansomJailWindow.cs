@@ -18,6 +18,8 @@ public class UIRansomJailWindow : UIWindowBase,IRansomJailWindow
 
     private int currentPlayerId;
 
+    #region PUBLIC_METHODS
+
     public void Show(int playerId, int fine, bool canAfford)
     {
         currentPlayerId = playerId;
@@ -40,4 +42,7 @@ public class UIRansomJailWindow : UIWindowBase,IRansomJailWindow
         if (onRansom != null)
             ransomButton.onClick.AddListener(() => onRansom(currentPlayerId));
     }
+
+    #endregion PUBLIC_METHODS
+
 }

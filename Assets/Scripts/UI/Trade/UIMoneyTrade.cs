@@ -16,6 +16,8 @@ public class UIMoneyTrade : MonoBehaviour
     private int currentMoney = 0;
     private RectTransform rectTransform;
 
+    #region LIFE_CYCLE
+
     private void Start()
     {
         rectTransform = GetComponent<RectTransform>();
@@ -34,6 +36,24 @@ public class UIMoneyTrade : MonoBehaviour
 #endif
     }
 
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
+    public void RefreshUI()
+    {
+        currentMoney = 0;
+        moneyTextValue.text = currentMoney.ToString("N0", CultureInfo.InvariantCulture);
+        moneyInputField.text = "0";
+        moneyInputField.gameObject.SetActive(false);
+        moneyTextValue.gameObject.SetActive(true);
+        penImage.gameObject.SetActive(true);
+    }
+
+    #endregion PUBLIC_METHODS
+
+    #region PRIVATE_METHODS
+
     private void HandleClick(Vector2 screenPosition)
     {
         if (!IsPointerOverUI(screenPosition))
@@ -47,10 +67,10 @@ public class UIMoneyTrade : MonoBehaviour
             CloseInput();
         }
     }
+
     private bool IsInsideAnyWindow(Vector2 screenPosition)
     {
         return IsPointerInsideWindow(rectTransform, screenPosition);
-           
     }
 
     private bool IsPointerInsideWindow(RectTransform window, Vector2 screenPosition)
@@ -74,6 +94,7 @@ public class UIMoneyTrade : MonoBehaviour
         return false;
 #endif
     }
+
     private void OpenMoneyInput()
     {
         moneyInputField.gameObject.SetActive(true);
@@ -93,12 +114,10 @@ public class UIMoneyTrade : MonoBehaviour
         CloseInput();
 
         moneyInputField.onEndEdit.RemoveListener(OnMoneyChanged);
-
-      
     }
-    private void CloseInput() 
-    {
 
+    private void CloseInput()
+    {
         moneyTextValue.text = currentMoney.ToString("N0", CultureInfo.InvariantCulture);
 
         penImage.gameObject.SetActive(true);
@@ -107,13 +126,5 @@ public class UIMoneyTrade : MonoBehaviour
         moneyText.gameObject.SetActive(true);
     }
 
-    public void RefreshUI()
-    {
-        currentMoney = 0;
-        moneyTextValue.text = currentMoney.ToString("N0", CultureInfo.InvariantCulture);
-        moneyInputField.text = "0";
-        moneyInputField.gameObject.SetActive(false);
-        moneyTextValue.gameObject.SetActive(true);
-        penImage.gameObject.SetActive(true);
-    }
+    #endregion PRIVATE_METHODS
 }

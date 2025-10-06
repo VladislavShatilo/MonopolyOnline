@@ -9,6 +9,7 @@ public class UIAuctionWindow : UIWindowBase, IAuctionWindow
 {
     [Header("UI References")]
     [SerializeField] private Button playButton;
+
     [SerializeField] private Button cantPlayButton;
     [SerializeField] private Button cancelButton;
     [SerializeField] private TextMeshProUGUI playPriceText;
@@ -18,6 +19,8 @@ public class UIAuctionWindow : UIWindowBase, IAuctionWindow
     private int playerId;
     private Action<int> onPlay;
     private Action<int> onPass;
+
+    #region LIFE_CYCLE
 
     protected void OnEnable()
     {
@@ -30,6 +33,10 @@ public class UIAuctionWindow : UIWindowBase, IAuctionWindow
         playButton.onClick.RemoveListener(HandlePlayClicked);
         cancelButton.onClick.RemoveListener(HandlePassClicked);
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public void Show(int playerId, string companyName, int minAllowedBid, int money)
     {
@@ -50,7 +57,12 @@ public class UIAuctionWindow : UIWindowBase, IAuctionWindow
     public void Hide() => HideWindow();
 
     public void SetPlayAction(Action<int> onPlay) => this.onPlay = onPlay;
+
     public void SetPassAction(Action<int> onPass) => this.onPass = onPass;
+
+    #endregion PUBLIC_METHODS
+
+    #region CALLBACKS
 
     private void HandlePlayClicked()
     {
@@ -63,22 +75,6 @@ public class UIAuctionWindow : UIWindowBase, IAuctionWindow
         HideWindow();
         onPass?.Invoke(playerId);
     }
-}
-public class PassAuctionRequestEvent
-{
-    public int PlayerId;
-    public PassAuctionRequestEvent(int playerId)
-    {
-        PlayerId = playerId; 
-    }
-}
-public class PlayAuctionRequestEvent
-{
-    public int PlayerId;
-    public PlayAuctionRequestEvent(int playerId)
-    {
-        Debug.Log("PlayAuctionRequestEvent");
 
-        PlayerId = playerId;
-    }
+    #endregion CALLBACKS
 }

@@ -9,6 +9,9 @@ public class PhotonTurnSynchronizer : MonoBehaviourPun,IPhotonTurnSynchronizer
     private IPlayerRepository playerRepository;
     private IEventBus eventBus;
     private IMortgageService mortgageService;
+
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IPlayerRepository playerRepository, IEventBus eventBus, IMortgageService mortgageService)
     {
@@ -16,16 +19,26 @@ public class PhotonTurnSynchronizer : MonoBehaviourPun,IPhotonTurnSynchronizer
         this.eventBus = eventBus;
         this.mortgageService = mortgageService;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
     public void RequestStartTurn(int playerId, bool isNext)
     {
 
         photonView.RPC(nameof(RPC_StartTurn), RpcTarget.All, playerId, isNext);
     }
+
+    #endregion PUBLIC_METHODS
+
+    #region RPC
+
     [PunRPC]
     private void RPC_StartTurn(int playerId, bool isNext)
     {
         var player = playerRepository.GetPlayerById(playerId);
-      
+
         if (player.IsInJail)
         {
             eventBus.Publish(new StartTurnJailEvent(playerId));
@@ -44,5 +57,9 @@ public class PhotonTurnSynchronizer : MonoBehaviourPun,IPhotonTurnSynchronizer
             mortgageService.TickTurn(playerId);
         }
     }
+
+    #endregion RPC
+
+
 
 }

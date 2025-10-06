@@ -9,7 +9,9 @@ public class LapMoneyService : IInitializable, IDisposable
     private IBankService bankService;
     private GameSettings gameSettings;
     private IChatService chatService;
-    
+
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IEventBus eventBus, IBankService bankService, GameSettings gameSettings, IChatService chatService)
     {
@@ -30,6 +32,10 @@ public class LapMoneyService : IInitializable, IDisposable
 
     }
 
+    #endregion LIFE_CYCLE
+
+    #region CALLBACKS
+
     private void GiveMoneyLap(LapMoneyEvent e)
     {
         if (e.isForward && e.targetCellId < e.currentCellId)
@@ -39,19 +45,7 @@ public class LapMoneyService : IInitializable, IDisposable
             chatService.SendMessage(e.playerId, message, false);
         }
     }
-}
-public class LapMoneyEvent
-{
-    public int playerId;
-    public int currentCellId;
-    public int targetCellId;
-    public bool isForward;
 
-    public LapMoneyEvent(int playerId, int currentCellId, int targetCellId, bool isForward)
-    {
-        this.playerId = playerId;
-        this.currentCellId = currentCellId;
-        this.targetCellId = targetCellId;
-        this.isForward = isForward;
-    }
+    #endregion CALLBACKS
+
 }

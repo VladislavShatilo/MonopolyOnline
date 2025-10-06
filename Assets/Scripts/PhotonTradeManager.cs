@@ -8,19 +8,29 @@ using Zenject;
 
 public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
 {
+    [Serializable]
+    private class CompanyIdListWrapper
+    {
+        public List<int> Ids = new();
+    }
+
     private ITradeService tradeService;
     private ICompanyRepository companyRepository;
-    private IEventBus eventBus;
     private IPlayerRepository playerRepository;
 
+    #region LIFE_CYCLE
+
     [Inject]
-    public void Construct(ITradeService tradeService, ICompanyRepository companyRepository, IEventBus eventBus, IPlayerRepository playerRepository)
+    public void Construct(ITradeService tradeService, ICompanyRepository companyRepository, IPlayerRepository playerRepository)
     {
         this.tradeService = tradeService;
         this.companyRepository = companyRepository;
-        this.eventBus = eventBus;
         this.playerRepository = playerRepository;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public void SendTradeRequest(int fromPlayerId, int toPlayerId)
     {
@@ -47,10 +57,26 @@ public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
         photonView.RPC(nameof(RPC_CompleteTrade), RpcTarget.All, accepted);
     }
 
-    public void UpdateTradeTimer(int playerId, float timeLeft)
+    #endregion PUBLIC_METHODS
+
+    #region PRIVATE_METHODS
+
+    private List<Company> DeserializeCompanies(string json)
     {
-        photonView.RPC(nameof(RPC_UpdateTradeTimer), RpcTarget.All, playerId, timeLeft);
+        if (string.IsNullOrEmpty(json)) return new List<Company>();
+        var wrapper = JsonUtility.FromJson<CompanyIdListWrapper>(json);
+        var result = new List<Company>();
+        foreach (var id in wrapper.Ids)
+        {
+            var company = companyRepository.GetCompanyById(id);
+            if (company != null) result.Add(company);
+        }
+        return result;
     }
+
+    #endregion PRIVATE_METHODS
+
+    #region RPC
 
     [PunRPC]
     private void RPC_StartTradeRequest(int fromPlayerId, int toPlayerId)
@@ -58,7 +84,6 @@ public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
         tradeService.StartTrade(fromPlayerId, toPlayerId);
     }
 
-  
     [PunRPC]
     private void RPC_SendTradeOffer(int fromId, int toId, string fromJson, string toJson, int fromMoney, int toMoney)
     {
@@ -81,28 +106,5 @@ public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
         tradeService.OnTradeCompleted(accepted);
     }
 
-    [PunRPC]
-    private void RPC_UpdateTradeTimer(int playerId, float timeLeft)
-    {
-        eventBus.Publish(new TradeTimerUpdatedEvent(playerId, timeLeft));
-    }
-
-    private List<Company> DeserializeCompanies(string json)
-    {
-        if (string.IsNullOrEmpty(json)) return new List<Company>();
-        var wrapper = JsonUtility.FromJson<CompanyIdListWrapper>(json);
-        var result = new List<Company>();
-        foreach (var id in wrapper.Ids)
-        {
-            var company = companyRepository.GetCompanyById(id);
-            if (company != null) result.Add(company);
-        }
-        return result;
-    }
-
-    [Serializable]
-    private class CompanyIdListWrapper
-    {
-        public List<int> Ids = new List<int>();
-    }
+    #endregion RPC
 }

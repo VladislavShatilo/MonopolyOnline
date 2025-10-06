@@ -4,11 +4,13 @@ using Zenject;
 
 public class MessageLogPresenter : IInitializable, IDisposable
 {
-    private  MessageLogView view;
-    private  IChatService chatService;
+    private MessageLogView view;
+    private IChatService chatService;
     private IEventBus eventBus;
-    private  IPlayerRepository playerRepository;
-    private  SendChatMessageUseCase sendChatMessageUseCase;
+    private IPlayerRepository playerRepository;
+    private SendChatMessageUseCase sendChatMessageUseCase;
+
+    #region LIFE_CYCLE
 
     [Inject]
     public void Construct(MessageLogView view, IChatService chatService, IPlayerRepository playerRepository, IEventBus eventBus)
@@ -19,18 +21,22 @@ public class MessageLogPresenter : IInitializable, IDisposable
         this.eventBus = eventBus;
     }
 
-    public void Initialize()
+    void IInitializable.Initialize()
     {
         view.OnSendClicked += OnSendClicked;
         sendChatMessageUseCase = new SendChatMessageUseCase(chatService);
         eventBus.Subscribe<ChatMessage>(OnMessageReceived);
     }
 
-    public void Dispose()
+    void IDisposable.Dispose()
     {
         view.OnSendClicked -= OnSendClicked;
         eventBus.Unsubscribe<ChatMessage>(OnMessageReceived);
     }
+
+    #endregion LIFE_CYCLE
+
+    #region CALLBACKS
 
     private void OnSendClicked(string text)
     {
@@ -45,4 +51,6 @@ public class MessageLogPresenter : IInitializable, IDisposable
         string formatted = $"{coloredName}: {message.Text}";
         view.AddMessage(formatted);
     }
+
+    #endregion CALLBACKS
 }

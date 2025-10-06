@@ -5,13 +5,15 @@ using System.Linq;
 using UnityEngine;
 using Zenject;
 
-public class TradeReviewWindowPresenter : ITradeReviewWindowPresenter, IInitializable, IDisposable
+public class TradeReviewWindowPresenter :  IInitializable, IDisposable
 {
     private ITradeReviewWindow tradeReviewWindow;
     private IEventBus eventBus;
     private ILocalPlayerService localPlayerService;
     private IPhotonTradeManager photonTradeManager;
-    
+
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(ITradeReviewWindow tradeReviewWindow, IEventBus eventBus, ILocalPlayerService localPlayerService, IPhotonTradeManager photonTradeManager)
     {
@@ -26,7 +28,6 @@ public class TradeReviewWindowPresenter : ITradeReviewWindowPresenter, IInitiali
         eventBus.Subscribe<TradeProposalReceivedEvent>(ShowTradeReviewWindow);
         eventBus.Subscribe<TradeEndedEvent>(HideWindowsOnTradeEnded);
 
-        
         tradeReviewWindow.SetAcceptAction(AcceptTrade);
         tradeReviewWindow.SetCancelAction(CancelTrade);
     }
@@ -35,8 +36,11 @@ public class TradeReviewWindowPresenter : ITradeReviewWindowPresenter, IInitiali
     {
         eventBus.Unsubscribe<TradeProposalReceivedEvent>(ShowTradeReviewWindow);
         eventBus.Unsubscribe<TradeEndedEvent>(HideWindowsOnTradeEnded);
-
     }
+
+    #endregion LIFE_CYCLE
+
+    #region CALLBACKS
 
     private void ShowTradeReviewWindow(TradeProposalReceivedEvent e)
     {
@@ -55,11 +59,12 @@ public class TradeReviewWindowPresenter : ITradeReviewWindowPresenter, IInitiali
             tradeReviewWindow.Show(false, e.Offer);
         }
     }
+
     private void HideWindowsOnTradeEnded(TradeEndedEvent e)
     {
         tradeReviewWindow.Hide();
-
     }
+
     private void AcceptTrade()
     {
         photonTradeManager.CompleteTrade(true);
@@ -69,4 +74,6 @@ public class TradeReviewWindowPresenter : ITradeReviewWindowPresenter, IInitiali
     {
         photonTradeManager.CompleteTrade(false);
     }
+
+    #endregion CALLBACKS
 }

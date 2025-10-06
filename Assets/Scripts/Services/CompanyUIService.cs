@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 using Zenject;
 
@@ -8,8 +9,10 @@ public class CompanyUIService : ICompanyUIService, IInitializable, IDisposable
 {
     private IBoardService boardService;
     private IEventBus eventBus;
-    private Dictionary<int, UICompanyCell> companyUIs = new();
+    private readonly Dictionary<int, UICompanyCell> companyUIs = new();
     private readonly Dictionary<int, CompanyWindowPopup> popups = new();
+
+    #region LIFE_CYCLE
 
     [Inject]
     public void Construct(IBoardService boardService, IEventBus eventBus)
@@ -27,6 +30,10 @@ public class CompanyUIService : ICompanyUIService, IInitializable, IDisposable
     {
         eventBus.Unsubscribe<HideButtonsTradeEvent>(HideAllButtonsOnTrade);
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public void InitializeUI()
     {
@@ -74,19 +81,16 @@ public class CompanyUIService : ICompanyUIService, IInitializable, IDisposable
         return ui;
     }
 
+    #endregion PUBLIC_METHODS
+
+    #region CALLBACKS
+
     private void HideAllButtonsOnTrade(HideButtonsTradeEvent e)
     {
         companyUIs[e.CompanyId].HideAllBranchButtons();
         companyUIs[e.CompanyId].HideAllMortgageButtons();
     }
-}
 
-public class HideButtonsTradeEvent
-{
-    public int CompanyId;
+    #endregion CALLBACKS
 
-    public HideButtonsTradeEvent(int CompanyId)
-    {
-        this.CompanyId = CompanyId;
-    }
 }

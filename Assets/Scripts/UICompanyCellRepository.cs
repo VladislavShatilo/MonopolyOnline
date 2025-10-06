@@ -5,6 +5,8 @@ public class UICompanyCellRepository : IUICompanyCellRepository
 {
     private readonly Dictionary<int, IUICompanyCellView> views = new();
 
+    #region PUBLIC_METHODS
+
     public void Register(IUICompanyCellView view)
     {
         if (views.ContainsKey(view.CompanyId()))
@@ -25,4 +27,7 @@ public class UICompanyCellRepository : IUICompanyCellRepository
     {
         return views.TryGetValue(companyId, out var view) ? view : null;
     }
+
+    #endregion PUBLIC_METHODS
+
 }

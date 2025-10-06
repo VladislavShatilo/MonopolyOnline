@@ -9,33 +9,33 @@ using Zenject;
 public class PlayerStatsService : MonoBehaviour, IDisposable
 {
     private IPhotonLoanManager photonLoanManager;
-    private ITradeService tradeService;
     private ILocalPlayerService localPlayerService;
     private IEventBus eventBus;
     private IPhotonTradeManager photonTradeManager;
 
     private UIPlayerStats playerStatsPrefab;
     private Transform playersStatsContainer;
-    private List<PlayerStatsPresenter> presenters = new List<PlayerStatsPresenter>();
+    private List<PlayerStatsPresenter> presenters = new();
+
+    #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IPhotonLoanManager photonLoanManager, ITradeService tradeService, [Inject(Id = "PlayerStatsContainer")] Transform playersStatsContainer,
-        [Inject(Id = "PlayerStatsPrefab")] UIPlayerStats playerStatsPrefab, IEventBus eventBus, ILocalPlayerService localPlayerService, IPhotonTradeManager photonTradeManager)
+    public void Construct(IPhotonLoanManager photonLoanManager, [Inject(Id = "PlayerStatsContainer")] Transform playersStatsContainer,
+      [Inject(Id = "PlayerStatsPrefab")] UIPlayerStats playerStatsPrefab, IEventBus eventBus, ILocalPlayerService localPlayerService, IPhotonTradeManager photonTradeManager)
     {
-
         this.photonLoanManager = photonLoanManager;
-        this.tradeService = tradeService;
         this.playerStatsPrefab = playerStatsPrefab;
         this.playersStatsContainer = playersStatsContainer;
         this.eventBus = eventBus;
         this.localPlayerService = localPlayerService;
         this.photonTradeManager = photonTradeManager;
     }
+
     public void Initialize()
     {
         eventBus.Subscribe<PlayerJoinedEvent>(OnPlayerJoined);
     }
-   
+
     void IDisposable.Dispose()
     {
         eventBus.Unsubscribe<PlayerJoinedEvent>(OnPlayerJoined);
@@ -46,18 +46,21 @@ public class PlayerStatsService : MonoBehaviour, IDisposable
         presenters.Clear();
     }
 
+    #endregion LIFE_CYCLE
+
+    #region CALLBACKS
+
     private void OnPlayerJoined(PlayerJoinedEvent e)
     {
-        // Создаём View
-        var uiStats =  Instantiate(playerStatsPrefab, playersStatsContainer);
+        var uiStats = Instantiate(playerStatsPrefab, playersStatsContainer);
 
-        // Зарегистрируем View как IPlayerStatsView
         var view = uiStats as IPlayerStatsView;
 
-        var presenter = new PlayerStatsPresenter(view, photonLoanManager,eventBus, localPlayerService, photonTradeManager);
+        var presenter = new PlayerStatsPresenter(view, photonLoanManager, eventBus, localPlayerService, photonTradeManager);
         presenter.Init(e.Player);
         presenters.Add(presenter);
-
     }
-   
+
+    #endregion CALLBACKS
+
 }

@@ -15,12 +15,14 @@ public class RoomPopup : MonoBehaviour
     private string roomName;
     private LobbyManager lobbyManager;
 
+    #region PUBLIC_METHODS
+
     public void Setup(RoomInfo room, LobbyManager lobby)
     {
         lobbyManager = lobby;
         UpdateInfo(room);
 
-        joinButton.onClick.AddListener(() => lobbyManager.JoinRoom(roomName));
+        joinButton.onClick.AddListener(() => lobbyManager.OnJoinRoomClicked(roomName));
     }
 
     public void UpdateInfo(RoomInfo room)
@@ -37,4 +39,7 @@ public class RoomPopup : MonoBehaviour
 
         joinButton.interactable = room.PlayerCount < room.MaxPlayers;
     }
+
+    #endregion PUBLIC_METHODS
+
 }

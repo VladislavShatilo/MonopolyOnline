@@ -10,8 +10,11 @@ public class TurnCompanyUIAdapter: IInitializable,IDisposable
     private ICompanyUIService companyUIService;
     private ICompanyRepository companyRepository;
     private IEventBus eventBus;
+
+    #region LIFE_CYCLE
+
     [Inject]
-    public void Construct(TurnCompanyUIUseCase turnUIUseCase, IEventBus eventBus, ICompanyUIService companyUIService, 
+    public void Construct(TurnCompanyUIUseCase turnUIUseCase, IEventBus eventBus, ICompanyUIService companyUIService,
         ICompanyRepository companyRepository)
     {
         this.eventBus = eventBus;
@@ -28,6 +31,11 @@ public class TurnCompanyUIAdapter: IInitializable,IDisposable
         eventBus.Unsubscribe<TurnStartEvent>(OnTurnStart);
 
     }
+
+    #endregion LIFE_CYCLE
+
+    #region CALLBACKS
+
     private void OnTurnStart(TurnStartEvent e)
     {
         var actions = turnUIUseCase.GetAvailableActions(e.PlayerId);
@@ -36,7 +44,7 @@ public class TurnCompanyUIAdapter: IInitializable,IDisposable
         {
             var ui = companyUIService.GetCompanyUI(action.CompanyId);
             if (ui == null) continue;
-           
+
             switch (action.ActionType)
             {
                 case CompanyActionType.Mortgage:
@@ -46,7 +54,7 @@ public class TurnCompanyUIAdapter: IInitializable,IDisposable
                     ui.ShowBuyoutButton();
                     break;
                 case CompanyActionType.ManageBranches:
-                    var company= companyRepository.GetCompanyById(action.CompanyId);
+                    var company = companyRepository.GetCompanyById(action.CompanyId);
                     switch (company.RentLevel)
                     {
                         case 0: ui.ShowBuyFirstBranchButton(); break;
@@ -62,4 +70,7 @@ public class TurnCompanyUIAdapter: IInitializable,IDisposable
             }
         }
     }
+
+    #endregion CALLBACKS
+
 }

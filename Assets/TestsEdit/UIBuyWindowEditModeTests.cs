@@ -33,20 +33,5 @@ public class UIBuyWindowEditModeTests
         windowGO.SetActive(false);
         windowGO.SetActive(true);
     }
-    [TearDown]
-    public void Teardown()
-    {
-        //EventBus.Unsubscribe<TryBuyCompanyEvent>(OnTryBuyCompany);
-        //EventBus.Unsubscribe<StartAuctionEvent>(OnAuctionStart);
-    }
-    private void OnTryBuyCompany(TryBuyCompanyEvent e)
-    {
-        //buyEventReceived = true;
-
-    }
-    private void OnAuctionStart(StartAuctionEvent e)
-    {
-        //auctionEventReceived = true;
-    }
-
+   
 }

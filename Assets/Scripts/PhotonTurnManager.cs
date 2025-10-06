@@ -7,12 +7,19 @@ using Zenject;
 public class PhotonTurnManager : MonoBehaviourPun, IPhotonTurnManager
 {
     private ITurnService turnService;
-   
+
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(ITurnService turnService)
     {
         this.turnService = turnService;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
     public void RequestStartRandomTurn()
     {
         if (!PhotonNetwork.IsMasterClient) return;
@@ -22,18 +29,22 @@ public class PhotonTurnManager : MonoBehaviourPun, IPhotonTurnManager
     public void RequestEndTurn()
     {
         photonView.RPC(nameof(RPC_RequestEndTurn), RpcTarget.MasterClient);
-
     }
+
     public void RegisterDouble(int playerId)
     {
-        photonView.RPC(nameof(RPC_RegisterDouble), RpcTarget.MasterClient,playerId);
-
+        photonView.RPC(nameof(RPC_RegisterDouble), RpcTarget.MasterClient, playerId);
     }
+
+    #endregion PUBLIC_METHODS
+
+    #region RPC
+
     [PunRPC]
     private void RPC_RequestEndTurn()
     {
         if (PhotonNetwork.IsMasterClient)
-            turnService.EndTurn(); 
+            turnService.EndTurn();
     }
 
     [PunRPC]
@@ -42,4 +53,6 @@ public class PhotonTurnManager : MonoBehaviourPun, IPhotonTurnManager
         if (PhotonNetwork.IsMasterClient)
             turnService.RegisterDouble(playerId);
     }
+
+    #endregion RPC
 }

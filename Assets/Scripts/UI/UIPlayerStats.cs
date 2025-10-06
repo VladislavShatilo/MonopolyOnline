@@ -29,8 +29,10 @@ public class UIPlayerStats : MonoBehaviour, IPlayerStatsView
     [SerializeField] private Button tradeButton;
     [SerializeField] private Button leaveButton;
 
+    #region PUBLIC_METHODS
+
     public void SetName(string name) =>
-        namePlayerText.text = name;
+       namePlayerText.text = name;
 
     public void SetMoney(int money) =>
         moneyPlayerText.text = money.ToString("N0", CultureInfo.InvariantCulture);
@@ -97,24 +99,8 @@ public class UIPlayerStats : MonoBehaviour, IPlayerStatsView
         payLoanButton.onClick.RemoveAllListeners();
         payLoanButton.onClick.AddListener(() => onPayLoan?.Invoke());
     }
-}
 
-public class OnUpdatePlayerMoneyEvent
-{
-    public PlayerData Player;
-    public OnUpdatePlayerMoneyEvent(PlayerData player)
-    {
-        Player = player;
-    }
+    #endregion PUBLIC_METHODS
 
-}
-public class StartTradeRequestEvent
-{
-    public int FromId;
-    public int ToId;
-    public StartTradeRequestEvent(int fromId,int toId)
-    {
-        FromId = fromId;
-        ToId= toId;
-    }
+
 }

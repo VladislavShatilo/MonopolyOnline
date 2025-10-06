@@ -1,16 +1,18 @@
 using Zenject;
 using System;
 
-public class PayRentPresenter : IPayRentPresenter, IInitializable, IDisposable
+public class PayRentPresenter : IInitializable, IDisposable
 {
-    private  IPayRentWindow window;
-    private  IPhotonCompanyManager photonCompanyManager;
-    private  IPlayerRepository playerRepository;
+    private IPayRentWindow window;
+    private IPhotonCompanyManager photonCompanyManager;
+    private IPlayerRepository playerRepository;
     private ILocalPlayerService localPlayerService;
     private IEventBus eventBus;
 
     private int currentPlayerId;
     private int currentCellIndex;
+
+    #region LIFE_CYCLE
 
     [Inject]
     public void Construct(IPayRentWindow window, IPhotonCompanyManager photonCompanyManager, IPlayerRepository playerRepository, ILocalPlayerService localPlayerService, IEventBus eventBus)
@@ -24,22 +26,23 @@ public class PayRentPresenter : IPayRentPresenter, IInitializable, IDisposable
 
     void IInitializable.Initialize()
     {
-        window.SetPayAction(OnPayClicked);
         eventBus.Subscribe<OfferRentEvent>(ShowRentFor);
-
         eventBus.Subscribe<RentPaidEvent>(OnRentPaid);
-        //EventBus.Subscribe<RentFailedEvent>(OnRentFailed);
+
+        window.SetPayAction(OnPayClicked);
     }
 
     void IDisposable.Dispose()
     {
         eventBus.Unsubscribe<RentPaidEvent>(OnRentPaid);
         eventBus.Unsubscribe<OfferRentEvent>(ShowRentFor);
-
-        //EventBus.Unsubscribe<RentFailedEvent>(OnRentFailed);
     }
 
-    public void ShowRentFor(OfferRentEvent e)
+    #endregion LIFE_CYCLE
+
+    #region CALLBACKS
+
+    private void ShowRentFor(OfferRentEvent e)
     {
         currentPlayerId = e.PlayerId;
         currentCellIndex = e.CellIndex;
@@ -49,21 +52,12 @@ public class PayRentPresenter : IPayRentPresenter, IInitializable, IDisposable
 
         if (e.PlayerId == localId)
         {
-            window.Show(e.PlayerId, e.CellIndex, e.Rent, canPay); 
-
+            window.Show(e.PlayerId, e.CellIndex, e.Rent, canPay);
         }
         else
         {
             window.HardHide();
         }
-      
-    }
-
-    public void HideRent() => window.Hide();
-
-    private void OnPayClicked()
-    {
-        photonCompanyManager.RequestPayRent( currentCellIndex, currentPlayerId);
     }
 
     private void OnRentPaid(RentPaidEvent e)
@@ -72,12 +66,10 @@ public class PayRentPresenter : IPayRentPresenter, IInitializable, IDisposable
             window.Hide();
     }
 
-    //private void OnRentFailed(RentFailedEvent e)
-    //{
-    //    if (e.PlayerId == currentPlayerId && e.CellIndex == currentCellIndex)
-    //    {
-    //        Debug.Log("Игрок не смог оплатить аренду");
-    //        window.Hide();
-    //    }
-    //}
+    private void OnPayClicked()
+    {
+        photonCompanyManager.RequestPayRent(currentCellIndex, currentPlayerId);
+    }
+
+    #endregion CALLBACKS
 }

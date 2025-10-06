@@ -7,84 +7,36 @@ using Zenject;
 
 public class CellOccupancyService : ICellOccupancyService, IDisposable
 {
-    private  Dictionary<int, List<PlayerMove>> cellPlayers = new();
-    private  HashSet<int> pendingCells = new HashSet<int>();
-    private  IBoardService boardService;
-    private IPlayerRepository playerRepository;
+    private readonly Dictionary<int, List<PlayerMove>> cellPlayers = new();
+    private readonly HashSet<int> pendingCells = new();
+    private IBoardService boardService;
     private IEventBus eventBus;
 
-    [Inject] 
-    public void Construct(IBoardService boardService, IPlayerRepository playerRepository, IEventBus eventBus)
+    #region LIFE_CYCLE
+
+    [Inject]
+    public void Construct(IBoardService boardService, IEventBus eventBus)
     {
         this.boardService = boardService;
-        this.playerRepository = playerRepository;
         this.eventBus = eventBus;
     }
+
     public void InitializePlayer()
     {
         eventBus.Subscribe<PlayerOccupancyRegisterEvent>(RegisterPlayerOnCell);
         eventBus.Subscribe<PlayerOccupancyUnregisterEvent>(UnregisterPlayerFromCell);
     }
 
-    public void Dispose()
+    void IDisposable.Dispose()
     {
         eventBus.Unsubscribe<PlayerOccupancyRegisterEvent>(RegisterPlayerOnCell);
         eventBus.Unsubscribe<PlayerOccupancyUnregisterEvent>(UnregisterPlayerFromCell);
     }
-    // Вызов при том как игрок встал на клетку (вызывается на всех клиентах через buffered RPC)
-    private void RegisterPlayerOnCell(PlayerOccupancyRegisterEvent e)
-    {
-        int cellIndex = e.CellIndex;
-        PlayerMove player = e.PlayerMove;
 
-        if (!cellPlayers.ContainsKey(cellIndex))
-            cellPlayers[cellIndex] = new List<PlayerMove>();
+    #endregion LIFE_CYCLE
 
-        if (!cellPlayers[cellIndex].Contains(player))
-            cellPlayers[cellIndex].Add(player);
+    #region PUBLIC_METHODS
 
-        // Сортируем по ActorNumber для детерминированности слотов
-        cellPlayers[cellIndex] = cellPlayers[cellIndex]
-            .OrderBy(p => (p.photonView != null && p.photonView.Owner != null) ? p.photonView.Owner.ActorNumber : int.MaxValue)
-            .ToList();
-
-        // batch-обновление: ждём маленькую паузу чтобы собрать несколько регистраций
-        if (pendingCells.Contains(cellIndex)) return;
-        pendingCells.Add(cellIndex);
-        player.StartCoroutine(DelayedUpdate(cellIndex));
-    }
-
-    private  IEnumerator DelayedUpdate(int cellIndex)
-    {
-        // Небольшая пауза чтобы собрать все buffered RPC, приходящие почти одновременно
-        yield return new WaitForSeconds(0.06f);
-
-        if (cellPlayers.ContainsKey(cellIndex))
-            UpdatePositions(cellIndex);
-
-        pendingCells.Remove(cellIndex);
-    }
-
-    // Вызов когда игрок ушёл с клетки
-    private  void UnregisterPlayerFromCell(PlayerOccupancyUnregisterEvent e)
-    {
-        int cellIndex = e.CellIndex;
-        PlayerMove player = e.PlayerMove;
-        if (cellPlayers.ContainsKey(cellIndex))
-        {
-            cellPlayers[cellIndex].Remove(player);
-            if (cellPlayers[cellIndex].Count == 0)
-            {
-                cellPlayers.Remove(cellIndex);
-            }
-            else
-            {
-                UpdatePositions(cellIndex);
-            }
-        }
-    }
-
-    // Расстановка игроков внутри клетки и вызов анимации у каждого (локально)
     public void UpdatePositions(int cellIndex)
     {
         if (!cellPlayers.ContainsKey(cellIndex)) return;
@@ -93,7 +45,7 @@ public class CellOccupancyService : ICellOccupancyService, IDisposable
         int count = players.Count;
 
         Vector3[] positions;
-        // --- здесь оставляем твою логику позиций (скопируй свои варианты) ---
+
         if (cellIndex % 10 == 0 && cellIndex != 30)
         {
             switch (count)
@@ -130,31 +82,64 @@ public class CellOccupancyService : ICellOccupancyService, IDisposable
             var pm = players[i];
             Vector3 targetPos = positions[i];
             pm.SetTargetPosition(targetPos);
-            
         }
     }
-}
-public class PlayerOccupancyRegisterEvent
-{
-    public int CellIndex;
-    public PlayerMove PlayerMove;
 
-    public PlayerOccupancyRegisterEvent(int cellIndex, PlayerMove playerMove)
+    #endregion PUBLIC_METHODS
+
+    #region PRIVATE_METHODS
+
+    private IEnumerator DelayedUpdate(int cellIndex)
     {
-        CellIndex = cellIndex;
-        PlayerMove = playerMove;
+        yield return new WaitForSeconds(0.06f);
+
+        if (cellPlayers.ContainsKey(cellIndex))
+            UpdatePositions(cellIndex);
+
+        pendingCells.Remove(cellIndex);
     }
 
-}
-public class PlayerOccupancyUnregisterEvent
-{
-    public int CellIndex;
-    public PlayerMove PlayerMove;
+    #endregion PRIVATE_METHODS
 
-    public PlayerOccupancyUnregisterEvent(int cellIndex, PlayerMove playerMove)
+    #region CALLBACKS
+
+    private void RegisterPlayerOnCell(PlayerOccupancyRegisterEvent e)
     {
-        CellIndex = cellIndex;
-        PlayerMove = playerMove;
+        int cellIndex = e.CellIndex;
+        PlayerMove player = e.PlayerMove;
+
+        if (!cellPlayers.ContainsKey(cellIndex))
+            cellPlayers[cellIndex] = new List<PlayerMove>();
+
+        if (!cellPlayers[cellIndex].Contains(player))
+            cellPlayers[cellIndex].Add(player);
+
+        cellPlayers[cellIndex] = cellPlayers[cellIndex]
+            .OrderBy(p => (p.photonView != null && p.photonView.Owner != null) ? p.photonView.Owner.ActorNumber : int.MaxValue)
+            .ToList();
+
+        if (pendingCells.Contains(cellIndex)) return;
+        pendingCells.Add(cellIndex);
+        player.StartCoroutine(DelayedUpdate(cellIndex));
     }
 
+    private void UnregisterPlayerFromCell(PlayerOccupancyUnregisterEvent e)
+    {
+        int cellIndex = e.CellIndex;
+        PlayerMove player = e.PlayerMove;
+        if (cellPlayers.ContainsKey(cellIndex))
+        {
+            cellPlayers[cellIndex].Remove(player);
+            if (cellPlayers[cellIndex].Count == 0)
+            {
+                cellPlayers.Remove(cellIndex);
+            }
+            else
+            {
+                UpdatePositions(cellIndex);
+            }
+        }
+    }
+
+    #endregion CALLBACKS
 }

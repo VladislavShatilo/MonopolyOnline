@@ -9,22 +9,22 @@ using Zenject;
 public class UICompanyCellPresenter : IInitializable, IDisposable
 {
     private IPlayerRepository playerRepository;
-    private ICompanyRepository companyRepository;  
+    private ICompanyRepository companyRepository;
     private IUICompanyCellRepository uiRepository;
     private ICompanyService companyService;
     private IEventBus eventBus;
-    private IGroupColors groupColors;
-    [Inject]
-    public void Construct( IPlayerRepository playerRepository,ICompanyRepository companyRepository, IUICompanyCellRepository uiRepository,
-        ICompanyService companyService, IEventBus eventBus, IGroupColors groupColors)
-    {
 
+    #region LIFE_CYCLE
+
+    [Inject]
+    public void Construct(IPlayerRepository playerRepository, ICompanyRepository companyRepository, IUICompanyCellRepository uiRepository,
+       ICompanyService companyService, IEventBus eventBus)
+    {
         this.playerRepository = playerRepository;
         this.companyRepository = companyRepository;
         this.uiRepository = uiRepository;
         this.companyService = companyService;
-        this.eventBus = eventBus;   
-        this.groupColors = groupColors;
+        this.eventBus = eventBus;
     }
 
     void IInitializable.Initialize()
@@ -34,29 +34,19 @@ public class UICompanyCellPresenter : IInitializable, IDisposable
 
     void IDisposable.Dispose()
     {
-
         eventBus.Unsubscribe<CompanyBoughtEvent>(CompanyBoughtUpdate);
     }
-    public void InitCompany(int companyId)
-    {
-        var view = uiRepository.GetByCompanyId(companyId);
-        if (view == null) return;
 
-        var company = companyRepository.GetCompanyById(companyId);
+    #endregion LIFE_CYCLE
 
-        if (company == null)
-            return;
-       
-        var groupColor = groupColors.Colors[(int)company.Group];
+    #region CALLBACKS
 
-        view.UpdateUI(company.Name, company.Price, groupColor);
-    }
     private void CompanyBoughtUpdate(CompanyBoughtEvent e)
     {
         CompanyGroup companyGroup = companyRepository.GetCompanyById(e.CellIndex).Group;
 
         IEnumerable<Company> companies = companyRepository.GetByGroup(companyGroup);
-        
+
         foreach (var company in companies)
         {
             Debug.Log("company.Name" + company.Name + "  " + "company.OwnerId" + company.OwnerId);
@@ -69,7 +59,6 @@ public class UICompanyCellPresenter : IInitializable, IDisposable
 
             var owner = playerRepository.GetPlayerById(e.PlayerId);
 
-
             var ownerColor = owner != null ? owner.PlayerColor.ToUnityColor() : Color.white;
             view.UpdateOwner(ownerColor);
 
@@ -77,7 +66,7 @@ public class UICompanyCellPresenter : IInitializable, IDisposable
 
             view.SetRentText(companyService.CalculateRent(company, 1));
         }
-      
     }
- 
+
+    #endregion CALLBACKS
 }

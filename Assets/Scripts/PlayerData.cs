@@ -21,12 +21,15 @@ public class PlayerData
     public int LoanTurnsLeft;
     public int LastDiceSum;
 
-    public List<Company> OwnedCompanies = new List<Company>();
+    public List<Company> OwnedCompanies = new();
 
     [System.NonSerialized]
     public Player photonPlayer;
 
     private int loanAmount;
+
+    #region LIFE_CYCLE
+
     public PlayerData(string name, int startMoney, int id, PlayerColor color, int loanAmount, Player photonPlayer = null)
     {
         IsInJail = false;
@@ -39,7 +42,10 @@ public class PlayerData
         this.loanAmount = loanAmount;
     }
 
-    // Видимая капитализация
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
     public int VisibleCapital
     {
         get
@@ -50,14 +56,13 @@ public class PlayerData
                 capital += OwnedCompanies[i].Price;
                 if (OwnedCompanies[i].Type == CompanyType.Company)
                 {
-                    // capital += OwnedCompanies[i].CompanyData.branchPrice * OwnedCompanies[i].RentLevel;
+                    //capital += OwnedCompanies[i].CompanyData.branchPrice * OwnedCompanies[i].RentLevel;
                 }
             }
             return capital;
         }
     }
 
-    // Скрытые ресурсы, которые можно быстро мобилизовать
     public int LiquidAssets
     {
         get
@@ -95,16 +100,5 @@ public class PlayerData
         JailTurnsLeft = 0;
     }
 
-    public void DecreaseTurn()
-    {
-        if (JailTurnsLeft > 0)
-            JailTurnsLeft--;
-    }
-
-    private bool CanPay(int amount)
-    {
-        return LiquidAssets >= amount;
-    }
-
-    // Ссылка на Photon игрока (можно не хранить, если достаточно id)
+    #endregion PUBLIC_METHODS
 }

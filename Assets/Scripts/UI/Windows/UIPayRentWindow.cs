@@ -13,6 +13,8 @@ public class UIPayRentWindow : UIWindowBase, IPayRentWindow
     [SerializeField] private Button cantPayRentButton;
     [SerializeField] private TextMeshProUGUI cantPayRentText;
 
+    #region PUBLIC_METHODS
+
     public void SetPayAction(Action payAction)
     {
         payRentButton.onClick.RemoveAllListeners();
@@ -20,9 +22,9 @@ public class UIPayRentWindow : UIWindowBase, IPayRentWindow
         {
             payRentButton.onClick.AddListener(() => payAction());
         }
-    
+
     }
-        
+
     public void Show(int playerId, int cellIndex, float rent, bool canPay)
     {
         payButtonText.text = $"Заплатите {rent:N0}";
@@ -36,4 +38,8 @@ public class UIPayRentWindow : UIWindowBase, IPayRentWindow
 
     public void Hide() => windowAnimation.HideWindow();
     public void HardHide() => windowAnimation.HardHideWindow();
+
+    #endregion PUBLIC_METHODS
+
+
 }

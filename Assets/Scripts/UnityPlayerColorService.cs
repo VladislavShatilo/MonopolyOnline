@@ -6,10 +6,7 @@ public class UnityPlayerColorService : IPlayerColorService
 {
     private readonly Color[] colors;
 
-    public UnityPlayerColorService(Color[] colors)
-    {
-        this.colors = colors;
-    }
+    #region PUBLIC_METHODS
 
     public PlayerColor GetColorForPlayer(int actorNumber)
     {
@@ -19,4 +16,8 @@ public class UnityPlayerColorService : IPlayerColorService
         var c = colors[(actorNumber - 1) % colors.Length];
         return new PlayerColor(c.r, c.g, c.b);
     }
+
+    #endregion PUBLIC_METHODS
+
+
 }

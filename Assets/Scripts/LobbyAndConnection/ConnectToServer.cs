@@ -10,6 +10,7 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
     [SerializeField] string region;
     private ISceneLoader sceneLoader;
 
+    #region LIFE_CYCLE
     [Inject]
     public void Construct(ISceneLoader sceneLoader)
     {
@@ -21,6 +22,7 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
         PhotonNetwork.ConnectToRegion(region);
 
     }
+
     public override void OnConnectedToMaster()
     {
         if (sceneLoader != null)
@@ -34,5 +36,8 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
 
         }
     }
+    #endregion LIFE_CYCLE
+
+
 
 }

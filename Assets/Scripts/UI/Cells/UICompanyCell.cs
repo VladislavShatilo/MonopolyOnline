@@ -9,28 +9,32 @@ using Zenject;
 /// <summary>
 /// UI-компонент для отображения компании и управления кнопками филиалов.
 /// </summary>
-public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDisposable
+public class UICompanyCell : MonoBehaviour, IUICompanyCellView, IInitializable, IDisposable
 {
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI companyNameText;
+
     [SerializeField] private TextMeshProUGUI priceText;
     [SerializeField] private Image BGImage;
     [SerializeField] private Image BGPriceImage;
 
     [Header("Branch Buttons")]
     [SerializeField] private Button buyFirstBranchButton;
+
     [SerializeField] private Button buyBranchButton;
     [SerializeField] private Button sellBranchButton;
     [SerializeField] private Button sellFirstBranchButton;
 
     [Header("Branch Button Icons")]
     [SerializeField] private Image buyFirstBranchIcon;
+
     [SerializeField] private Image buyBranchIcon;
     [SerializeField] private Image sellBranchIcon;
     [SerializeField] private Image sellFirstBranchIcon;
 
     [Header("Mortgage")]
     [SerializeField] private Button mortgageButton;
+
     [SerializeField] private Button buyoutButton;
     [SerializeField] private TextMeshProUGUI mortgageTurnsText;
     [SerializeField] private GameObject mortgageStatsGO;
@@ -38,16 +42,19 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
 
     [Header("Stars")]
     [SerializeField] private Image star1Image;
+
     [SerializeField] private Image star2Image;
     [SerializeField] private Image star3Image;
     [SerializeField] private Image star4Image;
     [SerializeField] private Image goldStarImage;
 
-    private int companyId; 
+    private int companyId;
 
     private IUICompanyCellRepository repository;
     private IPhotonBranchManager photonBranchManager;
     private IPhotonMortgageManager photonMortgageManager;
+
+    #region LIFE_CYCLE
 
     [Inject]
     public void Construct(IUICompanyCellRepository repository, IPhotonBranchManager photonBranchManager, IPhotonMortgageManager photonMortgageManager)
@@ -56,19 +63,26 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
         this.photonBranchManager = photonBranchManager;
         this.photonMortgageManager = photonMortgageManager;
     }
-    public int CompanyId()
-    {
-        return companyId; 
-    }
+
     void IInitializable.Initialize()
     {
         repository.Register(this);
     }
+
     void IDisposable.Dispose()
     {
         repository.Unregister(this);
     }
-   
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
+    public int CompanyId()
+    {
+        return companyId;
+    }
+
     public void Init(int id)
     {
         companyId = id;
@@ -90,11 +104,12 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
         priceText.text = price.ToString("N0", CultureInfo.InvariantCulture);
         BGPriceImage.color = groupColor;
     }
+
     public void UpdateOwner(Color ownerColor)
     {
         BGImage.color = ownerColor;
-
     }
+
     public void SetRentText(int rent) =>
         priceText.text = rent.ToString("N0", CultureInfo.InvariantCulture);
 
@@ -111,6 +126,55 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
         }
     }
 
+    public void ShowBuyFirstBranchButton() => ShowOnlyButton(buyFirstBranchButton);
+
+    public void ShowBuySellButtons() => ShowOnlyButtons(buyBranchButton, sellBranchButton);
+
+    public void ShowSellFirstButton() => ShowOnlyButton(sellFirstBranchButton);
+
+    public void HideAllBranchButtons()
+    {
+        buyFirstBranchButton.gameObject.SetActive(false);
+        buyBranchButton.gameObject.SetActive(false);
+        sellBranchButton.gameObject.SetActive(false);
+        sellFirstBranchButton.gameObject.SetActive(false);
+
+        BGPriceImage.gameObject.SetActive(true);
+        priceText.gameObject.SetActive(true);
+    }
+
+    public void HideAllMortgageButtons()
+    {
+        mortgageButton.gameObject.SetActive(false);
+        buyoutButton.gameObject.SetActive(false);
+
+        BGPriceImage.gameObject.SetActive(true);
+        priceText.gameObject.SetActive(true);
+    }
+
+    public void ShowMortgageButton() => ShowButton(true);
+
+    public void ShowBuyoutButton() => ShowButton(false);
+
+    public void MortgageUI() => MortgageUIChange(true);
+
+    public void BuyoutUI() => MortgageUIChange(false);
+
+    public void LoseCompanyUI(Company company)
+    {
+        MortgageUIChange(false);
+        UpdateOwner(Color.white);
+
+        SetRentText(company.GetRent(0, 0));
+    }
+
+    public void SetMortgageTurnsText(int turns) =>
+     mortgageTurnsText.text = turns.ToString();
+
+    #endregion PUBLIC_METHODS
+
+    #region PRIVATE_METHODS
+
     private void HideStars()
     {
         star1Image.gameObject.SetActive(false);
@@ -119,10 +183,6 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
         star4Image.gameObject.SetActive(false);
         goldStarImage.gameObject.SetActive(false);
     }
-
-    public void ShowBuyFirstBranchButton() => ShowOnlyButton(buyFirstBranchButton);
-    public void ShowBuySellButtons() => ShowOnlyButtons(buyBranchButton, sellBranchButton);
-    public void ShowSellFirstButton() => ShowOnlyButton(sellFirstBranchButton);
 
     private void ShowOnlyButton(Button button)
     {
@@ -141,27 +201,6 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
         priceText.gameObject.SetActive(false);
     }
 
-    public void HideAllBranchButtons()
-    {
-        buyFirstBranchButton.gameObject.SetActive(false);
-        buyBranchButton.gameObject.SetActive(false);
-        sellBranchButton.gameObject.SetActive(false);
-        sellFirstBranchButton.gameObject.SetActive(false);
-
-        BGPriceImage.gameObject.SetActive(true);
-        priceText.gameObject.SetActive(true);
-    }
-    public void HideAllMortgageButtons()
-    {
-        mortgageButton.gameObject.SetActive(false);
-        buyoutButton.gameObject.SetActive(false);
-       
-        BGPriceImage.gameObject.SetActive(true);
-        priceText.gameObject.SetActive(true);
-    }
-    public void ShowMortgageButton() => ShowButton(true);
-    public void ShowBuyoutButton() => ShowButton(false);
-
     private void ShowButton(bool isMortgage)
     {
         HideAllBranchButtons();
@@ -171,15 +210,6 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
         priceText.gameObject.SetActive(false);
     }
 
-    public void MortgageUI() => MortgageUIChange(true);
-    public void BuyoutUI() => MortgageUIChange(false);
-    public void LoseCompanyUI(Company company)
-    {
-        MortgageUIChange(false);
-        UpdateOwner(Color.white);
-
-        SetRentText(company.GetRent(0, 0));
-    }
     private void MortgageUIChange(bool isMortgage)
     {
         HideAllBranchButtons();
@@ -189,6 +219,5 @@ public class UICompanyCell : MonoBehaviour,IUICompanyCellView,IInitializable,IDi
         mortgageFadeImage.gameObject.SetActive(isMortgage);
     }
 
-    public void SetMortgageTurnsText(int turns) =>
-        mortgageTurnsText.text = turns.ToString();
+    #endregion PRIVATE_METHODS
 }

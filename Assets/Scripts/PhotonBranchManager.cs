@@ -8,11 +8,17 @@ public class PhotonBranchManager : MonoBehaviourPun, IPhotonBranchManager
 {
     private IBranchUseCase branchUseCase;
 
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IBranchUseCase branchUseCase)
     {
         this.branchUseCase = branchUseCase;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public void RequestBuyBranch(int companyId)
     {
@@ -24,15 +30,19 @@ public class PhotonBranchManager : MonoBehaviourPun, IPhotonBranchManager
         photonView.RPC(nameof(RPC_SellBranch), RpcTarget.MasterClient, companyId, PhotonNetwork.LocalPlayer.ActorNumber);
     }
 
+    #endregion PUBLIC_METHODS
+
+    #region RPC
+
     [PunRPC]
     private void RPC_BuyBranch(int companyId, int playerId)
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-       int newRentLevel =  branchUseCase.BuyBranch(companyId, playerId);
+        int newRentLevel = branchUseCase.BuyBranch(companyId, playerId);
 
         // Рассылаем всем клиентам (включая мастера) обновление UI
-        photonView.RPC(nameof(RPC_UpdateBranchUI), RpcTarget.All, companyId,playerId, newRentLevel);
+        photonView.RPC(nameof(RPC_UpdateBranchUI), RpcTarget.All, companyId, playerId, newRentLevel);
     }
 
     [PunRPC]
@@ -47,7 +57,10 @@ public class PhotonBranchManager : MonoBehaviourPun, IPhotonBranchManager
     [PunRPC]
     private void RPC_UpdateBranchUI(int companyId, int playerId, int newRentLevel)
     {
-        branchUseCase.UpdateBranchUI(companyId,playerId, newRentLevel);
+        branchUseCase.UpdateBranchUI(companyId, playerId, newRentLevel);
 
     }
+
+    #endregion RPC
+
 }

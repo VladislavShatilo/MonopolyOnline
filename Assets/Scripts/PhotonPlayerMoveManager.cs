@@ -12,6 +12,8 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
     private IBoardService boardService;
     private IEventBus eventBus;
 
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IPlayerMoveUseCase playerMoveUseCase, IEventBus eventBus, IPlayerRepository playerRepository, IBoardService boardService)
     {
@@ -31,16 +33,9 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
         eventBus.Unsubscribe<OnPlayerMoveEvent>(RequestMove);
     }
 
-    private void RequestMove(OnPlayerMoveEvent e)
-    {
-        photonView.RPC(nameof(RPC_MovePlayer), RpcTarget.All, e.PlayerId, e.Steps, e.Forward);
-    }
+    #endregion LIFE_CYCLE
 
-    [PunRPC]
-    private void RPC_MovePlayer(int playerId, int steps, bool forward)
-    {
-        playerMoveUseCase.MovePlayer(playerId, steps, forward);
-    }
+    #region PUBLIC_METHODS
 
     public void RequestTeleport(int playerId)
     {
@@ -48,6 +43,18 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
 
         photonView.RPC(nameof(RPC_TeleportPlayer), RpcTarget.MasterClient, playerId);
     }
+
+    #endregion PUBLIC_METHODS
+
+    #region RPC
+
+    [PunRPC]
+    private void RPC_MovePlayer(int playerId, int steps, bool forward)
+    {
+        playerMoveUseCase.MovePlayer(playerId, steps, forward);
+    }
+
+
 
     [PunRPC]
     private void RPC_TeleportPlayer(int playerId)
@@ -58,7 +65,7 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
         int randomIndex;
         do
         {
-            randomIndex = UnityEngine.Random.Range(0, boardService.CellsCount + 1); 
+            randomIndex = UnityEngine.Random.Range(0, boardService.CellsCount + 1);
         } while (randomIndex == player.CurrentCellId);
 
         photonView.RPC(nameof(RPC_TeleportPlayerBroadcast), RpcTarget.All, playerId, randomIndex, player.CurrentCellId);
@@ -69,4 +76,17 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
     {
         playerMoveUseCase.TeleportPlayer(playerId, randomIndex, currentCellId);
     }
+
+    #endregion RPC
+
+    #region CALLBACKS
+
+    private void RequestMove(OnPlayerMoveEvent e)
+    {
+        photonView.RPC(nameof(RPC_MovePlayer), RpcTarget.All, e.PlayerId, e.Steps, e.Forward);
+    }
+
+    #endregion CALLBACKS
+
+
 }

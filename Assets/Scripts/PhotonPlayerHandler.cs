@@ -5,19 +5,22 @@ using System.ComponentModel.Design;
 using UnityEngine;
 using Zenject;
 
-public class PhotonPlayerHandler : Photon.Pun.MonoBehaviourPunCallbacks
+public class PhotonPlayerHandler : MonoBehaviourPunCallbacks
 {
     private IPlayerRepository repository;
     private IPlayerColorService colorService;
     private IEventBus eventBus;
     private GameSettings gameSettings;
+
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IPlayerRepository repository, IPlayerColorService colorService, IEventBus eventBus, GameSettings gameSettings)
     {
         this.repository = repository;
         this.colorService = colorService;
         this.eventBus = eventBus;
-        this.gameSettings = gameSettings;   
+        this.gameSettings = gameSettings;
     }
 
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
@@ -33,10 +36,12 @@ public class PhotonPlayerHandler : Photon.Pun.MonoBehaviourPunCallbacks
         repository.AddPlayer(player);
         eventBus.Publish(new PlayerJoinedEvent(player));
     }
-  
+
     public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
     {
         repository.RemovePlayer(otherPlayer.ActorNumber);
-        eventBus.Publish(new PlayerLeftEvent(otherPlayer.ActorNumber));
     }
+
+    #endregion LIFE_CYCLE
+
 }

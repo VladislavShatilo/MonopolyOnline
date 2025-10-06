@@ -9,13 +9,19 @@ using UnityEngine.UI;
 public class UISpendCell : UICellBase
 {
     [SerializeField] private Image spendImage;
+
+    #region PUBLIC_METHODS
+
     public override void UpdateUI(CellData cellData, PlayerData owner)
     {
         var spend = cellData.spendData;
         spendImage.sprite = spend.spendSprite;
-    }   
+    }
     public void RotateIcon()
     {
-        spendImage.rectTransform.eulerAngles = new Vector3(0,0,270);
+        spendImage.rectTransform.eulerAngles = new Vector3(0, 0, 270);
     }
+
+    #endregion PUBLIC_METHODS
+
 }

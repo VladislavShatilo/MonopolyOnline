@@ -8,11 +8,17 @@ public class GroupOwnershipService : IGroupOwnershipService
 {
     private ICompanyRepository companyRepository;
 
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(ICompanyRepository companyRepository)
     {
         this.companyRepository = companyRepository;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public bool PlayerOwnsWholeGroup(CompanyGroup group, int playerId)
     {
@@ -29,4 +35,6 @@ public class GroupOwnershipService : IGroupOwnershipService
 
         return true;
     }
+
+    #endregion PUBLIC_METHODS
 }

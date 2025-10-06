@@ -12,6 +12,8 @@ public class TradeOffer
     public int FromMoney { get; set; }
     public int ToMoney { get; set; }
 
+    #region PUBLIC_METHODS
+
     public void SetFromCompanies(List<Company> companies)
     {
         FromCompanies.Clear();
@@ -54,4 +56,8 @@ public class TradeOffer
         float ratio = (float)left / right;
         return ratio >= 0.5f && ratio <= 2f;
     }
+
+    #endregion PUBLIC_METHODS
+
+
 }

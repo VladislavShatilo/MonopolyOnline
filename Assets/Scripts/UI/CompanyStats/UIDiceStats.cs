@@ -10,6 +10,8 @@ public class UIDiceStats : UIBaseCompanyStats,ICompanyStatsUI<DiceCompanyData>
     [Header("Field UI")]
     [SerializeField] private TextMeshProUGUI[] diceFieldMultiTexts;
 
+    #region PUBLIC_METHODS
+
     public void SetDiceFieldMultiTexts(int[] values)
     {
         for (int i = 0; i < diceFieldMultiTexts.Length && i < values.Length; i++)
@@ -28,4 +30,8 @@ public class UIDiceStats : UIBaseCompanyStats,ICompanyStatsUI<DiceCompanyData>
         SetPledgePrice(data.pledgePrice);
         SetBuyoutPrice(data.buyoutPrice);
     }
+
+    #endregion PUBLIC_METHODS
+
+
 }

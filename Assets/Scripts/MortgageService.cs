@@ -10,6 +10,8 @@ public class MortgageService : IMortgageService
     private IBankService bankService;
     private IEventBus eventBus;
 
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(ICompanyRepository companyRepository, IBankService bankService, IEventBus eventBus, GameSettings settings)
     {
@@ -18,6 +20,10 @@ public class MortgageService : IMortgageService
         this.eventBus = eventBus;
         this.settings = settings;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public void MortgageCompany(int companyId, int playerId)
     {
@@ -61,38 +67,7 @@ public class MortgageService : IMortgageService
             }
         }
     }
-}
-public class CompanyMortgagedEvent
-{
-    public int PlayerId { get; }
-    public int CompanyId { get; }
-    public int Turns { get; }
 
-    public CompanyMortgagedEvent(int playerId, int companyId, int turns)
-    {
-        PlayerId = playerId;
-        CompanyId = companyId;
-        Turns = turns;
-    }
-}
+    #endregion PUBLIC_METHODS
 
-public class CompanyBoughtBackEvent
-{
-    public int PlayerId { get; }
-    public int CompanyId { get; }
-    public CompanyBoughtBackEvent(int playerId, int companyId)
-    {
-        PlayerId = playerId;
-        CompanyId = companyId;
-    }
-}
-
-public class CompanyFreedFromMortgageEvent
-{
-    public int CompanyId { get; }
-
-    public CompanyFreedFromMortgageEvent(int companyId)
-    {
-        CompanyId = companyId;
-    }
 }

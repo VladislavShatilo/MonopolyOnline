@@ -15,6 +15,8 @@ public class AuthUI :MonoBehaviour, IInitializable,IDisposable
 
     private IAuthService authService;
 
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IAuthService authService)
     {
@@ -35,15 +37,26 @@ public class AuthUI :MonoBehaviour, IInitializable,IDisposable
         loginButton.onClick.RemoveListener(OnLoginButtonClick);
 
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PRIVATE_METHODS
+
     private void CheckFields()
     {
         loginButton.interactable = !string.IsNullOrWhiteSpace(nicknameField.text) &&
                                    !string.IsNullOrWhiteSpace(passwordField.text);
     }
 
+    #endregion PRIVATE_METHODS
+
+    #region CALLBACKS
     private void OnLoginButtonClick()
     {
         authService.Login(nicknameField.text, passwordField.text);
         SceneManager.LoadScene("LobbyScene");
     }
+
+    #endregion CALLBACKS
+
 }

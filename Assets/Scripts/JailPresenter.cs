@@ -16,12 +16,12 @@ public class JailPresenter : IInitializable, IDisposable
     private IPhotonDiceManager photonDiceManager;
     private GameSettings gameSettings;
 
-    
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IJailWindow jailWindow, ILocalPlayerService localPlayerService, IEventBus eventBus, IPlayerRepository playerRepository,
-        IRansomJailWindow ransomJailWindow, IPhotonDiceManager photonDiceManager, IJailService jailService, IBankService bankService, GameSettings gameSettings)
+       IRansomJailWindow ransomJailWindow, IPhotonDiceManager photonDiceManager, IJailService jailService, IBankService bankService, GameSettings gameSettings)
     {
-
         this.jailWindow = jailWindow;
         this.localPlayerService = localPlayerService;
         this.eventBus = eventBus;
@@ -35,7 +35,6 @@ public class JailPresenter : IInitializable, IDisposable
 
     void IInitializable.Initialize()
     {
-        //eventBus.Subscribe<OfferJailEvent>(ShowJailWindow);
         eventBus.Subscribe<StartTurnJailEvent>(OnStartTurn);
 
         jailWindow.SetThrowDiceAction(OnThrowDiceClicked);
@@ -45,9 +44,12 @@ public class JailPresenter : IInitializable, IDisposable
 
     void IDisposable.Dispose()
     {
-        // eventBus.Unsubscribe<OfferJailEvent>(ShowJailWindow);
         eventBus.Unsubscribe<StartTurnJailEvent>(OnStartTurn);
     }
+
+    #endregion LIFE_CYCLE
+
+    #region CALLBACKS
 
     private void OnStartTurn(StartTurnJailEvent e)
     {
@@ -92,46 +94,9 @@ public class JailPresenter : IInitializable, IDisposable
         jailService.ReleasePlayer(playerId, true);
         photonDiceManager.RequestDiceRoll(localPlayerService.GetLocalPlayerId(), false);
         bankService.RemoveMoney(playerId, gameSettings.jailRansom);
-        //eventBus.Publish(new ReleaseFromJailEvent(playerId, true));
         jailWindow.Hide();
         ransomJailWindow.Hide();
     }
-}
 
-public class OfferJailEvent
-{
-    public int PlayerId { get; }
-    public int PlayerMoney { get; }
-
-    public OfferJailEvent(int playerId, int playerMoney)
-    {
-        PlayerId = playerId;
-        PlayerMoney = playerMoney;
-    }
-}
-
-public class ShowMandatoryRansomEvent
-{
-    public int PlayerID { get; }
-    public int Fine { get; }
-
-    public ShowMandatoryRansomEvent(int playerId, int fine)
-    {
-        PlayerID = playerId;
-        Fine = fine;
-    }
-}
-
-public class ShowJailOfferEvent
-{
-    public int PlayerID { get; }
-    public int Fine { get; }
-    public int TurnsLeft { get; }
-
-    public ShowJailOfferEvent(int playerId, int fine, int turnsLeft)
-    {
-        PlayerID = playerId;
-        Fine = fine;
-        TurnsLeft = turnsLeft;
-    }
+    #endregion CALLBACKS
 }

@@ -30,10 +30,12 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
     private IPhotonJailManager photonJailManager;
     private IChatService chatService;
 
+    #region LIFE_CYCLE
+
     [Inject]
-    public void Construct(IChanceService chanceService, IPlayerRepository playerRepository, IBankService bankService, IPhotonTurnManager photonTurnManager, 
-        IPhotonPlayerMoveManager photonPlayerMove, IPhotonJailManager photonJailManager, IChatService chatService)
-    { 
+    public void Construct(IChanceService chanceService, IPlayerRepository playerRepository, IBankService bankService, IPhotonTurnManager photonTurnManager,
+       IPhotonPlayerMoveManager photonPlayerMove, IPhotonJailManager photonJailManager, IChatService chatService)
+    {
         this.chanceService = chanceService;
         this.playerRepository = playerRepository;
         this.bankService = bankService;
@@ -42,8 +44,12 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
         this.photonJailManager = photonJailManager;
         this.chatService = chatService;
 
-
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
     public void GiveRandomBuff(int playerId)
     {
         if (!PhotonNetwork.IsMasterClient) return;
@@ -54,9 +60,14 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
         {
             photonTurnManager.RequestEndTurn();
         }
-      
+
 
     }
+
+    #endregion PUBLIC_METHODS
+
+    #region PRIVATE_METHODS
+
     private string ApplyMoneyChange(PlayerData player, int min, int max, bool gain, bool fixedAmount = false)
     {
         if (!PhotonNetwork.IsMasterClient) return "";
@@ -72,6 +83,11 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
 
         return gain ? $"получил {amount}k!" : $"потерял {amount}k!";
     }
+
+    #endregion PRIVATE_METHODS
+
+    #region RPC
+
     [PunRPC]
     private void RPC_ApplyBuff(int playerId, int typeInt, int minAmount, int maxAmount)
     {
@@ -125,21 +141,10 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
                 message = "";
                 break;
         }
-        chatService.SendMessage(playerId, message,false);
+        chatService.SendMessage(playerId, message, false);
     }
 
+    #endregion RPC
 
-}
 
-public class OnPlayerTeleportEvent
-{
-    public int PlayerId { get; }
-    public int RandomIndex { get; }
-    public int CurrentCellIndex { get; }
-    public OnPlayerTeleportEvent(int playerId, int randomIndex, int currentCellIndex)
-    {
-        PlayerId = playerId;
-        RandomIndex = randomIndex;
-        CurrentCellIndex = currentCellIndex;
-    }
 }

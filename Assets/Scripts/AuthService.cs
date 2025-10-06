@@ -3,7 +3,9 @@ using Photon.Pun;
 
 public class AuthService : IAuthService
 {
-    private readonly PlayerAuthData playerData = new PlayerAuthData();
+    private readonly PlayerAuthData playerData = new();
+
+    #region PUBLIC_METHODS
 
     public void Login(string nickname, string password)
     {
@@ -11,12 +13,13 @@ public class AuthService : IAuthService
         playerData.Password = password;
 
         PhotonNetwork.NickName = playerData.Nickname;
-
-        Debug.Log($"Логин: {playerData.Nickname}, Пароль: {playerData.Password}");
     }
 
     public PlayerAuthData GetPlayerData()
     {
         return playerData;
     }
+
+    #endregion PUBLIC_METHODS
+
 }

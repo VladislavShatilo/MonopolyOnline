@@ -4,13 +4,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
+
 public enum BuyReason
 {
     Buy,
     Auction
 }
 
-public class CompanyService : ICompanyService,IInitializable,IDisposable
+public class CompanyService : ICompanyService, IInitializable, IDisposable
 {
     private ICompanyRepository companyRepository;
     private IBankService bank;
@@ -19,9 +20,11 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
     private IPlayerRepository playerRepository;
     private IEventBus eventBus;
 
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(ICompanyRepository companyRepository, IBankService bank, IPhotonTurnManager photonTurnManager, ICompanySyncService companySyncService,
-        IPlayerRepository playerRepository, IEventBus eventBus)
+       IPlayerRepository playerRepository, IEventBus eventBus)
     {
         this.companyRepository = companyRepository;
         this.bank = bank;
@@ -30,14 +33,21 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
         this.playerRepository = playerRepository;
         this.eventBus = eventBus;
     }
+
     void IInitializable.Initialize()
     {
         eventBus.Subscribe<EndAuctionWithWinnerEvent>(AuctionBuyCompany);
     }
+
     void IDisposable.Dispose()
     {
         eventBus.Unsubscribe<EndAuctionWithWinnerEvent>(AuctionBuyCompany);
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
     public void HandleCell(int cellIndex, int playerId)
     {
         var company = companyRepository.GetCompanyById(cellIndex);
@@ -46,14 +56,12 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
         if (!company.IsBought)
         {
             bool canAfford = bank.HasEnoughMoney(playerId, company.Price);
-            eventBus.Publish(new OfferPurchaseEvent(cellIndex, playerId,company.Price, canAfford));
-
+            eventBus.Publish(new OfferPurchaseEvent(cellIndex, playerId, company.Price, canAfford));
         }
         else if (company.OwnerId != playerId && !company.IsMortgaged)
         {
-            PlayerData player= playerRepository.GetPlayerById(playerId);
+            PlayerData player = playerRepository.GetPlayerById(playerId);
             eventBus.Publish(new OfferRentEvent(cellIndex, playerId, CalculateRent(company, player.LastDiceSum)));
-
         }
         else
         {
@@ -63,20 +71,15 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
             }
         }
     }
-    private void AuctionBuyCompany(EndAuctionWithWinnerEvent e)
-    {
-       
-        TryBuyCompany(e.CompanyId, e.WinnerId,e.FinalPrice, BuyReason.Auction);
-    }
-    public void TryBuyCompany(int cellIndex, int playerId, int price,BuyReason reason)
+
+    public void TryBuyCompany(int cellIndex, int playerId, int price, BuyReason reason)
     {
         var company = companyRepository.GetCompanyById(cellIndex);
 
-     
         if (company == null || company.IsBought) return;
         if (reason == BuyReason.Buy)
         {
-             price = company.Price;
+            price = company.Price;
         }
         if (!bank.HasEnoughMoney(playerId, price)) return;
 
@@ -84,13 +87,11 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
         bank.RemoveMoney(playerId, price);
         eventBus.Publish(new CompanyBoughtEvent(cellIndex, playerId));
         photonTurnManager.RequestEndTurn();
-        companySyncService.SyncCompanyBought(cellIndex,playerId,price);
-
+        companySyncService.SyncCompanyBought(cellIndex, playerId, price);
     }
 
     public void TryPayRent(int cellIndex, int playerId)
     {
-
         var company = companyRepository.GetCompanyById(cellIndex);
         if (company == null || !company.IsBought) return;
         PlayerData player = playerRepository.GetPlayerById(playerId);
@@ -103,17 +104,6 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
         photonTurnManager.RequestEndTurn();
 
         companySyncService.SyncRentPaid(cellIndex, playerId, company.OwnerId, rent);
-
-    }
-    public void TransferCompany(int companyId, int newOwnerId)
-    {
-        var company = companyRepository.GetCompanyById(companyId);
-        company.TransferTo(newOwnerId);
-
-        var player = playerRepository.GetPlayerById(newOwnerId);
-        player.OwnedCompanies.Add(company);
-
-        eventBus.Publish(new OnCompanyTransferredEvent(companyId, newOwnerId));
     }
 
     public int CalculateRent(Company company, int diceSum)
@@ -122,65 +112,14 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
         return company.GetRent(ownedCount, diceSum);
     }
 
+    #endregion PUBLIC_METHODS
 
-}
-public class OfferPurchaseEvent
-{
-    public int CellIndex;
-    public int PlayerId;
-    public int Price;
-    public bool CanAfford;
-    public OfferPurchaseEvent(int cellIndex, int playerId, int price,bool canAfford)
+    #region PRIVATE_METHODS
+
+    private void AuctionBuyCompany(EndAuctionWithWinnerEvent e)
     {
-        CellIndex = cellIndex;
-        PlayerId = playerId;
-        Price = price;
-        CanAfford = canAfford;
+        TryBuyCompany(e.CompanyId, e.WinnerId, e.FinalPrice, BuyReason.Auction);
     }
-}
-public class OfferRentEvent
-{
-    public int CellIndex;
-    public int PlayerId;
-    public int Rent;
-    public OfferRentEvent(int cellIndex, int playerId, int rent)
-    {
-        CellIndex = cellIndex;
-        PlayerId = playerId;
-        Rent = rent;
-    }
-}
-public class CompanyBoughtEvent
-{
-    public int CellIndex;
-    public int PlayerId;
-    public CompanyBoughtEvent(int cellIndex, int playerId)
-    {
-        CellIndex =cellIndex;
-        PlayerId = playerId;
-    }
-}
-public class RentPaidEvent
-{
-    public int CellIndex;
-    public int PlayerId;
-    public int Owner;
-    public int Rent;
-    public RentPaidEvent(int cellIndex,int playerId,int owner, int rent)
-    {
-        CellIndex = cellIndex;
-        PlayerId = playerId;
-        Owner = owner;
-        Rent = rent;
-    }
-}
-public class OnCompanyTransferredEvent
-{
-    public int CompanyId;
-    public int NewOwnerId;
-    public OnCompanyTransferredEvent(int companyId, int newOwnerId)
-    {
-        CompanyId = companyId;
-        NewOwnerId = newOwnerId;
-    }
+
+    #endregion PRIVATE_METHODS
 }

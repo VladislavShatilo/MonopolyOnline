@@ -21,27 +21,33 @@ public class TradeService : ITradeService,IInitializable,IDisposable
     private int senderId;
     private int receiverId;
 
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IPhotonTradeManager photonTradeManager, IBankService bankService, IEventBus eventBus, IPlayerRepository playerRepository
-         , ITimerManager timerManager, GameSettings gameSettings, ITurnPresenter turnPresenter)
+       , ITimerManager timerManager, GameSettings gameSettings, ITurnPresenter turnPresenter)
     {
         this.photonTradeManager = photonTradeManager;
         this.bankService = bankService;
         this.eventBus = eventBus;
-        this.playerRepository = playerRepository;   
+        this.playerRepository = playerRepository;
         this.timerManager = timerManager;
         this.gameSettings = gameSettings;
         this.turnPresenter = turnPresenter;
     }
     void IInitializable.Initialize()
     {
-        Debug.Log("Initialize");
         eventBus.Subscribe<TimerExpiredEvent>(TimerExpiredEvent);
     }
     void IDisposable.Dispose()
     {
         eventBus.Subscribe<TimerExpiredEvent>(TimerExpiredEvent);
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
     public void StartTrade(int fromPlayerId, int toPlayerId)
     {
         CancelTrade();
@@ -52,20 +58,15 @@ public class TradeService : ITradeService,IInitializable,IDisposable
         PlayerData playerTo = playerRepository.GetPlayerById(toPlayerId);
         CurrentOffer = new TradeOffer(playerFrom, playerTo);
         eventBus.Publish(new TradeStartedEvent(fromPlayerId, toPlayerId, CurrentOffer));
-      //  photonTradeManager.SendTradeRequest(fromPlayerId, toPlayerId);
+        //  photonTradeManager.SendTradeRequest(fromPlayerId, toPlayerId);
     }
 
-    public void OfferTrade()
-    {
-        if (CurrentOffer == null || !CurrentOffer.IsValid()) return;
-        photonTradeManager.SendTradeOffer(CurrentOffer);
-    }
     public void TimerExpiredEvent(TimerExpiredEvent e)
     {
         if (e.Type != TimerType.Trade) return;
 
         photonTradeManager.SendTradeResult(false);
-       
+
     }
 
     public void CancelTrade()
@@ -129,9 +130,14 @@ public class TradeService : ITradeService,IInitializable,IDisposable
         CancelTrade();
     }
 
+
+    #endregion PUBLIC_METHODS
+
+    #region PRIVATE_METHODS
+
     private void ApplyTrade(TradeOffer offer)
     {
-      
+
         foreach (var c in offer.FromCompanies)
         {
             c.TransferTo(receiverId);
@@ -160,4 +166,7 @@ public class TradeService : ITradeService,IInitializable,IDisposable
         }
 
     }
+
+    #endregion PRIVATE_METHODS
+
 }

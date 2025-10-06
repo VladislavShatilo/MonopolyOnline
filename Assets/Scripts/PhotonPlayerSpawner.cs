@@ -9,16 +9,21 @@ public class PhotonPlayerSpawner : MonoBehaviourPun, IPlayerSpawner
 {
     private PlayerSettings playerSettings;
     private IPlayerColorService playerColorService;
-    private IEventBus eventBus;
     private readonly Dictionary<int, PlayerMove> playerMoves = new();
     private PlayerMove playerMove;
+
+    #region LIFE_CYCLE
+
     [Inject]
-    public void Construct([Inject(Id = "PlayerSettings")] PlayerSettings playerSettings, IPlayerColorService playerColorService, IEventBus eventBus)
+    public void Construct([Inject(Id = "PlayerSettings")] PlayerSettings playerSettings, IPlayerColorService playerColorService)
     {
         this.playerSettings = playerSettings;
         this.playerColorService = playerColorService;
-        this.eventBus = eventBus;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public void SpawnLocalPlayer(int localId)
     {
@@ -30,35 +35,16 @@ public class PhotonPlayerSpawner : MonoBehaviourPun, IPlayerSpawner
             playerSettings.StartPosition,
             Quaternion.identity,
             0,
-            new object[] { localId - 1,playerColor.R, playerColor.G, playerColor.B, startPostion }
+            new object[] { localId - 1, playerColor.R, playerColor.G, playerColor.B, startPostion }
         );
         playerMove = go.GetComponent<PlayerMove>();
 
-        //  pm.Initialize(boardService, eventBus,localId);
-
         playerMoves[localId] = playerMove;
-
     }
-  
+
     public void RemovePlayer(int playerId)
     {
-        //if (!playerMoves.TryGetValue(playerId, out var move)) return;
-
-        //if (move != null && move.photonView != null && move.photonView.IsMine)
-        //    PhotonNetwork.Destroy(move.gameObject);
-        //else if (move != null)
-        //    Object.Destroy(move.gameObject);
-
-        //playerMoves.Remove(playerId);
     }
-}
 
-public class PlayerSpawnedViewEvent
-{
-    public PlayerView PlayerView;
-
-    public PlayerSpawnedViewEvent(PlayerView playerView)
-    {
-        PlayerView = playerView;
-    }
+    #endregion PUBLIC_METHODS
 }

@@ -15,9 +15,11 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
     private IPhotonTurnManager photonTurnManager;
     private IEventBus eventBus;
 
+    #region LIFE_CYCLE
+
     [Inject]
-    public void Construct( IBoardService boardService, ICompanyService companyService, IPhotonChanceManager photonChanceManager,
-        IPhotonJailManager photonJailManager, ICasinoService casinoService, IPhotonTurnManager photonTurnManager, IEventBus eventBus)
+    public void Construct(IBoardService boardService, ICompanyService companyService, IPhotonChanceManager photonChanceManager,
+     IPhotonJailManager photonJailManager, ICasinoService casinoService, IPhotonTurnManager photonTurnManager, IEventBus eventBus)
     {
         this.boardService = boardService;
         this.companyService = companyService;
@@ -34,13 +36,18 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
     void IDisposable.Dispose()
     {
         eventBus.Unsubscribe<HandleCellEvent>(OnHandleCell);
-       
+
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
     public void OnHandleCell(HandleCellEvent e)
     {
         int cellIndex = e.CellID;
         if (cellIndex >= boardService.CellsCount) return;
-       
+
         var cellData = boardService.GetCellData(cellIndex);
         switch (cellData.cellType)
         {
@@ -77,4 +84,7 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
                 break;
         }
     }
+
+    #endregion PUBLIC_METHODS
+
 }

@@ -11,6 +11,8 @@ public class GameStarter : MonoBehaviourPunCallbacks
     private IBoardService boardService;
     private IEventBus eventBus;
 
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IPhotonTurnManager photonTurnManager, IBoardService boardService, IEventBus eventBus)
     {
@@ -29,15 +31,19 @@ public class GameStarter : MonoBehaviourPunCallbacks
         CheckStartGame();
     }
 
+    #endregion LIFE_CYCLE
+
+    #region PRIVATE_METHODS
+
     private void CheckStartGame()
     {
-        if (!Photon.Pun.PhotonNetwork.InRoom)
+        if (!PhotonNetwork.InRoom)
             return;
-        if (Photon.Pun.PhotonNetwork.CurrentRoom.PlayerCount == Photon.Pun.PhotonNetwork.CurrentRoom.MaxPlayers)
+        if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
         {
             StartCoroutine(InitializeAllPlayers());
 
-            if (Photon.Pun.PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient)
             {
                 photonTurnManager.RequestStartRandomTurn();
             }
@@ -47,16 +53,26 @@ public class GameStarter : MonoBehaviourPunCallbacks
     private IEnumerator InitializeAllPlayers()
     {
         yield return new WaitForSeconds(0.5f);
+
         var players = GameObject.FindGameObjectsWithTag("Player");
         foreach (var player in players)
         {
-            player.GetComponent<PlayerMove>().Initialize(boardService, eventBus);
-            player.GetComponent<PlayerSkin>().Initialize(eventBus);
-            eventBus.Publish(new PlayerOccupancyRegisterEvent(0, player.GetComponent<PlayerMove>()));
+            PlayerMove playerMove = player.GetComponent<PlayerMove>();
+            PlayerSkin playerSkin = player.GetComponent<PlayerSkin>();
 
-
+            if (playerMove != null)
+            {
+                playerMove.Initialize(boardService, eventBus);
+                eventBus.Publish(new PlayerOccupancyRegisterEvent(0, player.GetComponent<PlayerMove>()));
+            }
+            if (playerSkin != null)
+            {
+                player.GetComponent<PlayerSkin>().Initialize(eventBus);
+            }
         }
         yield return new WaitForSeconds(0.5f);
-
     }
+
+    #endregion PRIVATE_METHODS
+
 }

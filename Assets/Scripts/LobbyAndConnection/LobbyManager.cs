@@ -6,21 +6,55 @@ using TMPro;
 using UnityEngine;
 using ExitGames.Client.Photon;
 using UnityEngine.UI;
+
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
     [Header("UI")]
     [SerializeField] private Transform roomListContainer;
+
     [SerializeField] private GameObject roomPopupPrefab;
     [SerializeField] private Button createRoomButton;
 
-    private Dictionary<string, GameObject> roomUIWindows = new Dictionary<string, GameObject>();
+    private readonly Dictionary<string, GameObject> roomUIWindows = new();
+
+    #region LIFE_CYCLE
 
     private void Start()
     {
         PhotonNetwork.JoinLobby();
-        createRoomButton.onClick.AddListener(() => CreateRoom());
+        createRoomButton.onClick.AddListener(() => OnCreateRoomClicked());
         PhotonNetwork.ConnectUsingSettings();
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PRIVATE_METHODS
+
+    private void CreateRoomUI(RoomInfo room)
+    {
+        if (roomUIWindows.ContainsKey(room.Name))
+            return; // Уже есть
+
+        GameObject go = Instantiate(roomPopupPrefab, roomListContainer);
+        roomUIWindows.Add(room.Name, go);
+
+        RoomPopup popup = go.GetComponent<RoomPopup>();
+        popup.Setup(room, this);
+    }
+
+    private void UpdateRoomUI(RoomInfo room)
+    {
+        if (roomUIWindows.TryGetValue(room.Name, out GameObject go))
+        {
+            RoomPopup popup = go.GetComponent<RoomPopup>();
+            popup.UpdateInfo(room);
+        }
+    }
+
+    #endregion PRIVATE_METHODS
+
+    #region CALLBACKS
+
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         Debug.Log("OnRoomListUpdate");
@@ -44,38 +78,23 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         }
     }
 
-    private void CreateRoomUI(RoomInfo room)
-    {
-        if (roomUIWindows.ContainsKey(room.Name))
-            return; // Уже есть
-
-        GameObject go = Instantiate(roomPopupPrefab, roomListContainer);
-        roomUIWindows.Add(room.Name, go);
-
-        RoomPopup popup = go.GetComponent<RoomPopup>();
-        popup.Setup(room, this);
-    }
-
-    private void UpdateRoomUI(RoomInfo room)
-    {
-        if (roomUIWindows.TryGetValue(room.Name, out GameObject go))
-        {
-            RoomPopup popup = go.GetComponent<RoomPopup>();
-            popup.UpdateInfo(room);
-        }
-    }
-
-    public void JoinRoom(string roomName)
-    {
-        PhotonNetwork.JoinRoom(roomName);
-    }
-  
-    // Коллбэк, когда присоединились к комнате
     public override void OnJoinedRoom()
     {
         PhotonNetwork.LoadLevel("GameScene"); // та же игровая сцена
     }
-    public void CreateRoom()
+
+    public override void OnCreatedRoom()
+    {
+        Debug.Log("Комната создана: " + PhotonNetwork.CurrentRoom.Name);
+        CreateRoomUI(PhotonNetwork.CurrentRoom);
+    }
+
+    public void OnJoinRoomClicked(string roomName)
+    {
+        PhotonNetwork.JoinRoom(roomName);
+    }
+
+    public void OnCreateRoomClicked()
     {
         string roomName = "Room_" + Random.Range(1000, 9999);
         RoomOptions options = new RoomOptions
@@ -90,11 +109,5 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         PhotonNetwork.CreateRoom(roomName, options);
     }
 
-    // Вот тут создаём UI сразу после создания комнаты
-    public override void OnCreatedRoom()
-    {
-        Debug.Log("Комната создана: " + PhotonNetwork.CurrentRoom.Name);
-        CreateRoomUI(PhotonNetwork.CurrentRoom);
-    }
-
+    #endregion CALLBACKS
 }

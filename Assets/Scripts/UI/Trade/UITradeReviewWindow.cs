@@ -12,7 +12,9 @@ public class UITradeReviewWindow : UITradeWindowBase, ITradeReviewWindow
     [SerializeField] private Button acceptButton;
     [SerializeField] private Button cancelButton;
 
-    public void Show(bool isRecipient,TradeOffer tradeOffer)
+    #region PUBLIC_METHODS
+
+    public void Show(bool isRecipient, TradeOffer tradeOffer)
     {
         acceptButton.gameObject.SetActive(isRecipient);
         cancelButton.gameObject.SetActive(isRecipient);
@@ -20,6 +22,7 @@ public class UITradeReviewWindow : UITradeWindowBase, ITradeReviewWindow
         ShowWindow();
         RefreshUI();
     }
+
     public void SetAcceptAction(System.Action onAccept)
     {
         acceptButton.onClick.RemoveAllListeners();
@@ -28,6 +31,7 @@ public class UITradeReviewWindow : UITradeWindowBase, ITradeReviewWindow
             acceptButton.onClick.AddListener(() => onAccept());
         }
     }
+
     public void SetCancelAction(System.Action onCancelAction)
     {
         cancelButton.onClick.RemoveAllListeners();
@@ -36,11 +40,12 @@ public class UITradeReviewWindow : UITradeWindowBase, ITradeReviewWindow
             cancelButton.onClick.AddListener(() => onCancelAction());
         }
     }
+
     public void Hide()
     {
         ClearUI();
         HideWindow();
-
     }
 
+    #endregion PUBLIC_METHODS
 }

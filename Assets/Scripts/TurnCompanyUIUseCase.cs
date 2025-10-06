@@ -16,6 +16,8 @@ public class TurnCompanyUIUseCase
     private IGroupOwnershipService groupOwnershipService; // сервис, провер€ющий владение группой
     private ILocalPlayerService localPlayerService;
 
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(ICompanyRepository companyRepository, IGroupOwnershipService groupOwnershipService, ILocalPlayerService localPlayerService)
     {
@@ -23,6 +25,10 @@ public class TurnCompanyUIUseCase
         this.groupOwnershipService = groupOwnershipService;
         this.localPlayerService = localPlayerService;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public IEnumerable<CompanyUIAction> GetAvailableActions(int currentPlayerId)
     {
@@ -67,15 +73,7 @@ public class TurnCompanyUIUseCase
 
         return actions;
     }
-}
-public class CompanyUIAction
-{
-    public int CompanyId { get; }
-    public CompanyActionType ActionType { get; }
 
-    public CompanyUIAction(int companyId, CompanyActionType actionType)
-    {
-        CompanyId = companyId;
-        ActionType = actionType;
-    }
+    #endregion PUBLIC_METHODS
+
 }

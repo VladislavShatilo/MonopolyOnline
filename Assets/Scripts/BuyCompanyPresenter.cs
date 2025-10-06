@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
-public class BuyCompanyPresenter : IBuyCompanyPresenter, IInitializable,IDisposable
+public class BuyCompanyPresenter : IBuyCompanyPresenter, IInitializable, IDisposable
 {
     private ILocalPlayerService localPlayerService;
     private IPhotonCompanyManager photonCompanyManager;
@@ -12,7 +12,8 @@ public class BuyCompanyPresenter : IBuyCompanyPresenter, IInitializable,IDisposa
     private IPhotonAuctionManager photonAuctionManager;
     private ICompanyRepository companyRepository;
     private IEventBus eventBus;
-    private int cellIndex;
+
+    #region LIFE_CYCLE
 
     [Inject]
     public void Construct(ILocalPlayerService localPlayerService, IBuyWindow buyWindow, IPhotonCompanyManager photonCompanyManager, IPhotonAuctionManager photonAuctionManager,
@@ -24,20 +25,46 @@ public class BuyCompanyPresenter : IBuyCompanyPresenter, IInitializable,IDisposa
         this.photonAuctionManager = photonAuctionManager;
         this.companyRepository = companyRepository;
         this.eventBus = eventBus;
-
     }
+
     void IInitializable.Initialize()
     {
         eventBus.Subscribe<OfferPurchaseEvent>(BuyWindowShow);
+
         buyWindow.SetBuyAction(TryBuyCompany);
         buyWindow.SetAuctionAction(StartAuctionRequest);
-
     }
 
     void IDisposable.Dispose()
     {
         eventBus.Unsubscribe<OfferPurchaseEvent>(BuyWindowShow);
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
+    public void TryBuyCompany(int cellIndex)
+    {
+        int localId = localPlayerService.GetLocalPlayerId();
+        photonCompanyManager.RequestBuyCompany(cellIndex, localId, BuyReason.Buy);
+    }
+
+    public void StartAuctionRequest(int cellIndex)
+    {
+        int localId = localPlayerService.GetLocalPlayerId();
+        Company company = companyRepository.GetCompanyById(cellIndex);
+        photonAuctionManager.StartAuctionRequest(localId, cellIndex, company.Price);
+    }
+
+    public void ShowTurnFor(int playerId) => HideTurn();
+
+    public void HideTurn() => buyWindow.Hide();
+
+    #endregion PUBLIC_METHODS
+
+    #region CALLBAKCS
+
     private void BuyWindowShow(OfferPurchaseEvent e)
     {
         int localId = localPlayerService.GetLocalPlayerId();
@@ -45,8 +72,6 @@ public class BuyCompanyPresenter : IBuyCompanyPresenter, IInitializable,IDisposa
         if (e.PlayerId == localId)
         {
             buyWindow.Show(e.PlayerId, e.CellIndex, e.Price, e.CanAfford);
-            cellIndex= e.CellIndex;
-
         }
         else
         {
@@ -54,19 +79,5 @@ public class BuyCompanyPresenter : IBuyCompanyPresenter, IInitializable,IDisposa
         }
     }
 
-    public void TryBuyCompany(int cellIndex)
-    {
-        int localId = localPlayerService.GetLocalPlayerId();
-        photonCompanyManager.RequestBuyCompany(cellIndex, localId, BuyReason.Buy);
-    }
-    public void StartAuctionRequest(int cellIndex)
-    {
-
-        int localId = localPlayerService.GetLocalPlayerId();
-        Company company = companyRepository.GetCompanyById(cellIndex);
-        photonAuctionManager.StartAuctionRequest(localId, cellIndex,company.Price);
-    }
-
-    public void ShowTurnFor(int playerId) => HideTurn();
-    public void HideTurn() => buyWindow.Hide();
+    #endregion CALLBAKCS
 }

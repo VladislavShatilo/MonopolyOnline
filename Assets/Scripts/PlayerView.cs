@@ -10,12 +10,14 @@ public class PlayerView : MonoBehaviourPun, IPunInstantiateMagicCallback
      private PlayerSkin playerSkin;
      private RectTransform rectTransform;
 
+    #region LIFE_CYCLE
+
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
         playerSkin = GetComponent<PlayerSkin>();
     }
-    public void OnPhotonInstantiate(Photon.Pun.PhotonMessageInfo info)
+    public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
         var playerRoot = GameObject.FindGameObjectWithTag("PlayerRoot");
         if (playerRoot != null)
@@ -36,6 +38,9 @@ public class PlayerView : MonoBehaviourPun, IPunInstantiateMagicCallback
             Color color = new Color(r, g, b, 1);
             playerSkin.SetColorDirect(color);
         }
-       
+
     }
+
+    #endregion LIFE_CYCLE
+
 }

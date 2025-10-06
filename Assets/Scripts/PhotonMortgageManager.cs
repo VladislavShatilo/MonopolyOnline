@@ -7,9 +7,10 @@ using Zenject;
 public class PhotonMortgageManager : MonoBehaviourPun, IPhotonMortgageManager
 {
     private IMortgageService mortgageService;
-    private ICompanyUIService companyUIService; 
+    private ICompanyUIService companyUIService;
     private GameSettings gameSettings;
 
+    #region LIFE_CYCLE
 
     [Inject]
     public void Construct(IMortgageService mortgageService, ICompanyUIService companyUIService, GameSettings gameSettings)
@@ -19,10 +20,23 @@ public class PhotonMortgageManager : MonoBehaviourPun, IPhotonMortgageManager
         this.gameSettings = gameSettings;
     }
 
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
     public void RequestMortgageCompany(int companyId)
     {
         photonView.RPC(nameof(RPC_MortgageCompany), RpcTarget.MasterClient, companyId, PhotonNetwork.LocalPlayer.ActorNumber);
     }
+
+    public void RequestBuyoutCompany(int companyId)
+    {
+        photonView.RPC(nameof(RPC_BuyBackCompany), RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber, companyId);
+    }
+
+    #endregion PUBLIC_METHODS
+
+    #region RPC
 
     [PunRPC]
     private void RPC_MortgageCompany(int companyId, int playerId)
@@ -30,11 +44,6 @@ public class PhotonMortgageManager : MonoBehaviourPun, IPhotonMortgageManager
         if (!PhotonNetwork.IsMasterClient) return;
         mortgageService.MortgageCompany(companyId, playerId);
         photonView.RPC(nameof(RPC_SyncMortgage), RpcTarget.All, playerId, companyId, true);
-    }
-
-    public void RequestBuyoutCompany(int companyId)
-    {
-        photonView.RPC(nameof(RPC_BuyBackCompany), RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber, companyId);
     }
 
     [PunRPC]
@@ -62,4 +71,6 @@ public class PhotonMortgageManager : MonoBehaviourPun, IPhotonMortgageManager
             ui.BuyoutUI();
         }
     }
+
+    #endregion RPC
 }

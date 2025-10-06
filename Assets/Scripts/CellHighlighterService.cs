@@ -10,11 +10,19 @@ public class CellHighlighterService : MonoBehaviour, ICellHighlighterService
 
     private GameObject tempCell;
     private IBoardService boardService;
+
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IBoardService boardService)
     {
         this.boardService = boardService;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
     public void ShowHighlight(int cellId)
     {
         fadeImage.SetActive(true);
@@ -36,4 +44,6 @@ public class CellHighlighterService : MonoBehaviour, ICellHighlighterService
         dice1GO.SetActive(false);
         dice2GO.SetActive(false);
     }
+
+    #endregion PUBLIC_METHODS
 }

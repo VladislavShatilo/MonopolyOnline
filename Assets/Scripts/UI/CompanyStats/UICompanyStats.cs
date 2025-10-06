@@ -14,7 +14,8 @@ public class UICompanyStats : UIBaseCompanyStats, ICompanyStatsUI<CompanyData>
     [Header("Branch Price")]
     [SerializeField] private TextMeshProUGUI branchPriceText;
 
-    
+    #region PUBLIC_METHODS
+
     public void SetRentPrices(int[] values)
     {
         if (rentPriceTexts == null) return;
@@ -36,4 +37,7 @@ public class UICompanyStats : UIBaseCompanyStats, ICompanyStatsUI<CompanyData>
         SetBuyoutPrice(data.buyoutPrice);
         SetBranchPrice(data.branchPrice);
     }
+
+    #endregion PUBLIC_METHODS
+
 }

@@ -71,7 +71,6 @@ public class GameplayInstaller : MonoInstaller
         Container.BindInstance(parentTransform).WithId("BoardParent");
         Container.BindInstance(playerRoot).WithId("PlayerRoot").NonLazy();
         Container.Bind<IChanceService>().To<ChanceService>().AsSingle().NonLazy();
-        Container.Bind<ICasinoService>().To<CasinoService>().AsSingle().NonLazy();
         Container.Bind<ITurnService>().To<TurnService>().AsSingle().NonLazy();
         Container.BindInstance(playerSettings).WithId("PlayerSettings").AsSingle().NonLazy();
         Container.BindInstance(gameSettings).AsSingle();
@@ -91,7 +90,6 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IRollDiceUseCase>().To<RollDiceUseCase>().AsSingle().NonLazy();
         Container.BindInterfacesTo<DicePresenter>().AsSingle().NonLazy();
 
-        Container.BindInterfacesTo<PlayerMoveInitService>().AsSingle().NonLazy();
         Container.BindInterfacesTo<TradeService>().AsSingle().NonLazy();
 
         
@@ -178,7 +176,6 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<UICompanyTrade>().FromInstance(uiCompanyTrade).AsSingle();
 
         Container.Bind<IJailService>().To<JailService>().AsSingle();
-        Container.Bind<BranchRules>().AsSingle().NonLazy();
         Container.Bind<PhotonTimerUpdater>().FromComponentInHierarchy().AsSingle();
         Container.Bind<ITimerManager>().To<TimerManager>().AsSingle().NonLazy();
         Container.BindInterfacesTo<LoanService>().AsSingle().NonLazy();

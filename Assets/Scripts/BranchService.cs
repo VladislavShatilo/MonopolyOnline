@@ -8,6 +8,9 @@ public class BranchService : IBranchService
     private ICompanyRepository companyRepository;
     private IPlayerRepository playerRepository;
     private GameSettings gameSettings;
+
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(ICompanyRepository companyRepository, IPlayerRepository playerRepository, GameSettings gameSettings)
     {
@@ -15,6 +18,10 @@ public class BranchService : IBranchService
         this.playerRepository = playerRepository;
         this.gameSettings = gameSettings;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public bool TryBuyBranch(int companyId, int playerId, out Company company)
     {
@@ -41,4 +48,6 @@ public class BranchService : IBranchService
         company.RentLevel--;
         return true;
     }
+
+    #endregion PUBLIC_METHODS
 }

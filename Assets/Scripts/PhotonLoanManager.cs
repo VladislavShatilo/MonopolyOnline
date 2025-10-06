@@ -9,12 +9,18 @@ public class PhotonLoanManager : MonoBehaviourPun, IPhotonLoanManager
     private ILoanService loanService;
     private IEventBus eventBus;
 
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(ILoanService loanService, IEventBus eventBus)
     {
         this.loanService = loanService;
         this.eventBus = eventBus;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public void TakeLoanRequest(int playerId)
     {
@@ -31,6 +37,10 @@ public class PhotonLoanManager : MonoBehaviourPun, IPhotonLoanManager
         photonView.RPC(nameof(RPC_ShowLoanWindow), PhotonNetwork.CurrentRoom.GetPlayer(playerId), playerId, loanAmount);
     }
 
+    #endregion PUBLIC_METHODS
+
+    #region RPC
+
     [PunRPC]
     private void RPC_TakeLoan(int playerId)
     {
@@ -44,9 +54,10 @@ public class PhotonLoanManager : MonoBehaviourPun, IPhotonLoanManager
     }
 
     [PunRPC]
-    private void RPC_ShowLoanWindow(int playerId,int loanAmount)
+    private void RPC_ShowLoanWindow(int playerId, int loanAmount)
     {
-        eventBus.Publish(new OfferLoanPayEvent(playerId,loanAmount));
-            // UILoanPayWindow.Instance.ShowLoanWindow(playerRepository.GetPlayerById(playerId));
+        eventBus.Publish(new OfferLoanPayEvent(playerId, loanAmount));
     }
+
+    #endregion RPC
 }

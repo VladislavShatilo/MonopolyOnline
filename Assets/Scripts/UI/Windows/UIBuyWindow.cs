@@ -18,6 +18,7 @@ public class UIBuyWindow : UIWindowBase,IBuyWindow
 
     private int currentCellIndex;
 
+    #region PUBLIC_METHODS
 
     public void Show(int playerId, int cellIndex, int price, bool canAfford)
     {
@@ -50,15 +51,10 @@ public class UIBuyWindow : UIWindowBase,IBuyWindow
             buyButton.onClick.AddListener(() => onBuyAction(currentCellIndex));
         }
     }
-    
-}
-public class TryBuyCompanyEvent
-{
-    public int CellIndex;
-    public TryBuyCompanyEvent(int cellIndex)
-    {
-        CellIndex = cellIndex;
-    }
+
+    #endregion PUBLIC_METHODS
+
 
 }
+
 

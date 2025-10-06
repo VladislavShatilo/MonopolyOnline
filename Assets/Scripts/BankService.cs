@@ -5,8 +5,10 @@ using Zenject;
 
 public class BankService : IBankService
 {
-    private  IPlayerRepository playerRepository;
-    private  IBankNotifier notifier;
+    private IPlayerRepository playerRepository;
+    private IBankNotifier notifier;
+
+    #region LIFE_CYCLE
 
     [Inject]
     public void Consturct(IPlayerRepository playerRepository, IBankNotifier notifier)
@@ -14,6 +16,10 @@ public class BankService : IBankService
         this.playerRepository = playerRepository;
         this.notifier = notifier;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public void AddMoney(int playerId, int amount)
     {
@@ -47,4 +53,6 @@ public class BankService : IBankService
         AddMoney(toPlayerId, amount);
         return true;
     }
+
+    #endregion PUBLIC_METHODS
 }

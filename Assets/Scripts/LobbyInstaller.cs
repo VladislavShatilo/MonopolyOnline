@@ -10,11 +10,6 @@ public class LobbyInstaller : MonoInstaller
 
     public override void InstallBindings()
     {
-        Container.BindInterfacesAndSelfTo<LobbyUI>()
-             .FromInstance(lobbyUIPrefab)
-             .AsSingle()
-             .NonLazy();
-
+        Container.BindInterfacesAndSelfTo<LobbyUI>().FromInstance(lobbyUIPrefab).AsSingle().NonLazy();
     }
-
 }

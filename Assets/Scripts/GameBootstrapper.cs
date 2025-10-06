@@ -10,9 +10,12 @@ public class GameBootstrapper : MonoBehaviour
     private ICompanyUIService companyUIService;
     private ICellOccupancyService cellOccupancyService;
     private PlayerStatsService playerStatsService;
+
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(GameManager gameManager, IBoardService boardService, ICompanyUIService companyUIService,
-        ICellOccupancyService cellOccupancyService, PlayerStatsService playerStatsService)
+      ICellOccupancyService cellOccupancyService, PlayerStatsService playerStatsService)
     {
         this.gameManager = gameManager;
         this.boardService = boardService;
@@ -29,4 +32,8 @@ public class GameBootstrapper : MonoBehaviour
         playerStatsService.Initialize();
         gameManager.Initialize();
     }
+
+    #endregion LIFE_CYCLE
+
+
 }

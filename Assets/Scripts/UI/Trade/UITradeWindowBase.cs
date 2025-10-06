@@ -8,14 +8,15 @@ using Zenject;
 
 public class UITradeWindowBase : MonoBehaviour
 {
-
     [Header("Panels & Prefabs")]
     [SerializeField] protected Transform leftPanel;
+
     [SerializeField] protected Transform rightPanel;
     [SerializeField] protected GameObject companyCardPrefab;
 
     [Header("UI Elements")]
     [SerializeField] protected float animationDuration = 0.5f;
+
     [SerializeField] protected RectTransform windowRectTransform;
     [SerializeField] protected TextMeshProUGUI leftTotalAmountText;
     [SerializeField] protected TextMeshProUGUI rightTotalAmountText;
@@ -25,12 +26,20 @@ public class UITradeWindowBase : MonoBehaviour
     [SerializeField] protected TextMeshProUGUI rightPlayerNameText;
 
     private DiContainer _container;
+
+    protected TradeOffer currentOffer;
+
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(DiContainer container)
     {
         _container = container;
     }
-    protected TradeOffer currentOffer;
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public virtual void RefreshUI()
     {
@@ -59,6 +68,14 @@ public class UITradeWindowBase : MonoBehaviour
         leftTotalAmountText.text = leftSum.ToString("N0", CultureInfo.InvariantCulture);
         rightTotalAmountText.text = rightSum.ToString("N0", CultureInfo.InvariantCulture);
     }
+
+    public void ShowWindow() => windowRectTransform.DOAnchorPos(Vector2.zero, animationDuration);
+
+    public void HideWindow() => windowRectTransform.DOAnchorPos(new Vector2(0, 450), animationDuration);
+
+    #endregion PUBLIC_METHODS
+
+    #region PROTECTED_METHODS
 
     protected void PopulateCompanies(Transform panel, List<Company> companies, int playerId, ref int sum)
     {
@@ -98,6 +115,5 @@ public class UITradeWindowBase : MonoBehaviour
         }
     }
 
-    public void ShowWindow() => windowRectTransform.DOAnchorPos(Vector2.zero, animationDuration);
-    public void HideWindow() => windowRectTransform.DOAnchorPos(new Vector2(0, 450), animationDuration);
+    #endregion PROTECTED_METHODS
 }

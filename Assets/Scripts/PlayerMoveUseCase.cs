@@ -13,6 +13,8 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase, IInitializable, IDisposable
     private IEventBus eventBus;
     private ICellHighlighterService cellHighlighterService;
 
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IPlayerRepository playerRepository, IBoardService boardService, IEventBus eventBus, ICellHighlighterService cellHighlighterService)
     {
@@ -29,6 +31,11 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase, IInitializable, IDisposable
     {
         eventBus.Unsubscribe<DiceFadeEvent>(HighlightCell);
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
     public void MovePlayer(int playerId, int steps, bool isForward)
     {
         PlayerData player = playerRepository.GetPlayerById(playerId);
@@ -37,20 +44,13 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase, IInitializable, IDisposable
             ? (player.CurrentCellId + steps) % boardService.CellsCount
             : (player.CurrentCellId - steps + boardService.CellsCount) % boardService.CellsCount;
 
-        // EventBus.Publish(new DiceFadeEvent(targetIndex, true));
-        //  EventBus.Publish(new PlayerMoveUnregister(player.CurrentCellId, playerId));
-       
-        eventBus.Publish(new MovePlayerEvent(playerId, player.CurrentCellId, steps,isForward,targetIndex));
+        eventBus.Publish(new MovePlayerEvent(playerId, player.CurrentCellId, steps, isForward, targetIndex));
 
-        
-
-        // Логика изменения позиции в модели
         player.CurrentCellId = targetIndex;
-       // EventBus.Publish(new DiceFadeEvent(targetIndex, false));
-       //EventBus.Publish(new PlayerMoveRegister( playerId, player.CurrentCellId));
+
     }
- 
-    public void TeleportPlayer(int playerId,int randomIndex, int currentCellIndex)
+
+    public void TeleportPlayer(int playerId, int randomIndex, int currentCellIndex)
     {
         int steps = 0;
         if (randomIndex > currentCellIndex)
@@ -64,13 +64,18 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase, IInitializable, IDisposable
 
         MovePlayer(playerId, steps, true);
     }
+
+    #endregion PUBLIC_METHODS
+
+    #region CALLBACKS
+
     private void HighlightCell(DiceFadeEvent e)
     {
         if (e.IsMovementStart)
         {
             cellHighlighterService.ShowHighlight(e.CellId);
         }
-        else 
+        else
         {
             cellHighlighterService.HideHighlight();
 
@@ -78,21 +83,8 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase, IInitializable, IDisposable
 
     }
 
-  
-}
-public class MovePlayerEvent
-{
-    public int PlayerId;
-    public int CurrentCellIndex;
-    public int Steps;
-    public bool IsForward;
-    public int TargetIndex;
-    public MovePlayerEvent(int playerId,int currentCellIndex,int steps,bool isForward,int targetIndex)
-    {
-        PlayerId = playerId;
-        CurrentCellIndex = currentCellIndex;
-        Steps = steps;
-        IsForward = isForward;
-        TargetIndex = targetIndex;
-    }
+    #endregion CALLBACKS
+
+
+
 }

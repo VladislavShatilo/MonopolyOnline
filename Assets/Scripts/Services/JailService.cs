@@ -11,6 +11,8 @@ public class JailService : IJailService
     private IEventBus eventBus;
     private GameSettings gameSettings;
 
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IPlayerRepository playerRepository, IEventBus eventBus, IPhotonTurnManager photonTurnManager, GameSettings gameSettings)
     {
@@ -19,6 +21,10 @@ public class JailService : IJailService
         this.photonTurnManager = photonTurnManager;
         this.gameSettings = gameSettings;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public void SendPlayerToJail(int playerId)
     {
@@ -34,11 +40,9 @@ public class JailService : IJailService
         var player = playerRepository.GetPlayerById(playerId);
         player.Release();
 
-      
+
         eventBus.Publish(new SetTurnsJailEvent(playerId, 0));
-        
-       // if (PhotonNetwork.IsMasterClient)
-         //   photonTurnManager.RequestEndTurn();
+
 
     }
 
@@ -50,7 +54,7 @@ public class JailService : IJailService
         if (firstDice == secondDice)
         {
             ReleasePlayer(playerId, false);
-            
+
             return;
         }
 
@@ -60,7 +64,6 @@ public class JailService : IJailService
         }
         eventBus.Publish(new SetTurnsJailEvent(playerId, player.JailTurnsLeft));
 
-        // вызов хода только на мастере
         if (PhotonNetwork.IsMasterClient)
             photonTurnManager.RequestEndTurn();
     }
@@ -68,4 +71,8 @@ public class JailService : IJailService
     {
         return playerRepository.GetPlayerById(playerId).JailTurnsLeft;
     }
+
+    #endregion PUBLIC_METHODS
+
+
 }

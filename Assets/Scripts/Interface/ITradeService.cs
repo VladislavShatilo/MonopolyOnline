@@ -6,7 +6,6 @@ public interface ITradeService
     TradeOffer CurrentOffer { get; }
 
     void StartTrade(int fromPlayerId, int toPlayerId);
-    void OfferTrade();
     void CancelTrade();
 
     void AddCompanyToOffer(int playerId, Company company);

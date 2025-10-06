@@ -15,11 +15,7 @@ public class UITurnWindow : UIWindowBase,ITurnWindow
     [SerializeField] private TMP_InputField inputField1;
     [SerializeField] private TMP_InputField inputField2;
 
-    public Button ThrowDiceButton
-    {
-        get => throwDiceButton;
-        set => throwDiceButton = value;
-    }
+    #region PUBLIC_METHODS
 
     public void Show() => ShowWindow();
     public void Hide() => HideWindow();
@@ -27,7 +23,7 @@ public class UITurnWindow : UIWindowBase,ITurnWindow
     public void SetThrowDiceAction(System.Action onClick)
     {
         throwDiceButton.onClick.RemoveAllListeners();
-      
+
         if (onClick != null)
         {
             throwDiceButton.onClick.AddListener(() => onClick());
@@ -51,4 +47,8 @@ public class UITurnWindow : UIWindowBase,ITurnWindow
         }
         return steps;
     }
+
+    #endregion PUBLIC_METHODS
+
+
 }

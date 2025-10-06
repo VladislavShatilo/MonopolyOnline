@@ -12,13 +12,17 @@ public class UILoanPayWindow : UIWindowBase, ILoanPayWindow
 {
     [Header("Buttons")]
     [SerializeField] private Button payLoanButton;
+
     [SerializeField] private Button cantPayLoanButton;
 
     [Header("Texts")]
     [SerializeField] private TextMeshProUGUI payLoanText;
+
     [SerializeField] private TextMeshProUGUI cantPayLoanText;
 
     private int currentPlayerId;
+
+    #region PUBLIC_METHODS
 
     public void Show(int playerId, int loanAmount, bool canAfford)
     {
@@ -44,12 +48,6 @@ public class UILoanPayWindow : UIWindowBase, ILoanPayWindow
             payLoanButton.onClick.AddListener(() => onPayLoan(currentPlayerId));
         }
     }
-}
-public class PayLoanEvent 
-{
-    public int PlayerId;
-    public PayLoanEvent(int playerId)
-    {
-        PlayerId = playerId;
-    }
+
+    #endregion PUBLIC_METHODS
 }

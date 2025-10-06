@@ -18,6 +18,8 @@ public class UIJailWindow : UIWindowBase, IJailWindow
 
     private int currentPlayerId;
 
+    #region PUBLIC_METHODS
+
     public void Show(int playerId, int ransomMoney, bool canAfford)
     {
         currentPlayerId = playerId;
@@ -51,16 +53,8 @@ public class UIJailWindow : UIWindowBase, IJailWindow
             ransomButton.onClick.AddListener(() => onRansom(currentPlayerId));
         }
     }
-}
-public class ReleaseFromJailEvent
-{
-    public int PlayerID;
-    public bool IsPaidExit;
 
-    public ReleaseFromJailEvent(int playerId, bool isPaidExit)
-    {
-        PlayerID= playerId;
-        IsPaidExit = isPaidExit;
+    #endregion PUBLIC_METHODS
 
-    }
+
 }

@@ -8,25 +8,29 @@ using UnityEngine.UI;
 
 public class UITradeWindow : UITradeWindowBase, ITradeWindow
 {
-
     [Header("ButtonsInputs")]
     [SerializeField] private Button offerButton;
+
     [SerializeField] private Button closeButton;
 
     [Header("Inputs")]
     [SerializeField] private TMP_InputField leftMoneyInputField;
+
     [SerializeField] private TMP_InputField rightMoneyInputField;
     [SerializeField] private UIMoneyTrade leftUIMoneyTrade;
     [SerializeField] private UIMoneyTrade rightUIMoneyTrade;
+
+    #region LIFE_CYCLE
+
     private void OnEnable()
     {
         offerButton.interactable = false;
 
         leftMoneyInputField.onEndEdit.AddListener(OnLeftMoneyChanged);
         rightMoneyInputField.onEndEdit.AddListener(OnRightMoneyChanged);
-  
-        offerButton.onClick.AddListener(OnOffer);
-        closeButton.onClick.AddListener(OnClose);
+
+        offerButton.onClick.AddListener(OnOfferClicked);
+        closeButton.onClick.AddListener(OnCloseClicked);
     }
 
     private void OnDisable()
@@ -34,11 +38,15 @@ public class UITradeWindow : UITradeWindowBase, ITradeWindow
         leftMoneyInputField.onEndEdit.RemoveListener(OnLeftMoneyChanged);
         rightMoneyInputField.onEndEdit.RemoveListener(OnRightMoneyChanged);
 
-
-        offerButton.onClick.AddListener(OnOffer);
-        closeButton.onClick.AddListener(OnClose);
+        offerButton.onClick.AddListener(OnOfferClicked);
+        closeButton.onClick.AddListener(OnCloseClicked);
     }
-    void ITradeWindow.Show(TradeOffer tradeOffer)
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
+    public void Show(TradeOffer tradeOffer)
     {
         ValidateOfferButton();
         ClearUI();
@@ -46,14 +54,17 @@ public class UITradeWindow : UITradeWindowBase, ITradeWindow
         RefreshUI();
         ShowWindow();
     }
-    void ITradeWindow.Hide()
+
+    public void Hide()
     {
-        OnClose();
+        OnCloseClicked();
     }
-    void ITradeWindow.Clear()
+
+    public void Clear()
     {
         throw new System.NotImplementedException();
     }
+
     public void SetOfferAction(System.Action onAuction)
     {
         offerButton.onClick.RemoveAllListeners();
@@ -62,6 +73,7 @@ public class UITradeWindow : UITradeWindowBase, ITradeWindow
             offerButton.onClick.AddListener(() => onAuction());
         }
     }
+
     public void SetCloseAction(System.Action onBuyAction)
     {
         closeButton.onClick.RemoveAllListeners();
@@ -70,18 +82,23 @@ public class UITradeWindow : UITradeWindowBase, ITradeWindow
             closeButton.onClick.AddListener(() => onBuyAction());
         }
     }
-    void ITradeWindow.UpdateTrade(TradeOffer tradeOffer)
+
+    public void UpdateTrade(TradeOffer tradeOffer)
     {
         currentOffer = tradeOffer;
         RefreshUI();
         ValidateOfferButton();
     }
- 
+
+    #endregion PUBLIC_METHODS
+
+    #region PRIVATE_METHODS
+
     private void OnLeftMoneyChanged(string value)
     {
         if (int.TryParse(value, out int amount) && currentOffer != null)
         {
-           // TradeManager.Instance.SetMoney(currentOffer.FromPlayerData.Id, amount);
+            // TradeManager.Instance.SetMoney(currentOffer.FromPlayerData.Id, amount);
             currentOffer.FromMoney = amount;
             RefreshUI();
             ValidateOfferButton();
@@ -98,6 +115,7 @@ public class UITradeWindow : UITradeWindowBase, ITradeWindow
             ValidateOfferButton();
         }
     }
+
     private void ValidateOfferButton()
     {
         if (currentOffer != null)
@@ -105,7 +123,7 @@ public class UITradeWindow : UITradeWindowBase, ITradeWindow
             Debug.Log("ValidateOfferButton");
             int leftAmount = currentOffer.GetFromTotalValue();
             int rightAmount = currentOffer.GetToTotalValue();
-            if(leftAmount ==0 || rightAmount == 0)
+            if (leftAmount == 0 || rightAmount == 0)
             {
                 offerButton.interactable = false;
             }
@@ -124,26 +142,24 @@ public class UITradeWindow : UITradeWindowBase, ITradeWindow
         }
     }
 
-    private void OnOffer()
+    #endregion PRIVATE_METHODS
+
+    #region CALLBACKS
+
+    private void OnOfferClicked()
     {
         if (currentOffer == null || !currentOffer.IsValid()) return;
-        //EventBus.Publish(new OfferTradeEvent());
         HideWindow();
     }
 
-    private void OnClose()
+    private void OnCloseClicked()
     {
-        // EventBus.Publish(new CancelTradeEvent());
-
         HideWindow();
         leftMoneyInputField.text = "0";
         rightMoneyInputField.text = "0";
         leftUIMoneyTrade.RefreshUI();
         rightUIMoneyTrade.RefreshUI();
-
     }
+
+    #endregion CALLBACKS
 }
-
-public class OfferTradeEvent { }
-
-public class CancelTradeEvent { }

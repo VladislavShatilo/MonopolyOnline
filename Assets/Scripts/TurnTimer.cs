@@ -2,20 +2,23 @@ using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 public enum TimerType
 {
     Turn,
     Auction,
     Trade
 }
+
 public class TurnTimer
 {
-
     private TimerType type;
     private int playerId;
     private double startTime;
     private double duration;
     private bool isActive;
+
+    #region PUBLIC_METHODS
 
     public void Start(TimerType type, int playerId, double startTime, double duration)
     {
@@ -44,19 +47,5 @@ public class TurnTimer
 
     public void Stop() => isActive = false;
 
-}
-public class TimerUpdatedEvent
-{
-    public TimerType Type { get; }
-    public int PlayerId { get; }
-    public float TimeLeft { get; }
-    public bool IsActive { get; }
-
-    public TimerUpdatedEvent(TimerType type, int playerId, float timeLeft, bool isActive)
-    {
-        Type = type;
-        PlayerId = playerId;
-        TimeLeft = timeLeft;
-        IsActive = isActive;
-    }
+    #endregion PUBLIC_METHODS
 }

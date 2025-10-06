@@ -11,8 +11,11 @@ public class LoanPayPresenter : IInitializable, IDisposable
     private IEventBus eventBus;
     private IBankService bankService;
     private IPhotonLoanManager photonLoanManager;
+
+    #region LIFE_CYCLE
+
     [Inject]
-    public void Construct(ILoanPayWindow loanPayWindow, ILocalPlayerService localPlayerService,IEventBus eventBus, IBankService bankService, IPhotonLoanManager photonLoanManager)
+    public void Construct(ILoanPayWindow loanPayWindow, ILocalPlayerService localPlayerService, IEventBus eventBus, IBankService bankService, IPhotonLoanManager photonLoanManager)
     {
         this.loanPayWindow = loanPayWindow;
         this.localPlayerService = localPlayerService;
@@ -24,6 +27,7 @@ public class LoanPayPresenter : IInitializable, IDisposable
     void IInitializable.Initialize()
     {
         eventBus.Subscribe<OfferLoanPayEvent>(ShowLoanWindow);
+
         loanPayWindow.SetPayLoanAction(OnPayLoan);
     }
 
@@ -31,6 +35,10 @@ public class LoanPayPresenter : IInitializable, IDisposable
     {
         eventBus.Unsubscribe<OfferLoanPayEvent>(ShowLoanWindow);
     }
+
+    #endregion LIFE_CYCLE
+
+    #region CALLBACKS
 
     private void ShowLoanWindow(OfferLoanPayEvent e)
     {
@@ -51,15 +59,6 @@ public class LoanPayPresenter : IInitializable, IDisposable
         photonLoanManager.PayLoanRequest(playerId);
         loanPayWindow.Hide();
     }
-}
-public class OfferLoanPayEvent
-{
-    public int PlayerId { get; }
-    public int LoanAmount { get; }
 
-    public OfferLoanPayEvent(int playerId, int loanAmount)
-    {
-        PlayerId = playerId;
-        LoanAmount = loanAmount;
-    }
+    #endregion CALLBACKS
 }

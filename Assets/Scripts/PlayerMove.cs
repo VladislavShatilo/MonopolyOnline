@@ -18,13 +18,13 @@ public class PlayerMove : MonoBehaviourPun
     private int cellsCount;
     private IEventBus eventBus;
 
+    #region LIFE_CYCLE
+
     public void Initialize(IBoardService boardService, IEventBus eventBus)
     {
         this.boardService = boardService;
         this.eventBus = eventBus;
         eventBus.Subscribe<MovePlayerEvent>(OnPlayerMove);
-        eventBus.Subscribe<PlayerMoveRegister>(OnOccupancyRegister);
-        eventBus.Subscribe<PlayerMoveUnregister>(OnOccupancyUnregister);
         eventBus.Subscribe<MoveToJailEvent>(MoveToJail);
 
         cellsCount = boardService.CellsCount;
@@ -35,32 +35,24 @@ public class PlayerMove : MonoBehaviourPun
         if (eventBus != null)
         {
             eventBus.Unsubscribe<MovePlayerEvent>(OnPlayerMove);
-            eventBus.Unsubscribe<PlayerMoveRegister>(OnOccupancyRegister);
-            eventBus.Unsubscribe<PlayerMoveUnregister>(OnOccupancyUnregister);
             eventBus.Unsubscribe<MoveToJailEvent>(MoveToJail);
         }
     }
 
-    private void OnOccupancyRegister(PlayerMoveRegister e)
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
+    public void SetTargetPosition(Vector3 target)
     {
-        eventBus.Publish(new PlayerOccupancyRegisterEvent(e.CellIndex, this));
+        StartCoroutine(MoveToPosition(target));
     }
 
-    private void OnOccupancyUnregister(PlayerMoveUnregister e)
-    {
-        eventBus.Publish(new PlayerOccupancyUnregisterEvent(e.CellIndex, this));
-    }
+    #endregion PUBLIC_METHODS
 
-    private void OnPlayerMove(MovePlayerEvent e)
-    {
-        if (e.PlayerId == photonView.OwnerActorNr)
-        {
-            StopAllCoroutines();
-            StartCoroutine(Move(e.PlayerId,e.Steps, e.CurrentCellIndex, e.IsForward, e.TargetIndex));
-        }
-    }
+    #region PRIVATE_METHODS
 
-    private IEnumerator Move(int playerId,int steps, int currentCellIndex, bool forward, int targetIndex)
+    private IEnumerator Move(int playerId, int steps, int currentCellIndex, bool forward, int targetIndex)
     {
         int startCellId = currentCellIndex;
         eventBus.Publish(new DiceFadeEvent(targetIndex, true));
@@ -91,6 +83,15 @@ public class PlayerMove : MonoBehaviourPun
         eventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.OwnerActorNr));
     }
 
+    private IEnumerator MoveToJailCoroutine()
+    {
+        yield return new WaitForSeconds(0.2f);
+        Vector3 targetPos = boardService.GetCellRectTransform(10).position;
+        yield return MoveToPosition(targetPos);
+
+        //EventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.Owner.ActorNumber));
+    }
+
     private IEnumerator MoveToPosition(Vector3 target)
     {
         Vector3 start = transform.position;
@@ -106,9 +107,17 @@ public class PlayerMove : MonoBehaviourPun
         transform.position = target;
     }
 
-    public void SetTargetPosition(Vector3 target)
+    #endregion PRIVATE_METHODS
+
+    #region CALLBACKS
+
+    private void OnPlayerMove(MovePlayerEvent e)
     {
-        StartCoroutine(MoveToPosition(target));
+        if (e.PlayerId == photonView.OwnerActorNr)
+        {
+            StopAllCoroutines();
+            StartCoroutine(Move(e.PlayerId, e.Steps, e.CurrentCellIndex, e.IsForward, e.TargetIndex));
+        }
     }
 
     private void MoveToJail(MoveToJailEvent e)
@@ -120,76 +129,8 @@ public class PlayerMove : MonoBehaviourPun
         }
     }
 
-    private IEnumerator MoveToJailCoroutine()
-    {
-        yield return new WaitForSeconds(0.2f);
-        Vector3 targetPos = boardService.GetCellRectTransform(10).position;
-        yield return MoveToPosition(targetPos);
+    #endregion CALLBACKS
 
-        //EventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.Owner.ActorNumber));
-    }
-}
 
-public class MoveToJailEvent
-{
-    public int PlayerID;
 
-    public MoveToJailEvent(int playerId)
-    {
-        PlayerID = playerId;
-    }
-}
-
-public class HandleCellEvent
-{
-    public int CellID;
-    public int PlayerID;
-
-    public HandleCellEvent(int cellID, int playerId)
-    {
-        CellID = cellID;
-        PlayerID = playerId;
-    }
-}
-
-public class PlayerMoveRegister
-{
-    public int CellIndex;
-    public int PlayerId;
-
-    public PlayerMoveRegister(int cellIndex, int playerId)
-    {
-        CellIndex = cellIndex;
-        PlayerId = playerId;
-    }
-}
-
-public class PlayerMoveUnregister
-{
-    public int CellIndex;
-    public int PlayerId;
-
-    public PlayerMoveUnregister(int cellIndex, int playerId)
-    {
-        CellIndex = cellIndex;
-        PlayerId = playerId;
-    }
-}
-
-public class InitializePlayerMoveEvent
-{
-    public IBoardService BoardService;
-    public ILocalPlayerService LocalPlayerService;
-    public IEventBus eventBus;
-
-    public InitializePlayerMoveEvent(IBoardService boardService, ILocalPlayerService localPlayerService, IEventBus eventBus)
-    {
-        BoardService = boardService;
-        LocalPlayerService = localPlayerService;
-        this.eventBus = eventBus;
-    }
-}
-
-public class EnablePlayerMoveEvent
-{
 }

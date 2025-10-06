@@ -12,12 +12,15 @@ public class LoanService : ILoanService,IInitializable,IDisposable
     private IBankService bankService;
     private IEventBus eventBus;
     private GameSettings gameSettings;
+
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IPlayerRepository playerRepository, IPhotonLoanManager network, IBankService bankService, IEventBus eventBus, GameSettings gameSettings)
     {
         this.playerRepository = playerRepository;
         this.photonLoanManager = network;
-        this.bankService = bankService; 
+        this.bankService = bankService;
         this.eventBus = eventBus;
         this.gameSettings = gameSettings;
     }
@@ -29,40 +32,11 @@ public class LoanService : ILoanService,IInitializable,IDisposable
     {
         eventBus.Unsubscribe<OnStartTurnLoanEvent>(OnPlayerTurnStart);
     }
-    public void RequestTakeLoan(int playerId)
-    {
-        var player = playerRepository.GetPlayerById(playerId);
-        if (player.HasLoan) return;
 
-        photonLoanManager.TakeLoanRequest(playerId);
-    }
+    #endregion LIFE_CYCLE
 
-    public void RequestPayLoan(int playerId)
-    {
-        var player = playerRepository.GetPlayerById(playerId);
-        if (!player.HasLoan) return;
+    #region PUBLIC_METHODS
 
-        photonLoanManager.PayLoanRequest(playerId);
-    }
-
-    private void OnPlayerTurnStart(OnStartTurnLoanEvent e)
-    {
-        var player = playerRepository.GetPlayerById(e.PlayerId);
-        if (!player.HasLoan) return;
-
-        player.LoanTurnsLeft--;
-
-        if (player.LoanTurnsLeft <= 0)
-        {
-            photonLoanManager.ShowLoanWindow(e.PlayerId, gameSettings.loanAmountBack);
-        }
-        else
-        {
-            eventBus.Publish(new OnTakeLoanEvent(player));
-        }
-    }
-
-    // Этот метод вызывается **только из RPC**
     public void TakeLoanConfirmed(int playerId)
     {
         if (PhotonNetwork.IsMasterClient)
@@ -92,4 +66,28 @@ public class LoanService : ILoanService,IInitializable,IDisposable
         eventBus.Publish(new OnTakeLoanEvent(player));
         eventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
     }
+
+    #endregion PUBLIC_METHODS
+
+    #region CALLBACKS
+
+    private void OnPlayerTurnStart(OnStartTurnLoanEvent e)
+    {
+        var player = playerRepository.GetPlayerById(e.PlayerId);
+        if (!player.HasLoan) return;
+
+        player.LoanTurnsLeft--;
+
+        if (player.LoanTurnsLeft <= 0)
+        {
+            photonLoanManager.ShowLoanWindow(e.PlayerId, gameSettings.loanAmountBack);
+        }
+        else
+        {
+            eventBus.Publish(new OnTakeLoanEvent(player));
+        }
+    }
+
+    #endregion CALLBACKS
+
 }

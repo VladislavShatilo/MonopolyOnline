@@ -3,11 +3,8 @@ using UnityEngine;
 public abstract class UIWindowBase: MonoBehaviour
 {
     [SerializeField] protected WindowAnimation windowAnimation;
-    public WindowAnimation WindowAnimation
-    {
-        get => windowAnimation;
-        set => windowAnimation = value;
-    }
+
+    #region PUBLIC_METHODS
 
     public virtual void ShowWindow()
     {
@@ -22,4 +19,7 @@ public abstract class UIWindowBase: MonoBehaviour
     {
         windowAnimation?.HardHideWindow();
     }
+
+    #endregion PUBLIC_METHODS
+
 }

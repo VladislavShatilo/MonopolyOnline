@@ -36,11 +36,11 @@ public class AuctionService : IAuctionService
     public void Construct(IPhotonAuctionManager photonAuctionManager, IPhotonTurnManager photonTurnManager, IEventBus eventBus,
         ITimerManager timerManager, GameSettings gameSettings)
     {
-        this.photonAuctionManager = photonAuctionManager;
-        this.photonTurnManager = photonTurnManager;
-        this.eventBus = eventBus;
-        this.timerManager = timerManager;
-        this.gameSettings = gameSettings;
+        this.photonAuctionManager = photonAuctionManager ?? throw new ArgumentNullException(nameof(photonAuctionManager));
+        this.photonTurnManager = photonTurnManager ?? throw new ArgumentNullException(nameof(photonTurnManager));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.timerManager = timerManager ?? throw new ArgumentNullException(nameof(timerManager));
+        this.gameSettings = gameSettings ?? throw new ArgumentNullException(nameof(gameSettings));
     }
 
     #endregion LIFE_CYCLE

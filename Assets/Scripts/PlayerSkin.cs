@@ -9,10 +9,18 @@ public class PlayerSkin : MonoBehaviourPun
     [SerializeField] private Image playerSkinImage;
     [SerializeField] private TextMeshProUGUI turnJailText;
     private IEventBus eventBus;
+
+    #region LIFE_CYCLE
+
     public void Initialize(IEventBus eventBus)
     {
         this.eventBus = eventBus;
         eventBus.Subscribe<SetTurnsJailEvent>(SetTurnJain);
+    }
+
+    private void Start()
+    {
+        turnJailText.gameObject.SetActive(false);
     }
 
     private void OnDestroy()
@@ -23,19 +31,18 @@ public class PlayerSkin : MonoBehaviourPun
         }
     }
 
-    private void SetTurnJain(SetTurnsJailEvent e)
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
+    public void SetColorDirect(Color c)
     {
-        if (e.PlayerID == photonView.OwnerActorNr)
-        {
-            //  if (!photonView.IsMine) return;
-            photonView.RPC(nameof(RPC_SetTurnJain), RpcTarget.AllBuffered, e.Turns);
-        }
+        playerSkinImage.color = c;
     }
 
-    private void Start()
-    {
-        turnJailText.gameObject.SetActive(false);
-    }
+    #endregion PUBLIC_METHODS
+
+    #region RPC
 
     [PunRPC]
     private void RPC_SetTurnJain(int turns)
@@ -51,20 +58,18 @@ public class PlayerSkin : MonoBehaviourPun
         }
     }
 
-    public void SetColorDirect(Color c)
+    #endregion RPC
+
+    #region CALLBACKS
+
+    private void SetTurnJain(SetTurnsJailEvent e)
     {
-        playerSkinImage.color = c;
+        if (e.PlayerID == photonView.OwnerActorNr)
+        {
+            photonView.RPC(nameof(RPC_SetTurnJain), RpcTarget.AllBuffered, e.Turns);
+        }
     }
+
+    #endregion CALLBACKS
 }
 
-public class SetTurnsJailEvent
-{
-    public int Turns;
-    public int PlayerID;
-
-    public SetTurnsJailEvent(int playerID, int turns)
-    {
-        Turns = turns;
-        PlayerID = playerID;
-    }
-}

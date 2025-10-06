@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 public enum CellType
 {
     Company,
@@ -10,12 +11,13 @@ public enum CellType
     Question,
     Corner
 }
+
 public enum CornerType
 {
-   Start,
-   ChillJail,
-   Caisno,
-   Police
+    Start,
+    ChillJail,
+    Caisno,
+    Police
 }
 
 public enum CompanyGroup
@@ -30,8 +32,8 @@ public enum CompanyGroup
     FastFood,
     Hotels,
     Phones
-
 }
+
 [System.Serializable]
 public abstract class CompanyBaseData : ICellDetails
 {
@@ -41,9 +43,8 @@ public abstract class CompanyBaseData : ICellDetails
     public int pledgePrice;
     public int buyoutPrice;
     public StatsWindowPosition popupData;
-
-
 }
+
 public interface ICellDetails
 {
 }
@@ -54,16 +55,19 @@ public class CompanyData : CompanyBaseData
     public int[] rent;
     public int branchPrice;
 }
+
 [System.Serializable]
 public class FieldCompanyData : CompanyBaseData
 {
     public int[] rentField;
 }
+
 [System.Serializable]
 public class DiceCompanyData : CompanyBaseData
 {
     public int[] rentMultiplier;
 }
+
 [System.Serializable]
 public class SpendData : ICellDetails
 {
@@ -84,6 +88,7 @@ public class CornerData : ICellDetails
     public Sprite logoSprite;
     public CornerType type;
 }
+
 [System.Serializable]
 public class CellData
 {
@@ -97,7 +102,6 @@ public class CellData
     public QuestionData questionData;
     public CornerData cornerData;
     public List<PlayerMove> PlayersOnCell = new List<PlayerMove>();
-
 }
 
 [CreateAssetMenu(fileName = "BoardConfig", menuName = "Monopoly/BoardConfig")]

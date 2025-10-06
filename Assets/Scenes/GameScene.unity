@@ -7582,6 +7582,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9a9339abb5b574eb9e2e0369f42f6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pvCache: {fileID: 0}
+  playerID: 0
 --- !u!4 &486951061
 Transform:
   m_ObjectHideFlags: 0
@@ -10009,10 +10011,10 @@ RectTransform:
   - {fileID: 525100923}
   m_Father: {fileID: 1434692071}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 120, y: 60}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &661066057
 MonoBehaviour:
@@ -16625,6 +16627,8 @@ MonoBehaviour:
   dice4Button: {fileID: 723380666}
   dice5Button: {fileID: 82091431}
   dice6Button: {fileID: 47503050}
+  selectedNumbers: 
+  diceButtons: []
 --- !u!1 &1126752762
 GameObject:
   m_ObjectHideFlags: 0
@@ -17492,10 +17496,10 @@ RectTransform:
   - {fileID: 46618510}
   m_Father: {fileID: 1541854863}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 120, y: 60}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1164650535
 MonoBehaviour:

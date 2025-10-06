@@ -5,6 +5,12 @@ using UnityEngine.UI;
 
 public class MessageLogView : MonoBehaviour
 {
+    #region EVENTS
+
+    public event System.Action<string> OnSendClicked;
+
+    #endregion EVENTS
+
     [SerializeField] private RectTransform contentTransform;
     [SerializeField] private TextMeshProUGUI messagePrefab;
     [SerializeField] private TMP_InputField chatInputField;
@@ -13,28 +19,19 @@ public class MessageLogView : MonoBehaviour
 
     private readonly Queue<TextMeshProUGUI> messages = new();
 
-    public event System.Action<string> OnSendClicked;
+    #region LIFE_CYCLE
 
     private void Start()
     {
         sendButton.gameObject.SetActive(false);
-        sendButton.onClick.AddListener(() => TrySend(chatInputField.text));
+        sendButton.onClick.AddListener(() => OnSendMessage(chatInputField.text));
         chatInputField.onValueChanged.AddListener(OnInputChanged);
-        chatInputField.onSubmit.AddListener(TrySend);
+        chatInputField.onSubmit.AddListener(OnSendMessage);
     }
 
-    private void OnInputChanged(string text)
-    {
-        sendButton.gameObject.SetActive(!string.IsNullOrWhiteSpace(text));
-    }
+    #endregion LIFE_CYCLE
 
-    private void TrySend(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text)) return;
-        OnSendClicked?.Invoke(text);
-        chatInputField.text = "";
-        chatInputField.ActivateInputField();
-    }
+    #region PUBLIC_METHODS
 
     public void AddMessage(string formattedText)
     {
@@ -48,4 +45,23 @@ public class MessageLogView : MonoBehaviour
             Destroy(oldMsg.gameObject);
         }
     }
+
+    #endregion PUBLIC_METHODS
+
+    #region CALLBACKS
+
+    private void OnInputChanged(string text)
+    {
+        sendButton.gameObject.SetActive(!string.IsNullOrWhiteSpace(text));
+    }
+
+    private void OnSendMessage(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
+        OnSendClicked?.Invoke(text);
+        chatInputField.text = "";
+        chatInputField.ActivateInputField();
+    }
+
+    #endregion CALLBACKS
 }

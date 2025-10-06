@@ -11,6 +11,8 @@ public class UIFieldCompanyStats : UIBaseCompanyStats, ICompanyStatsUI<FieldComp
     [Header("Field UI")]
     [SerializeField] private TextMeshProUGUI[] fieldPriceTexts;
 
+    #region PUBLIC_METHODS
+
     public void SetFieldPrices(int[] values)
     {
         for (int i = 0; i < fieldPriceTexts.Length && i < values.Length; i++)
@@ -29,5 +31,8 @@ public class UIFieldCompanyStats : UIBaseCompanyStats, ICompanyStatsUI<FieldComp
         SetPledgePrice(data.pledgePrice);
         SetBuyoutPrice(data.buyoutPrice);
     }
+
+    #endregion PUBLIC_METHODS
+
 
 }

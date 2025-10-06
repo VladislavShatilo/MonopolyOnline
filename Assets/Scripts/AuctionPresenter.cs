@@ -16,15 +16,15 @@ public class AuctionPresenter : IInitializable, IDisposable
     public void Construct(IAuctionWindow auctionWindow, ILocalPlayerService localPlayerService, IPhotonAuctionManager photonAuctionManager, IPlayerRepository playerRepository,
         ICompanyRepository companyRepository, IEventBus eventBus)
     {
-        this.auctionWindow = auctionWindow;
-        this.localPlayerService = localPlayerService;
-        this.photonAuctionManager = photonAuctionManager;
-        this.playerRepository = playerRepository;
-        this.companyRepository = companyRepository;
-        this.eventBus = eventBus;
+        this.auctionWindow = auctionWindow ?? throw new ArgumentNullException(nameof(auctionWindow));
+        this.localPlayerService = localPlayerService ?? throw new ArgumentNullException(nameof(localPlayerService));
+        this.photonAuctionManager = photonAuctionManager ?? throw new ArgumentNullException(nameof(photonAuctionManager));
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<AuctionPromptBidEvent>(OnAuctionPromptBid);
         eventBus.Subscribe<AuctionEndEvent>(_ => auctionWindow.Hide());
@@ -59,6 +59,12 @@ public class AuctionPresenter : IInitializable, IDisposable
         {
             PlayerData player = playerRepository.GetPlayerById(localId);
             Company company = companyRepository.GetCompanyById(e.CompanyId);
+
+            if (player == null)
+                throw new InvalidOperationException($"Player with ID {localId} not found in repository.");
+            if (company == null)
+                throw new InvalidOperationException($"Company with ID {e.CompanyId} not found in repository.");
+
             auctionWindow.Show(e.PlayerId, company.Name, e.Bid, player.Money);
         }
         else

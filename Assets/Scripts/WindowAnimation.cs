@@ -8,6 +8,9 @@ public class WindowAnimation : MonoBehaviour
     [SerializeField] private RectTransform windowRectTransform;
     [SerializeField] private float animationDuration = 0.5f;
     [SerializeField] private float animationOffset = 160f;
+
+    #region PUBLIC_METHODS
+
     public RectTransform WindowRectTransform
     {
         get => windowRectTransform;
@@ -15,7 +18,7 @@ public class WindowAnimation : MonoBehaviour
     }
     public void ShowWindow()
     {
-       windowRectTransform.DOAnchorPos(Vector2.zero, animationDuration);
+        windowRectTransform.DOAnchorPos(Vector2.zero, animationDuration);
     }
     public void HideWindow()
     {
@@ -25,4 +28,7 @@ public class WindowAnimation : MonoBehaviour
     {
         windowRectTransform.anchoredPosition = new Vector2(0, animationOffset);
     }
+
+    #endregion PUBLIC_METHODS
+
 }

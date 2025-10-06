@@ -8,8 +8,10 @@ public class TimerManager : ITimerManager
 {
     private TurnTimer turnTimer = new TurnTimer();
 
+    #region PUBLIC_METHODS
+
     public void StartTurnTimer(int playerId, double duration) =>
-        turnTimer.Start(TimerType.Turn, playerId, PhotonNetwork.Time, duration);
+     turnTimer.Start(TimerType.Turn, playerId, PhotonNetwork.Time, duration);
 
     public void StartAuctionTimer(int playerId, double duration) =>
         turnTimer.Start(TimerType.Auction, playerId, PhotonNetwork.Time, duration);
@@ -22,5 +24,6 @@ public class TimerManager : ITimerManager
         return turnTimer.Tick(PhotonNetwork.Time);
     }
 
-    public void StopTimer() => turnTimer.Stop();
+    #endregion PUBLIC_METHODS
+
 }

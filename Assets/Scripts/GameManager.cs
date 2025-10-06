@@ -9,9 +9,11 @@ public class GameManager
     private IEventBus eventBus;
     private GameSettings gameSettings;
 
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(IPlayerRepository repository, IPlayerSpawner spawner, IPlayerColorService colorService,
-        IEventBus eventBus, GameSettings gameSettings)
+       IEventBus eventBus, GameSettings gameSettings)
     {
         this.repository = repository;
         this.spawner = spawner;
@@ -19,6 +21,10 @@ public class GameManager
         this.eventBus = eventBus;
         this.gameSettings = gameSettings;
     }
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
 
     public void Initialize()
     {
@@ -37,41 +43,11 @@ public class GameManager
             repository.AddPlayer(player);
             eventBus.Publish(new PlayerJoinedEvent(player));
         }
-        
+
         spawner.SpawnLocalPlayer(Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
 
     }
+
+    #endregion PUBLIC_METHODS
+
 }
-
-public class PlayerJoinedEvent
-{
-    public PlayerData Player { get; }
-
-    public PlayerJoinedEvent(PlayerData player)
-    {
-        Player = player;
-    }
-}
-
-public class PlayerLeftEvent
-{
-    public int PlayerId { get; }
-
-    public PlayerLeftEvent(int playerId)
-    {
-        PlayerId = playerId;
-    }
-}
-
-public class AllPlayersInitializedEvent
-{
-    public List<PlayerData> Players { get; }
-
-    public AllPlayersInitializedEvent(List<PlayerData> players)
-    {
-        Players = players;
-    }
-}
-
-public class TryStartGameEvent
-{ }

@@ -7,26 +7,19 @@ using Zenject;
 public class PhotonCompanyManager : MonoBehaviourPun, IPhotonCompanyManager
 {
     private ICompanyService companyService;
-   
+
+    #region LIFE_CYCLE
+
     [Inject]
     public void Construct(ICompanyService companyService)
     {
         this.companyService = companyService;
-      
+
     }
 
-    [PunRPC]
-    private void RPC_TryBuyCompany(int cellIndex, int playerId, int reason)
-    {
-        companyService.TryBuyCompany(cellIndex, playerId, 0,(BuyReason)reason);
-    }
+    #endregion LIFE_CYCLE
 
-    [PunRPC]
-    private void RPC_TryPayRent(int cellIndex, int playerId)
-    {
-        companyService.TryPayRent(cellIndex, playerId);
-    }
-  
+    #region PUBLIC_METHODS
 
     public void RequestBuyCompany(int cellIndex, int playerId, BuyReason reason)
     {
@@ -37,4 +30,24 @@ public class PhotonCompanyManager : MonoBehaviourPun, IPhotonCompanyManager
     {
         photonView.RPC(nameof(RPC_TryPayRent), RpcTarget.MasterClient, cellIndex, playerId);
     }
+
+    #endregion PUBLIC_METHODS
+
+    #region RPC
+
+    [PunRPC]
+    private void RPC_TryBuyCompany(int cellIndex, int playerId, int reason)
+    {
+        companyService.TryBuyCompany(cellIndex, playerId, 0, (BuyReason)reason);
+    }
+
+    [PunRPC]
+    private void RPC_TryPayRent(int cellIndex, int playerId)
+    {
+        companyService.TryPayRent(cellIndex, playerId);
+    }
+
+    #endregion RPC
+
+
 }
