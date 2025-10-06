@@ -64,9 +64,10 @@ public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
     [PunRPC]
     private void RPC_RequestDiceHandle(int first,int second,int playerId, bool isForJail)
     {
-        rollDiceUseCase.HandleDice(first, second, playerId, isForJail);
+       StartCoroutine( rollDiceUseCase.HandleDice(first, second, playerId, isForJail));
 
     }
+  
 }
 
 #region Events

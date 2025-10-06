@@ -6,5 +6,5 @@ public interface ICompanyService
     void TryBuyCompany(int cellIndex, int playerId, int price, BuyReason reason);
     void TryPayRent(int cellIndex, int playerId);
     void TransferCompany(int companyId, int newOwnerId);
-    int CalculateRent(Company company, int diceSum = 0);
+    int CalculateRent(Company company, int diceSum);
 }

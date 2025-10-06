@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -50,13 +51,16 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
         }
         else if (company.OwnerId != playerId && !company.IsMortgaged)
         {
-
-            eventBus.Publish(new OfferRentEvent(cellIndex, playerId, CalculateRent(company)));
+            PlayerData player= playerRepository.GetPlayerById(playerId);
+            eventBus.Publish(new OfferRentEvent(cellIndex, playerId, CalculateRent(company, player.LastDiceSum)));
 
         }
         else
         {
-            photonTurnManager.RequestEndTurn();
+            if (PhotonNetwork.IsMasterClient)
+            {
+                photonTurnManager.RequestEndTurn();
+            }
         }
     }
     private void AuctionBuyCompany(EndAuctionWithWinnerEvent e)
@@ -69,7 +73,7 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
         var company = companyRepository.GetCompanyById(cellIndex);
 
      
-            if (company == null || company.IsBought) return;
+        if (company == null || company.IsBought) return;
         if (reason == BuyReason.Buy)
         {
              price = company.Price;
@@ -89,8 +93,9 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
 
         var company = companyRepository.GetCompanyById(cellIndex);
         if (company == null || !company.IsBought) return;
+        PlayerData player = playerRepository.GetPlayerById(playerId);
 
-        int rent = CalculateRent(company);
+        int rent = CalculateRent(company, player.LastDiceSum);
         if (!bank.HasEnoughMoney(playerId, rent)) return;
 
         bank.TransferMoney(playerId, company.OwnerId, rent);
@@ -111,7 +116,7 @@ public class CompanyService : ICompanyService,IInitializable,IDisposable
         eventBus.Publish(new OnCompanyTransferredEvent(companyId, newOwnerId));
     }
 
-    public int CalculateRent(Company company, int diceSum = 0)
+    public int CalculateRent(Company company, int diceSum)
     {
         var ownedCount = companyRepository.CountOwnedByPlayer(company.OwnerId, company.Type);
         return company.GetRent(ownedCount, diceSum);

@@ -32,7 +32,7 @@ public class CellOccupancyService : ICellOccupancyService, IDisposable
         eventBus.Unsubscribe<PlayerOccupancyUnregisterEvent>(UnregisterPlayerFromCell);
     }
     // Вызов при том как игрок встал на клетку (вызывается на всех клиентах через buffered RPC)
-    public void RegisterPlayerOnCell(PlayerOccupancyRegisterEvent e)
+    private void RegisterPlayerOnCell(PlayerOccupancyRegisterEvent e)
     {
         int cellIndex = e.CellIndex;
         PlayerMove player = e.PlayerMove;
@@ -66,7 +66,7 @@ public class CellOccupancyService : ICellOccupancyService, IDisposable
     }
 
     // Вызов когда игрок ушёл с клетки
-    public  void UnregisterPlayerFromCell(PlayerOccupancyUnregisterEvent e)
+    private  void UnregisterPlayerFromCell(PlayerOccupancyUnregisterEvent e)
     {
         int cellIndex = e.CellIndex;
         PlayerMove player = e.PlayerMove;

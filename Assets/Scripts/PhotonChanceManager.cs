@@ -28,9 +28,11 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
     private IPhotonTurnManager photonTurnManager;
     private IPhotonPlayerMoveManager photonPlayerMove;
     private IPhotonJailManager photonJailManager;
+    private IChatService chatService;
+
     [Inject]
     public void Construct(IChanceService chanceService, IPlayerRepository playerRepository, IBankService bankService, IPhotonTurnManager photonTurnManager, 
-        IPhotonPlayerMoveManager photonPlayerMove, IPhotonJailManager photonJailManager)
+        IPhotonPlayerMoveManager photonPlayerMove, IPhotonJailManager photonJailManager, IChatService chatService)
     { 
         this.chanceService = chanceService;
         this.playerRepository = playerRepository;
@@ -38,6 +40,7 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
         this.photonTurnManager = photonTurnManager;
         this.photonPlayerMove = photonPlayerMove;
         this.photonJailManager = photonJailManager;
+        this.chatService = chatService;
 
 
     }
@@ -72,9 +75,6 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
     [PunRPC]
     private void RPC_ApplyBuff(int playerId, int typeInt, int minAmount, int maxAmount)
     {
-       
-      
-
         var player = playerRepository.GetPlayerById(playerId);
         var type = (BuffType)typeInt;
 
@@ -125,12 +125,7 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
                 message = "";
                 break;
         }
-        Debug.Log(playerId+"  "+ type + "  "+ message);
-
-        // Чтобы было видно, что вызвалось
-        //MessageLog.Instance.AddMessage("Тестовый телепорт!", playerId);
-        //photonPlayerMove.RequestTeleport(playerId);
-        //MessageLog.Instance.AddMessage(message, playerId);
+        chatService.SendMessage(playerId, message,false);
     }
 
 

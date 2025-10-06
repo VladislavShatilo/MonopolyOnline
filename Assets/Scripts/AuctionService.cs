@@ -8,18 +8,11 @@ using Zenject;
 
 public class AuctionService : IAuctionService
 {
-    private int starterActorNumber;
-    private int companyId;
-    private int basePrice;
-    private int currentPrice;
-    private int lastBidder = -1;
-
-    private List<int> bidders = new List<int>(); // очередь игроков
-    private HashSet<int> passed = new HashSet<int>();
-
-    private int currentBidderIndex = 0;
+    #region CONSTANTS
 
     private const int FIRST_BID_INCREMENT = 100;
+
+    #endregion CONSTANTS
 
     private IPhotonAuctionManager photonAuctionManager;
     private IPhotonTurnManager photonTurnManager;
@@ -27,6 +20,17 @@ public class AuctionService : IAuctionService
     private ITimerManager timerManager;
     private GameSettings gameSettings;
 
+    private int companyId;
+    private int basePrice;
+    private int currentPrice;
+    private int lastBidder = -1;
+
+    private List<int> bidders = new();
+    private readonly HashSet<int> passed = new();
+
+    private int currentBidderIndex = 0;
+
+    #region LIFE_CYCLE
 
     [Inject]
     public void Construct(IPhotonAuctionManager photonAuctionManager, IPhotonTurnManager photonTurnManager, IEventBus eventBus,
@@ -38,17 +42,20 @@ public class AuctionService : IAuctionService
         this.timerManager = timerManager;
         this.gameSettings = gameSettings;
     }
-   
+
+    #endregion LIFE_CYCLE
+
+    #region PUBLIC_METHODS
+
     public void StartAuction(int starterActorNumber, int companyId, int basePrice)
     {
-        this.starterActorNumber = starterActorNumber;
         this.companyId = companyId;
         this.basePrice = basePrice;
-        this.currentPrice = basePrice;
-        this.lastBidder = -1;
+        currentPrice = basePrice;
+        lastBidder = -1;
 
         passed.Clear();
-        passed.Add(starterActorNumber); // отказался первый
+        passed.Add(starterActorNumber);
 
         bidders = BuildTurnOrderStartingAfter(starterActorNumber, passed);
         currentBidderIndex = 0;
@@ -65,11 +72,20 @@ public class AuctionService : IAuctionService
     {
         if (!IsPlayerTurn(playerId)) return;
 
-        currentPrice = (lastBidder == -1) ? basePrice + FIRST_BID_INCREMENT : currentPrice + FIRST_BID_INCREMENT;
+        if (lastBidder == -1)
+        {
+            currentPrice = basePrice + FIRST_BID_INCREMENT;
+        }
+        else
+        {
+            currentPrice = currentPrice + FIRST_BID_INCREMENT;
+        }
+
         lastBidder = playerId;
 
         MoveToNextBidderOrEnd();
     }
+
     public void PassBid(int playerId)
     {
         if (!IsPlayerTurn(playerId)) return;
@@ -78,6 +94,10 @@ public class AuctionService : IAuctionService
         photonAuctionManager.CloseAuctionWindowRequest(playerId);
         MoveToNextBidderOrEnd();
     }
+
+    #endregion PUBLIC_METHODS
+
+    #region PRIVATE_METHODS
 
     private bool IsPlayerTurn(int playerId)
     {
@@ -114,7 +134,6 @@ public class AuctionService : IAuctionService
             return;
         }
 
-        // крутим индекс по кругу
         do
         {
             currentBidderIndex = (currentBidderIndex + 1) % bidders.Count;
@@ -140,14 +159,11 @@ public class AuctionService : IAuctionService
     private void EndAuction_NoWinner()
     {
         photonTurnManager.RequestEndTurn();
-       // eventBus.Publish(new AuctionEndEvent());
     }
 
     private void EndAuction_WithWinner(int winnerId, int finalPrice)
     {
         eventBus.Publish(new EndAuctionWithWinnerEvent(winnerId, finalPrice, companyId));
-        //eventBus.Publish(new AuctionEndEvent());
-
     }
 
     private List<int> BuildTurnOrderStartingAfter(int starterActorNumber, HashSet<int> excludedPlayers)
@@ -171,16 +187,6 @@ public class AuctionService : IAuctionService
 
         return ordered;
     }
-}
-public class EndAuctionWithWinnerEvent
-{
-    public int WinnerId;
-    public int CompanyId;
-    public int FinalPrice;
-    public EndAuctionWithWinnerEvent(int winnerId, int finalPrice,int companyId)
-    {
-        WinnerId = winnerId;
-        FinalPrice = finalPrice;
-        CompanyId = companyId;
-    }
+
+    #endregion PRIVATE_METHODS
 }

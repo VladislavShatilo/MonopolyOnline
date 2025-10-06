@@ -50,3 +50,15 @@ public class EventBus : IEventBus
         eventHandlers.Clear();
     }
 }
+public class EndAuctionWithWinnerEvent
+{
+    public int WinnerId;
+    public int CompanyId;
+    public int FinalPrice;
+    public EndAuctionWithWinnerEvent(int winnerId, int finalPrice, int companyId)
+    {
+        WinnerId = winnerId;
+        FinalPrice = finalPrice;
+        CompanyId = companyId;
+    }
+}

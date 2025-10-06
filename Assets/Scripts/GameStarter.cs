@@ -52,7 +52,11 @@ public class GameStarter : MonoBehaviourPunCallbacks
         {
             player.GetComponent<PlayerMove>().Initialize(boardService, eventBus);
             player.GetComponent<PlayerSkin>().Initialize(eventBus);
+            eventBus.Publish(new PlayerOccupancyRegisterEvent(0, player.GetComponent<PlayerMove>()));
+
 
         }
+        yield return new WaitForSeconds(0.5f);
+
     }
 }

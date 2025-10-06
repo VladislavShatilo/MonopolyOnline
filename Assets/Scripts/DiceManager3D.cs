@@ -9,6 +9,9 @@ public class DiceManager3D : MonoBehaviour, IDiceManager3D
 
     public void ShowDice(int first, int second)
     {
+        dice1.gameObject.SetActive(true);
+        dice2.gameObject.SetActive(true);
+
         dice1.RollToResult(first);
         dice2.RollToResult(second);
     }

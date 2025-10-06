@@ -53,6 +53,7 @@ public class GameplayInstaller : MonoInstaller
     [SerializeField] private PhotonChanceManager photonChanceManager;
     [SerializeField] private PhotonBranchManager photonBranchManager;
     [SerializeField] private PhotonMortgageManager photonMortgageManager;
+    [SerializeField] private PhotonChatService photonChatService;
 
     public override void InstallBindings()
     {
@@ -95,7 +96,6 @@ public class GameplayInstaller : MonoInstaller
 
         
         Container.Bind<IPhotonPlayerMoveManager>().To<PhotonPlayerMoveManager>().FromInstance(playerMoveManager).AsSingle();
-        Container.Bind<IPlayerMoveUseCase>().To<PlayerMoveUseCase>().AsSingle().NonLazy();
 
         Container.Bind<IPhotonTurnManager>().To<PhotonTurnManager>().FromInstance(photonTurnManager).AsSingle();
         Container.Bind<IPhotonCompanyManager>().To<PhotonCompanyManager>().FromInstance(photonCompanyManager).AsSingle();
@@ -124,13 +124,22 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IPhotonChanceManager>().To<PhotonChanceManager>().FromInstance(photonChanceManager).AsSingle();
         Container.Bind<IPhotonBranchManager>().To<PhotonBranchManager>().FromInstance(photonBranchManager).AsSingle();
         Container.Bind<IPhotonMortgageManager>().To<PhotonMortgageManager>().FromInstance(photonMortgageManager).AsSingle();
+        Container.Bind<IChatService>().To<PhotonChatService>().FromInstance(photonChatService).AsSingle();
 
         Container.Bind<IBranchService>().To<BranchService>().AsSingle();
         Container.Bind<IBranchUseCase>().To<BranchUseCase>().AsSingle();
         Container.Bind<IAuctionService>().To<AuctionService>().AsSingle();
 
         Container.Bind<IGroupOwnershipService>().To<GroupOwnershipService>().AsSingle();
+        Container.BindInterfacesTo<PlayerMoveUseCase>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<LapMoneyService>().AsSingle().NonLazy();
 
+        
+
+
+        Container.BindInterfacesAndSelfTo<CellHighlighterService>()
+         .FromComponentInHierarchy()
+         .AsSingle();
         Container.BindInterfacesAndSelfTo<PlayerStatsService>()
           .FromComponentInHierarchy()
           .AsSingle();
@@ -183,5 +192,10 @@ public class GameplayInstaller : MonoInstaller
 
         Container.Bind<TurnCompanyUIUseCase>().AsSingle();
         Container.Bind<PhotonMortgageSync>().FromComponentInHierarchy().AsSingle();
+
+        Container.Bind<MessageLogView>().FromComponentInHierarchy().AsSingle();
+        Container.BindInterfacesTo<MessageLogPresenter>().AsSingle().NonLazy();
+
+        
     }
 }

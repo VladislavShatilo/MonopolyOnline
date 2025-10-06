@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,16 +12,20 @@ public class RollDiceUseCase : IRollDiceUseCase
     private IPhotonJailManager photonJailManager;
     private IPlayerRepository playerRepository; 
     private ILocalPlayerService localPlayerService;
+    private IPhotonTurnManager photonTurnManager;
+
     private IEventBus eventBus;
 
     [Inject]
-    public void Construct(IDiceService diceService, IPhotonJailManager photonJailManager, IPlayerRepository playerRepository, ILocalPlayerService localPlayerService, IEventBus eventBus)
+    public void Construct(IDiceService diceService, IPhotonJailManager photonJailManager, IPlayerRepository playerRepository, ILocalPlayerService localPlayerService,
+        IEventBus eventBus, IPhotonTurnManager photonTurnManager)
     {
         this.diceService = diceService;
         this.playerRepository = playerRepository;
         this.localPlayerService = localPlayerService;
         this.eventBus = eventBus;
         this.photonJailManager = photonJailManager;
+        this.photonTurnManager = photonTurnManager;
     }
 
     public DiceResult GetDiceResult(int playerId, bool isForJail)
@@ -29,26 +34,28 @@ public class RollDiceUseCase : IRollDiceUseCase
         return diceResult;
     }
 
-    public void HandleDice(int first, int second, int playerId, bool isForJail)
+    public IEnumerator HandleDice(int first, int second, int playerId, bool isForJail)
     {
         DiceResult diceResult = new DiceResult(first, second);
         eventBus.Publish(new DiceRolledEvent(diceResult, playerId, isForJail));
 
         if (isForJail)
         {
-          
-            photonJailManager.CheckDice(playerId, first, second);
-            if(first == second)
+            photonJailManager.CheckDice(playerId, diceResult.First, diceResult.Second);
+            if (diceResult.First == diceResult.Second)
             {
-                HandlePlayerMove(diceResult, playerId);
+                HandlePlayerMove(diceResult, playerId,true);
+                yield return null;
             }
+            yield return new WaitForSeconds(0.7f);
+            eventBus.Publish(new DiceFadeEvent(10, false));
         }
         else
         {
-            HandlePlayerMove(diceResult, playerId);
+            HandlePlayerMove(diceResult, playerId, false);
         }
     }
-    private void HandlePlayerMove(DiceResult diceResult,int playerId)
+    private void HandlePlayerMove(DiceResult diceResult,int playerId,bool fromJail)
     {
         PlayerData player = playerRepository.GetPlayerById(playerId);
 
@@ -64,13 +71,15 @@ public class RollDiceUseCase : IRollDiceUseCase
 
                 eventBus.Publish(new OnPlayerMoveEvent(playerId, diceResult.Sum, true));
             }
-            if (diceResult.IsDouble)
+            if (diceResult.IsDouble && !fromJail)
             {
-                eventBus.Publish(new PlayerRolledDoubleEvent(playerId, diceResult.IsDouble));
+                photonTurnManager.RegisterDouble(playerId);
+                //eventBus.Publish(new PlayerRolledDoubleEvent(playerId, diceResult.IsDouble));
             }
         }
 
     }
+  
 
 }
 public class DiceRolledEvent

@@ -83,13 +83,13 @@ public class TurnService : ITurnService
         }
     }
 
-    public void RegisterDouble(int playerId, bool isDouble)
+    public void RegisterDouble(int playerId)
     {
-        if (!isDouble) return;
+        Debug.Log("RegisterDouble 1");
 
         var player = playerRepository.GetPlayerById(playerId);
         if (player.SkipNextTurn) return;
-
+        Debug.Log("RegisterDouble 2");
         turn.AddExtraTurn(playerId);
     }
 

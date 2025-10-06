@@ -19,6 +19,7 @@ public class PlayerData
     public bool NextMoveBackward { get; set; } = false;
     public bool HasLoan = false;
     public int LoanTurnsLeft;
+    public int LastDiceSum;
 
     public List<Company> OwnedCompanies = new List<Company>();
 

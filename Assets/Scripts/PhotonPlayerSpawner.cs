@@ -9,12 +9,15 @@ public class PhotonPlayerSpawner : MonoBehaviourPun, IPlayerSpawner
 {
     private PlayerSettings playerSettings;
     private IPlayerColorService playerColorService;
+    private IEventBus eventBus;
     private readonly Dictionary<int, PlayerMove> playerMoves = new();
+    private PlayerMove playerMove;
     [Inject]
-    public void Construct([Inject(Id = "PlayerSettings")] PlayerSettings playerSettings, IPlayerColorService playerColorService)
+    public void Construct([Inject(Id = "PlayerSettings")] PlayerSettings playerSettings, IPlayerColorService playerColorService, IEventBus eventBus)
     {
         this.playerSettings = playerSettings;
         this.playerColorService = playerColorService;
+        this.eventBus = eventBus;
     }
 
     public void SpawnLocalPlayer(int localId)
@@ -29,13 +32,14 @@ public class PhotonPlayerSpawner : MonoBehaviourPun, IPlayerSpawner
             0,
             new object[] { localId - 1,playerColor.R, playerColor.G, playerColor.B, startPostion }
         );
-        var pm = go.GetComponent<PlayerMove>();
-      //  pm.Initialize(boardService, eventBus,localId);
+        playerMove = go.GetComponent<PlayerMove>();
 
-        playerMoves[localId] = pm;
+        //  pm.Initialize(boardService, eventBus,localId);
+
+        playerMoves[localId] = playerMove;
 
     }
- 
+  
     public void RemovePlayer(int playerId)
     {
         //if (!playerMoves.TryGetValue(playerId, out var move)) return;

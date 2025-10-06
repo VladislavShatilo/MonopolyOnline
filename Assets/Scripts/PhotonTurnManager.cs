@@ -24,11 +24,22 @@ public class PhotonTurnManager : MonoBehaviourPun, IPhotonTurnManager
         photonView.RPC(nameof(RPC_RequestEndTurn), RpcTarget.MasterClient);
 
     }
+    public void RegisterDouble(int playerId)
+    {
+        photonView.RPC(nameof(RPC_RegisterDouble), RpcTarget.MasterClient,playerId);
 
+    }
     [PunRPC]
     private void RPC_RequestEndTurn()
     {
         if (PhotonNetwork.IsMasterClient)
             turnService.EndTurn(); 
+    }
+
+    [PunRPC]
+    private void RPC_RegisterDouble(int playerId)
+    {
+        if (PhotonNetwork.IsMasterClient)
+            turnService.RegisterDouble(playerId);
     }
 }

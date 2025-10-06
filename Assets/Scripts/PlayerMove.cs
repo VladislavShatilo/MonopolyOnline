@@ -27,7 +27,6 @@ public class PlayerMove : MonoBehaviourPun
         eventBus.Subscribe<PlayerMoveUnregister>(OnOccupancyUnregister);
         eventBus.Subscribe<MoveToJailEvent>(MoveToJail);
 
-
         cellsCount = boardService.CellsCount;
     }
 
@@ -39,7 +38,6 @@ public class PlayerMove : MonoBehaviourPun
             eventBus.Unsubscribe<PlayerMoveRegister>(OnOccupancyRegister);
             eventBus.Unsubscribe<PlayerMoveUnregister>(OnOccupancyUnregister);
             eventBus.Unsubscribe<MoveToJailEvent>(MoveToJail);
-
         }
     }
 
@@ -58,13 +56,19 @@ public class PlayerMove : MonoBehaviourPun
         if (e.PlayerId == photonView.OwnerActorNr)
         {
             StopAllCoroutines();
-            StartCoroutine(Move(e.Steps, e.CurrentCellIndex, e.IsForward));
+            StartCoroutine(Move(e.PlayerId,e.Steps, e.CurrentCellIndex, e.IsForward, e.TargetIndex));
         }
     }
 
-    private IEnumerator Move(int steps, int currentCellIndex, bool forward)
+    private IEnumerator Move(int playerId,int steps, int currentCellIndex, bool forward, int targetIndex)
     {
-        yield return new WaitForSeconds(0.1f);
+        int startCellId = currentCellIndex;
+        eventBus.Publish(new DiceFadeEvent(targetIndex, true));
+
+        yield return new WaitForSeconds(0.8f);
+
+        eventBus.Publish(new PlayerOccupancyUnregisterEvent(currentCellIndex, this));
+
         for (int i = 0; i < steps; i++)
         {
             if (forward)
@@ -79,9 +83,14 @@ public class PlayerMove : MonoBehaviourPun
 
             yield return MoveToPosition(stepPos);
         }
+        eventBus.Publish(new LapMoneyEvent(playerId, startCellId, targetIndex, forward));
+
+        eventBus.Publish(new DiceFadeEvent(targetIndex, false));
+        eventBus.Publish(new PlayerOccupancyRegisterEvent(currentCellIndex, this));
+
         eventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.OwnerActorNr));
     }
-   
+
     private IEnumerator MoveToPosition(Vector3 target)
     {
         Vector3 start = transform.position;
@@ -99,9 +108,9 @@ public class PlayerMove : MonoBehaviourPun
 
     public void SetTargetPosition(Vector3 target)
     {
-       
-            StartCoroutine(MoveToPosition(target));
+        StartCoroutine(MoveToPosition(target));
     }
+
     private void MoveToJail(MoveToJailEvent e)
     {
         if (e.PlayerID == photonView.OwnerActorNr)
@@ -111,7 +120,6 @@ public class PlayerMove : MonoBehaviourPun
         }
     }
 
-  
     private IEnumerator MoveToJailCoroutine()
     {
         yield return new WaitForSeconds(0.2f);
@@ -120,7 +128,6 @@ public class PlayerMove : MonoBehaviourPun
 
         //EventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.Owner.ActorNumber));
     }
-
 }
 
 public class MoveToJailEvent

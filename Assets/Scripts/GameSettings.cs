@@ -7,6 +7,7 @@ public class GameSettings : ScriptableObject
 {
     [Header("Game")]
     public int startPlayerMoney = 100_000;
+    public int lapMoney = 2_000;
 
     [Header("Mortgage")]
     public int mortgageTurns = 7;
@@ -26,9 +27,8 @@ public class GameSettings : ScriptableObject
     [Header("Branch")]
     public int maxBranchLevel = 5;
 
-
     [Header("Loan")]
     public int loanAmount = 5000;
-    public int loanAmountBack = 5500;
 
+    public int loanAmountBack = 5500;
 }

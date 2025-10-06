@@ -6,4 +6,5 @@ public interface IPhotonTurnManager
 {
     void RequestStartRandomTurn();
     void RequestEndTurn();
+    void RegisterDouble(int playerId);
 }

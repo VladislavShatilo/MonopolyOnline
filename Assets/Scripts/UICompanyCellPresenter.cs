@@ -53,20 +53,31 @@ public class UICompanyCellPresenter : IInitializable, IDisposable
     }
     private void CompanyBoughtUpdate(CompanyBoughtEvent e)
     {
-        var view = uiRepository.GetByCompanyId(e.CellIndex);
+        CompanyGroup companyGroup = companyRepository.GetCompanyById(e.CellIndex).Group;
 
-        if (view == null) return;
-     
-        var owner = playerRepository.GetPlayerById(e.PlayerId);
+        IEnumerable<Company> companies = companyRepository.GetByGroup(companyGroup);
         
+        foreach (var company in companies)
+        {
+            Debug.Log("company.Name" + company.Name + "  " + "company.OwnerId" + company.OwnerId);
+            if (company.OwnerId != e.PlayerId)
+                continue;
 
-        var ownerColor = owner != null ? owner.PlayerColor.ToUnityColor() : Color.white;
-        view.UpdateOwner(ownerColor);
+            var view = uiRepository.GetByCompanyId(company.Id);
+            if (view == null)
+                continue;
 
-        var company = companyRepository.GetCompanyById(e.CellIndex);
-        if (company == null) return;
+            var owner = playerRepository.GetPlayerById(e.PlayerId);
 
-        view.SetRentText(companyService.CalculateRent(company));
+
+            var ownerColor = owner != null ? owner.PlayerColor.ToUnityColor() : Color.white;
+            view.UpdateOwner(ownerColor);
+
+            if (company == null) return;
+
+            view.SetRentText(companyService.CalculateRent(company, 1));
+        }
+      
     }
  
 }
