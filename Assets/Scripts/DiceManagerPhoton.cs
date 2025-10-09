@@ -11,11 +11,13 @@ using Zenject;
 public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
 {
     private IRollDiceUseCase rollDiceUseCase;
+    private IPhotonNetworkWrapper photonNetworkWrapper;
     public static bool AllowCheats = true;
     [Inject]
-    public void Construct(IRollDiceUseCase rollDiceUseCase)
+    public void Construct(IRollDiceUseCase rollDiceUseCase, IPhotonNetworkWrapper photonNetworkWrapper)
     {
         this.rollDiceUseCase = rollDiceUseCase;
+        this.photonNetworkWrapper = photonNetworkWrapper;
     }
     public void RequestDiceRoll(int playerId, bool isForJail, int cheatFirst = -1, int cheatSecond = -1)
     {
@@ -40,7 +42,7 @@ public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
     [PunRPC]
     private void RPC_RequestGetDiceResult(int playerId, bool isForJail, int cheatFirst, int cheatSecond)
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!photonNetworkWrapper.IsMasterClient) return;
 
         int first, second;
         // Доп: используем флаг AllowCheats, чтобы разрешать только на мастере и только при включенном флаге
@@ -71,42 +73,5 @@ public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
 }
 
 #region Events
-
-public class OnPlayerMoveEvent
-{
-    public int PlayerId { get; }
-    public int Steps { get; }
-    public bool Forward { get; }
-    public  OnPlayerMoveEvent(int playerId,int steps,bool forward)
-    {
-        PlayerId= playerId;
-        Steps = steps;
-        Forward = forward;
-    }
-}
-public class PlayerRolledDoubleEvent
-{
-    public int PlayerId { get; }
-    public bool IsDouble { get; }
-
-    public PlayerRolledDoubleEvent(int playerId, bool isDouble)
-    {
-        PlayerId = playerId;
-        IsDouble = isDouble;
-    }
-}
-public class DiceFadeEvent
-{
-
-    public int CellId;
-    public bool IsMovementStart;
-    public DiceFadeEvent(int cellId, bool isMovementStart)
-    {
-
-        CellId = cellId;
-        IsMovementStart = isMovementStart;
-    }
-}
-
 
 #endregion

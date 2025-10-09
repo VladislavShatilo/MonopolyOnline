@@ -11,29 +11,28 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
     private ICompanyService companyService;
     private IPhotonChanceManager photonChanceManager;
     private IPhotonJailManager photonJailManager;
-    private ICasinoService casinoService;
     private IPhotonTurnManager photonTurnManager;
     private IEventBus eventBus;
-
+    private IPhotonNetworkWrapper photonNetworkWrapper;
     #region LIFE_CYCLE
 
     [Inject]
     public void Construct(IBoardService boardService, ICompanyService companyService, IPhotonChanceManager photonChanceManager,
-     IPhotonJailManager photonJailManager, ICasinoService casinoService, IPhotonTurnManager photonTurnManager, IEventBus eventBus)
+     IPhotonJailManager photonJailManager, IPhotonTurnManager photonTurnManager, IEventBus eventBus, IPhotonNetworkWrapper photonNetworkWrapper)
     {
         this.boardService = boardService;
         this.companyService = companyService;
         this.photonChanceManager = photonChanceManager;
         this.photonJailManager = photonJailManager;
-        this.casinoService = casinoService;
         this.photonTurnManager = photonTurnManager;
         this.eventBus = eventBus;
+        this.photonNetworkWrapper = photonNetworkWrapper;
     }
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<HandleCellEvent>(OnHandleCell);
     }
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<HandleCellEvent>(OnHandleCell);
 
@@ -67,14 +66,18 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
                 {
                     case CornerType.Start:
                     case CornerType.ChillJail:
-                        if (PhotonNetwork.IsMasterClient)
+                        if (photonNetworkWrapper.IsMasterClient)
                         {
                             photonTurnManager.RequestEndTurn();
                         }
                         break;
 
                     case CornerType.Caisno:
-                        casinoService.OfferCasino(e.PlayerID);
+                        if (photonNetworkWrapper.IsMasterClient)
+                        {
+                            photonTurnManager.RequestEndTurn();
+                        }
+                        //casinoService.OfferCasino(e.PlayerID);
                         break;
 
                     case CornerType.Police:

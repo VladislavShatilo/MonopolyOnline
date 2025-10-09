@@ -21,12 +21,12 @@ public class CompanyUIService : ICompanyUIService, IInitializable, IDisposable
         this.eventBus = eventBus;
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<HideButtonsTradeEvent>(HideAllButtonsOnTrade);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<HideButtonsTradeEvent>(HideAllButtonsOnTrade);
     }
@@ -75,7 +75,7 @@ public class CompanyUIService : ICompanyUIService, IInitializable, IDisposable
         }
     }
 
-    public UICompanyCell GetCompanyUI(int index)
+    public IUICompanyCellView GetCompanyUI(int index)
     {
         companyUIs.TryGetValue(index, out var ui);
         return ui;

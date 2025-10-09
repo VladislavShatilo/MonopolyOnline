@@ -61,8 +61,7 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<ICellOccupancyService>().To<CellOccupancyService>().AsSingle().NonLazy();
         Container.Bind<IPlayerRepository>().To<PlayerRepository>().AsSingle().NonLazy();
 
-        Container.Bind<IPlayerColorService>().To<UnityPlayerColorService>().AsSingle()
-          .WithArguments(playerColors).NonLazy();
+        Container.Bind<IPlayerColorService>().To<UnityPlayerColorService>().AsSingle().NonLazy();
         Container.Bind<GameManager>().AsSingle().NonLazy();
         Container.Bind<PhotonPlayerHandler>().FromComponentInHierarchy().AsSingle();
 
@@ -132,7 +131,7 @@ public class GameplayInstaller : MonoInstaller
         Container.BindInterfacesTo<PlayerMoveUseCase>().AsSingle().NonLazy();
         Container.BindInterfacesTo<LapMoneyService>().AsSingle().NonLazy();
 
-        
+
 
 
         Container.BindInterfacesAndSelfTo<CellHighlighterService>()
@@ -141,7 +140,7 @@ public class GameplayInstaller : MonoInstaller
         Container.BindInterfacesAndSelfTo<PlayerStatsService>()
           .FromComponentInHierarchy()
           .AsSingle();
-
+        
         Container.BindInterfacesTo<UICompanyCellPresenter>().AsSingle().NonLazy();
         Container.BindInterfacesTo<PayRentPresenter>().AsSingle().NonLazy();
         Container.BindInterfacesTo<AuctionUseCase>().AsSingle().NonLazy();
@@ -187,12 +186,18 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IMortgageService>().To<MortgageService>().AsSingle();
         Container.BindInterfacesTo<TurnCompanyUIAdapter>().AsSingle().NonLazy();
 
-        Container.Bind<TurnCompanyUIUseCase>().AsSingle();
         Container.Bind<PhotonMortgageSync>().FromComponentInHierarchy().AsSingle();
 
-        Container.Bind<MessageLogView>().FromComponentInHierarchy().AsSingle();
         Container.BindInterfacesTo<MessageLogPresenter>().AsSingle().NonLazy();
+        Container.BindInterfacesAndSelfTo<MessageLogView>()
+      .FromComponentInHierarchy().AsSingle().NonLazy();
+
+        Container.Bind<IPhotonNetworkWrapper>().To<PhotonNetworkWrapper>().AsSingle().NonLazy();
+        Container.Bind<ITurnCompanyUIUseCase>().To<TurnCompanyUIUseCase>().AsSingle().NonLazy();
 
         
+
+
+
     }
 }

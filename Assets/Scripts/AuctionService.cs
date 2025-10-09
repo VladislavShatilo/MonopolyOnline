@@ -1,9 +1,6 @@
-﻿using Photon.Pun;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using Zenject;
 
 public class AuctionService : IAuctionService
@@ -18,6 +15,7 @@ public class AuctionService : IAuctionService
     private IPhotonTurnManager photonTurnManager;
     private IEventBus eventBus;
     private ITimerManager timerManager;
+    private IPlayerRepository playerRepository;
     private GameSettings gameSettings;
 
     private int companyId;
@@ -34,13 +32,14 @@ public class AuctionService : IAuctionService
 
     [Inject]
     public void Construct(IPhotonAuctionManager photonAuctionManager, IPhotonTurnManager photonTurnManager, IEventBus eventBus,
-        ITimerManager timerManager, GameSettings gameSettings)
+        ITimerManager timerManager, GameSettings gameSettings, IPlayerRepository playerRepository)
     {
         this.photonAuctionManager = photonAuctionManager ?? throw new ArgumentNullException(nameof(photonAuctionManager));
         this.photonTurnManager = photonTurnManager ?? throw new ArgumentNullException(nameof(photonTurnManager));
         this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
         this.timerManager = timerManager ?? throw new ArgumentNullException(nameof(timerManager));
         this.gameSettings = gameSettings ?? throw new ArgumentNullException(nameof(gameSettings));
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
     }
 
     #endregion LIFE_CYCLE
@@ -168,9 +167,10 @@ public class AuctionService : IAuctionService
 
     private List<int> BuildTurnOrderStartingAfter(int starterActorNumber, HashSet<int> excludedPlayers)
     {
-        var list = PhotonNetwork.PlayerList
-            .OrderBy(p => p.ActorNumber)
-            .Select(p => p.ActorNumber)
+       
+        var list = playerRepository.GetAllPlayers()
+            .OrderBy(p => p.Id)
+            .Select(p => p.Id)
             .Where(p => !excludedPlayers.Contains(p))
             .ToList();
 

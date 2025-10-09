@@ -8,6 +8,7 @@ public class PhotonMortgageManager : MonoBehaviourPun, IPhotonMortgageManager
 {
     private IMortgageService mortgageService;
     private ICompanyUIService companyUIService;
+    private IPhotonNetworkWrapper photonNetworkWrapper;
     private GameSettings gameSettings;
 
     #region LIFE_CYCLE
@@ -41,7 +42,7 @@ public class PhotonMortgageManager : MonoBehaviourPun, IPhotonMortgageManager
     [PunRPC]
     private void RPC_MortgageCompany(int companyId, int playerId)
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!photonNetworkWrapper.IsMasterClient) return;
         mortgageService.MortgageCompany(companyId, playerId);
         photonView.RPC(nameof(RPC_SyncMortgage), RpcTarget.All, playerId, companyId, true);
     }
@@ -49,7 +50,7 @@ public class PhotonMortgageManager : MonoBehaviourPun, IPhotonMortgageManager
     [PunRPC]
     private void RPC_BuyBackCompany(int playerId, int companyId)
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!photonNetworkWrapper.IsMasterClient) return;
         mortgageService.BuyoutCompany(companyId, playerId);
         photonView.RPC(nameof(RPC_SyncMortgage), RpcTarget.All, playerId, companyId, false);
     }

@@ -30,7 +30,6 @@ public class PhotonPlayerHandler : MonoBehaviourPunCallbacks
             gameSettings.startPlayerMoney,
             newPlayer.ActorNumber,
             colorService.GetColorForPlayer(newPlayer.ActorNumber),
-            gameSettings.loanAmount,
             newPlayer);
 
         repository.AddPlayer(player);

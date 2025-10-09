@@ -24,7 +24,7 @@ public class PayRentPresenter : IInitializable, IDisposable
         this.eventBus = eventBus;
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<OfferRentEvent>(ShowRentFor);
         eventBus.Subscribe<RentPaidEvent>(OnRentPaid);
@@ -32,7 +32,7 @@ public class PayRentPresenter : IInitializable, IDisposable
         window.SetPayAction(OnPayClicked);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<RentPaidEvent>(OnRentPaid);
         eventBus.Unsubscribe<OfferRentEvent>(ShowRentFor);

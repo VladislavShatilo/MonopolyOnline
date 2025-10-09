@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MessageLogView : MonoBehaviour
+public class MessageLogView : MonoBehaviour, IMessageLogView
 {
     #region EVENTS
 

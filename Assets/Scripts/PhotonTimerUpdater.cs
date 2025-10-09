@@ -8,20 +8,22 @@ public class PhotonTimerUpdater : MonoBehaviourPun
 {
     private ITimerManager timerManager;
     private IEventBus eventBus;
+    private IPhotonNetworkWrapper photonNetworkWrapper;
     private int lastSecond = -1;
 
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(ITimerManager timerManager, IEventBus eventBus)
+    public void Construct(ITimerManager timerManager, IEventBus eventBus, IPhotonNetworkWrapper photonNetworkWrapper)
     {
         this.timerManager = timerManager;
         this.eventBus = eventBus;
+        this.photonNetworkWrapper = photonNetworkWrapper;
     }
 
     private void Update()
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!photonNetworkWrapper.IsMasterClient) return;
 
         var result = timerManager.Tick();
         if (result.HasValue)

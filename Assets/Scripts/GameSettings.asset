@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: GameSettings
   m_EditorClassIdentifier: 
   startPlayerMoney: 100000
+  lapMoney: 2000
   mortgageTurns: 7
   turnTime: 90
   auctionTime: 15
@@ -23,3 +24,9 @@ MonoBehaviour:
   maxBranchLevel: 5
   loanAmount: 5000
   loanAmountBack: 5500
+  playerColors:
+  - {r: 1, g: 0, b: 0, a: 1}
+  - {r: 0, g: 1, b: 0, a: 1}
+  - {r: 0, g: 1, b: 1, a: 1}
+  - {r: 1, g: 0, b: 1, a: 1}
+  groupColors: []

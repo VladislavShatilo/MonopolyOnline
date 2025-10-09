@@ -12,6 +12,7 @@ public class TradeService : ITradeService,IInitializable,IDisposable
     private IEventBus eventBus;
     private IPlayerRepository playerRepository;
     private ITimerManager timerManager;
+    private IPhotonNetworkWrapper photonNetworkWrapper;
     private GameSettings gameSettings;
     private ITurnPresenter turnPresenter;
     private int turnTimeLeft;
@@ -25,7 +26,7 @@ public class TradeService : ITradeService,IInitializable,IDisposable
 
     [Inject]
     public void Construct(IPhotonTradeManager photonTradeManager, IBankService bankService, IEventBus eventBus, IPlayerRepository playerRepository
-       , ITimerManager timerManager, GameSettings gameSettings, ITurnPresenter turnPresenter)
+       , ITimerManager timerManager, GameSettings gameSettings, ITurnPresenter turnPresenter, IPhotonNetworkWrapper photonNetworkWrapper)
     {
         this.photonTradeManager = photonTradeManager;
         this.bankService = bankService;
@@ -34,12 +35,13 @@ public class TradeService : ITradeService,IInitializable,IDisposable
         this.timerManager = timerManager;
         this.gameSettings = gameSettings;
         this.turnPresenter = turnPresenter;
+        this.photonNetworkWrapper = photonNetworkWrapper;
     }
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<TimerExpiredEvent>(TimerExpiredEvent);
     }
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Subscribe<TimerExpiredEvent>(TimerExpiredEvent);
     }
@@ -58,7 +60,6 @@ public class TradeService : ITradeService,IInitializable,IDisposable
         PlayerData playerTo = playerRepository.GetPlayerById(toPlayerId);
         CurrentOffer = new TradeOffer(playerFrom, playerTo);
         eventBus.Publish(new TradeStartedEvent(fromPlayerId, toPlayerId, CurrentOffer));
-        //  photonTradeManager.SendTradeRequest(fromPlayerId, toPlayerId);
     }
 
     public void TimerExpiredEvent(TimerExpiredEvent e)
@@ -111,7 +112,6 @@ public class TradeService : ITradeService,IInitializable,IDisposable
         }
         else
         {
-            // таймер неактивен → можно задать запасное значение
             turnTimeLeft = gameSettings.turnTime;
         }
         timerManager.StartTradeTimer(receiverId, gameSettings.tradeTime);
@@ -155,7 +155,7 @@ public class TradeService : ITradeService,IInitializable,IDisposable
         }
 
 
-        if (PhotonNetwork.IsMasterClient)
+        if (photonNetworkWrapper.IsMasterClient)
         {
 
             bankService.RemoveMoney(senderId, offer.FromMoney);

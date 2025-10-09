@@ -45,10 +45,6 @@ public class EventBus : IEventBus
         }
     }
 
-    public void ClearAll()
-    {
-        eventHandlers.Clear();
-    }
 }
 public class EndAuctionWithWinnerEvent
 {
@@ -459,3 +455,70 @@ public class OnUpdatePlayerMoneyEvent
     }
 
 }
+public class ShowCompanyWindowEvent
+{
+    public RectTransform Cell { get; }
+    public StatsWindowPosition Position { get; }
+    public CompanyData Data { get; }
+
+    public ShowCompanyWindowEvent(RectTransform cell, StatsWindowPosition pos, CompanyData data)
+    {
+        Cell = cell;
+        Position = pos;
+        Data = data;
+    }
+}
+
+public class ShowFieldCompanyWindowEvent
+{
+    public RectTransform Cell { get; }
+    public StatsWindowPosition Position { get; }
+    public FieldCompanyData Data { get; }
+
+    public ShowFieldCompanyWindowEvent(RectTransform cell, StatsWindowPosition pos, FieldCompanyData data)
+    {
+        Cell = cell;
+        Position = pos;
+        Data = data;
+    }
+}
+
+public class ShowDiceCompanyWindowEvent
+{
+    public RectTransform Cell { get; }
+    public StatsWindowPosition Position { get; }
+    public DiceCompanyData Data { get; }
+
+    public ShowDiceCompanyWindowEvent(RectTransform cell, StatsWindowPosition pos, DiceCompanyData data)
+    {
+        Cell = cell;
+        Position = pos;
+        Data = data;
+    }
+}
+
+public class OnPlayerMoveEvent
+{
+    public int PlayerId { get; }
+    public int Steps { get; }
+    public bool Forward { get; }
+    public OnPlayerMoveEvent(int playerId, int steps, bool forward)
+    {
+        PlayerId = playerId;
+        Steps = steps;
+        Forward = forward;
+    }
+}
+public class DiceFadeEvent
+{
+
+    public int CellId;
+    public bool IsMovementStart;
+    public DiceFadeEvent(int cellId, bool isMovementStart)
+    {
+
+        CellId = cellId;
+        IsMovementStart = isMovementStart;
+    }
+}
+

@@ -26,7 +26,7 @@ public class TradeWindowPresenter : IInitializable, IDisposable
         this.turnWindow = turnWindow;
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<TradeStartedEvent>(ShowTradeWindow);
         eventBus.Subscribe<TradeUpdatedEvent>(UpdateTrade);
@@ -35,7 +35,7 @@ public class TradeWindowPresenter : IInitializable, IDisposable
         tradeWindow.SetOfferAction(OfferTrade);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<TradeStartedEvent>(ShowTradeWindow);
         eventBus.Unsubscribe<TradeUpdatedEvent>(UpdateTrade);

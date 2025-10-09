@@ -9,6 +9,8 @@ public class LoanService : ILoanService,IInitializable,IDisposable
 {
     private IPlayerRepository playerRepository;
     private IPhotonLoanManager photonLoanManager;
+    private IPhotonNetworkWrapper photonNetworkWrapper;
+
     private IBankService bankService;
     private IEventBus eventBus;
     private GameSettings gameSettings;
@@ -16,19 +18,21 @@ public class LoanService : ILoanService,IInitializable,IDisposable
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IPlayerRepository playerRepository, IPhotonLoanManager network, IBankService bankService, IEventBus eventBus, GameSettings gameSettings)
+    public void Construct(IPlayerRepository playerRepository, IPhotonLoanManager network, IBankService bankService, IEventBus eventBus, GameSettings gameSettings, IPhotonNetworkWrapper photonNetworkWrapper)
     {
         this.playerRepository = playerRepository;
         this.photonLoanManager = network;
         this.bankService = bankService;
         this.eventBus = eventBus;
         this.gameSettings = gameSettings;
+        this.photonNetworkWrapper = photonNetworkWrapper;
+
     }
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<OnStartTurnLoanEvent>(OnPlayerTurnStart);
     }
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<OnStartTurnLoanEvent>(OnPlayerTurnStart);
     }
@@ -39,7 +43,7 @@ public class LoanService : ILoanService,IInitializable,IDisposable
 
     public void TakeLoanConfirmed(int playerId)
     {
-        if (PhotonNetwork.IsMasterClient)
+        if (photonNetworkWrapper.IsMasterClient)
         {
             bankService.AddMoney(playerId, gameSettings.loanAmount);
         }
@@ -54,7 +58,7 @@ public class LoanService : ILoanService,IInitializable,IDisposable
 
     public void PayLoanConfirmed(int playerId)
     {
-        if (PhotonNetwork.IsMasterClient)
+        if (photonNetworkWrapper.IsMasterClient)
         {
             bankService.RemoveMoney(playerId, gameSettings.loanAmountBack);
         }

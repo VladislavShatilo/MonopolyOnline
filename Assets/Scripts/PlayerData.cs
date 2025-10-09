@@ -26,11 +26,9 @@ public class PlayerData
     [System.NonSerialized]
     public Player photonPlayer;
 
-    private int loanAmount;
-
     #region LIFE_CYCLE
 
-    public PlayerData(string name, int startMoney, int id, PlayerColor color, int loanAmount, Player photonPlayer = null)
+    public PlayerData(string name, int startMoney, int id, PlayerColor color, Player photonPlayer = null)
     {
         IsInJail = false;
         Name = name;
@@ -39,7 +37,6 @@ public class PlayerData
         PlayerColor = color;
         this.photonPlayer = photonPlayer;
         CurrentCellId = 0;
-        this.loanAmount = loanAmount;
     }
 
     #endregion LIFE_CYCLE
@@ -61,6 +58,10 @@ public class PlayerData
             }
             return capital;
         }
+        set
+        {
+
+        }
     }
 
     public int LiquidAssets
@@ -81,9 +82,13 @@ public class PlayerData
             }
             if (!HasLoan)
             {
-                liquid += loanAmount; // кредиты
+               // liquid += loanAmount; // кредиты
             }
             return liquid;
+        }
+        set
+        {
+
         }
     }
 

@@ -23,7 +23,7 @@ public class TradeReviewWindowPresenter :  IInitializable, IDisposable
         this.photonTradeManager = photonTradeManager;
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<TradeProposalReceivedEvent>(ShowTradeReviewWindow);
         eventBus.Subscribe<TradeEndedEvent>(HideWindowsOnTradeEnded);
@@ -32,7 +32,7 @@ public class TradeReviewWindowPresenter :  IInitializable, IDisposable
         tradeReviewWindow.SetCancelAction(CancelTrade);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<TradeProposalReceivedEvent>(ShowTradeReviewWindow);
         eventBus.Unsubscribe<TradeEndedEvent>(HideWindowsOnTradeEnded);

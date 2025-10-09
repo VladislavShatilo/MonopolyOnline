@@ -8,18 +8,20 @@ public class JailService : IJailService
 {
     private IPlayerRepository playerRepository;
     private IPhotonTurnManager photonTurnManager;
+    private IPhotonNetworkWrapper photonNetworkWrapper;
     private IEventBus eventBus;
     private GameSettings gameSettings;
 
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IPlayerRepository playerRepository, IEventBus eventBus, IPhotonTurnManager photonTurnManager, GameSettings gameSettings)
+    public void Construct(IPlayerRepository playerRepository, IEventBus eventBus, IPhotonTurnManager photonTurnManager, GameSettings gameSettings, IPhotonNetworkWrapper photonNetworkWrapper)
     {
         this.playerRepository = playerRepository;
         this.eventBus = eventBus;
         this.photonTurnManager = photonTurnManager;
         this.gameSettings = gameSettings;
+        this.photonNetworkWrapper = photonNetworkWrapper;
     }
 
     #endregion LIFE_CYCLE
@@ -64,7 +66,7 @@ public class JailService : IJailService
         }
         eventBus.Publish(new SetTurnsJailEvent(playerId, player.JailTurnsLeft));
 
-        if (PhotonNetwork.IsMasterClient)
+        if (photonNetworkWrapper.IsMasterClient)
             photonTurnManager.RequestEndTurn();
     }
     public int GetTurnsLeft(int playerId)

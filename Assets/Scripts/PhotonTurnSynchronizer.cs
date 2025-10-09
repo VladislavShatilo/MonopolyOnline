@@ -9,15 +9,17 @@ public class PhotonTurnSynchronizer : MonoBehaviourPun,IPhotonTurnSynchronizer
     private IPlayerRepository playerRepository;
     private IEventBus eventBus;
     private IMortgageService mortgageService;
+    private IPhotonNetworkWrapper photonNetworkWrapper;
 
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IPlayerRepository playerRepository, IEventBus eventBus, IMortgageService mortgageService)
+    public void Construct(IPlayerRepository playerRepository, IEventBus eventBus, IMortgageService mortgageService, IPhotonNetworkWrapper photonNetworkWrapper)
     {
         this.playerRepository = playerRepository;
         this.eventBus = eventBus;
         this.mortgageService = mortgageService;
+        this.photonNetworkWrapper = photonNetworkWrapper;
     }
 
     #endregion LIFE_CYCLE
@@ -52,7 +54,7 @@ public class PhotonTurnSynchronizer : MonoBehaviourPun,IPhotonTurnSynchronizer
         {
             eventBus.Publish(new OnStartTurnLoanEvent(playerId));
         }
-        if (PhotonNetwork.IsMasterClient)
+        if (photonNetworkWrapper.IsMasterClient)
         {
             mortgageService.TickTurn(playerId);
         }

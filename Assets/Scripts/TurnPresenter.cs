@@ -22,14 +22,14 @@ public class TurnPresenter : ITurnPresenter, IInitializable, IDisposable
         this.eventBus = eventBus;
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         uiTurnWindow.SetThrowDiceAction(OnThrowDiceClicked);
 
         eventBus.Subscribe<TurnStartEvent>(OnTurnStart);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<TurnStartEvent>(OnTurnStart);
     }

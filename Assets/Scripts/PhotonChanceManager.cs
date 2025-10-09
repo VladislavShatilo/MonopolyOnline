@@ -29,12 +29,13 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
     private IPhotonPlayerMoveManager photonPlayerMove;
     private IPhotonJailManager photonJailManager;
     private IChatService chatService;
+    private IPhotonNetworkWrapper photonNetworkWrapper;
 
     #region LIFE_CYCLE
 
     [Inject]
     public void Construct(IChanceService chanceService, IPlayerRepository playerRepository, IBankService bankService, IPhotonTurnManager photonTurnManager,
-       IPhotonPlayerMoveManager photonPlayerMove, IPhotonJailManager photonJailManager, IChatService chatService)
+       IPhotonPlayerMoveManager photonPlayerMove, IPhotonJailManager photonJailManager, IChatService chatService, IPhotonNetworkWrapper photonNetworkWrapper)
     {
         this.chanceService = chanceService;
         this.playerRepository = playerRepository;
@@ -43,6 +44,7 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
         this.photonPlayerMove = photonPlayerMove;
         this.photonJailManager = photonJailManager;
         this.chatService = chatService;
+        this.photonNetworkWrapper = photonNetworkWrapper;
 
     }
 
@@ -52,7 +54,7 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
 
     public void GiveRandomBuff(int playerId)
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!photonNetworkWrapper.IsMasterClient) return;
 
         ChanceBuff buff = chanceService.GetRandomBuff();
         photonView.RPC(nameof(RPC_ApplyBuff), RpcTarget.All, playerId, (int)buff.Type, buff.MinAmount, buff.MaxAmount);
@@ -70,7 +72,7 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
 
     private string ApplyMoneyChange(PlayerData player, int min, int max, bool gain, bool fixedAmount = false)
     {
-        if (!PhotonNetwork.IsMasterClient) return "";
+        if (!photonNetworkWrapper.IsMasterClient) return "";
         int amount = fixedAmount ? max : UnityEngine.Random.Range(min, max + 1);
         if (gain)
         {

@@ -9,15 +9,16 @@ public class PhotonJailManager : MonoBehaviourPun, IPhotonJailManager
     private IJailService jailService;
     private IPhotonTurnManager photonTurnManager;
     private IEventBus eventBus;
-
+    private IPhotonNetworkWrapper photonNetworkWrapper;
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IJailService jailService, IEventBus eventBus, IPhotonTurnManager photonTurnManager)
+    public void Construct(IJailService jailService, IEventBus eventBus, IPhotonTurnManager photonTurnManager, IPhotonNetworkWrapper photonNetworkWrapper)
     {
         this.jailService = jailService;
         this.eventBus = eventBus;
         this.photonTurnManager = photonTurnManager;
+        this.photonNetworkWrapper = photonNetworkWrapper;
     }
 
     #endregion LIFE_CYCLE
@@ -26,7 +27,7 @@ public class PhotonJailManager : MonoBehaviourPun, IPhotonJailManager
 
     public void SendToJail(int playerId)
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!photonNetworkWrapper.IsMasterClient) return;
         photonView.RPC(nameof(RPC_MoveToJail), RpcTarget.All, playerId);
 
         photonTurnManager.RequestEndTurn();

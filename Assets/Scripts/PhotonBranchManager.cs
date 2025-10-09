@@ -7,13 +7,15 @@ using Zenject;
 public class PhotonBranchManager : MonoBehaviourPun, IPhotonBranchManager
 {
     private IBranchUseCase branchUseCase;
+    private IPhotonNetworkWrapper photonNetworkWrapper;
 
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IBranchUseCase branchUseCase)
+    public void Construct(IBranchUseCase branchUseCase, IPhotonNetworkWrapper photonNetworkWrapper)
     {
         this.branchUseCase = branchUseCase;
+        this.photonNetworkWrapper = photonNetworkWrapper;
     }
 
     #endregion LIFE_CYCLE
@@ -37,7 +39,7 @@ public class PhotonBranchManager : MonoBehaviourPun, IPhotonBranchManager
     [PunRPC]
     private void RPC_BuyBranch(int companyId, int playerId)
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!photonNetworkWrapper.IsMasterClient) return;
 
         int newRentLevel = branchUseCase.BuyBranch(companyId, playerId);
 
@@ -48,7 +50,7 @@ public class PhotonBranchManager : MonoBehaviourPun, IPhotonBranchManager
     [PunRPC]
     private void RPC_SellBranch(int companyId, int playerId)
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!photonNetworkWrapper.IsMasterClient) return;
 
         int newRentLevel = branchUseCase.SellBranch(companyId, playerId);
         photonView.RPC(nameof(RPC_UpdateBranchUI), RpcTarget.All, companyId, playerId, newRentLevel);

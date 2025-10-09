@@ -19,12 +19,13 @@ public class CompanyService : ICompanyService, IInitializable, IDisposable
     private ICompanySyncService companySyncService;
     private IPlayerRepository playerRepository;
     private IEventBus eventBus;
+    private IPhotonNetworkWrapper photonNetworkWrapper;
 
     #region LIFE_CYCLE
 
     [Inject]
     public void Construct(ICompanyRepository companyRepository, IBankService bank, IPhotonTurnManager photonTurnManager, ICompanySyncService companySyncService,
-       IPlayerRepository playerRepository, IEventBus eventBus)
+       IPlayerRepository playerRepository, IEventBus eventBus, IPhotonNetworkWrapper photonNetworkWrapper)
     {
         this.companyRepository = companyRepository;
         this.bank = bank;
@@ -32,14 +33,15 @@ public class CompanyService : ICompanyService, IInitializable, IDisposable
         this.companySyncService = companySyncService;
         this.playerRepository = playerRepository;
         this.eventBus = eventBus;
+        this.photonNetworkWrapper = photonNetworkWrapper;
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<EndAuctionWithWinnerEvent>(AuctionBuyCompany);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<EndAuctionWithWinnerEvent>(AuctionBuyCompany);
     }
@@ -65,7 +67,7 @@ public class CompanyService : ICompanyService, IInitializable, IDisposable
         }
         else
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (photonNetworkWrapper.IsMasterClient)
             {
                 photonTurnManager.RequestEndTurn();
             }

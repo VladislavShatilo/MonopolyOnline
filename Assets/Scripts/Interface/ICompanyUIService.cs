@@ -2,5 +2,5 @@
 public interface ICompanyUIService
 {
     void InitializeUI();
-    UICompanyCell GetCompanyUI(int id);
+    IUICompanyCellView GetCompanyUI(int id);
 }

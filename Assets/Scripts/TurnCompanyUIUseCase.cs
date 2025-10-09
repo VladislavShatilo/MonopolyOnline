@@ -10,7 +10,7 @@ public enum CompanyActionType
     Buyout,
     ManageBranches
 }
-public class TurnCompanyUIUseCase
+public class TurnCompanyUIUseCase: ITurnCompanyUIUseCase
 {
     private ICompanyRepository companyRepository;
     private IGroupOwnershipService groupOwnershipService; // сервис, провер€ющий владение группой

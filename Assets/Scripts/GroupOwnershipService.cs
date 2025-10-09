@@ -22,7 +22,7 @@ public class GroupOwnershipService : IGroupOwnershipService
 
     public bool PlayerOwnsWholeGroup(CompanyGroup group, int playerId)
     {
-        var companiesInGroup = companyRepository.GetByGroup(group).ToList();
+        var companiesInGroup = companyRepository.GetByGroup(group)?.ToList();
 
         if (companiesInGroup == null || companiesInGroup.Count == 0)
             return false;

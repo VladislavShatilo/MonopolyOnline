@@ -11,16 +11,17 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
     private IPlayerRepository playerRepository;
     private IBoardService boardService;
     private IEventBus eventBus;
-
+    private IPhotonNetworkWrapper photonNetworkWrapper;
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IPlayerMoveUseCase playerMoveUseCase, IEventBus eventBus, IPlayerRepository playerRepository, IBoardService boardService)
+    public void Construct(IPlayerMoveUseCase playerMoveUseCase, IEventBus eventBus, IPlayerRepository playerRepository, IBoardService boardService, IPhotonNetworkWrapper photonNetworkWrapper)
     {
         this.playerMoveUseCase = playerMoveUseCase;
         this.playerRepository = playerRepository;
         this.eventBus = eventBus;
         this.boardService = boardService;
+        this.photonNetworkWrapper = photonNetworkWrapper;
     }
 
     private void OnEnable()
@@ -39,7 +40,7 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
 
     public void RequestTeleport(int playerId)
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!photonNetworkWrapper.IsMasterClient) return;
 
         photonView.RPC(nameof(RPC_TeleportPlayer), RpcTarget.MasterClient, playerId);
     }
@@ -59,7 +60,7 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
     [PunRPC]
     private void RPC_TeleportPlayer(int playerId)
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!photonNetworkWrapper.IsMasterClient) return;
 
         PlayerData player = playerRepository.GetPlayerById(playerId);
         int randomIndex;

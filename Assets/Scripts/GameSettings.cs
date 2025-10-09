@@ -28,4 +28,8 @@ public class GameSettings : ScriptableObject
     [Header("Loan")]
     public int loanAmount = 5000;
     public int loanAmountBack = 5500;
+
+    [Header("Colors")]
+    public Color[] playerColors;
+    public Color[] groupColors;
 }

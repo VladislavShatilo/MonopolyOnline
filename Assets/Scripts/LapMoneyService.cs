@@ -22,11 +22,11 @@ public class LapMoneyService : IInitializable, IDisposable
     }
 
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<LapMoneyEvent>(GiveMoneyLap);
     }
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<LapMoneyEvent>(GiveMoneyLap);
 

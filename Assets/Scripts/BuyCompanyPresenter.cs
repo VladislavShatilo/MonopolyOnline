@@ -27,7 +27,7 @@ public class BuyCompanyPresenter : IBuyCompanyPresenter, IInitializable, IDispos
         this.eventBus = eventBus;
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<OfferPurchaseEvent>(BuyWindowShow);
 
@@ -35,7 +35,7 @@ public class BuyCompanyPresenter : IBuyCompanyPresenter, IInitializable, IDispos
         buyWindow.SetAuctionAction(StartAuctionRequest);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<OfferPurchaseEvent>(BuyWindowShow);
     }

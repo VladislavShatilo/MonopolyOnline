@@ -9,19 +9,19 @@ public enum CompanyType
 
 public class Company
 {
-    public int Id { get; }
+    public int Id { get; set; }
     public bool IsBought { get; set; }
-    public string Name { get; }
-    public int Price { get; }
+    public string Name { get; set; }
+    public int Price { get; set; }
     public int OwnerId { get; set; } = -1;
     public int RentLevel { get;  set; } = 0;
     public bool IsMortgaged { get; set; }
     public int MortgageTurnsLeft { get; set; }
-    public int MortgagePrice { get; }
-    public int BuyoutPrice { get; }
-    public int BranchPrice { get; }
-    public CompanyType Type { get; }
-    public CompanyGroup Group { get; }
+    public int MortgagePrice { get; set; }
+    public int BuyoutPrice { get; set; }
+    public int BranchPrice { get; set; }
+    public CompanyType Type { get; set; }
+    public CompanyGroup Group { get; set; }
 
     private readonly CompanyData companyData;
     private readonly FieldCompanyData fieldCompanyData;

@@ -19,7 +19,7 @@ public class AuctionUseCase : IInitializable, IDisposable
         this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<StartAuctionEvent>(StartAuction);
         eventBus.Subscribe<PlayerBidAuction>(PlayerBid);
@@ -27,7 +27,7 @@ public class AuctionUseCase : IInitializable, IDisposable
         eventBus.Subscribe<TimerExpiredEvent>(TimerExpiredEvent);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<StartAuctionEvent>(StartAuction);
         eventBus.Unsubscribe<PlayerBidAuction>(PlayerBid);

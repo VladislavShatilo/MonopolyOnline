@@ -16,11 +16,11 @@ public class DicePresenter : IInitializable,IDisposable
         this.eventBus = eventBus;
 
     }
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<DiceRolledEvent>(OnDiceRolled);
     }
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<DiceRolledEvent>(OnDiceRolled);
     }

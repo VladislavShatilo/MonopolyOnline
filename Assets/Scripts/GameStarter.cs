@@ -10,15 +10,17 @@ public class GameStarter : MonoBehaviourPunCallbacks
     private IPhotonTurnManager photonTurnManager;
     private IBoardService boardService;
     private IEventBus eventBus;
+    private IPhotonNetworkWrapper networkWrapper;
 
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IPhotonTurnManager photonTurnManager, IBoardService boardService, IEventBus eventBus)
+    public void Construct(IPhotonTurnManager photonTurnManager, IBoardService boardService, IEventBus eventBus, IPhotonNetworkWrapper networkWrapper)
     {
         this.photonTurnManager = photonTurnManager;
         this.boardService = boardService;
         this.eventBus = eventBus;
+        this.networkWrapper = networkWrapper;
     }
 
     public void Start()
@@ -43,7 +45,7 @@ public class GameStarter : MonoBehaviourPunCallbacks
         {
             StartCoroutine(InitializeAllPlayers());
 
-            if (PhotonNetwork.IsMasterClient)
+            if (networkWrapper.IsMasterClient)
             {
                 photonTurnManager.RequestStartRandomTurn();
             }

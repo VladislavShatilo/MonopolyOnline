@@ -27,12 +27,12 @@ public class UICompanyCellPresenter : IInitializable, IDisposable
         this.eventBus = eventBus;
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<CompanyBoughtEvent>(CompanyBoughtUpdate);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<CompanyBoughtEvent>(CompanyBoughtUpdate);
     }

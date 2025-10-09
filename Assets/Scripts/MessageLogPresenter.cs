@@ -4,7 +4,7 @@ using Zenject;
 
 public class MessageLogPresenter : IInitializable, IDisposable
 {
-    private MessageLogView view;
+    private IMessageLogView view;
     private IChatService chatService;
     private IEventBus eventBus;
     private IPlayerRepository playerRepository;
@@ -13,7 +13,7 @@ public class MessageLogPresenter : IInitializable, IDisposable
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(MessageLogView view, IChatService chatService, IPlayerRepository playerRepository, IEventBus eventBus)
+    public void Construct(IMessageLogView view, IChatService chatService, IPlayerRepository playerRepository, IEventBus eventBus)
     {
         this.view = view;
         this.chatService = chatService;
@@ -21,14 +21,14 @@ public class MessageLogPresenter : IInitializable, IDisposable
         this.eventBus = eventBus;
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         view.OnSendClicked += OnSendClicked;
         sendChatMessageUseCase = new SendChatMessageUseCase(chatService);
         eventBus.Subscribe<ChatMessage>(OnMessageReceived);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         view.OnSendClicked -= OnSendClicked;
         eventBus.Unsubscribe<ChatMessage>(OnMessageReceived);

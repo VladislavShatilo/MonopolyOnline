@@ -7552,75 +7552,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 463324165}
   m_CullTransparentMesh: 1
---- !u!1 &486951059
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 486951061}
-  - component: {fileID: 486951060}
-  - component: {fileID: 486951062}
-  m_Layer: 0
-  m_Name: CasinoManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &486951060
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 486951059}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b9a9339abb5b574eb9e2e0369f42f6a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pvCache: {fileID: 0}
-  playerID: 0
---- !u!4 &486951061
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 486951059}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1106.4125, y: 925.8164, z: -170.34763}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &486951062
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 486951059}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  observableSearch: 2
-  ObservedComponents: []
-  sceneViewId: 9
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!1001 &486999024
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8745,8 +8676,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 146.05151, y: -277.62408}
-  m_SizeDelta: {x: 593.7657, y: 52.7519}
+  m_AnchoredPosition: {x: 146.05151, y: -282.51}
+  m_SizeDelta: {x: 593.7657, y: 62.529}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &588809861
 MonoBehaviour:
@@ -10011,10 +9942,10 @@ RectTransform:
   - {fileID: 525100923}
   m_Father: {fileID: 1434692071}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 60}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &661066057
 MonoBehaviour:
@@ -16520,7 +16451,6 @@ GameObject:
   - component: {fileID: 1126649301}
   - component: {fileID: 1126649303}
   - component: {fileID: 1126649302}
-  - component: {fileID: 1126649305}
   - component: {fileID: 1126649304}
   m_Layer: 5
   m_Name: CasinoWindow
@@ -16606,29 +16536,6 @@ MonoBehaviour:
   windowRectTransform: {fileID: 1126649301}
   animationDuration: 0.2
   animationOffset: 160
---- !u!114 &1126649305
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1126649300}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d76476f7346e73c448f23cc1e4b0cd13, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  windowAnimation: {fileID: 1126649304}
-  cancelButton: {fileID: 1112727813}
-  playButton: {fileID: 637042049}
-  dice1Button: {fileID: 362855517}
-  dice2Button: {fileID: 889784044}
-  dice3Button: {fileID: 298836111}
-  dice4Button: {fileID: 723380666}
-  dice5Button: {fileID: 82091431}
-  dice6Button: {fileID: 47503050}
-  selectedNumbers: 
-  diceButtons: []
 --- !u!1 &1126752762
 GameObject:
   m_ObjectHideFlags: 0
@@ -17033,8 +16940,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -17058,7 +16965,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 35.55
+  m_fontSize: 44.3
   m_fontSizeBase: 14
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -17496,10 +17403,10 @@ RectTransform:
   - {fileID: 46618510}
   m_Father: {fileID: 1541854863}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 60}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1164650535
 MonoBehaviour:
@@ -19596,7 +19503,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 35.55
+  m_fontSize: 44.3
   m_fontSizeBase: 14
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -22773,7 +22680,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1515504477}
-  - component: {fileID: 1515504478}
   m_Layer: 5
   m_Name: BaseUI
   m_TagString: Untagged
@@ -22808,18 +22714,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1515504478
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1515504476}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ba171eaa0f150d4a8e52fdb0a87654e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1517077686
 GameObject:
   m_ObjectHideFlags: 0
@@ -24712,7 +24606,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1665539846}
-  - component: {fileID: 1665539847}
   m_Layer: 5
   m_Name: BaseUI
   m_TagString: Untagged
@@ -24747,18 +24640,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1665539847
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1665539845}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ba171eaa0f150d4a8e52fdb0a87654e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1669628023
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30387,7 +30268,6 @@ SceneRoots:
   - {fileID: 202444996}
   - {fileID: 1355578821}
   - {fileID: 2038016545}
-  - {fileID: 486951061}
   - {fileID: 401622155}
   - {fileID: 1997305230}
   - {fileID: 341810153}

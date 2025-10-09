@@ -6,7 +6,7 @@ using Zenject;
 
 public class TurnCompanyUIAdapter: IInitializable,IDisposable
 {
-    private  TurnCompanyUIUseCase turnUIUseCase;
+    private ITurnCompanyUIUseCase turnUIUseCase;
     private ICompanyUIService companyUIService;
     private ICompanyRepository companyRepository;
     private IEventBus eventBus;
@@ -14,7 +14,7 @@ public class TurnCompanyUIAdapter: IInitializable,IDisposable
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(TurnCompanyUIUseCase turnUIUseCase, IEventBus eventBus, ICompanyUIService companyUIService,
+    public void Construct(ITurnCompanyUIUseCase turnUIUseCase, IEventBus eventBus, ICompanyUIService companyUIService,
         ICompanyRepository companyRepository)
     {
         this.eventBus = eventBus;
@@ -22,11 +22,11 @@ public class TurnCompanyUIAdapter: IInitializable,IDisposable
         this.companyUIService = companyUIService;
         this.companyRepository = companyRepository;
     }
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<TurnStartEvent>(OnTurnStart);
     }
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<TurnStartEvent>(OnTurnStart);
 

@@ -33,7 +33,7 @@ public class JailPresenter : IInitializable, IDisposable
         this.gameSettings = gameSettings;
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<StartTurnJailEvent>(OnStartTurn);
 
@@ -42,7 +42,7 @@ public class JailPresenter : IInitializable, IDisposable
         ransomJailWindow.SetRansomAction(OnRansomClicked);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<StartTurnJailEvent>(OnStartTurn);
     }

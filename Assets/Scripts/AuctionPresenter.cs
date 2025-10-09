@@ -33,7 +33,7 @@ public class AuctionPresenter : IInitializable, IDisposable
         auctionWindow.SetPassAction(OnPassClicked);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<AuctionPromptBidEvent>(OnAuctionPromptBid);
         eventBus.Unsubscribe<AuctionEndEvent>(_ => auctionWindow.Hide());

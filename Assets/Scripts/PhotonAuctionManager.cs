@@ -7,13 +7,15 @@ using Zenject;
 public class PhotonAuctionManager : MonoBehaviourPun, IPhotonAuctionManager
 {
     private IEventBus eventBus;
+    private IPhotonNetworkWrapper photonNetworkWrapper;
 
     #region LIFE_CYCLE
 
     [Inject]
-    public void Consturct(IEventBus eventBus)
+    public void Consturct(IEventBus eventBus, IPhotonNetworkWrapper photonNetworkWrapper)
     {
         this.eventBus = eventBus;
+        this.photonNetworkWrapper = photonNetworkWrapper;
     }
 
     #endregion LIFE_CYCLE
@@ -58,7 +60,7 @@ public class PhotonAuctionManager : MonoBehaviourPun, IPhotonAuctionManager
     [PunRPC]
     private void RPC_StartAuctionRequest(int starterActorNumber, int companyId, int companyBasePrice)
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!photonNetworkWrapper.IsMasterClient) return;
 
         eventBus.Publish(new StartAuctionEvent(starterActorNumber, companyId, companyBasePrice));
     }
@@ -66,7 +68,7 @@ public class PhotonAuctionManager : MonoBehaviourPun, IPhotonAuctionManager
     [PunRPC]
     private void RPC_UpdateBid(int playerId)
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!photonNetworkWrapper.IsMasterClient) return;
 
         eventBus.Publish(new PlayerBidAuction(playerId));
     }
@@ -74,7 +76,7 @@ public class PhotonAuctionManager : MonoBehaviourPun, IPhotonAuctionManager
     [PunRPC]
     private void RPC_UpdatePass(int playerId)
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!photonNetworkWrapper.IsMasterClient) return;
 
         eventBus.Publish(new PlayerPassAuction(playerId));
     }

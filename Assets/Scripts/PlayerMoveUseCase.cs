@@ -23,11 +23,11 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase, IInitializable, IDisposable
         this.eventBus = eventBus;
         this.cellHighlighterService = cellHighlighterService;
     }
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<DiceFadeEvent>(HighlightCell);
     }
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<DiceFadeEvent>(HighlightCell);
     }

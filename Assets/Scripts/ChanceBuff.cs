@@ -16,6 +16,5 @@ public class ChanceBuff
         MaxAmount = maxAmount;
     }
 
-    public bool IsMoneyBuff() => Type.ToString().Contains("Money");
 
 }

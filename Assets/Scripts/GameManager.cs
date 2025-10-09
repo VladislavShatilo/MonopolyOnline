@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Zenject;
-
 public class GameManager
 {
     private IPlayerRepository repository;
@@ -37,7 +36,6 @@ public class GameManager
                 gameSettings.startPlayerMoney,
                 p.ActorNumber,
                 colorService.GetColorForPlayer(p.ActorNumber),
-                 gameSettings.loanAmount,
                 p);
 
             repository.AddPlayer(player);

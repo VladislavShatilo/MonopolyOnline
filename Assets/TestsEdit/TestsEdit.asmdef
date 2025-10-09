@@ -4,7 +4,8 @@
     "references": [
         "GameAssembly",
         "PhotonRealtime",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "PhotonUnityNetworking"
     ],
     "includePlatforms": [
         "Editor"
@@ -13,7 +14,9 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "nunit.framework.dll"
+        "nunit.framework.dll",
+        "Moq.dll",
+        "Castle.Core.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

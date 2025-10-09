@@ -24,14 +24,14 @@ public class LoanPayPresenter : IInitializable, IDisposable
         this.photonLoanManager = photonLoanManager;
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         eventBus.Subscribe<OfferLoanPayEvent>(ShowLoanWindow);
 
         loanPayWindow.SetPayLoanAction(OnPayLoan);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         eventBus.Unsubscribe<OfferLoanPayEvent>(ShowLoanWindow);
     }

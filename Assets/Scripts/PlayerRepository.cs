@@ -21,7 +21,13 @@ public class PlayerRepository : IPlayerRepository
 
     public PlayerData GetNextPlayerId(int currentId)
     {
+        if (players.Count == 0)
+            throw new System.ArgumentOutOfRangeException(nameof(players), "Player list is empty.");
+
         int index = players.FindIndex(p => p.Id == currentId);
+        if (index == -1)
+            throw new System.ArgumentException($"Player with Id {currentId} not found.");
+
         index = (index + 1) % players.Count;
         return players[index];
     }
