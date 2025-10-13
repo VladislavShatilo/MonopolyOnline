@@ -17,15 +17,16 @@ public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
     private ITradeService tradeService;
     private ICompanyRepository companyRepository;
     private IPlayerRepository playerRepository;
-
+    private IPhotonViewWrapper photonViewWrapper;
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(ITradeService tradeService, ICompanyRepository companyRepository, IPlayerRepository playerRepository)
+    public void Construct(ITradeService tradeService, ICompanyRepository companyRepository, IPlayerRepository playerRepository, IPhotonViewWrapper photonViewWrapper)
     {
         this.tradeService = tradeService;
         this.companyRepository = companyRepository;
         this.playerRepository = playerRepository;
+        this.photonViewWrapper = photonViewWrapper;
     }
 
     #endregion LIFE_CYCLE
@@ -34,27 +35,30 @@ public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
 
     public void SendTradeRequest(int fromPlayerId, int toPlayerId)
     {
-        photonView.RPC(nameof(RPC_StartTradeRequest), RpcTarget.All, fromPlayerId, toPlayerId);
+        photonViewWrapper.RPC(photonView,nameof(RPC_StartTradeRequest), RpcTarget.All, fromPlayerId, toPlayerId);
+        
     }
 
     public void SendTradeOffer(TradeOffer offer)
     {
-        photonView.RPC(nameof(RPC_SendTradeOffer), RpcTarget.All,
+        photonViewWrapper.RPC(photonView, nameof(RPC_SendTradeOffer), RpcTarget.All,
             offer.FromPlayerData.Id, offer.ToPlayerData.Id,
             JsonUtility.ToJson(new CompanyIdListWrapper { Ids = offer.FromCompanies.ConvertAll(c => c.Id) }),
             JsonUtility.ToJson(new CompanyIdListWrapper { Ids = offer.ToCompanies.ConvertAll(c => c.Id) }),
-            offer.FromMoney, offer.ToMoney
-        );
+            offer.FromMoney, offer.ToMoney);
+
+       
     }
 
     public void CompleteTrade(bool accepted)
     {
-        photonView.RPC(nameof(RPC_CompleteTrade), RpcTarget.All, accepted);
+        photonViewWrapper.RPC(photonView, nameof(RPC_CompleteTrade), RpcTarget.All, accepted);
     }
 
     public void SendTradeResult(bool accepted)
     {
-        photonView.RPC(nameof(RPC_CompleteTrade), RpcTarget.All, accepted);
+        photonViewWrapper.RPC(photonView, nameof(RPC_CompleteTrade), RpcTarget.All, accepted);
+
     }
 
     #endregion PUBLIC_METHODS

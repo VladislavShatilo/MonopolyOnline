@@ -8,14 +8,16 @@ public class PhotonLoanManager : MonoBehaviourPun, IPhotonLoanManager
 {
     private ILoanService loanService;
     private IEventBus eventBus;
+    private IPhotonViewWrapper photonViewWrapper;
 
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(ILoanService loanService, IEventBus eventBus)
+    public void Construct(ILoanService loanService, IEventBus eventBus, IPhotonViewWrapper photonViewWrapper)
     {
         this.loanService = loanService;
         this.eventBus = eventBus;
+        this.photonViewWrapper = photonViewWrapper;
     }
 
     #endregion LIFE_CYCLE
@@ -24,17 +26,17 @@ public class PhotonLoanManager : MonoBehaviourPun, IPhotonLoanManager
 
     public void TakeLoanRequest(int playerId)
     {
-        photonView.RPC(nameof(RPC_TakeLoan), RpcTarget.All, playerId);
+        photonViewWrapper.RPC(photonView, nameof(RPC_TakeLoan), RpcTarget.All, playerId);
     }
 
     public void PayLoanRequest(int playerId)
     {
-        photonView.RPC(nameof(RPC_PayLoan), RpcTarget.All, playerId);
+        photonViewWrapper.RPC(photonView, nameof(RPC_PayLoan), RpcTarget.All, playerId);
     }
 
     public void ShowLoanWindow(int playerId, int loanAmount)
     {
-        photonView.RPC(nameof(RPC_ShowLoanWindow), PhotonNetwork.CurrentRoom.GetPlayer(playerId), playerId, loanAmount);
+        photonViewWrapper.RPC(photonView, nameof(RPC_ShowLoanWindow), PhotonNetwork.CurrentRoom.GetPlayer(playerId), playerId, loanAmount);
     }
 
     #endregion PUBLIC_METHODS

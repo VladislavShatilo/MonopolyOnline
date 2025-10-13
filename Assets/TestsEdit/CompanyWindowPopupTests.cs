@@ -1,88 +1,71 @@
-//using Moq;
 //using NUnit.Framework;
-//using System.Collections;
+//using Moq;
 //using UnityEngine;
-//using UnityEngine.TestTools;
 //using UnityEngine.UI;
+//using System;
 
+//[TestFixture]
 //public class CompanyWindowPopupTests
 //{
-//    private GameObject go;
+//    private GameObject gameObject;
 //    private CompanyWindowPopup popup;
-//    private Mock<ITradeService> tradeServiceMock;
-//    private Mock<ICompanyRepository> companyRepoMock;
 //    private Button button;
+//    private Mock<ITradeService> mockTradeService;
+//    private Mock<ICompanyRepository> mockCompanyRepo;
 
 //    [SetUp]
 //    public void SetUp()
 //    {
-//        go = new GameObject();
-//        popup = go.AddComponent<CompanyWindowPopup>();
+//        // Создаём GameObject с компонентом
+//        gameObject = new GameObject();
+//        popup = gameObject.AddComponent<CompanyWindowPopup>();
 
-//        // создаём кнопку и присваиваем
-//        var btnGO = new GameObject();
-//        button = btnGO.AddComponent<Button>();
+//        // Создаём кнопку
+//        var buttonGO = new GameObject("Button");
+//        button = buttonGO.AddComponent<Button>();
+//        // Присваиваем кнопку через Reflection
 //        typeof(CompanyWindowPopup)
 //            .GetField("showWindowButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
 //            .SetValue(popup, button);
 
-//        tradeServiceMock = new Mock<ITradeService>();
-//        companyRepoMock = new Mock<ICompanyRepository>();
-
-//        popup.Construct(tradeServiceMock.Object, companyRepoMock.Object);
+//        // Моки для зависимостей
+//        mockTradeService = new Mock<ITradeService>();
+//        mockCompanyRepo = new Mock<ICompanyRepository>();
+//        popup.Construct(mockTradeService.Object, mockCompanyRepo.Object);
 //    }
 
 //    [TearDown]
 //    public void TearDown()
 //    {
-//        GameObject.DestroyImmediate(go);
+//        GameObject.DestroyImmediate(gameObject);
+//        GameObject.DestroyImmediate(button.gameObject);
 //    }
 
 //    [Test]
-//    public void Init_ShouldAddButtonListener_AndCreateInteractor()
+//    public void Init_AddsButtonListener_AndCreatesInteractor()
 //    {
-//        popup.Init(5);
+//        bool clicked = false;
+//        popup.OnCompanyClicked += _ => clicked = true;
 
-//        // проверяем, что listener добавлен
-//        Assert.IsTrue(button.onClick.GetPersistentEventCount() > 0);
-
-//        // проверяем, что приватный interactor != null
-//        var interactor = typeof(CompanyWindowPopup)
-//            .GetField("interactor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-//            .GetValue(popup);
-//        Assert.IsNotNull(interactor);
-//    }
-
-//    [Test]
-//    public void OnClick_ShouldInvokeEvent_WhenInteractorReturnsFalse()
-//    {
-//        popup.Init(10);
-//        // заменяем interactor на мок, чтобы вернуть false
-//        var interactor = new Mock<CompanyOfferInteractor>(tradeServiceMock.Object, companyRepoMock.Object);
-//        interactor.Setup(x => x.TryToggleCompanyInOffer(10)).Returns(false);
-
-//        typeof(CompanyWindowPopup)
-//            .GetField("interactor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-//            .SetValue(popup, interactor.Object);
-
-//        int calledId = -1;
-//        popup.OnCompanyClicked += id => calledId = id;
-
+//        popup.Init(42);
 //        button.onClick.Invoke();
 
-//        Assert.AreEqual(10, calledId);
+//        Assert.IsTrue(clicked); // Проверяем, что кнопка реально вызывает логику
 //    }
 
 //    [Test]
-//    public void OnClick_ShouldNotInvokeEvent_WhenInteractorReturnsTrue()
+//    public void OnClick_HandledByInteractor_DoesNotInvokeEvent()
 //    {
 //        popup.Init(10);
-//        var interactor = new Mock<CompanyOfferInteractor>(tradeServiceMock.Object, companyRepoMock.Object);
-//        interactor.Setup(x => x.TryToggleCompanyInOffer(10)).Returns(true);
 
-//        typeof(CompanyWindowPopup)
-//            .GetField("interactor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-//            .SetValue(popup, interactor.Object);
+//        // Мокаем interactor через partial class
+//        var interactorField = typeof(CompanyWindowPopup)
+//            .GetField("interactor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+//        var mockInteractor = new Mock<CompanyOfferInteractor>(mockTradeService.Object, mockCompanyRepo.Object);
+//        mockInteractor.Setup(x => x.TryToggleCompanyInOffer(10)).Returns(true);
+
+//        interactorField.SetValue(popup, mockInteractor.Object);
 
 //        bool eventCalled = false;
 //        popup.OnCompanyClicked += id => eventCalled = true;
@@ -90,5 +73,28 @@
 //        button.onClick.Invoke();
 
 //        Assert.IsFalse(eventCalled);
+//        mockInteractor.Verify(x => x.TryToggleCompanyInOffer(10), Times.Once);
+//    }
+
+//    [Test]
+//    public void OnClick_NotHandledByInteractor_InvokesEvent()
+//    {
+//        popup.Init(5);
+
+//        var interactorField = typeof(CompanyWindowPopup)
+//            .GetField("interactor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+//        var mockInteractor = new Mock<CompanyOfferInteractor>(mockTradeService.Object, mockCompanyRepo.Object);
+//        mockInteractor.Setup(x => x.TryToggleCompanyInOffer(5)).Returns(false);
+
+//        interactorField.SetValue(popup, mockInteractor.Object);
+
+//        int? receivedId = null;
+//        popup.OnCompanyClicked += id => receivedId = id;
+
+//        button.onClick.Invoke();
+
+//        Assert.AreEqual(5, receivedId);
+//        mockInteractor.Verify(x => x.TryToggleCompanyInOffer(5), Times.Once);
 //    }
 //}

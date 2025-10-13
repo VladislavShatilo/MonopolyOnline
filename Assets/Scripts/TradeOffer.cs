@@ -3,11 +3,11 @@ using Zenject;
 
 public class TradeOffer
 {
-    public PlayerData FromPlayerData { get; }
+    public PlayerData FromPlayerData { get;}
     public PlayerData ToPlayerData { get; }
 
-    public List<Company> FromCompanies { get; } = new();
-    public List<Company> ToCompanies { get; } = new();
+    public List<Company> FromCompanies { get; set; } = new();
+    public List<Company> ToCompanies { get; set; } = new();
 
     public int FromMoney { get; set; }
     public int ToMoney { get; set; }

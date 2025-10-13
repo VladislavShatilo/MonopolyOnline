@@ -1,23 +1,26 @@
 using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using Zenject;
 
 public class PhotonCompanySyncManager : MonoBehaviourPun, ICompanySyncService
 {
     private ICompanyRepository companyRepository;
+    private IPhotonViewWrapper photonViewWrapper;
     private IPlayerRepository playerRepository;
     private IEventBus eventBus;
 
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(ICompanyRepository companyRepository, IPlayerRepository playerRepository, IEventBus eventBus)
+    public void Construct(ICompanyRepository companyRepository, IPlayerRepository playerRepository, IEventBus eventBus, IPhotonViewWrapper photonViewWrapper)
     {
         this.companyRepository = companyRepository;
         this.playerRepository = playerRepository;
         this.eventBus = eventBus;
+        this.photonViewWrapper = photonViewWrapper;
     }
 
     #endregion LIFE_CYCLE
@@ -26,13 +29,12 @@ public class PhotonCompanySyncManager : MonoBehaviourPun, ICompanySyncService
 
     public void SyncCompanyBought(int companyId, int playerId, int price)
     {
-
-        photonView.RPC(nameof(RPC_SyncCompanyBought), RpcTarget.Others, companyId, playerId, price);
+        photonViewWrapper.RPC(photonView, nameof(RPC_SyncCompanyBought), RpcTarget.Others, companyId, playerId, price);
     }
 
     public void SyncRentPaid(int companyId, int playerId, int ownerId, int rent)
     {
-        photonView.RPC(nameof(RPC_SyncRentPaid), RpcTarget.Others, companyId, playerId, ownerId, rent);
+        photonViewWrapper.RPC(photonView, nameof(RPC_SyncRentPaid), RpcTarget.Others, companyId, playerId, ownerId, rent);
     }
 
     #endregion PUBLIC_METHODS

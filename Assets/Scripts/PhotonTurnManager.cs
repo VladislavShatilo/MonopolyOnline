@@ -8,13 +8,16 @@ public class PhotonTurnManager : MonoBehaviourPun, IPhotonTurnManager
 {
     private ITurnService turnService;
     private IPhotonNetworkWrapper photonNetworkWrapper;
+    private IPhotonViewWrapper photonViewWrapper;
+
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(ITurnService turnService, IPhotonNetworkWrapper photonNetworkWrapper)
+    public void Construct(ITurnService turnService, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
         this.turnService = turnService;
         this.photonNetworkWrapper = photonNetworkWrapper;
+        this.photonViewWrapper = photonViewWrapper;
     }
 
     #endregion LIFE_CYCLE
@@ -29,12 +32,13 @@ public class PhotonTurnManager : MonoBehaviourPun, IPhotonTurnManager
 
     public void RequestEndTurn()
     {
-        photonView.RPC(nameof(RPC_RequestEndTurn), RpcTarget.MasterClient);
+        photonViewWrapper.RPC(photonView,nameof(RPC_RequestEndTurn), RpcTarget.MasterClient);
     }
 
     public void RegisterDouble(int playerId)
     {
-        photonView.RPC(nameof(RPC_RegisterDouble), RpcTarget.MasterClient, playerId);
+        photonViewWrapper.RPC(photonView, nameof(RPC_RegisterDouble), RpcTarget.MasterClient, playerId);
+
     }
 
     #endregion PUBLIC_METHODS

@@ -54,9 +54,9 @@ public class AuctionServiceTests
     {
         var players = new List<PlayerData>
         {
-            new PlayerData("A", 500, 1, null),
-            new PlayerData("B", 500, 2, null),
-            new PlayerData("C", 500, 3, null)
+            new("A", 500, 1, null),
+            new("B", 500, 2, null),
+            new("C", 500, 3, null)
         };
         playerRepository.Setup(r => r.GetAllPlayers()).Returns(players);
 
@@ -131,5 +131,64 @@ public class AuctionServiceTests
         auctionService.PassBid(1); // оставляем 1 игрока, победитель 2
 
         eventBus.Verify(e => e.Publish(It.Is<EndAuctionWithWinnerEvent>(ev => ev.WinnerId == 2 && ev.FinalPrice == 600)), Times.Once);
+    }
+    [Test]
+    public void AuctionEnds_NoEligibleBidders_ShouldEndAuctionNoWinner()
+    {
+        var players = new List<PlayerData>
+        {
+            new("A", 500, 1, null)
+        };
+        playerRepository.Setup(r => r.GetAllPlayers()).Returns(players);
+
+        // Все игроки сразу пасуют
+        auctionService.StartAuction(1, 100, 500);
+        auctionService.PassBid(1);
+
+        photonTurnManager.Verify(t => t.RequestEndTurn(), Times.Once);
+    }
+
+   
+
+    // ===== Очередность ходов =====
+    [Test]
+    public void PlaceBid_ShouldMoveToNextBidderCorrectly()
+    {
+        var players = new List<PlayerData>
+        {
+            new("A", 500, 1, null),
+            new("B", 500, 2, null),
+            new("C", 500, 3, null)
+        };
+        playerRepository.Setup(r => r.GetAllPlayers()).Returns(players);
+
+        auctionService.StartAuction(1, 100, 500); // Стартуем с 1
+
+        auctionService.PlaceBid(2); // B ставит
+        auctionService.PlaceBid(3); // C ставит
+
+        // После ставок очередь вернулась к A
+        photonAuctionManager.Verify(p => p.PromptBidRequest(2, 600, 100), Times.Once);
+        photonAuctionManager.Verify(p => p.PromptBidRequest(3, 700, 100), Times.Once);
+    }
+
+   
+
+    // ===== Граничные значения и старт с последнего игрока =====
+    [Test]
+    public void StartAuction_WithLastPlayerAsStarter_ShouldBuildCorrectOrder()
+    {
+        var players = new List<PlayerData>
+        {
+            new("A", 500, 1, null),
+            new("B", 500, 2, null),
+            new("C", 500, 3, null)
+        };
+        playerRepository.Setup(r => r.GetAllPlayers()).Returns(players);
+
+        auctionService.StartAuction(3, 100, 500); // стартуем с последнего игрока
+
+        // Первый вызов PromptBidRequest должен быть для игрока с ID > 3, т.е. A (1)
+        photonAuctionManager.Verify(p => p.PromptBidRequest(1, 600, 100), Times.Once);
     }
 }

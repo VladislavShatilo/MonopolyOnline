@@ -6,7 +6,9 @@
         "UnityEditor.TestRunner",
         "Zenject",
         "GameAssembly",
-        "PhotonUnityNetworking"
+        "PhotonUnityNetworking",
+        "Unity.TextMeshPro",
+        "PhotonRealtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

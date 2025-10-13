@@ -9,6 +9,7 @@ public class PhotonMortgageManager : MonoBehaviourPun, IPhotonMortgageManager
     private IMortgageService mortgageService;
     private ICompanyUIService companyUIService;
     private IPhotonNetworkWrapper photonNetworkWrapper;
+    private IPhotonViewWrapper photonViewWrapper;
     private GameSettings gameSettings;
 
     #region LIFE_CYCLE
@@ -27,12 +28,13 @@ public class PhotonMortgageManager : MonoBehaviourPun, IPhotonMortgageManager
 
     public void RequestMortgageCompany(int companyId)
     {
-        photonView.RPC(nameof(RPC_MortgageCompany), RpcTarget.MasterClient, companyId, PhotonNetwork.LocalPlayer.ActorNumber);
+        photonViewWrapper.RPC(photonView, nameof(RPC_MortgageCompany), RpcTarget.MasterClient, companyId, PhotonNetwork.LocalPlayer.ActorNumber);
     }
 
     public void RequestBuyoutCompany(int companyId)
     {
-        photonView.RPC(nameof(RPC_BuyBackCompany), RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber, companyId);
+        photonViewWrapper.RPC(photonView, nameof(RPC_BuyBackCompany), RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber, companyId);
+
     }
 
     #endregion PUBLIC_METHODS
@@ -44,7 +46,7 @@ public class PhotonMortgageManager : MonoBehaviourPun, IPhotonMortgageManager
     {
         if (!photonNetworkWrapper.IsMasterClient) return;
         mortgageService.MortgageCompany(companyId, playerId);
-        photonView.RPC(nameof(RPC_SyncMortgage), RpcTarget.All, playerId, companyId, true);
+        photonViewWrapper.RPC(photonView, nameof(RPC_SyncMortgage), RpcTarget.All, playerId, companyId, true);
     }
 
     [PunRPC]
@@ -52,13 +54,13 @@ public class PhotonMortgageManager : MonoBehaviourPun, IPhotonMortgageManager
     {
         if (!photonNetworkWrapper.IsMasterClient) return;
         mortgageService.BuyoutCompany(companyId, playerId);
-        photonView.RPC(nameof(RPC_SyncMortgage), RpcTarget.All, playerId, companyId, false);
+        photonViewWrapper.RPC(photonView, nameof(RPC_SyncMortgage), RpcTarget.All, playerId, companyId, false);
+
     }
 
     [PunRPC]
     private void RPC_SyncMortgage(int playerId, int companyId, bool isMortgage)
     {
-        // Здесь только UI-логика
         var ui = companyUIService.GetCompanyUI(companyId);
         if (ui == null) return;
 

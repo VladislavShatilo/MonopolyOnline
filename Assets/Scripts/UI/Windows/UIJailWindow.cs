@@ -54,6 +54,12 @@ public class UIJailWindow : UIWindowBase, IJailWindow
         }
     }
 
+    public Button RansomButton { get => ransomButton; set => ransomButton = value; }
+    public Button CantRansomButton { get => cantRansomButton; set => cantRansomButton = value; }
+    public Button ThrowDiceButton { get => throwDiceButton; set => throwDiceButton = value; }
+    public TextMeshProUGUI RansomText { get => ransomText; set =>  ransomText = value; }
+    public TextMeshProUGUI CantRansomText { get => cantRansomText; set => cantRansomText = value; }
+
     #endregion PUBLIC_METHODS
 
 

@@ -49,5 +49,10 @@ public class UILoanPayWindow : UIWindowBase, ILoanPayWindow
         }
     }
 
+    public Button PayLoanButton { get => payLoanButton; set => payLoanButton = value; }
+    public Button CantPayLoanButton { get => cantPayLoanButton; set => cantPayLoanButton = value; }
+    public TextMeshProUGUI PayLoanText { get => payLoanText; set => payLoanText = value; }
+    public TextMeshProUGUI CantPayLoanText { get => cantPayLoanText; set => cantPayLoanText = value; }
+
     #endregion PUBLIC_METHODS
 }

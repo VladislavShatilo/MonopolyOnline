@@ -12,17 +12,20 @@ public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
 {
     private IRollDiceUseCase rollDiceUseCase;
     private IPhotonNetworkWrapper photonNetworkWrapper;
+    private IPhotonViewWrapper photonViewWrapper;
     public static bool AllowCheats = true;
     [Inject]
-    public void Construct(IRollDiceUseCase rollDiceUseCase, IPhotonNetworkWrapper photonNetworkWrapper)
+    public void Construct(IRollDiceUseCase rollDiceUseCase, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
         this.rollDiceUseCase = rollDiceUseCase;
         this.photonNetworkWrapper = photonNetworkWrapper;
+        this.photonViewWrapper = photonViewWrapper;
     }
     public void RequestDiceRoll(int playerId, bool isForJail, int cheatFirst = -1, int cheatSecond = -1)
     {
         // посылаем запрос мастеру с возможными override (чита)
-        photonView.RPC(nameof(RPC_RequestGetDiceResult), RpcTarget.MasterClient, playerId, isForJail, cheatFirst, cheatSecond);
+        photonViewWrapper.RPC(photonView, nameof(RPC_RequestGetDiceResult), RpcTarget.MasterClient, playerId, isForJail, cheatFirst, cheatSecond);
+
     }
     private void Update()
     {
@@ -59,9 +62,9 @@ public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
             first = diceResult.First;
             second = diceResult.Second;
         }
-
+        
         // рассылаем всем единый результат
-        photonView.RPC(nameof(RPC_RequestDiceHandle), RpcTarget.All, first, second, playerId, isForJail);
+        photonViewWrapper.RPC(photonView,nameof(RPC_RequestDiceHandle), RpcTarget.All, first, second, playerId, isForJail);
     }
     [PunRPC]
     private void RPC_RequestDiceHandle(int first,int second,int playerId, bool isForJail)
@@ -71,7 +74,3 @@ public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
     }
   
 }
-
-#region Events
-
-#endregion

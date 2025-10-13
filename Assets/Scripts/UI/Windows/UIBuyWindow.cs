@@ -27,8 +27,8 @@ public class UIBuyWindow : UIWindowBase,IBuyWindow
         buyButton.gameObject.SetActive(canAfford);
         cantBuyButton.gameObject.SetActive(!canAfford);
 
-        buyButtonText.text = $"Купить за {price:N0}";
-        cantBuyButtonText.text = $"Купить за {price:N0}";
+        buyButtonText.text = $"Купить за {price.ToString("N0", CultureInfo.InvariantCulture)}";
+        cantBuyButtonText.text = $"Купить за {price.ToString("N0", CultureInfo.InvariantCulture)}";
 
         ShowWindow();
     }
@@ -52,6 +52,12 @@ public class UIBuyWindow : UIWindowBase,IBuyWindow
         }
     }
 
+  
+    public Button BuyButton { get => buyButton; set => buyButton = value; }
+    public Button CantBuyButton { get => cantBuyButton; set => cantBuyButton = value; }
+    public Button AuctionButton { get => auctionButton; set => auctionButton = value; }
+    public TextMeshProUGUI BuyButtonText { get => buyButtonText; set => buyButtonText = value; }
+    public TextMeshProUGUI CantBuyButtonText { get => cantBuyButtonText; set => cantBuyButtonText = value; }
     #endregion PUBLIC_METHODS
 
 

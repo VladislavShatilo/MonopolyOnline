@@ -7,13 +7,15 @@ using Zenject;
 public class PhotonCompanyManager : MonoBehaviourPun, IPhotonCompanyManager
 {
     private ICompanyService companyService;
+    private IPhotonViewWrapper photonViewWrapper;
 
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(ICompanyService companyService)
+    public void Construct(ICompanyService companyService, IPhotonViewWrapper photonViewWrapper)
     {
         this.companyService = companyService;
+        this.photonViewWrapper = photonViewWrapper;
 
     }
 
@@ -23,12 +25,12 @@ public class PhotonCompanyManager : MonoBehaviourPun, IPhotonCompanyManager
 
     public void RequestBuyCompany(int cellIndex, int playerId, BuyReason reason)
     {
-        photonView.RPC(nameof(RPC_TryBuyCompany), RpcTarget.MasterClient, cellIndex, playerId, (int)reason);
+        photonViewWrapper.RPC(photonView, nameof(RPC_TryBuyCompany), RpcTarget.MasterClient, cellIndex, playerId, (int)reason);
     }
 
     public void RequestPayRent(int cellIndex, int playerId)
     {
-        photonView.RPC(nameof(RPC_TryPayRent), RpcTarget.MasterClient, cellIndex, playerId);
+        photonViewWrapper.RPC(photonView, nameof(RPC_TryPayRent), RpcTarget.MasterClient, cellIndex, playerId);
     }
 
     #endregion PUBLIC_METHODS

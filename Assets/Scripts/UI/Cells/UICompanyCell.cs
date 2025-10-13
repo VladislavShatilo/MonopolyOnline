@@ -64,12 +64,12 @@ public class UICompanyCell : MonoBehaviour, IUICompanyCellView, IInitializable, 
         this.photonMortgageManager = photonMortgageManager;
     }
 
-    void IInitializable.Initialize()
+    public void Initialize()
     {
         repository.Register(this);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         repository.Unregister(this);
     }

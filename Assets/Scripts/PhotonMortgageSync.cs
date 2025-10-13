@@ -9,15 +9,18 @@ public class PhotonMortgageSync : MonoBehaviourPun
     private IEventBus eventBus;
     private ICompanyRepository companyRepository;
     private ICompanyUIService companyUIService;
+    private IPhotonViewWrapper photonViewWrapper;
+
 
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IEventBus eventBus, ICompanyRepository companyRepository, ICompanyUIService companyUIService)
+    public void Construct(IEventBus eventBus, ICompanyRepository companyRepository, ICompanyUIService companyUIService, IPhotonViewWrapper photonViewWrapper)
     {
         this.eventBus = eventBus;
         this.companyRepository = companyRepository;
         this.companyUIService = companyUIService;
+        this.photonViewWrapper = photonViewWrapper;
     }
 
     private void OnEnable()
@@ -78,22 +81,22 @@ public class PhotonMortgageSync : MonoBehaviourPun
 
     private void OnCompanyMortgaged(CompanyMortgagedEvent e)
     {
-        photonView.RPC(nameof(RPC_SetMortgage), RpcTarget.All, e.CompanyId, true, e.Turns);
+        photonViewWrapper.RPC(photonView, nameof(RPC_SetMortgage), RpcTarget.All, e.CompanyId, true, e.Turns);
     }
 
     private void OnCompanyBoughtBack(CompanyBoughtBackEvent e)
     {
-        photonView.RPC(nameof(RPC_SetMortgage), RpcTarget.All, e.CompanyId, false, 0);
+        photonViewWrapper.RPC(photonView, nameof(RPC_SetMortgage), RpcTarget.All, e.CompanyId, false, 0);
     }
 
     private void OnCompanyFreedFromMortgage(CompanyFreedFromMortgageEvent e)
     {
-        photonView.RPC(nameof(RPC_CompanyFreed), RpcTarget.All, e.CompanyId, false, 0);
+        photonViewWrapper.RPC(photonView, nameof(RPC_CompanyFreed), RpcTarget.All, e.CompanyId, false, 0);
     }
 
     private void OnCompanyTickUI(CompanyTickUIEvent e)
     {
-        photonView.RPC(nameof(RPC_CompanyTickUI), RpcTarget.All, e.CompanyId, e.TurnsLeft);
+        photonViewWrapper.RPC(photonView, nameof(RPC_CompanyTickUI), RpcTarget.All, e.CompanyId, e.TurnsLeft);
     }
 
     #endregion CALLBACKS

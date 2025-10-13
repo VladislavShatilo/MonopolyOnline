@@ -5,7 +5,9 @@
         "GameAssembly",
         "PhotonRealtime",
         "Unity.TextMeshPro",
-        "PhotonUnityNetworking"
+        "PhotonUnityNetworking",
+        "DOTween.Modules",
+        "Zenject"
     ],
     "includePlatforms": [
         "Editor"
@@ -16,7 +18,9 @@
     "precompiledReferences": [
         "nunit.framework.dll",
         "Moq.dll",
-        "Castle.Core.dll"
+        "Castle.Core.dll",
+        "DOTween.dll",
+        "Zenject-usage.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

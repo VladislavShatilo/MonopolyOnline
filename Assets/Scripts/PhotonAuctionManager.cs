@@ -8,14 +8,15 @@ public class PhotonAuctionManager : MonoBehaviourPun, IPhotonAuctionManager
 {
     private IEventBus eventBus;
     private IPhotonNetworkWrapper photonNetworkWrapper;
-
+    private IPhotonViewWrapper photonViewWrapper;
     #region LIFE_CYCLE
 
     [Inject]
-    public void Consturct(IEventBus eventBus, IPhotonNetworkWrapper photonNetworkWrapper)
+    public void Consturct(IEventBus eventBus, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
         this.eventBus = eventBus;
         this.photonNetworkWrapper = photonNetworkWrapper;
+        this.photonViewWrapper = photonViewWrapper;
     }
 
     #endregion LIFE_CYCLE
@@ -24,27 +25,30 @@ public class PhotonAuctionManager : MonoBehaviourPun, IPhotonAuctionManager
 
     public void PromptBidRequest(int playerId, int minAllowedBid, int companyId)
     {
-        photonView.RPC(nameof(RPC_PromptBid_Internal), RpcTarget.All, playerId, minAllowedBid, companyId);
+        photonViewWrapper.RPC(photonView, nameof(RPC_PromptBid_Internal), RpcTarget.All, playerId, minAllowedBid, companyId);
     }
 
     public void StartAuctionRequest(int starterActorNumber, int companyId, int companyBasePrice)
     {
-        photonView.RPC(nameof(RPC_StartAuctionRequest), RpcTarget.MasterClient, starterActorNumber, companyId, companyBasePrice);
+        photonViewWrapper.RPC(photonView, nameof(RPC_StartAuctionRequest), RpcTarget.MasterClient, starterActorNumber, companyId, companyBasePrice);
     }
 
     public void PlayerBidRequest(int playerId)
     {
-        photonView.RPC(nameof(RPC_UpdateBid), RpcTarget.MasterClient, playerId);
+        photonViewWrapper.RPC(photonView, nameof(RPC_UpdateBid), RpcTarget.MasterClient, playerId);
     }
 
     public void PlayerPassRequest(int playerId)
     {
-        photonView.RPC(nameof(RPC_UpdatePass), RpcTarget.MasterClient, playerId);
+        photonViewWrapper.RPC(photonView, nameof(RPC_UpdatePass), RpcTarget.MasterClient, playerId);
     }
 
     public void CloseAuctionWindowRequest(int playerId)
     {
-        photonView.RPC(nameof(RPC_CloseAuctionWindow), PhotonNetwork.CurrentRoom.GetPlayer(playerId));
+        var target = PhotonNetwork.CurrentRoom.GetPlayer(playerId);
+
+        photonViewWrapper.RPC(photonView, nameof(RPC_CloseAuctionWindow),target, null);
+
     }
 
     #endregion PUBLIC_METHODS

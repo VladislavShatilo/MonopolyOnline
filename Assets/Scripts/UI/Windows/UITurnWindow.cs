@@ -47,7 +47,23 @@ public class UITurnWindow : UIWindowBase,ITurnWindow
         }
         return steps;
     }
+    public Button ThrowDiceButtonPublic
+    {
+        get => throwDiceButton;
+        set => throwDiceButton = value;
+    }
 
+    public TMP_InputField InputField1Public
+    {
+        get => inputField1;
+        set => inputField1 = value;
+    }
+
+    public TMP_InputField InputField2Public
+    {
+        get => inputField2;
+        set => inputField2 = value;
+    }
     #endregion PUBLIC_METHODS
 
 

@@ -43,6 +43,31 @@ public class UIRansomJailWindow : UIWindowBase,IRansomJailWindow
             ransomButton.onClick.AddListener(() => onRansom(currentPlayerId));
     }
 
+
+    public Button RansomButtonPublic
+    {
+        get => ransomButton;
+        set => ransomButton = value;
+    }
+
+    public Button CantRansomButtonPublic
+    {
+        get => cantRansomButton;
+        set => cantRansomButton = value;
+    }
+
+    public TextMeshProUGUI RansomTextPublic
+    {
+        get => ransomText;
+        set => ransomText = value;
+    }
+
+    public TextMeshProUGUI CantRansomTextPublic
+    {
+        get => cantRansomText;
+        set => cantRansomText = value;
+    }
+
     #endregion PUBLIC_METHODS
 
 }

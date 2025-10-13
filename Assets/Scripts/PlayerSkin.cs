@@ -9,13 +9,15 @@ public class PlayerSkin : MonoBehaviourPun
     [SerializeField] private Image playerSkinImage;
     [SerializeField] private TextMeshProUGUI turnJailText;
     private IEventBus eventBus;
+    private IPhotonViewWrapper photonViewWrapper;
 
     #region LIFE_CYCLE
 
-    public void Initialize(IEventBus eventBus)
+    public void Initialize(IEventBus eventBus, IPhotonViewWrapper photonViewWrapper)
     {
         this.eventBus = eventBus;
         eventBus.Subscribe<SetTurnsJailEvent>(SetTurnJain);
+        this.photonViewWrapper = photonViewWrapper;
     }
 
     private void Start()
@@ -66,7 +68,7 @@ public class PlayerSkin : MonoBehaviourPun
     {
         if (e.PlayerID == photonView.OwnerActorNr)
         {
-            photonView.RPC(nameof(RPC_SetTurnJain), RpcTarget.AllBuffered, e.Turns);
+            photonViewWrapper.RPC(photonView, nameof(RPC_SetTurnJain), RpcTarget.AllBuffered, e.Turns);
         }
     }
 

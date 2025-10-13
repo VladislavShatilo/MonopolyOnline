@@ -1,64 +1,62 @@
-using System.Collections;
 using NUnit.Framework;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Moq;
 
 public class DiceManager3DTests
 {
-    private GameObject _gameObject;
-    private DiceManager3D _diceManager;
+    private GameObject gameObject;
+    private DiceManager3D diceManager;
 
-    private Mock<DiceRoll3D> _mockDice1;
-    private Mock<DiceRoll3D> _mockDice2;
 
     [SetUp]
     public void SetUp()
     {
-        _gameObject = new GameObject();
-        _diceManager = _gameObject.AddComponent<DiceManager3D>();
+        gameObject = new GameObject();
+        diceManager = gameObject.AddComponent<DiceManager3D>();
+   
+        // Создаём заглушки для кубиков
+        var dice1Obj = new GameObject("Dice1");
+        dice1Obj.AddComponent<DiceRoll3D>();
+        var dice2Obj = new GameObject("Dice2");
+        dice2Obj.AddComponent<DiceRoll3D>();
 
-        // Создаем моки кубиков
-        _mockDice1 = new Mock<DiceRoll3D>();
-        _mockDice2 = new Mock<DiceRoll3D>();
+        // Присваиваем кубики через Reflection
+        SetPrivateField("dice1", dice1Obj.GetComponent<DiceRoll3D>());
+        SetPrivateField("dice2", dice2Obj.GetComponent<DiceRoll3D>());
+    }
 
-        // Создаем реальные объекты GameObject, чтобы SetActive работал
-        var diceObj1 = new GameObject();
-        var diceObj2 = new GameObject();
-
-        _mockDice1.SetupGet(d => d.gameObject).Returns(diceObj1);
-        _mockDice2.SetupGet(d => d.gameObject).Returns(diceObj2);
-
-        // Присваиваем кубики через рефлексию
-        typeof(DiceManager3D)
-            .GetField("dice1", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(_diceManager, _mockDice1.Object);
-
-        typeof(DiceManager3D)
-            .GetField("dice2", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(_diceManager, _mockDice2.Object);
+    private void SetPrivateField(string name, object value)
+    {
+        typeof(DiceManager3D).GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.SetValue(diceManager, value);
     }
 
     [TearDown]
     public void TearDown()
     {
-        GameObject.Destroy(_gameObject);
+        Object.DestroyImmediate(gameObject);
     }
 
     [UnityTest]
-    public IEnumerator ShowDice_ActivatesDiceAndRollsToResult()
+    public IEnumerator ShowDice_ActivatesDice_AndRollsToResult()
     {
-        // Действие
-        _diceManager.ShowDice(3, 5);
+        diceManager.ShowDice(3, 5);
+        yield return new WaitForSeconds(2f);
 
-        yield return null; // Ждем один кадр
+        var dice1Field = typeof(DiceManager3D).GetField("dice1", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var dice2Field = typeof(DiceManager3D).GetField("dice2", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-        // Проверяем, что кубики активны
-        _mockDice1.Verify(d => d.gameObject.SetActive(true), Times.Once);
-        _mockDice2.Verify(d => d.gameObject.SetActive(true), Times.Once);
+        var dice1 = dice1Field.GetValue(diceManager) as DiceRoll3D;
+        var dice2 = dice2Field.GetValue(diceManager) as DiceRoll3D;
 
-        // Проверяем, что вызван RollToResult с нужными числами
-        _mockDice1.Verify(d => d.RollToResult(3), Times.Once);
-        _mockDice2.Verify(d => d.RollToResult(5), Times.Once);
+        Assert.IsTrue(dice1.gameObject.activeSelf);
+        Assert.IsTrue(dice2.gameObject.activeSelf);
+
+        Assert.AreEqual(3, dice1.Result);
+        Assert.AreEqual(5, dice2.Result);
     }
+
+   
 }

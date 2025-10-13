@@ -6,13 +6,16 @@ public class PhotonChatService : MonoBehaviourPun, IChatService
 {
     private IEventBus eventBus;
     private IPhotonNetworkWrapper photonNetworkWrapper;
+    private IPhotonViewWrapper photonViewWrapper;
+
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IEventBus eventBus, IPhotonNetworkWrapper photonNetworkWrapper)
+    public void Construct(IEventBus eventBus, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
         this.eventBus = eventBus;
         this.photonNetworkWrapper = photonNetworkWrapper;
+        this.photonViewWrapper = photonViewWrapper;
     }
 
     #endregion LIFE_CYCLE
@@ -23,12 +26,13 @@ public class PhotonChatService : MonoBehaviourPun, IChatService
     {
         if (isChat)
         {
-            photonView.RPC(nameof(RPC_ReceiveMessage), RpcTarget.All, playerId, text);
+            photonViewWrapper.RPC(photonView, nameof(RPC_ReceiveMessage), RpcTarget.All, playerId, text);
         }
         else
         {
             if (!photonNetworkWrapper.IsMasterClient) return;
-            photonView.RPC(nameof(RPC_ReceiveMessage), RpcTarget.All, playerId, text);
+            photonViewWrapper.RPC(photonView, nameof(RPC_ReceiveMessage), RpcTarget.All, playerId, text);
+
         }
     }
 

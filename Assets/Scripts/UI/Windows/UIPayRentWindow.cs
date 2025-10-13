@@ -27,17 +27,22 @@ public class UIPayRentWindow : UIWindowBase, IPayRentWindow
 
     public void Show(int playerId, int cellIndex, float rent, bool canPay)
     {
-        payButtonText.text = $"Заплатите {rent:N0}";
-        cantPayRentText.text = $"Заплатите {rent:N0}";
+        payButtonText.text = $"Заплатите {rent.ToString("N0", CultureInfo.InvariantCulture)}";
+        cantPayRentText.text = $"Заплатите {rent.ToString("N0", CultureInfo.InvariantCulture)}";
 
         payRentButton.gameObject.SetActive(canPay);
         cantPayRentButton.gameObject.SetActive(!canPay);
 
-        windowAnimation.ShowWindow();
+        ShowWindow();
     }
 
-    public void Hide() => windowAnimation.HideWindow();
-    public void HardHide() => windowAnimation.HardHideWindow();
+    public void Hide() => HideWindow();
+    public void HardHide() => HardHideWindow();
+
+    public Button PayRentButton { get => payRentButton; set => payRentButton = value; }
+    public Button CantPayRentButton { get => cantPayRentButton; set => cantPayRentButton = value; }
+    public TextMeshProUGUI PayButtonText { get => payButtonText; set => payButtonText = value; }
+    public TextMeshProUGUI CantPayRentText { get => cantPayRentText; set => cantPayRentText = value; }
 
     #endregion PUBLIC_METHODS
 

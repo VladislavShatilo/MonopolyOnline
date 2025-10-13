@@ -41,6 +41,7 @@ public class AuctionPresenterTests
         // Assert
         mockEventBus.Verify(bus => bus.Subscribe<AuctionPromptBidEvent>(It.IsAny<Action<AuctionPromptBidEvent>>()), Times.Once);
         mockEventBus.Verify(bus => bus.Subscribe<AuctionEndEvent>(It.IsAny<Action<AuctionEndEvent>>()), Times.Once);
+
         mockAuctionWindow.Verify(window => window.SetPlayAction(It.IsAny<Action<int>>()), Times.Once);
         mockAuctionWindow.Verify(window => window.SetPassAction(It.IsAny<Action<int>>()), Times.Once);
     }
@@ -63,6 +64,7 @@ public class AuctionPresenterTests
     public void OnPlayClicked_ShouldCallPlayerBidRequest()
     { // Arrange
         int playerId = 1;
+        int playerId2 = 2;
 
         Action<int> playAction = null;
         mockAuctionWindow.Setup(w => w.SetPlayAction(It.IsAny<Action<int>>()))
@@ -75,6 +77,8 @@ public class AuctionPresenterTests
 
         // Assert
         mockPhotonAuctionManager.Verify(m => m.PlayerBidRequest(playerId), Times.Once);
+        mockPhotonAuctionManager.Verify(m => m.PlayerBidRequest(playerId2), Times.Never);
+
     }
 
     [Test]
@@ -82,6 +86,7 @@ public class AuctionPresenterTests
     {
         // Arrange
         int playerId = 1;
+        int playerId2 = 2;
 
         Action<int> passAction = null;
         mockAuctionWindow.Setup(w => w.SetPassAction(It.IsAny<Action<int>>()))
@@ -94,6 +99,7 @@ public class AuctionPresenterTests
 
         // Assert
         mockPhotonAuctionManager.Verify(m => m.PlayerPassRequest(playerId), Times.Once);
+        mockPhotonAuctionManager.Verify(m => m.PlayerPassRequest(playerId2), Times.Never);
     }
 
     [Test]
@@ -146,5 +152,59 @@ public class AuctionPresenterTests
 
         // Assert
         mockAuctionWindow.Verify(window => window.Hide(), Times.Once);
+    }
+    [Test]
+    public void OnAuctionPromptBid_ShouldThrow_WhenPlayerIsNull()
+    {
+        // Arrange
+        int localPlayerId = 1;
+        int companyId = 2;
+        int bid = 100;
+
+        var auctionEvent = new AuctionPromptBidEvent(localPlayerId, bid, companyId);
+     
+        var company = new Company(companyId, new CompanyData());
+
+        mockLocalPlayerService.Setup(s => s.GetLocalPlayerId()).Returns(localPlayerId);
+        mockPlayerRepository.Setup(r => r.GetPlayerById(localPlayerId)).Returns((PlayerData)null);
+        mockCompanyRepository.Setup(r => r.GetCompanyById(companyId)).Returns(company);
+
+        Action<AuctionPromptBidEvent> capturedHandler = null;
+        mockEventBus.Setup(bus => bus.Subscribe(It.IsAny<Action<AuctionPromptBidEvent>>()))
+                    .Callback<Action<AuctionPromptBidEvent>>(h => capturedHandler = h);
+
+        auctionPresenter.Initialize();
+
+        // Act
+        TestDelegate act = () => capturedHandler?.Invoke(auctionEvent);
+
+        Assert.Throws<InvalidOperationException>(act);
+    }
+    [Test]
+    public void OnAuctionPromptBid_ShouldThrow_WhenCompanyIsNull()
+    {
+        // Arrange
+        int localPlayerId = 1;
+        int companyId = 2;
+        int bid = 100;
+
+        var auctionEvent = new AuctionPromptBidEvent(localPlayerId, bid, companyId);
+        var player = new PlayerData("player1", 500, localPlayerId, null);
+      
+        mockLocalPlayerService.Setup(s => s.GetLocalPlayerId()).Returns(localPlayerId);
+        mockPlayerRepository.Setup(r => r.GetPlayerById(localPlayerId)).Returns(player);
+        mockCompanyRepository.Setup(r => r.GetCompanyById(companyId)).Returns((Company)null);
+
+        Action<AuctionPromptBidEvent> capturedHandler = null;
+        mockEventBus.Setup(bus => bus.Subscribe(It.IsAny<Action<AuctionPromptBidEvent>>()))
+                    .Callback<Action<AuctionPromptBidEvent>>(h => capturedHandler = h);
+
+        auctionPresenter.Initialize();
+
+        // Act
+
+        TestDelegate act = () => capturedHandler?.Invoke(auctionEvent);
+
+        Assert.Throws<InvalidOperationException>(act);
     }
 }

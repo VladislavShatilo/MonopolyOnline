@@ -60,17 +60,24 @@ public class UIAuctionWindow : UIWindowBase, IAuctionWindow
 
     public void SetPassAction(Action<int> onPass) => this.onPass = onPass;
 
+    public Button PlayButton { get => playButton; set => playButton = value; }
+    public Button CantPlayButton { get => cantPlayButton; set => cantPlayButton = value; }
+    public Button CancelButton { get => cancelButton; set => cancelButton = value; }
+    public TextMeshProUGUI PlayPriceText { get => playPriceText; set => playPriceText = value; }
+    public TextMeshProUGUI CantPriceText { get => cantPriceText; set => cantPriceText = value; }
+    public TextMeshProUGUI HeaderText { get => headerText; set => headerText = value; }
+
     #endregion PUBLIC_METHODS
 
     #region CALLBACKS
 
-    private void HandlePlayClicked()
+    protected void HandlePlayClicked()
     {
         HideWindow();
         onPlay?.Invoke(playerId);
     }
 
-    private void HandlePassClicked()
+    protected void HandlePassClicked()
     {
         HideWindow();
         onPass?.Invoke(playerId);

@@ -12,16 +12,19 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
     private IBoardService boardService;
     private IEventBus eventBus;
     private IPhotonNetworkWrapper photonNetworkWrapper;
+    private IPhotonViewWrapper photonViewWrapper;
+
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IPlayerMoveUseCase playerMoveUseCase, IEventBus eventBus, IPlayerRepository playerRepository, IBoardService boardService, IPhotonNetworkWrapper photonNetworkWrapper)
+    public void Construct(IPlayerMoveUseCase playerMoveUseCase, IEventBus eventBus, IPlayerRepository playerRepository, IBoardService boardService, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
         this.playerMoveUseCase = playerMoveUseCase;
         this.playerRepository = playerRepository;
         this.eventBus = eventBus;
         this.boardService = boardService;
         this.photonNetworkWrapper = photonNetworkWrapper;
+        this.photonViewWrapper = photonViewWrapper;
     }
 
     private void OnEnable()
@@ -41,8 +44,7 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
     public void RequestTeleport(int playerId)
     {
         if (!photonNetworkWrapper.IsMasterClient) return;
-
-        photonView.RPC(nameof(RPC_TeleportPlayer), RpcTarget.MasterClient, playerId);
+        photonViewWrapper.RPC(photonView, nameof(RPC_TeleportPlayer), RpcTarget.MasterClient, playerId);
     }
 
     #endregion PUBLIC_METHODS
@@ -69,7 +71,8 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
             randomIndex = UnityEngine.Random.Range(0, boardService.CellsCount + 1);
         } while (randomIndex == player.CurrentCellId);
 
-        photonView.RPC(nameof(RPC_TeleportPlayerBroadcast), RpcTarget.All, playerId, randomIndex, player.CurrentCellId);
+        photonViewWrapper.RPC(photonView, nameof(RPC_TeleportPlayerBroadcast), RpcTarget.All, playerId, randomIndex, player.CurrentCellId);
+
     }
 
     [PunRPC]
@@ -84,7 +87,8 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
 
     private void RequestMove(OnPlayerMoveEvent e)
     {
-        photonView.RPC(nameof(RPC_MovePlayer), RpcTarget.All, e.PlayerId, e.Steps, e.Forward);
+        photonViewWrapper.RPC(photonView, nameof(RPC_MovePlayer), RpcTarget.All, e.PlayerId, e.Steps, e.Forward);
+
     }
 
     #endregion CALLBACKS

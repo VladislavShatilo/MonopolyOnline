@@ -16,15 +16,15 @@ public class WindowAnimation : MonoBehaviour
         get => windowRectTransform;
         set => windowRectTransform = value;
     }
-    public void ShowWindow()
+    public virtual void ShowWindow()
     {
         windowRectTransform.DOAnchorPos(Vector2.zero, animationDuration);
     }
-    public void HideWindow()
+    public virtual void HideWindow()
     {
         windowRectTransform.DOAnchorPos(new Vector2(0, animationOffset), animationDuration);
     }
-    public void HardHideWindow()
+    public virtual void HardHideWindow()
     {
         windowRectTransform.anchoredPosition = new Vector2(0, animationOffset);
     }

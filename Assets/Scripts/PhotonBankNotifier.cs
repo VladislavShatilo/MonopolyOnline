@@ -8,15 +8,18 @@ using Zenject;
 public class PhotonBankNotifier : MonoBehaviourPun, IBankNotifier
 {
     private IPlayerRepository playerRepository;
+    private IPhotonViewWrapper photonViewWrapper;
+
     private IEventBus eventBus;
 
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IPlayerRepository playerRepository, IEventBus eventBus)
+    public void Construct(IPlayerRepository playerRepository, IEventBus eventBus, IPhotonViewWrapper photonViewWrapper)
     {
         this.playerRepository = playerRepository;
         this.eventBus = eventBus;
+        this.photonViewWrapper = photonViewWrapper;
     }
 
     #endregion LIFE_CYCLE
@@ -25,7 +28,7 @@ public class PhotonBankNotifier : MonoBehaviourPun, IBankNotifier
 
     public void NotifyBalanceChanged(PlayerData player)
     {
-        photonView.RPC(nameof(RPC_UpdateMoney), RpcTarget.All, player.Id, player.Money);
+        photonViewWrapper.RPC(photonView, nameof(RPC_UpdateMoney), RpcTarget.All, player.Id, player.Money);
     }
 
     #endregion PUBLIC_METHODS
@@ -36,7 +39,7 @@ public class PhotonBankNotifier : MonoBehaviourPun, IBankNotifier
     private void RPC_UpdateMoney(int playerId, int money)
     {
         PlayerData player = playerRepository.GetPlayerById(playerId);
-        player.Money = money; // обновляем локально
+        player.Money = money;
         eventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
     }
 

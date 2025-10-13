@@ -10,16 +10,18 @@ public class PhotonTurnSynchronizer : MonoBehaviourPun,IPhotonTurnSynchronizer
     private IEventBus eventBus;
     private IMortgageService mortgageService;
     private IPhotonNetworkWrapper photonNetworkWrapper;
+    private IPhotonViewWrapper photonViewWrapper;
 
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IPlayerRepository playerRepository, IEventBus eventBus, IMortgageService mortgageService, IPhotonNetworkWrapper photonNetworkWrapper)
+    public void Construct(IPlayerRepository playerRepository, IEventBus eventBus, IMortgageService mortgageService, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
         this.playerRepository = playerRepository;
         this.eventBus = eventBus;
         this.mortgageService = mortgageService;
         this.photonNetworkWrapper = photonNetworkWrapper;
+        this.photonViewWrapper = photonViewWrapper;
     }
 
     #endregion LIFE_CYCLE
@@ -28,8 +30,7 @@ public class PhotonTurnSynchronizer : MonoBehaviourPun,IPhotonTurnSynchronizer
 
     public void RequestStartTurn(int playerId, bool isNext)
     {
-
-        photonView.RPC(nameof(RPC_StartTurn), RpcTarget.All, playerId, isNext);
+        photonViewWrapper.RPC(photonView, nameof(RPC_StartTurn), RpcTarget.All, playerId, isNext);
     }
 
     #endregion PUBLIC_METHODS

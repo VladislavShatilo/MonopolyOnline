@@ -30,12 +30,13 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
     private IPhotonJailManager photonJailManager;
     private IChatService chatService;
     private IPhotonNetworkWrapper photonNetworkWrapper;
+    private IPhotonViewWrapper photonViewWrapper;
 
     #region LIFE_CYCLE
 
     [Inject]
     public void Construct(IChanceService chanceService, IPlayerRepository playerRepository, IBankService bankService, IPhotonTurnManager photonTurnManager,
-       IPhotonPlayerMoveManager photonPlayerMove, IPhotonJailManager photonJailManager, IChatService chatService, IPhotonNetworkWrapper photonNetworkWrapper)
+       IPhotonPlayerMoveManager photonPlayerMove, IPhotonJailManager photonJailManager, IChatService chatService, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
         this.chanceService = chanceService;
         this.playerRepository = playerRepository;
@@ -45,6 +46,7 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
         this.photonJailManager = photonJailManager;
         this.chatService = chatService;
         this.photonNetworkWrapper = photonNetworkWrapper;
+        this.photonViewWrapper = photonViewWrapper;
 
     }
 
@@ -57,7 +59,8 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
         if (!photonNetworkWrapper.IsMasterClient) return;
 
         ChanceBuff buff = chanceService.GetRandomBuff();
-        photonView.RPC(nameof(RPC_ApplyBuff), RpcTarget.All, playerId, (int)buff.Type, buff.MinAmount, buff.MaxAmount);
+        photonViewWrapper.RPC(photonView, nameof(RPC_ApplyBuff), RpcTarget.All, playerId, (int)buff.Type, buff.MinAmount, buff.MaxAmount);
+
         if (buff.Type != BuffType.Jail && buff.Type != BuffType.Teleport)
         {
             photonTurnManager.RequestEndTurn();

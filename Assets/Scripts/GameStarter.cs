@@ -11,16 +11,18 @@ public class GameStarter : MonoBehaviourPunCallbacks
     private IBoardService boardService;
     private IEventBus eventBus;
     private IPhotonNetworkWrapper networkWrapper;
+    private IPhotonViewWrapper photonViewWrapper;
 
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IPhotonTurnManager photonTurnManager, IBoardService boardService, IEventBus eventBus, IPhotonNetworkWrapper networkWrapper)
+    public void Construct(IPhotonTurnManager photonTurnManager, IBoardService boardService, IEventBus eventBus, IPhotonNetworkWrapper networkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
         this.photonTurnManager = photonTurnManager;
         this.boardService = boardService;
         this.eventBus = eventBus;
         this.networkWrapper = networkWrapper;
+        this.photonViewWrapper = photonViewWrapper;
     }
 
     public void Start()
@@ -69,7 +71,7 @@ public class GameStarter : MonoBehaviourPunCallbacks
             }
             if (playerSkin != null)
             {
-                player.GetComponent<PlayerSkin>().Initialize(eventBus);
+                player.GetComponent<PlayerSkin>().Initialize(eventBus, photonViewWrapper);
             }
         }
         yield return new WaitForSeconds(0.5f);
