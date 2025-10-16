@@ -1,8 +1,11 @@
-using NUnit.Framework;
-using UnityEngine;
-using TMPro;
 using Moq;
+using NUnit.Framework;
+using System;
 using System.Globalization;
+using System.Reflection;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 [TestFixture]
 public class UIDiceStatsTests
@@ -25,38 +28,47 @@ public class UIDiceStatsTests
         go = new GameObject();
         stats = go.AddComponent<UIDiceStats>();
 
-        // Создаем UI поля
+        // --- Top Bar ---
+        var topBarImage1 = new GameObject().AddComponent<Image>();
+        var topBarImage2 = new GameObject().AddComponent<Image>();
+        typeof(UIBaseCompanyStats).GetField("topBarImage1", BindingFlags.NonPublic | BindingFlags.Instance)
+            .SetValue(stats, topBarImage1);
+        typeof(UIBaseCompanyStats).GetField("topBarImage2", BindingFlags.NonPublic | BindingFlags.Instance)
+            .SetValue(stats, topBarImage2);
+
+        // --- Text Fields ---
         companyName = new GameObject().AddComponent<TextMeshProUGUI>();
         groupName = new GameObject().AddComponent<TextMeshProUGUI>();
         cellPriceText = new GameObject().AddComponent<TextMeshProUGUI>();
         pledgePriceText = new GameObject().AddComponent<TextMeshProUGUI>();
         buyoutPriceText = new GameObject().AddComponent<TextMeshProUGUI>();
 
+        typeof(UIBaseCompanyStats).GetField("companyNameText", BindingFlags.NonPublic | BindingFlags.Instance)
+            .SetValue(stats, companyName);
+        typeof(UIBaseCompanyStats).GetField("groupNameText", BindingFlags.NonPublic | BindingFlags.Instance)
+            .SetValue(stats, groupName);
+        typeof(UIBaseCompanyStats).GetField("cellPriceText", BindingFlags.NonPublic | BindingFlags.Instance)
+            .SetValue(stats, cellPriceText);
+        typeof(UIBaseCompanyStats).GetField("pledgePriceText", BindingFlags.NonPublic | BindingFlags.Instance)
+            .SetValue(stats, pledgePriceText);
+        typeof(UIBaseCompanyStats).GetField("buyoutPriceText", BindingFlags.NonPublic | BindingFlags.Instance)
+            .SetValue(stats, buyoutPriceText);
+
+        // --- Dice Fields ---
         diceFieldMultiTexts = new TextMeshProUGUI[3];
         for (int i = 0; i < diceFieldMultiTexts.Length; i++)
             diceFieldMultiTexts[i] = new GameObject().AddComponent<TextMeshProUGUI>();
 
-        // Присваиваем через Reflection приватные поля базового класса
-        typeof(UIBaseCompanyStats).GetField("companyNameText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(stats, companyName);
-        typeof(UIBaseCompanyStats).GetField("groupNameText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(stats, groupName);
-        typeof(UIBaseCompanyStats).GetField("cellPriceText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(stats, cellPriceText);
-        typeof(UIBaseCompanyStats).GetField("pledgePriceText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(stats, pledgePriceText);
-        typeof(UIBaseCompanyStats).GetField("buyoutPriceText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(stats, buyoutPriceText);
-
-        // Присваиваем массив diceFieldMultiTexts
-        typeof(UIDiceStats).GetField("diceFieldMultiTexts", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+        typeof(UIDiceStats).GetField("diceFieldMultiTexts", BindingFlags.NonPublic | BindingFlags.Instance)
             .SetValue(stats, diceFieldMultiTexts);
 
-        // Мок для цветов
+        // --- Mock IGroupColors ---
         groupColorsMock = new Mock<IGroupColors>();
         groupColorsMock.Setup(g => g.Colors).Returns(new Color[] { Color.red, Color.green, Color.blue });
-        stats.Constuct(groupColorsMock.Object);
+
+        stats.Constuct(groupColorsMock.Object); // теперь не упадет
     }
+
 
     [TearDown]
     public void TearDown()
@@ -71,6 +83,10 @@ public class UIDiceStatsTests
             GameObject.DestroyImmediate(t.gameObject);
     }
 
+    // ============================
+    // SetDiceFieldMultiTexts tests
+    // ============================
+
     [Test]
     public void SetDiceFieldMultiTexts_ShouldUpdateTexts()
     {
@@ -82,6 +98,41 @@ public class UIDiceStatsTests
             Assert.AreEqual(values[i].ToString("N0", CultureInfo.InvariantCulture), diceFieldMultiTexts[i].text);
         }
     }
+
+    [Test]
+    public void SetDiceFieldMultiTexts_ShouldThrow_WhenArrayIsNull()
+    {
+        typeof(UIDiceStats).GetField("diceFieldMultiTexts", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(stats, null);
+
+        Assert.Throws<ArgumentNullException>(() => stats.SetDiceFieldMultiTexts(new int[] { 1, 2, 3 }));
+    }
+
+    [Test]
+    public void SetDiceFieldMultiTexts_ShouldHandleValuesShorterThanUIArray()
+    {
+        int[] values = { 5, 10 }; // меньше чем diceFieldMultiTexts.Length = 3
+        stats.SetDiceFieldMultiTexts(values);
+
+        Assert.AreEqual("5", diceFieldMultiTexts[0].text);
+        Assert.AreEqual("10", diceFieldMultiTexts[1].text);
+    }
+
+    [Test]
+    public void SetDiceFieldMultiTexts_ShouldHandleValuesLongerThanUIArray()
+    {
+        int[] values = { 1, 2, 3, 4, 5 }; // длиннее массива UI
+        stats.SetDiceFieldMultiTexts(values);
+
+        for (int i = 0; i < diceFieldMultiTexts.Length; i++)
+        {
+            Assert.AreEqual(values[i].ToString("N0", CultureInfo.InvariantCulture), diceFieldMultiTexts[i].text);
+        }
+    }
+
+    // ============================
+    // SetData tests
+    // ============================
 
     [Test]
     public void SetData_ShouldUpdateAllFields()
@@ -107,5 +158,11 @@ public class UIDiceStatsTests
 
         for (int i = 0; i < data.rentMultiplier.Length; i++)
             Assert.AreEqual(data.rentMultiplier[i].ToString("N0", CultureInfo.InvariantCulture), diceFieldMultiTexts[i].text);
+    }
+
+    [Test]
+    public void SetData_ShouldThrow_WhenDataIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => stats.SetData(null));
     }
 }

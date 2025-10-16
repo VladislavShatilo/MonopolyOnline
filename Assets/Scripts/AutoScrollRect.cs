@@ -16,14 +16,23 @@ public class AutoScrollRect : MonoBehaviour
 
     private void Start()
     {
-        scrollRect = GetComponent<ScrollRect>() ?? throw new ArgumentNullException(nameof(scrollRect));
-        content = scrollRect.content ?? throw new ArgumentNullException(nameof(content));
+        scrollRect = GetComponent<ScrollRect>();
+        if (scrollRect == null)
+        {
+            throw new ArgumentNullException(nameof(scrollRect));
+        }
+
+        content = scrollRect.content;
+        if (content == null)
+        {
+            throw new ArgumentNullException(nameof(content));
+        }
     }
 
     private void Update()
     {
         int childCount = content.childCount;
-        
+        if (gridLayoutGroup == null) return;
         int columns = gridLayoutGroup.constraintCount;
         int rows = Mathf.CeilToInt((float)childCount / columns);
 

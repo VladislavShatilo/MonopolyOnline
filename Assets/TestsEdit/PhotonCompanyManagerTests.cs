@@ -1,6 +1,7 @@
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
 using Photon.Pun;
+using System;
 using UnityEngine;
 
 public class PhotonCompanyManagerTests
@@ -67,5 +68,33 @@ public class PhotonCompanyManagerTests
         method.Invoke(companyManager, new object[] { 4, 2 });
 
         companyServiceMock.Verify(c => c.TryPayRent(4, 2), Times.Once);
+    }
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenCompanyServiceIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            companyManager.Construct(null, viewWrapperMock.Object)
+        );
+    }
+
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenPhotonViewWrapperIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            companyManager.Construct(companyServiceMock.Object, null)
+        );
+    }
+
+    [Test]
+    public void Construct_ShouldThrowNullReferenceException_WhenPhotonViewIsMissing()
+    {
+        GameObject goWithoutView = new GameObject();
+        var managerWithoutView = goWithoutView.AddComponent<PhotonCompanyManager>();
+
+        Assert.Throws<NullReferenceException>(() =>
+            managerWithoutView.Construct(companyServiceMock.Object, viewWrapperMock.Object)
+        );
+
+        GameObject.DestroyImmediate(goWithoutView);
     }
 }

@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,9 +16,11 @@ public class PhotonTurnManager : MonoBehaviourPun, IPhotonTurnManager
     [Inject]
     public void Construct(ITurnService turnService, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
-        this.turnService = turnService;
-        this.photonNetworkWrapper = photonNetworkWrapper;
-        this.photonViewWrapper = photonViewWrapper;
+        this.turnService = turnService ?? throw new ArgumentNullException(nameof(turnService));
+        this.photonNetworkWrapper = photonNetworkWrapper ?? throw new ArgumentNullException(nameof(photonNetworkWrapper));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
+        if (photonView == null) throw new NullReferenceException(nameof(photonView));
+
     }
 
     #endregion LIFE_CYCLE

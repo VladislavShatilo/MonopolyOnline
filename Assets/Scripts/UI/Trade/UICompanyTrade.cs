@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -21,17 +22,29 @@ public class UICompanyTrade : MonoBehaviour
     [Inject]
     public void Construct(ITradeService tradeService)
     {
-        this.tradeService = tradeService;
+        this.tradeService = tradeService ?? throw new ArgumentNullException(nameof(tradeService));
+        if (companyName == null)
+            throw new ArgumentNullException(nameof(companyName));
+        if (companyPrice == null)
+            throw new ArgumentNullException(nameof(companyPrice));
+        if (removeCompanyButton == null)
+            throw new ArgumentNullException(nameof(removeCompanyButton));
     }
 
     private void OnEnable()
     {
-        removeCompanyButton.onClick.AddListener(OnRemoveClicked);
+        if (removeCompanyButton != null)
+        {
+            removeCompanyButton.onClick.RemoveListener(OnRemoveClicked); 
+            removeCompanyButton.onClick.AddListener(OnRemoveClicked);
+        }
     }
 
     private void OnDisable()
     {
-        removeCompanyButton.onClick.RemoveListener(OnRemoveClicked);
+
+        if (removeCompanyButton != null)
+            removeCompanyButton.onClick.RemoveListener(OnRemoveClicked);
     }
 
     #endregion LIFE_CYCLE

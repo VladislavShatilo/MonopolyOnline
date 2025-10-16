@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
@@ -15,10 +17,10 @@ public class MortgageService : IMortgageService
     [Inject]
     public void Construct(ICompanyRepository companyRepository, IBankService bankService, IEventBus eventBus, GameSettings settings)
     {
-        this.companyRepository = companyRepository;
-        this.bankService = bankService;
-        this.eventBus = eventBus;
-        this.settings = settings;
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
+        this.bankService = bankService ?? throw new ArgumentNullException(nameof(bankService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
     }
 
     #endregion LIFE_CYCLE
@@ -27,8 +29,8 @@ public class MortgageService : IMortgageService
 
     public void MortgageCompany(int companyId, int playerId)
     {
-        var company = companyRepository.GetCompanyById(companyId);
-        if (company == null || company.OwnerId != playerId || company.IsMortgaged) return;
+        var company = companyRepository.GetCompanyById(companyId) ?? throw new InvalidOperationException(nameof(MortgageCompany));
+        if (company.OwnerId != playerId || company.IsMortgaged) return;
 
         company.IsMortgaged = true;
         company.MortgageTurnsLeft = settings.mortgageTurns;
@@ -39,8 +41,8 @@ public class MortgageService : IMortgageService
 
     public void BuyoutCompany(int companyId, int playerId)
     {
-        var company = companyRepository.GetCompanyById(companyId);
-        if (company == null || company.OwnerId != playerId || !company.IsMortgaged) return;
+        var company = companyRepository.GetCompanyById(companyId) ?? throw new InvalidOperationException(nameof(BuyoutCompany));
+        if ( company.OwnerId != playerId || !company.IsMortgaged) return;
 
         company.IsMortgaged = false;
         company.MortgageTurnsLeft = 0;
@@ -51,9 +53,10 @@ public class MortgageService : IMortgageService
 
     public void TickTurn(int playerId)
     {
-        var companies = companyRepository.GetByOwner(playerId);
+        var companies = companyRepository.GetByOwner(playerId) ?? throw new InvalidOperationException(nameof(TickTurn));
         foreach (var company in companies)
         {
+            if (company == null) continue;
             if (!company.IsMortgaged) continue;
             company.MortgageTurnsLeft--;
             eventBus.Publish(new CompanyTickUIEvent(company.Id, company.MortgageTurnsLeft));

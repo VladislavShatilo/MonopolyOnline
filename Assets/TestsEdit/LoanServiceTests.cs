@@ -109,4 +109,99 @@ public class LoanServiceTests
         loanService.Dispose();
         eventBusMock.Verify(e => e.Unsubscribe<OnStartTurnLoanEvent>(It.IsAny<Action<OnStartTurnLoanEvent>>()), Times.Once);
     }
+    [Test]
+    public void Construct_NullDependencies_Throws()
+    {
+        // loanService = новый экземпляр для каждого случая
+        Assert.Throws<ArgumentNullException>(() =>
+            new LoanService().Construct(null,
+                photonLoanManagerMock.Object,
+                bankServiceMock.Object,
+                eventBusMock.Object,
+                gameSettings,
+                photonWrapperMock.Object));
+
+        Assert.Throws<ArgumentNullException>(() =>
+            new LoanService().Construct(
+                playerRepoMock.Object,
+                null,
+                bankServiceMock.Object,
+                eventBusMock.Object,
+                gameSettings,
+                photonWrapperMock.Object));
+
+        Assert.Throws<ArgumentNullException>(() =>
+            new LoanService().Construct(
+                playerRepoMock.Object,
+                photonLoanManagerMock.Object,
+                null,
+                eventBusMock.Object,
+                gameSettings,
+                photonWrapperMock.Object));
+
+        Assert.Throws<ArgumentNullException>(() =>
+            new LoanService().Construct(
+                playerRepoMock.Object,
+                photonLoanManagerMock.Object,
+                bankServiceMock.Object,
+                null,
+                gameSettings,
+                photonWrapperMock.Object));
+
+        Assert.Throws<ArgumentNullException>(() =>
+            new LoanService().Construct(
+                playerRepoMock.Object,
+                photonLoanManagerMock.Object,
+                bankServiceMock.Object,
+                eventBusMock.Object,
+                null,
+                photonWrapperMock.Object));
+
+        Assert.Throws<ArgumentNullException>(() =>
+            new LoanService().Construct(
+                playerRepoMock.Object,
+                photonLoanManagerMock.Object,
+                bankServiceMock.Object,
+                eventBusMock.Object,
+                gameSettings,
+                null));
+    }
+
+
+    [Test]
+    public void TakeLoanConfirmed_NotMaster_DoesNotCallBank()
+    {
+        photonWrapperMock.Setup(p => p.IsMasterClient).Returns(false);
+        loanService.TakeLoanConfirmed(1);
+        bankServiceMock.Verify(b => b.AddMoney(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+    }
+
+    [Test]
+    public void PayLoanConfirmed_NotMaster_DoesNotCallBank()
+    {
+        photonWrapperMock.Setup(p => p.IsMasterClient).Returns(false);
+        player.HasLoan = true;
+        player.LoanTurnsLeft = 1;
+        loanService.PayLoanConfirmed(1);
+        bankServiceMock.Verify(b => b.RemoveMoney(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+    }
+
+    [Test]
+    public void TakeLoanConfirmed_PlayerNotFound_Throws()
+    {
+        playerRepoMock.Setup(r => r.GetPlayerById(It.IsAny<int>())).Returns((PlayerData)null);
+        Assert.Throws<InvalidOperationException>(() => loanService.TakeLoanConfirmed(1));
+    }
+
+    [Test]
+    public void OnPlayerTurnStart_PlayerHasNoLoan_DoesNothing()
+    {
+        player.HasLoan = false;
+        var method = typeof(LoanService).GetMethod("OnPlayerTurnStart", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method.Invoke(loanService, new object[] { new OnStartTurnLoanEvent(1) });
+        // Проверяем, что события не публикуются
+        eventBusMock.Verify(e => e.Publish(It.IsAny<OnTakeLoanEvent>()), Times.Never);
+        photonLoanManagerMock.Verify(p => p.ShowLoanWindow(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+    }
+
 }

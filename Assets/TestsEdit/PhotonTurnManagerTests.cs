@@ -1,7 +1,8 @@
-using NUnit.Framework;
 using Moq;
-using UnityEngine;
+using NUnit.Framework;
 using Photon.Pun;
+using System;
+using UnityEngine;
 
 [TestFixture]
 public class PhotonTurnManagerTests
@@ -21,6 +22,7 @@ public class PhotonTurnManagerTests
         turnServiceMock = new Mock<ITurnService>();
         photonNetworkMock = new Mock<IPhotonNetworkWrapper>();
         photonViewWrapperMock = new Mock<IPhotonViewWrapper>();
+        var photonView = go.AddComponent<PhotonView>(); // <--- вот это
 
         manager.Construct(turnServiceMock.Object, photonNetworkMock.Object, photonViewWrapperMock.Object);
     }
@@ -28,7 +30,7 @@ public class PhotonTurnManagerTests
     [TearDown]
     public void TearDown()
     {
-        Object.DestroyImmediate(go);
+        UnityEngine.Object.DestroyImmediate(go);
     }
 
     [Test]
@@ -91,5 +93,42 @@ public class PhotonTurnManagerTests
         method.Invoke(manager, new object[] { playerId });
 
         turnServiceMock.Verify(t => t.RegisterDouble(playerId), Times.Once);
+    }
+    [Test]
+    public void RPC_RequestEndTurn_ShouldNotCallEndTurn_WhenNotMasterClient()
+    {
+        photonNetworkMock.Setup(p => p.IsMasterClient).Returns(false);
+
+        var method = manager.GetType().GetMethod("RPC_RequestEndTurn",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method.Invoke(manager, null);
+
+        turnServiceMock.Verify(t => t.EndTurn(), Times.Never);
+    }
+
+    [Test]
+    public void RPC_RegisterDouble_ShouldNotCallRegisterDouble_WhenNotMasterClient()
+    {
+        photonNetworkMock.Setup(p => p.IsMasterClient).Returns(false);
+        int playerId = 42;
+
+        var method = manager.GetType().GetMethod("RPC_RegisterDouble",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method.Invoke(manager, new object[] { playerId });
+
+        turnServiceMock.Verify(t => t.RegisterDouble(It.IsAny<int>()), Times.Never);
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenPhotonViewMissing()
+    {
+        UnityEngine.Object.DestroyImmediate(go.GetComponent<PhotonView>());
+
+        var ex = Assert.Throws<NullReferenceException>(() =>
+        {
+            manager.Construct(turnServiceMock.Object, photonNetworkMock.Object, photonViewWrapperMock.Object);
+        });
+
+        Assert.That(ex.Message, Is.EqualTo("photonView"));
     }
 }

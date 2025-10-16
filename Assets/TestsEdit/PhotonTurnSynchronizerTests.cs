@@ -1,7 +1,8 @@
-using NUnit.Framework;
 using Moq;
-using UnityEngine;
+using NUnit.Framework;
 using Photon.Pun;
+using System.Reflection;
+using UnityEngine;
 
 [TestFixture]
 public class PhotonTurnSynchronizerTests
@@ -25,6 +26,7 @@ public class PhotonTurnSynchronizerTests
         mortgageServiceMock = new Mock<IMortgageService>();
         photonNetworkMock = new Mock<IPhotonNetworkWrapper>();
         photonViewWrapperMock = new Mock<IPhotonViewWrapper>();
+        var photonView = go.AddComponent<PhotonView>(); // <--- вот это
 
         manager.Construct(playerRepoMock.Object, eventBusMock.Object, mortgageServiceMock.Object,
             photonNetworkMock.Object, photonViewWrapperMock.Object);
@@ -105,5 +107,40 @@ public class PhotonTurnSynchronizerTests
         method.Invoke(manager, new object[] { 4, false });
 
         mortgageServiceMock.Verify(m => m.TickTurn(4), Times.Once);
+    }
+    [Test]
+    public void RPC_StartTurn_ShouldThrow_WhenPlayerNotFound()
+    {
+        playerRepoMock.Setup(r => r.GetPlayerById(It.IsAny<int>())).Returns((PlayerData)null);
+
+        var method = manager.GetType().GetMethod("RPC_StartTurn", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        Assert.Throws<TargetInvocationException>(() => method.Invoke(manager, new object[] { 999, false }),
+            "Должно выбросить NullReferenceException внутри RPC_StartTurn");
+    }
+
+    [Test]
+    public void RPC_StartTurn_ShouldNotPublishLoanEvent_WhenIsNextFalse()
+    {
+        var player = new PlayerData("p1", 500, 5, null) { IsInJail = false, HasLoan = true };
+        playerRepoMock.Setup(r => r.GetPlayerById(5)).Returns(player);
+
+        var method = manager.GetType().GetMethod("RPC_StartTurn", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method.Invoke(manager, new object[] { 5, false });
+
+        eventBusMock.Verify(e => e.Publish(It.IsAny<OnStartTurnLoanEvent>()), Times.Never);
+    }
+
+    [Test]
+    public void RPC_StartTurn_ShouldNotCallTickTurn_WhenNotMasterClient()
+    {
+        var player = new PlayerData("p1", 500, 6, null) { IsInJail = false, HasLoan = false };
+        playerRepoMock.Setup(r => r.GetPlayerById(6)).Returns(player);
+        photonNetworkMock.Setup(p => p.IsMasterClient).Returns(false);
+
+        var method = manager.GetType().GetMethod("RPC_StartTurn", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method.Invoke(manager, new object[] { 6, false });
+
+        mortgageServiceMock.Verify(m => m.TickTurn(It.IsAny<int>()), Times.Never);
     }
 }

@@ -1,8 +1,10 @@
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
 using Photon.Pun;
-using UnityEngine;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
+using UnityEngine;
 
 [TestFixture]
 public class PhotonTradeManagerTests
@@ -24,6 +26,7 @@ public class PhotonTradeManagerTests
         companyRepoMock = new Mock<ICompanyRepository>();
         playerRepoMock = new Mock<IPlayerRepository>();
         photonViewWrapperMock = new Mock<IPhotonViewWrapper>();
+        var photonView = go.AddComponent<PhotonView>(); // <--- вот это
 
         manager.Construct(tradeServiceMock.Object, companyRepoMock.Object, playerRepoMock.Object, photonViewWrapperMock.Object);
     }
@@ -31,7 +34,7 @@ public class PhotonTradeManagerTests
     [TearDown]
     public void TearDown()
     {
-        Object.DestroyImmediate(go);
+        UnityEngine.Object.DestroyImmediate(go);
     }
 
     [Test]
@@ -128,5 +131,37 @@ public class PhotonTradeManagerTests
             o.FromMoney == 100 &&
             o.ToMoney == 200
         )), Times.Once);
+    }
+    [Test]
+    public void DeserializeCompanies_ShouldThrow_WhenCompanyNotFound()
+    {
+        var method = manager.GetType().GetMethod("DeserializeCompanies", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        string json = "{\"Ids\":[999]}"; // несуществующий ID
+        companyRepoMock.Setup(r => r.GetCompanyById(999)).Returns((Company)null);
+
+        Assert.Throws<TargetInvocationException>(() => method.Invoke(manager, new object[] { json }));
+    }
+
+    [Test]
+    public void SendTradeResult_ShouldCallRPC_CompleteTrade()
+    {
+        manager.SendTradeResult(true);
+
+        photonViewWrapperMock.Verify(p => p.RPC(manager.photonView,
+            "RPC_CompleteTrade",
+            RpcTarget.All,
+            true), Times.Once);
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenPhotonViewMissing()
+    {
+        var go2 = new GameObject();
+        var manager2 = go2.AddComponent<PhotonTradeManager>();
+        var ex = Assert.Throws<NullReferenceException>(() =>
+            manager2.Construct(tradeServiceMock.Object, companyRepoMock.Object, playerRepoMock.Object, photonViewWrapperMock.Object)
+        );
+        Assert.That(ex.Message.Contains("photonView"));
+        UnityEngine.Object.DestroyImmediate(go2);
     }
 }

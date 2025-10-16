@@ -22,8 +22,9 @@ public class PlayerMove : MonoBehaviourPun
 
     public void Initialize(IBoardService boardService, IEventBus eventBus)
     {
-        this.boardService = boardService;
-        this.eventBus = eventBus;
+        this.boardService = boardService ?? throw new ArgumentNullException(nameof(boardService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+
         eventBus.Subscribe<MovePlayerEvent>(OnPlayerMove);
         eventBus.Subscribe<MoveToJailEvent>(MoveToJail);
 
@@ -89,7 +90,6 @@ public class PlayerMove : MonoBehaviourPun
         Vector3 targetPos = boardService.GetCellRectTransform(10).position;
         yield return MoveToPosition(targetPos);
 
-        //EventBus.Publish(new HandleCellEvent(currentCellIndex, photonView.Owner.ActorNumber));
     }
 
     private IEnumerator MoveToPosition(Vector3 target)

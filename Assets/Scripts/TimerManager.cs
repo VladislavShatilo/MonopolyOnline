@@ -6,24 +6,25 @@ using Zenject;
 
 public class TimerManager : ITimerManager
 {
-    private TurnTimer turnTimer = new TurnTimer();
+    private TurnTimer turnTimer;
 
-    #region PUBLIC_METHODS
+    public TimerManager(ITimeProvider timeProvider)
+    {
+        turnTimer = new TurnTimer(timeProvider);
+    }
 
     public void StartTurnTimer(int playerId, double duration) =>
-     turnTimer.Start(TimerType.Turn, playerId, PhotonNetwork.Time, duration);
+        turnTimer.Start(TimerType.Turn, playerId, 0, duration);
 
     public void StartAuctionTimer(int playerId, double duration) =>
-        turnTimer.Start(TimerType.Auction, playerId, PhotonNetwork.Time, duration);
+        turnTimer.Start(TimerType.Auction, playerId, 0, duration);
 
     public void StartTradeTimer(int playerId, double duration) =>
-        turnTimer.Start(TimerType.Trade, playerId, PhotonNetwork.Time, duration);
+        turnTimer.Start(TimerType.Trade, playerId, 0, duration);
 
     public (TimerType type, int playerId, float timeLeft, bool isActive, bool expired)? Tick()
     {
-        return turnTimer.Tick(PhotonNetwork.Time);
+        return turnTimer.Tick();
     }
-
-    #endregion PUBLIC_METHODS
 
 }

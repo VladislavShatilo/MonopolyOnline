@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,8 +15,8 @@ public class BoardService : IBoardService
     [Inject]
     public void Construct(IBoardRepository repository, [Inject(Id = "BoardParent")] Transform parent)
     {
-        this.repository = repository;
-        this.parentTransform = parent;
+        this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        this.parentTransform = parent ?? throw new ArgumentNullException(nameof(parentTransform));
     }
 
 
@@ -27,6 +28,7 @@ public class BoardService : IBoardService
     {
         CacheBoardCells();
     }
+
     public RectTransform GetCellRectTransform(int index) => index >= 0 && index < boardCells.Count ? boardCells[index].GetComponent<RectTransform>() : null;
     public GameObject GetCellGameObject(int index) => GetCellRectTransform(index)?.gameObject;
     public CellData GetCellData(int index) => repository.GetCell(index);
@@ -39,9 +41,14 @@ public class BoardService : IBoardService
 
     private void CacheBoardCells()
     {
+        boardCells.Clear();
         foreach (Transform child in parentTransform)
         {
-            boardCells.Add(child);
+            if (child != null)
+            {
+                boardCells.Add(child);
+            }
+
         }
     }
 

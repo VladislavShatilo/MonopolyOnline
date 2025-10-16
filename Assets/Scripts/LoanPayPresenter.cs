@@ -17,11 +17,11 @@ public class LoanPayPresenter : IInitializable, IDisposable
     [Inject]
     public void Construct(ILoanPayWindow loanPayWindow, ILocalPlayerService localPlayerService, IEventBus eventBus, IBankService bankService, IPhotonLoanManager photonLoanManager)
     {
-        this.loanPayWindow = loanPayWindow;
-        this.localPlayerService = localPlayerService;
-        this.eventBus = eventBus;
-        this.bankService = bankService;
-        this.photonLoanManager = photonLoanManager;
+        this.loanPayWindow = loanPayWindow ?? throw new ArgumentNullException(nameof(loanPayWindow));
+        this.localPlayerService = localPlayerService ?? throw new ArgumentNullException(nameof(localPlayerService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.bankService = bankService ?? throw new ArgumentNullException(nameof(bankService));
+        this.photonLoanManager = photonLoanManager ?? throw new ArgumentNullException(nameof(photonLoanManager));
     }
 
     public void Initialize()

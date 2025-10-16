@@ -1,4 +1,5 @@
 using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -17,6 +18,24 @@ public class UIRansomJailWindow : UIWindowBase,IRansomJailWindow
     [SerializeField] private TextMeshProUGUI cantRansomText;
 
     private int currentPlayerId;
+
+    #region LIFE_CYCLE
+
+    private void Start()
+    {
+        if (ransomButton == null)
+            throw new ArgumentNullException(nameof(ransomButton));
+        if (cantRansomButton == null)
+            throw new ArgumentNullException(nameof(cantRansomButton));
+        if (ransomText == null)
+            throw new ArgumentNullException(nameof(ransomText));
+        if (cantRansomText == null)
+            throw new ArgumentNullException(nameof(cantRansomText));
+
+
+
+    }
+    #endregion LIFE_CYCLE
 
     #region PUBLIC_METHODS
 

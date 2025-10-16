@@ -1,4 +1,6 @@
 using JetBrains.Annotations;
+using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,8 +14,12 @@ public class BoardRepository : IBoardRepository
 
     [Inject]
     public void Construct(BoardConfig config)
-    {
-        cells = new List<CellData>(config.cells);
+    { 
+        if(config == null || config.cells == null)
+        {
+            throw new ArgumentNullException(nameof(config));
+        }
+        cells = new List<CellData>(config.cells)?? throw new ArgumentNullException(nameof(config));
     }
 
     #endregion LIFE_CYCLE

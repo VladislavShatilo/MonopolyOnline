@@ -73,4 +73,29 @@ public class TurnTests
         Assert.IsFalse(turn.HasExtraTurn(1));
         Assert.IsTrue(turn.HasExtraTurn(2));
     }
+    [Test]
+    public void AddExtraTurn_ShouldBeIdempotent()
+    {
+        turn.AddExtraTurn(1);
+        turn.AddExtraTurn(1);
+        Assert.IsTrue(turn.HasExtraTurn(1));
+    }
+
+    [Test]
+    public void RemoveExtraTurn_ShouldHandleNonExistingPlayerGracefully()
+    {
+        turn.RemoveExtraTurn(99); // не должно вызывать ошибку
+        Assert.Pass();
+    }
+
+    [Test]
+    public void ExtraTurnRemainsAfterEndTurn()
+    {
+        turn.StartTurn(1);
+        turn.AddExtraTurn(1);
+        turn.EndTurn();
+        Assert.IsTrue(turn.HasExtraTurn(1));
+        Assert.IsFalse(turn.IsActive);
+    }
+
 }

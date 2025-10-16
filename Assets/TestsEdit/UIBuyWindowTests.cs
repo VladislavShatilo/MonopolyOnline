@@ -1,6 +1,9 @@
 using NUnit.Framework;
+using System;
 using System.Collections;
+using System.Reflection;
 using TMPro;
+using UnityEditor.PackageManager.UI;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -37,7 +40,7 @@ public class UIBuyWindowTests
     [TearDown]
     public void TearDown()
     {
-        Object.DestroyImmediate(_window.gameObject);
+        UnityEngine.Object.DestroyImmediate(_window.gameObject);
     }
     [Test]
     public void Show_SetsButtonsAndTexts_WhenCanAfford()
@@ -84,4 +87,40 @@ public class UIBuyWindowTests
         _window.AuctionButton.onClick.Invoke();
         Assert.AreEqual(99, receivedCellIndex);
     }
+    [Test]
+    public void Start_ShouldThrow_WhenBuyButtonIsNull()
+    {
+        _window.BuyButton = null;
+        var ex = Assert.Throws<TargetInvocationException>(() =>
+        {
+            typeof(UIBuyWindow).GetMethod("Start", BindingFlags.NonPublic | BindingFlags.Instance)
+                               .Invoke(_window, null);
+        });
+
+        Assert.IsInstanceOf<ArgumentNullException>(ex.InnerException);
+        Assert.That(((ArgumentNullException)ex.InnerException).ParamName, Is.EqualTo("buyButton"));
+    }
+    [Test]
+    public void Show_SetsButtonsAndTexts_WhenCantAfford()
+    {
+        _window.Show(1, 5, 1000, false);
+
+        Assert.IsFalse(_window.BuyButton.gameObject.activeSelf);
+        Assert.IsTrue(_window.CantBuyButton.gameObject.activeSelf);
+        Assert.AreEqual("Купить за 1,000", _window.BuyButtonText.text);
+        Assert.AreEqual("Купить за 1,000", _window.CantBuyButtonText.text);
+        Assert.IsTrue(_window.showWindowCalled);
+    }
+    [Test]
+    public void SetBuyAction_DoesNotThrow_WhenNull()
+    {
+        Assert.DoesNotThrow(() => _window.SetBuyAction(null));
+    }
+
+    [Test]
+    public void SetAuctionAction_DoesNotThrow_WhenNull()
+    {
+        Assert.DoesNotThrow(() => _window.SetAuctionAction(null));
+    }
+
 }

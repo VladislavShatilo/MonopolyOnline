@@ -23,10 +23,12 @@ public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
     [Inject]
     public void Construct(ITradeService tradeService, ICompanyRepository companyRepository, IPlayerRepository playerRepository, IPhotonViewWrapper photonViewWrapper)
     {
-        this.tradeService = tradeService;
-        this.companyRepository = companyRepository;
-        this.playerRepository = playerRepository;
-        this.photonViewWrapper = photonViewWrapper;
+        this.tradeService = tradeService ?? throw new ArgumentNullException(nameof(tradeService));
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
+        if (photonView == null) throw new NullReferenceException(nameof(photonView));
+
     }
 
     #endregion LIFE_CYCLE
@@ -72,8 +74,8 @@ public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
         var result = new List<Company>();
         foreach (var id in wrapper.Ids)
         {
-            var company = companyRepository.GetCompanyById(id);
-            if (company != null) result.Add(company);
+            var company = companyRepository.GetCompanyById(id) ?? throw new NullReferenceException(nameof(DeserializeCompanies));
+            result.Add(company);
         }
         return result;
     }
@@ -91,15 +93,19 @@ public class PhotonTradeManager : MonoBehaviourPun, IPhotonTradeManager
     [PunRPC]
     private void RPC_SendTradeOffer(int fromId, int toId, string fromJson, string toJson, int fromMoney, int toMoney)
     {
-        PlayerData playerFrom = playerRepository.GetPlayerById(fromId);
-        PlayerData playerTo = playerRepository.GetPlayerById(toId);
+        PlayerData playerFrom = playerRepository.GetPlayerById(fromId) ?? throw new NullReferenceException(nameof(RPC_SendTradeOffer)); 
+        PlayerData playerTo = playerRepository.GetPlayerById(toId) ?? throw new NullReferenceException(nameof(RPC_SendTradeOffer));
         var offer = new TradeOffer(playerFrom, playerTo)
         {
             FromMoney = fromMoney,
             ToMoney = toMoney
         };
-        offer.SetFromCompanies(DeserializeCompanies(fromJson));
-        offer.SetToCompanies(DeserializeCompanies(toJson));
+        if(offer != null)
+        {
+            offer.SetFromCompanies(DeserializeCompanies(fromJson));
+            offer.SetToCompanies(DeserializeCompanies(toJson));
+        }
+      
 
         tradeService.OnTradeProposalReceived(offer);
     }

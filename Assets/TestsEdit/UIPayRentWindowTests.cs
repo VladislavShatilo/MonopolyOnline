@@ -1,9 +1,11 @@
 using NUnit.Framework;
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 public class UIPayRentWindowTests
 {
@@ -86,5 +88,54 @@ public class UIPayRentWindowTests
     {
         _window.HardHide();
         Assert.IsTrue(_window.hardHideCalled);
+    }
+  
+
+    // 2. Проверка, что повторное присвоение SetPayAction удаляет предыдущие слушатели
+    [Test]
+    public void SetPayAction_ReplacesPreviousListeners()
+    {
+        int callCount1 = 0;
+        int callCount2 = 0;
+
+        _window.SetPayAction(() => callCount1++);
+        _window.SetPayAction(() => callCount2++);
+
+        _window.PayRentButton.onClick.Invoke();
+
+        Assert.AreEqual(0, callCount1, "Старый слушатель не должен вызываться");
+        Assert.AreEqual(1, callCount2, "Новый слушатель должен вызываться один раз");
+    }
+
+    // 3. Проверка публичных свойств get/set
+    [Test]
+    public void Properties_GetSet_WorkCorrectly()
+    {
+        var button = new GameObject().AddComponent<Button>();
+        var text = new GameObject().AddComponent<TextMeshProUGUI>();
+
+        _window.PayRentButton = button;
+        _window.CantPayRentButton = button;
+        _window.PayButtonText = text;
+        _window.CantPayRentText = text;
+
+        Assert.AreEqual(button, _window.PayRentButton);
+        Assert.AreEqual(button, _window.CantPayRentButton);
+        Assert.AreEqual(text, _window.PayButtonText);
+        Assert.AreEqual(text, _window.CantPayRentText);
+
+        GameObject.DestroyImmediate(text.gameObject);
+    }
+
+    // 4. Проверка правильного форматирования больших чисел
+    [Test]
+    public void Show_FormatsLargeNumbersCorrectly()
+    {
+        float rent = 1234567;
+        _window.Show(1, 0, rent, true);
+
+        string expectedText = $"Заплатите {rent.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)}";
+        Assert.AreEqual(expectedText, _window.PayButtonText.text);
+        Assert.AreEqual(expectedText, _window.CantPayRentText.text);
     }
 }

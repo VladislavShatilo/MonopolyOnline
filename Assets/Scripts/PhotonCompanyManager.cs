@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,8 +15,10 @@ public class PhotonCompanyManager : MonoBehaviourPun, IPhotonCompanyManager
     [Inject]
     public void Construct(ICompanyService companyService, IPhotonViewWrapper photonViewWrapper)
     {
-        this.companyService = companyService;
-        this.photonViewWrapper = photonViewWrapper;
+        this.companyService = companyService ?? throw new ArgumentNullException(nameof(companyService));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
+        if (photonView == null) throw new NullReferenceException(nameof(photonView));
+
 
     }
 

@@ -12,40 +12,45 @@ public enum TimerType
 
 public class TurnTimer
 {
-    private TimerType type;
-    private int playerId;
-    private double startTime;
-    private double duration;
-    private bool isActive;
+    private TimerData currentTimer;
+    private ITimeProvider timeProvider;
 
-    #region PUBLIC_METHODS
+    public TurnTimer(ITimeProvider timeProvider)
+    {
+        this.timeProvider = timeProvider;
+    }
 
     public void Start(TimerType type, int playerId, double startTime, double duration)
     {
-        this.type = type;
-        this.playerId = playerId;
-        this.startTime = startTime;
-        this.duration = duration;
-        isActive = true;
-    }
-
-    public (TimerType type, int playerId, float timeLeft, bool isActive, bool expired)? Tick(double currentTime)
-    {
-        if (!isActive) return null;
-
-        double elapsed = currentTime - startTime;
-        float timeLeft = Mathf.Clamp((float)(duration - elapsed), 0, (float)duration);
-
-        if (timeLeft <= 0)
+        currentTimer = new TimerData
         {
-            isActive = false;
-            return (type, playerId, 0, false, true); // expired = true
-        }
-
-        return (type, playerId, timeLeft, true, false);
+            type = type,
+            playerId = playerId,
+            startTime = startTime,
+            duration = duration,
+            isActive = true
+        };
     }
 
-    public void Stop() => isActive = false;
+    public (TimerType type, int playerId, float timeLeft, bool isActive, bool expired)? Tick()
+    {
+        if (currentTimer == null) return null;
 
-    #endregion PUBLIC_METHODS
+        double elapsed = timeProvider.Now - currentTimer.startTime;
+        float timeLeft = (float)(currentTimer.duration - elapsed);
+
+        bool expired = timeLeft <= 0;
+        currentTimer.isActive = !expired;
+
+        return (currentTimer.type, currentTimer.playerId, Mathf.Max(timeLeft, 0f), currentTimer.isActive, expired);
+    }
+
+    private class TimerData
+    {
+        public TimerType type;
+        public int playerId;
+        public double startTime;
+        public double duration;
+        public bool isActive;
+    }
 }

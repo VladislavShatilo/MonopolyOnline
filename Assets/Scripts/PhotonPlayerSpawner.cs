@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using UnityEditor;
@@ -17,8 +18,8 @@ public class PhotonPlayerSpawner : MonoBehaviourPun, IPlayerSpawner
     [Inject]
     public void Construct([Inject(Id = "PlayerSettings")] PlayerSettings playerSettings, IPlayerColorService playerColorService)
     {
-        this.playerSettings = playerSettings;
-        this.playerColorService = playerColorService;
+        this.playerSettings = playerSettings ?? throw new ArgumentNullException(nameof(playerSettings));
+        this.playerColorService = playerColorService ?? throw new ArgumentNullException(nameof(playerColorService));
     }
 
     #endregion LIFE_CYCLE
@@ -38,13 +39,13 @@ public class PhotonPlayerSpawner : MonoBehaviourPun, IPlayerSpawner
             new object[] { localId - 1, playerColor.R, playerColor.G, playerColor.B, startPostion }
         );
         playerMove = go.GetComponent<PlayerMove>();
-
-        playerMoves[localId] = playerMove;
+        if (playerMove != null)
+        {
+            playerMoves[localId] = playerMove;
+        }
     }
 
-    public void RemovePlayer(int playerId)
-    {
-    }
+
 
     #endregion PUBLIC_METHODS
 }

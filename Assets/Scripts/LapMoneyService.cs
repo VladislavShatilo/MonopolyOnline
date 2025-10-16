@@ -15,10 +15,10 @@ public class LapMoneyService : IInitializable, IDisposable
     [Inject]
     public void Construct(IEventBus eventBus, IBankService bankService, GameSettings gameSettings, IChatService chatService)
     {
-        this.eventBus = eventBus;
-        this.bankService = bankService;
-        this.gameSettings = gameSettings;
-        this.chatService = chatService;
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.bankService = bankService ?? throw new ArgumentNullException(nameof(bankService));
+        this.gameSettings = gameSettings ?? throw new ArgumentNullException(nameof(gameSettings));
+        this.chatService = chatService ?? throw new ArgumentNullException(nameof(chatService));
     }
 
 

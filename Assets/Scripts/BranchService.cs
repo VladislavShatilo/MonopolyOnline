@@ -1,3 +1,5 @@
+using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,9 +16,9 @@ public class BranchService : IBranchService
     [Inject]
     public void Construct(ICompanyRepository companyRepository, IPlayerRepository playerRepository, GameSettings gameSettings)
     {
-        this.companyRepository = companyRepository;
-        this.playerRepository = playerRepository;
-        this.gameSettings = gameSettings;
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.gameSettings = gameSettings ?? throw new ArgumentNullException(nameof(gameSettings));
     }
 
     #endregion LIFE_CYCLE
@@ -25,10 +27,9 @@ public class BranchService : IBranchService
 
     public bool TryBuyBranch(int companyId, int playerId, out Company company)
     {
-        company = companyRepository.GetCompanyById(companyId);
-        var player = playerRepository.GetPlayerById(playerId);
+        company = companyRepository.GetCompanyById(companyId) ?? throw new InvalidOperationException(nameof(company));
+        var player = playerRepository.GetPlayerById(playerId) ?? throw new InvalidOperationException(nameof(TryBuyBranch));
 
-        if (company == null || player == null) return false;
         if (company.OwnerId != player.Id) return false;
         if (company.RentLevel >= gameSettings.maxBranchLevel) return false;
 
@@ -38,10 +39,9 @@ public class BranchService : IBranchService
 
     public bool TrySellBranch(int companyId, int playerId, out Company company)
     {
-        company = companyRepository.GetCompanyById(companyId);
-        var player = playerRepository.GetPlayerById(playerId);
+        company = companyRepository.GetCompanyById(companyId) ?? throw new InvalidOperationException(nameof(company));
+        var player = playerRepository.GetPlayerById(playerId) ?? throw new InvalidOperationException(nameof(TryBuyBranch));
 
-        if (company == null || player == null) return false;
         if (company.OwnerId != player.Id) return false;
         if (company.RentLevel <= 0) return false;
 

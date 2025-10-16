@@ -1,8 +1,9 @@
 using NUnit.Framework;
 using Moq;
+using System;
 
 [TestFixture]
-public class BankServiceTests
+public class BankServiceFullTests
 {
     private BankService bankService;
     private Mock<IPlayerRepository> playerRepository;
@@ -26,6 +27,7 @@ public class BankServiceTests
         bankService.Consturct(playerRepository.Object, notifier.Object);
     }
 
+    // ===== AddMoney =====
     [Test]
     public void AddMoney_ShouldIncreasePlayerMoneyAndNotify()
     {
@@ -44,6 +46,23 @@ public class BankServiceTests
         notifier.Verify(n => n.NotifyBalanceChanged(It.IsAny<PlayerData>()), Times.Never);
     }
 
+    [Test]
+    public void AddMoney_ZeroAmount_ShouldDoNothing()
+    {
+        bankService.AddMoney(1, 0);
+
+        Assert.AreEqual(1000, player1.Money);
+        notifier.Verify(n => n.NotifyBalanceChanged(It.IsAny<PlayerData>()), Times.Never);
+    }
+
+    [Test]
+    public void AddMoney_NullPlayer_ShouldThrow()
+    {
+        playerRepository.Setup(r => r.GetPlayerById(3)).Returns((PlayerData)null);
+        Assert.Throws<InvalidOperationException>(() => bankService.AddMoney(3, 100));
+    }
+
+    // ===== RemoveMoney =====
     [Test]
     public void RemoveMoney_ShouldDecreasePlayerMoneyAndNotify_WhenEnoughMoney()
     {
@@ -75,6 +94,24 @@ public class BankServiceTests
     }
 
     [Test]
+    public void RemoveMoney_ZeroAmount_ShouldReturnFalse()
+    {
+        bool result = bankService.RemoveMoney(1, 0);
+
+        Assert.IsFalse(result);
+        Assert.AreEqual(1000, player1.Money);
+        notifier.Verify(n => n.NotifyBalanceChanged(It.IsAny<PlayerData>()), Times.Never);
+    }
+
+    [Test]
+    public void RemoveMoney_NullPlayer_ShouldThrow()
+    {
+        playerRepository.Setup(r => r.GetPlayerById(3)).Returns((PlayerData)null);
+        Assert.Throws<InvalidOperationException>(() => bankService.RemoveMoney(3, 100));
+    }
+
+    // ===== HasEnoughMoney =====
+    [Test]
     public void HasEnoughMoney_ShouldReturnTrue_WhenPlayerHasEnough()
     {
         bool result = bankService.HasEnoughMoney(1, 500);
@@ -88,6 +125,14 @@ public class BankServiceTests
         Assert.IsFalse(result);
     }
 
+    [Test]
+    public void HasEnoughMoney_NullPlayer_ShouldThrow()
+    {
+        playerRepository.Setup(r => r.GetPlayerById(3)).Returns((PlayerData)null);
+        Assert.Throws<InvalidOperationException>(() => bankService.HasEnoughMoney(3, 100));
+    }
+
+    // ===== TransferMoney =====
     [Test]
     public void TransferMoney_ShouldMoveMoneyBetweenPlayers_WhenEnoughFunds()
     {
@@ -120,5 +165,34 @@ public class BankServiceTests
         Assert.AreEqual(1000, player1.Money);
         Assert.AreEqual(500, player2.Money);
         notifier.Verify(n => n.NotifyBalanceChanged(It.IsAny<PlayerData>()), Times.Never);
+    }
+
+    [Test]
+    public void TransferMoney_ZeroAmount_ShouldFailAndDoNothing()
+    {
+        bool result = bankService.TransferMoney(1, 2, 0);
+
+        Assert.IsFalse(result);
+        Assert.AreEqual(1000, player1.Money);
+        Assert.AreEqual(500, player2.Money);
+        notifier.Verify(n => n.NotifyBalanceChanged(It.IsAny<PlayerData>()), Times.Never);
+    }
+
+    [Test]
+    public void TransferMoney_FromPlayerNull_ShouldFail()
+    {
+        playerRepository.Setup(r => r.GetPlayerById(3)).Returns((PlayerData)null);
+
+        Assert.Throws<InvalidOperationException>(() => bankService.TransferMoney(3, 2, 100));
+
+       
+    }
+
+    [Test]
+    public void TransferMoney_ToPlayerNull_ShouldThrow()
+    {
+        playerRepository.Setup(r => r.GetPlayerById(3)).Returns((PlayerData)null);
+
+        Assert.Throws<InvalidOperationException>(() => bankService.TransferMoney(1, 3, 100));
     }
 }

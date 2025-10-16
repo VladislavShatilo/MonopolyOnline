@@ -1,6 +1,8 @@
 using Moq;
 using NUnit.Framework;
 using Photon.Pun;
+using System;
+using System.Reflection;
 using System.Windows.Input;
 using UnityEngine;
 
@@ -94,4 +96,98 @@ public class PhotonCompanySyncManagerTests
         Assert.AreEqual(300, renter.Money);
         eventBusMock.Verify(e => e.Publish(It.IsAny<RentPaidEvent>()), Times.Once);
     }
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenCompanyRepoIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            syncManager.Construct(null, playerRepoMock.Object, eventBusMock.Object, viewWrapperMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenPlayerRepoIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            syncManager.Construct(companyRepoMock.Object, null, eventBusMock.Object, viewWrapperMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenEventBusIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            syncManager.Construct(companyRepoMock.Object, playerRepoMock.Object, null, viewWrapperMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenPhotonViewWrapperIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            syncManager.Construct(companyRepoMock.Object, playerRepoMock.Object, eventBusMock.Object, null));
+    }
+
+    [Test]
+    public void Construct_ShouldThrowNullReferenceException_WhenPhotonViewIsMissing()
+    {
+        var goWithoutView = new GameObject();
+        var managerWithoutView = goWithoutView.AddComponent<PhotonCompanySyncManager>();
+
+        Assert.Throws<NullReferenceException>(() =>
+            managerWithoutView.Construct(companyRepoMock.Object, playerRepoMock.Object, eventBusMock.Object, viewWrapperMock.Object));
+
+        GameObject.DestroyImmediate(goWithoutView);
+    }
+
+    [Test]
+    public void RPC_SyncCompanyBought_ShouldThrowNullReferenceException_WhenCompanyIsNull()
+    {
+        syncManager.Construct(companyRepoMock.Object, playerRepoMock.Object, eventBusMock.Object, viewWrapperMock.Object);
+
+        playerRepoMock.Setup(p => p.GetPlayerById(It.IsAny<int>())).Returns(new PlayerData("p", 1000, 1, null));
+        companyRepoMock.Setup(c => c.GetCompanyById(It.IsAny<int>())).Returns((Company)null);
+
+        var method = typeof(PhotonCompanySyncManager)
+            .GetMethod("RPC_SyncCompanyBought", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        var ex = Assert.Throws<TargetInvocationException>(() => method.Invoke(syncManager, new object[] { 1, 1, 500 }));
+        Assert.IsInstanceOf<NullReferenceException>(ex.InnerException);
+        Assert.AreEqual("RPC_SyncCompanyBought", ex.InnerException.Message);
+    }
+
+
+    [Test]
+    public void RPC_SyncCompanyBought_ShouldThrowNullReferenceException_WhenPlayerIsNull()
+    {
+        syncManager.Construct(companyRepoMock.Object, playerRepoMock.Object, eventBusMock.Object, viewWrapperMock.Object);
+
+        // Компания существует, игрок null
+        companyRepoMock.Setup(c => c.GetCompanyById(It.IsAny<int>())).Returns(new Company(1, new CompanyData()));
+        playerRepoMock.Setup(p => p.GetPlayerById(It.IsAny<int>())).Returns((PlayerData)null);
+
+        var method = typeof(PhotonCompanySyncManager)
+            .GetMethod("RPC_SyncCompanyBought", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // Проверяем через TargetInvocationException
+        var ex = Assert.Throws<TargetInvocationException>(() => method.Invoke(syncManager, new object[] { 1, 1, 500 }));
+        Assert.IsInstanceOf<NullReferenceException>(ex.InnerException);
+        Assert.AreEqual("RPC_SyncCompanyBought", ex.InnerException.Message);
+    }
+
+
+    [Test]
+    public void RPC_SyncRentPaid_ShouldThrowNullReferenceException_WhenAnyEntityIsNull()
+    {
+        syncManager.Construct(companyRepoMock.Object, playerRepoMock.Object, eventBusMock.Object, viewWrapperMock.Object);
+
+        // Любой из объектов null: компания или игроки
+        companyRepoMock.Setup(c => c.GetCompanyById(It.IsAny<int>())).Returns((Company)null);
+        playerRepoMock.Setup(p => p.GetPlayerById(It.IsAny<int>())).Returns((PlayerData)null);
+
+        var method = typeof(PhotonCompanySyncManager)
+            .GetMethod("RPC_SyncRentPaid", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // Проверка через InnerException
+        var ex = Assert.Throws<TargetInvocationException>(() => method.Invoke(syncManager, new object[] { 1, 2, 3, 100 }));
+        Assert.IsInstanceOf<NullReferenceException>(ex.InnerException);
+        Assert.AreEqual("RPC_SyncRentPaid", ex.InnerException.Message);
+    }
+
 }

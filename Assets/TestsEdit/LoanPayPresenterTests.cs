@@ -105,5 +105,15 @@ public class LoanPayPresenterTests
         photonLoanManager.Verify(p => p.PayLoanRequest(playerId), Times.Once);
         loanPayWindow.Verify(w => w.Hide(), Times.Once);
     }
+    [Test]
+    public void Construct_NullDependencies_Throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => new LoanPayPresenter().Construct(null, localPlayerService.Object, eventBus.Object, bankService.Object, photonLoanManager.Object));
+        Assert.Throws<ArgumentNullException>(() => new LoanPayPresenter().Construct(loanPayWindow.Object, null, eventBus.Object, bankService.Object, photonLoanManager.Object));
+        Assert.Throws<ArgumentNullException>(() => new LoanPayPresenter().Construct(loanPayWindow.Object, localPlayerService.Object, null, bankService.Object, photonLoanManager.Object));
+        Assert.Throws<ArgumentNullException>(() => new LoanPayPresenter().Construct(loanPayWindow.Object, localPlayerService.Object, eventBus.Object, null, photonLoanManager.Object));
+        Assert.Throws<ArgumentNullException>(() => new LoanPayPresenter().Construct(loanPayWindow.Object, localPlayerService.Object, eventBus.Object, bankService.Object, null));
+    }
+
 }
 

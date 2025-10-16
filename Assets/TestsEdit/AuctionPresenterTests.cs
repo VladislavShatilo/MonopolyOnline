@@ -207,4 +207,51 @@ public class AuctionPresenterTests
 
         Assert.Throws<InvalidOperationException>(act);
     }
+   
+
+    [Test]
+    public void OnAuctionEndEvent_ShouldHideWindow()
+    {
+        Action<AuctionEndEvent> capturedHandler = null;
+        mockEventBus.Setup(bus => bus.Subscribe(It.IsAny<Action<AuctionEndEvent>>()))
+                    .Callback<Action<AuctionEndEvent>>(h => capturedHandler = h);
+
+        auctionPresenter.Initialize();
+
+        capturedHandler?.Invoke(new AuctionEndEvent());
+
+        mockAuctionWindow.Verify(w => w.Hide(), Times.Once);
+    }
+    [TestCase(null, "auctionWindow")]
+    [TestCase(typeof(ILocalPlayerService), "localPlayerService")]
+    [TestCase(typeof(IPhotonAuctionManager), "photonAuctionManager")]
+    [TestCase(typeof(IPlayerRepository), "playerRepository")]
+    [TestCase(typeof(ICompanyRepository), "companyRepository")]
+    [TestCase(typeof(IEventBus), "eventBus")]
+    public void Construct_ShouldThrowArgumentNullException_WhenDependencyIsNull(Type? nullDependencyType, string expectedParamName)
+    {
+        // Arrange: создаем mock-и всех зависимостей
+        var auctionWindow = nullDependencyType == null ? null : Mock.Of<IAuctionWindow>();
+        var localPlayerService = nullDependencyType == typeof(ILocalPlayerService) ? null : Mock.Of<ILocalPlayerService>();
+        var photonAuctionManager = nullDependencyType == typeof(IPhotonAuctionManager) ? null : Mock.Of<IPhotonAuctionManager>();
+        var playerRepository = nullDependencyType == typeof(IPlayerRepository) ? null : Mock.Of<IPlayerRepository>();
+        var companyRepository = nullDependencyType == typeof(ICompanyRepository) ? null : Mock.Of<ICompanyRepository>();
+        var eventBus = nullDependencyType == typeof(IEventBus) ? null : Mock.Of<IEventBus>();
+
+        var presenter = new AuctionPresenter();
+
+        // Act + Assert
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+            presenter.Construct(
+                (IAuctionWindow)auctionWindow,
+                (ILocalPlayerService)localPlayerService,
+                (IPhotonAuctionManager)photonAuctionManager,
+                (IPlayerRepository)playerRepository,
+                (ICompanyRepository)companyRepository,
+                (IEventBus)eventBus
+            ));
+
+        Assert.That(ex.ParamName, Is.EqualTo(expectedParamName));
+    }
+
 }

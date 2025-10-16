@@ -1,104 +1,151 @@
 using Moq;
 using NUnit.Framework;
-using Photon.Realtime;
+using System;
+using System.Drawing.Printing;
 using UnityEngine;
 
 public class JailServiceTests
 {
-    private JailService jailService;
-    private Mock<IPlayerRepository> playerRepoMock;
-    private Mock<IEventBus> eventBusMock;
-    private Mock<IPhotonTurnManager> turnManagerMock;
-    private Mock<IPhotonNetworkWrapper> photonWrapperMock;
-    private GameSettings gameSettings;
-    private Mock<PlayerData> playerMock;
+    private JailService service;
+    private Mock<IPlayerRepository> playerRepo;
+    private Mock<IEventBus> eventBus;
+    private Mock<IPhotonTurnManager> turnManager;
+    private Mock<IPhotonNetworkWrapper> networkWrapper;
+    private GameSettings settings;
 
     [SetUp]
-    public void Setup()
+    public void SetUp()
     {
-        playerRepoMock = new Mock<IPlayerRepository>();
-        eventBusMock = new Mock<IEventBus>();
-        turnManagerMock = new Mock<IPhotonTurnManager>();
-        photonWrapperMock = new Mock<IPhotonNetworkWrapper>();
+        playerRepo = new Mock<IPlayerRepository>();
+        eventBus = new Mock<IEventBus>();
+        turnManager = new Mock<IPhotonTurnManager>();
+        networkWrapper = new Mock<IPhotonNetworkWrapper>();
+        settings =  ScriptableObject.CreateInstance<GameSettings>();
 
-
-        // Вместо мокирования PlayerData (MonoBehaviour/ScriptableObject), создаём обычный объект
-        var player = new PlayerData("P1",500,1,null)
-        {
-            CurrentCellId = 0,
-            JailTurnsLeft = 2,
-            IsInJail = true
-        };
-        // Для методов SendToJail и Release можно сделать виртуальные методы и наследовать, либо сделать TestPlayerData
-        var playerMock = new Mock<PlayerData>();
-        playerMock.SetupProperty(p => p.CurrentCellId, 0);
-        playerMock.SetupProperty(p => p.JailTurnsLeft, 2);
-        playerMock.Setup(p => p.IsInJail).Returns(true);
-        playerMock.Setup(p => p.SendToJail(It.IsAny<GameSettings>()));
-        playerMock.Setup(p => p.Release());
-
-        playerRepoMock.Setup(r => r.GetPlayerById(It.IsAny<int>())).Returns(playerMock.Object);
-
-        jailService = new JailService();
-        jailService.Construct(playerRepoMock.Object, eventBusMock.Object, turnManagerMock.Object, gameSettings, photonWrapperMock.Object);
+        service = new JailService();
+        service.Construct(playerRepo.Object, eventBus.Object, turnManager.Object, settings, networkWrapper.Object);
     }
-    [Test]
-    public void SendPlayerToJail_ShouldSetCell_CallSendToJail_AndPublishEvent()
-    {
-        jailService.SendPlayerToJail(1);
 
-        Assert.AreEqual(10, playerMock.Object.CurrentCellId);
-        playerMock.Verify(p => p.SendToJail(gameSettings), Times.Once);
-        eventBusMock.Verify(e => e.Publish(It.Is<SetTurnsJailEvent>(ev => ev.PlayerID == 1 && ev.Turns == playerMock.Object.JailTurnsLeft)), Times.Once);
+    // SendPlayerToJail
+    [Test]
+    public void SendPlayerToJail_PlayerExists_SetsCellAndPublishesEvent()
+    {
+        var player = new PlayerData("p", 0, 1, null);
+        playerRepo.Setup(r => r.GetPlayerById(1)).Returns(player);
+
+        service.SendPlayerToJail(1);
+
+        Assert.AreEqual(player.CurrentCellId, settings.jailCellId);
+
+        Assert.AreEqual(player.IsInJail,true);
+        Assert.AreEqual(player.JailTurnsLeft, settings.jailTurns);
+
+        eventBus.Verify(e => e.Publish(It.IsAny<SetTurnsJailEvent>()), Times.Once);
     }
 
     [Test]
-    public void ReleasePlayer_ShouldCallRelease_AndPublishEventWithZeroTurns()
+    public void SendPlayerToJail_PlayerNotFound_Throws()
     {
-        jailService.ReleasePlayer(1, false);
+        playerRepo.Setup(r => r.GetPlayerById(1)).Returns((PlayerData)null);
+        Assert.Throws<NullReferenceException>(() => service.SendPlayerToJail(1));
+    }
 
-        playerMock.Verify(p => p.Release(), Times.Once);
-        eventBusMock.Verify(e => e.Publish(It.Is<SetTurnsJailEvent>(ev => ev.PlayerID == 1 && ev.Turns == 0)), Times.Once);
+    // ReleasePlayer
+    [Test]
+    public void ReleasePlayer_PlayerExists_CallsReleaseAndPublishesEvent()
+    {
+        var player = new PlayerData("p", 0, 1, null);
+        playerRepo.Setup(r => r.GetPlayerById(1)).Returns(player);
+
+        service.ReleasePlayer(1, true);
+
+
+        Assert.AreEqual(player.IsInJail, false);
+        Assert.AreEqual(player.JailTurnsLeft, 0);
+        eventBus.Verify(e => e.Publish(It.Is<SetTurnsJailEvent>(x => x.PlayerID == 1 && x.Turns == 0)), Times.Once);
     }
 
     [Test]
-    public void TryReleaseByDice_ShouldReleasePlayer_WhenDoublesRolled()
+    public void ReleasePlayer_PlayerNotFound_Throws()
     {
-        jailService.TryReleaseByDice(1, 3, 3);
+        playerRepo.Setup(r => r.GetPlayerById(1)).Returns((PlayerData)null);
+        Assert.Throws<NullReferenceException>(() => service.ReleasePlayer(1, true));
+    }
 
-        playerMock.Verify(p => p.Release(), Times.Once);
-        eventBusMock.Verify(e => e.Publish(It.IsAny<SetTurnsJailEvent>()), Times.Once);
-        turnManagerMock.Verify(tm => tm.RequestEndTurn(), Times.Never);
+    // TryReleaseByDice
+    [Test]
+    public void TryReleaseByDice_PlayerNotInJail_DoesNothing()
+    {
+        var player = new PlayerData("p", 0, 1, null);
+        player.IsInJail = false;
+        playerRepo.Setup(r => r.GetPlayerById(1)).Returns(player);
+
+        service.TryReleaseByDice(1, 1, 2);
+
+        Assert.AreEqual(player.IsInJail, false);
+        Assert.AreEqual(player.JailTurnsLeft, 0);
+
+        eventBus.Verify(e => e.Publish(It.IsAny<SetTurnsJailEvent>()), Times.Never);
+        turnManager.Verify(t => t.RequestEndTurn(), Times.Never);
     }
 
     [Test]
-    public void TryReleaseByDice_ShouldDecreaseTurnsAndEndTurn_WhenNotDoubles_AndMasterClient()
+    public void TryReleaseByDice_Doubles_ReleasesPlayer()
     {
-        photonWrapperMock.Setup(p => p.IsMasterClient).Returns(true);
+        var player = new PlayerData("p", 0, 1, null);
+        player.IsInJail = true;
 
-        jailService.TryReleaseByDice(1, 2, 3);
+        playerRepo.Setup(r => r.GetPlayerById(1)).Returns(player);
 
-        Assert.AreEqual(1, playerMock.Object.JailTurnsLeft);
-        eventBusMock.Verify(e => e.Publish(It.Is<SetTurnsJailEvent>(ev => ev.PlayerID == 1 && ev.Turns == 1)), Times.Once);
-        turnManagerMock.Verify(tm => tm.RequestEndTurn(), Times.Once);
+        service.TryReleaseByDice(1, 2, 2);
+
+        Assert.AreEqual(player.IsInJail, false);
+        Assert.AreEqual(player.JailTurnsLeft, 0);
+
+        eventBus.Verify(e => e.Publish(It.IsAny<SetTurnsJailEvent>()), Times.Once);
     }
 
     [Test]
-    public void TryReleaseByDice_ShouldDoNothing_WhenPlayerNotInJail()
+    public void TryReleaseByDice_NotDoubles_DecreasesTurnsAndEndsTurnIfMaster()
     {
-        playerMock.Setup(p => p.IsInJail).Returns(false);
+        var player = new PlayerData("p", 0, 1, null);
+        player.JailTurnsLeft = 2;
+        player.IsInJail = true;
+      
+        playerRepo.Setup(r => r.GetPlayerById(1)).Returns(player);
+        networkWrapper.Setup(n => n.IsMasterClient).Returns(true);
 
-        jailService.TryReleaseByDice(1, 2, 3);
+        service.TryReleaseByDice(1, 1, 2);
 
-        playerMock.Verify(p => p.Release(), Times.Never);
-        eventBusMock.Verify(e => e.Publish(It.IsAny<SetTurnsJailEvent>()), Times.Never);
-        turnManagerMock.Verify(tm => tm.RequestEndTurn(), Times.Never);
+        Assert.AreEqual(1, player.JailTurnsLeft);
+        eventBus.Verify(e => e.Publish(It.Is<SetTurnsJailEvent>(x => x.Turns == 1)), Times.Once);
+        turnManager.Verify(t => t.RequestEndTurn(), Times.Once);
     }
 
     [Test]
-    public void GetTurnsLeft_ShouldReturnPlayerJailTurns()
+    public void TryReleaseByDice_PlayerNotFound_Throws()
     {
-        var turns = jailService.GetTurnsLeft(1);
-        Assert.AreEqual(2, turns);
+        playerRepo.Setup(r => r.GetPlayerById(1)).Returns((PlayerData)null);
+        Assert.Throws<NullReferenceException>(() => service.TryReleaseByDice(1, 1, 2));
+    }
+
+    // GetTurnsLeft
+    [Test]
+    public void GetTurnsLeft_PlayerExists_ReturnsJailTurns()
+    {
+        var player = new PlayerData("p", 0, 1, null);
+        player.JailTurnsLeft = 3;
+        playerRepo.Setup(r => r.GetPlayerById(1)).Returns(player);
+
+        int turns = service.GetTurnsLeft(1);
+
+        Assert.AreEqual(3, turns);
+    }
+
+    [Test]
+    public void GetTurnsLeft_PlayerNotFound_Throws()
+    {
+        playerRepo.Setup(r => r.GetPlayerById(1)).Returns((PlayerData)null);
+        Assert.Throws<NullReferenceException>(() => service.GetTurnsLeft(1));
     }
 }

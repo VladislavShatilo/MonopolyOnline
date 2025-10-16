@@ -177,6 +177,30 @@ public class PlayerMoveUseCaseTests
         mockCellHighlighterService.Verify(s => s.HideHighlight(), Times.Once);
         mockCellHighlighterService.Verify(s => s.ShowHighlight(It.IsAny<int>()), Times.Never);
     }
+    [Test]
+    public void MovePlayer_ShouldThrow_WhenPlayerNotFound()
+    {
+        mockPlayerRepository.Setup(r => r.GetPlayerById(99)).Returns((PlayerData)null);
+
+        Assert.Throws<NullReferenceException>(() => playerMoveUseCase.MovePlayer(99, 3, true));
+    }
+    [Test]
+    public void TeleportPlayer_ShouldHandleSameCellIndex()
+    {
+        testPlayer.CurrentCellId = 4;
+        playerMoveUseCase.TeleportPlayer(1, randomIndex: 4, currentCellIndex: 4);
+
+        Assert.AreEqual(4, testPlayer.CurrentCellId);
+        mockEventBus.Verify(bus => bus.Publish(It.Is<MovePlayerEvent>(e => e.PlayerId == 1 && e.TargetIndex == 4)), Times.Once);
+    }
+    [Test]
+    public void MovePlayer_ShouldPublishEvent_WhenStepsZero()
+    {
+        playerMoveUseCase.MovePlayer(1, 0, true);
+
+        Assert.AreEqual(5, testPlayer.CurrentCellId);
+        mockEventBus.Verify(bus => bus.Publish(It.IsAny<MovePlayerEvent>()), Times.Once);
+    }
 
     #endregion
 }

@@ -1,6 +1,7 @@
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
 using System;
+using System.Reflection;
 
 [TestFixture]
 public class AuctionUseCaseTests
@@ -76,7 +77,7 @@ public class AuctionUseCaseTests
     [Test]
     public void TimerExpiredEvent_WithAuctionType_ShouldCallPassBid()
     {
-        var evt = new TimerExpiredEvent (TimerType.Auction, 4);
+        var evt = new TimerExpiredEvent(TimerType.Auction, 4);
         var method = typeof(AuctionUseCase).GetMethod("TimerExpiredEvent", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         method.Invoke(useCase, new object[] { evt });
 
@@ -86,10 +87,52 @@ public class AuctionUseCaseTests
     [Test]
     public void TimerExpiredEvent_WithNonAuctionType_ShouldNotCallPassBid()
     {
-        var evt = new TimerExpiredEvent(TimerType.Turn ,4);
+        var evt = new TimerExpiredEvent(TimerType.Turn, 4);
         var method = typeof(AuctionUseCase).GetMethod("TimerExpiredEvent", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         method.Invoke(useCase, new object[] { evt });
 
         auctionService.Verify(a => a.PassBid(It.IsAny<int>()), Times.Never);
     }
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenDependenciesAreNull()
+    {
+        var useCase = new AuctionUseCase();
+
+        Assert.Throws<ArgumentNullException>(() => useCase.Construct(null, new Mock<IEventBus>().Object));
+        Assert.Throws<ArgumentNullException>(() => useCase.Construct(new Mock<IAuctionService>().Object, null));
+    }
+    [Test]
+    public void StartAuction_ShouldThrow_WhenEventIsNull()
+    {
+        var method = typeof(AuctionUseCase)
+            .GetMethod("StartAuction", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        var ex = Assert.Throws<TargetInvocationException>(() => method.Invoke(useCase, new object[] { null }));
+
+        Assert.IsInstanceOf<ArgumentNullException>(ex.InnerException);
+        Assert.That(((ArgumentNullException)ex.InnerException).ParamName, Is.EqualTo("e"));
+    }
+
+
+    [Test]
+    public void PlayerBid_ShouldThrow_WhenEventIsNull()
+    {
+        var method = typeof(AuctionUseCase).GetMethod("PlayerBid", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        Assert.Throws<TargetInvocationException>(() => method.Invoke(useCase, new object[] { null }));
+    }
+
+    [Test]
+    public void PlayerPass_ShouldThrow_WhenEventIsNull()
+    {
+        var method = typeof(AuctionUseCase).GetMethod("PlayerPass", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        Assert.Throws<TargetInvocationException>(() => method.Invoke(useCase, new object[] { null }));
+    }
+
+    [Test]
+    public void TimerExpiredEvent_ShouldThrow_WhenEventIsNull()
+    {
+        var method = typeof(AuctionUseCase).GetMethod("TimerExpiredEvent", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        Assert.Throws<TargetInvocationException>(() => method.Invoke(useCase, new object[] { null }));
+    }
+
 }

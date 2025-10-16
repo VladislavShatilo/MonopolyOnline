@@ -20,13 +20,13 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
     public void Construct(IBoardService boardService, ICompanyService companyService, IPhotonChanceManager photonChanceManager,
      IPhotonJailManager photonJailManager, IPhotonTurnManager photonTurnManager, IEventBus eventBus, IPhotonNetworkWrapper photonNetworkWrapper)
     {
-        this.boardService = boardService;
-        this.companyService = companyService;
-        this.photonChanceManager = photonChanceManager;
-        this.photonJailManager = photonJailManager;
-        this.photonTurnManager = photonTurnManager;
-        this.eventBus = eventBus;
-        this.photonNetworkWrapper = photonNetworkWrapper;
+        this.boardService = boardService ?? throw new ArgumentNullException(nameof(boardService));
+        this.companyService = companyService ?? throw new ArgumentNullException(nameof(companyService));
+        this.photonChanceManager = photonChanceManager ?? throw new ArgumentNullException(nameof(photonChanceManager));
+        this.photonJailManager = photonJailManager ?? throw new ArgumentNullException(nameof(photonJailManager));
+        this.photonTurnManager = photonTurnManager ?? throw new ArgumentNullException(nameof(photonTurnManager));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.photonNetworkWrapper = photonNetworkWrapper ?? throw new ArgumentNullException(nameof(photonNetworkWrapper));
     }
     public void Initialize()
     {
@@ -47,7 +47,7 @@ public class CellHandlerService : ICellHandler, IInitializable,IDisposable
         int cellIndex = e.CellID;
         if (cellIndex >= boardService.CellsCount) return;
 
-        var cellData = boardService.GetCellData(cellIndex);
+        var cellData = boardService.GetCellData(cellIndex) ?? throw new NullReferenceException(nameof(OnHandleCell)); ;
         switch (cellData.cellType)
         {
             case CellType.Company:

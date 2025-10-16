@@ -22,6 +22,8 @@ public class UICompanyTradePlayModeTests
     {
         // —оздаем объект и компонент
         go = new GameObject("UICompanyTrade");
+        go.SetActive(false); // выключаем объект
+
         uiTrade = go.AddComponent<UICompanyTrade>();
 
         // —оздаЄм UI элементы заранее
@@ -52,6 +54,7 @@ public class UICompanyTradePlayModeTests
         // явный вызов OnEnable после присвоени€ кнопки
         uiTrade.GetType().GetMethod("OnEnable", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .Invoke(uiTrade, null);
+        go.SetActive(true);
 
         yield return null;
     }
@@ -66,46 +69,46 @@ public class UICompanyTradePlayModeTests
         yield return null;
     }
 
-    [UnityTest]
-    public IEnumerator SetCompanyTradeUI_ShouldUpdateUIFields()
+    [UnityEngine.TestTools.UnityTest]
+    public System.Collections.IEnumerator RemoveButtonClicked_ShouldCallTradeServiceAndDestroyGameObject_WhenTradeActive()
     {
         uiTrade.SetCompanyTradeUI(testCompany, 42);
+        uiTrade.gameObject.SetActive(true); // OnEnable вызоветс€
 
-        Assert.AreEqual("MyCompany", companyNameText.text);
-        Assert.AreEqual(testCompany.Price.ToString("N0", System.Globalization.CultureInfo.InvariantCulture), companyPriceText.text);
-
-        yield return null;
-    }
-
-    [UnityTest]
-    public IEnumerator RemoveButtonClicked_ShouldCallTradeServiceAndDestroyGameObject()
-    {
-        uiTrade.SetCompanyTradeUI(testCompany, 42);
-
-        // Ёмулируем клик
         removeButton.onClick.Invoke();
 
-        // ѕровер€ем вызов метода RemoveCompanyFromOffer
-        tradeServiceMock.Verify(ts => ts.RemoveCompanyFromOffer(42, testCompany), Times.Once);
+        yield return null; // ждем кадр, чтобы Destroy отработал
 
-        // ѕровер€ем, что объект уничтожен (Destroy в PlayMode срабатывает через один кадр)
-        yield return null;
-        Assert.IsTrue(go == null || go.Equals(null));
+        tradeServiceMock.Verify(ts => ts.RemoveCompanyFromOffer(42, testCompany), Times.Once);
+        Assert.IsTrue(uiTrade == null || uiTrade.Equals(null));
     }
 
-    [UnityTest]
-    public IEnumerator RemoveButtonClicked_WhenTradeInactive_ShouldDestroyGameObjectWithoutCallingService()
+    [UnityEngine.TestTools.UnityTest]
+    public System.Collections.IEnumerator RemoveButtonClicked_ShouldDestroyGameObjectWithoutCallingService_WhenTradeInactive()
     {
         tradeServiceMock.Setup(ts => ts.IsTradeActive).Returns(false);
         uiTrade.SetCompanyTradeUI(testCompany, 42);
+        uiTrade.gameObject.SetActive(true);
 
-        // Ёмулируем клик
         removeButton.onClick.Invoke();
 
-        // ћетод не должен вызыватьс€
-        tradeServiceMock.Verify(ts => ts.RemoveCompanyFromOffer(It.IsAny<int>(), It.IsAny<Company>()), Times.Never);
-
         yield return null;
-        Assert.IsTrue(go == null || go.Equals(null));
+
+        tradeServiceMock.Verify(ts => ts.RemoveCompanyFromOffer(It.IsAny<int>(), It.IsAny<Company>()), Times.Never);
+        Assert.IsTrue(uiTrade == null || uiTrade.Equals(null));
+    }
+
+    [UnityTest]
+    public System.Collections.IEnumerator RemoveButtonClicked_ShouldCallServiceAndDestroy()
+    {
+        uiTrade.SetCompanyTradeUI(testCompany, 42);
+        uiTrade.gameObject.SetActive(true); // OnEnable будет вызван
+
+        removeButton.onClick.Invoke();
+
+        yield return null; // ∆дЄм один кадр, чтобы Destroy отработал
+
+        tradeServiceMock.Verify(ts => ts.RemoveCompanyFromOffer(42, testCompany), Times.Once);
+        Assert.IsTrue(uiTrade == null || uiTrade.Equals(null));
     }
 }

@@ -3,7 +3,7 @@ using System;
 
 public class PayRentPresenter : IInitializable, IDisposable
 {
-    private IPayRentWindow window;
+    private IPayRentWindow payRentWindow;
     private IPhotonCompanyManager photonCompanyManager;
     private IPlayerRepository playerRepository;
     private ILocalPlayerService localPlayerService;
@@ -15,12 +15,12 @@ public class PayRentPresenter : IInitializable, IDisposable
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IPayRentWindow window, IPhotonCompanyManager photonCompanyManager, IPlayerRepository playerRepository, ILocalPlayerService localPlayerService, IEventBus eventBus)
+    public void Construct(IPayRentWindow payRentWindow, IPhotonCompanyManager photonCompanyManager, IPlayerRepository playerRepository, ILocalPlayerService localPlayerService, IEventBus eventBus)
     {
-        this.window = window;
-        this.photonCompanyManager = photonCompanyManager;
-        this.playerRepository = playerRepository;
-        this.localPlayerService = localPlayerService;
+        this.payRentWindow = payRentWindow ?? throw new ArgumentNullException(nameof(payRentWindow));
+        this.photonCompanyManager = photonCompanyManager ?? throw new ArgumentNullException(nameof(photonCompanyManager));
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.localPlayerService = localPlayerService ?? throw new ArgumentNullException(nameof(localPlayerService));
         this.eventBus = eventBus;
     }
 
@@ -29,7 +29,7 @@ public class PayRentPresenter : IInitializable, IDisposable
         eventBus.Subscribe<OfferRentEvent>(ShowRentFor);
         eventBus.Subscribe<RentPaidEvent>(OnRentPaid);
 
-        window.SetPayAction(OnPayClicked);
+        payRentWindow.SetPayAction(OnPayClicked);
     }
 
     public void Dispose()
@@ -46,24 +46,24 @@ public class PayRentPresenter : IInitializable, IDisposable
     {
         currentPlayerId = e.PlayerId;
         currentCellIndex = e.CellIndex;
-        var player = playerRepository.GetPlayerById(e.PlayerId);
+        var player = playerRepository.GetPlayerById(e.PlayerId) ?? throw new InvalidOperationException(nameof(ShowRentFor));
         bool canPay = player.Money >= e.Rent;
         int localId = localPlayerService.GetLocalPlayerId();
 
         if (e.PlayerId == localId)
         {
-            window.Show(e.PlayerId, e.CellIndex, e.Rent, canPay);
+            payRentWindow.Show(e.PlayerId, e.CellIndex, e.Rent, canPay);
         }
         else
         {
-            window.HardHide();
+            payRentWindow.HardHide();
         }
     }
 
     private void OnRentPaid(RentPaidEvent e)
     {
         if (e.PlayerId == currentPlayerId && e.CellIndex == currentCellIndex)
-            window.Hide();
+            payRentWindow.Hide();
     }
 
     private void OnPayClicked()

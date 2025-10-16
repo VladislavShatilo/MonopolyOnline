@@ -78,13 +78,10 @@ public class UICompanyCellPresenterTests
         };
         mockCompanyRepo.Setup(r => r.GetCompanyById(1)).Returns(company);
         mockCompanyRepo.Setup(r => r.GetByGroup(companyGroup)).Returns(new[] { company });
-
         mockUIRepo.Setup(u => u.GetByCompanyId(1)).Returns((IUICompanyCellView)null);
 
-        subscribedAction?.Invoke(new CompanyBoughtEvent(1, 42));
-
-        // Проверяем, что ошибок не возникло и UI не вызван
-        mockUIRepo.Verify(u => u.GetByCompanyId(1), Times.Once);
+        Assert.Throws<NullReferenceException>(() =>
+            subscribedAction?.Invoke(new CompanyBoughtEvent(1, 42)));
     }
 
     [Test]
@@ -111,4 +108,172 @@ public class UICompanyCellPresenterTests
         mockView.Verify(v => v.UpdateOwner(It.IsAny<Color>()), Times.Once);
         mockView.Verify(v => v.SetRentText(100), Times.Once);
     }
+    #region ADDITIONAL TESTS FOR FULL COVERAGE
+
+    [Test]
+    public void Construct_ShouldThrow_WhenPlayerRepositoryIsNull()
+    {
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+            new UICompanyCellPresenter().Construct(
+                null,
+                Mock.Of<ICompanyRepository>(),
+                Mock.Of<IUICompanyCellRepository>(),
+                Mock.Of<ICompanyService>(),
+                Mock.Of<IEventBus>())
+        );
+        Assert.That(ex.ParamName, Is.EqualTo("playerRepository"));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenCompanyRepositoryIsNull()
+    {
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+            new UICompanyCellPresenter().Construct(
+                Mock.Of<IPlayerRepository>(),
+                null,
+                Mock.Of<IUICompanyCellRepository>(),
+                Mock.Of<ICompanyService>(),
+                Mock.Of<IEventBus>())
+        );
+        Assert.That(ex.ParamName, Is.EqualTo("companyRepository"));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenUIRepositoryIsNull()
+    {
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+            new UICompanyCellPresenter().Construct(
+                Mock.Of<IPlayerRepository>(),
+                Mock.Of<ICompanyRepository>(),
+                null,
+                Mock.Of<ICompanyService>(),
+                Mock.Of<IEventBus>())
+        );
+        Assert.That(ex.ParamName, Is.EqualTo("uiRepository"));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenCompanyServiceIsNull()
+    {
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+            new UICompanyCellPresenter().Construct(
+                Mock.Of<IPlayerRepository>(),
+                Mock.Of<ICompanyRepository>(),
+                Mock.Of<IUICompanyCellRepository>(),
+                null,
+                Mock.Of<IEventBus>())
+        );
+        Assert.That(ex.ParamName, Is.EqualTo("companyService"));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenEventBusIsNull()
+    {
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+            new UICompanyCellPresenter().Construct(
+                Mock.Of<IPlayerRepository>(),
+                Mock.Of<ICompanyRepository>(),
+                Mock.Of<IUICompanyCellRepository>(),
+                Mock.Of<ICompanyService>(),
+                null)
+        );
+        Assert.That(ex.ParamName, Is.EqualTo("eventBus"));
+    }
+
+    [Test]
+    public void Initialize_ShouldSubscribeToEvent()
+    {
+        var mockEventBus = new Mock<IEventBus>();
+        var presenter = new UICompanyCellPresenter();
+        presenter.Construct(
+            Mock.Of<IPlayerRepository>(),
+            Mock.Of<ICompanyRepository>(),
+            Mock.Of<IUICompanyCellRepository>(),
+            Mock.Of<ICompanyService>(),
+            mockEventBus.Object
+        );
+
+        presenter.Initialize();
+
+        mockEventBus.Verify(e => e.Subscribe<CompanyBoughtEvent>(It.IsAny<Action<CompanyBoughtEvent>>()), Times.Once);
+    }
+
+    [Test]
+    public void Dispose_ShouldUnsubscribeFromEvent()
+    {
+        var mockEventBus = new Mock<IEventBus>();
+        var presenter = new UICompanyCellPresenter();
+        presenter.Construct(
+            Mock.Of<IPlayerRepository>(),
+            Mock.Of<ICompanyRepository>(),
+            Mock.Of<IUICompanyCellRepository>(),
+            Mock.Of<ICompanyService>(),
+            mockEventBus.Object
+        );
+
+        presenter.Initialize();
+        presenter.Dispose();
+
+        mockEventBus.Verify(e => e.Unsubscribe<CompanyBoughtEvent>(It.IsAny<Action<CompanyBoughtEvent>>()), Times.Once);
+    }
+
+    [Test]
+    public void CompanyBoughtUpdate_ShouldThrow_WhenGetByGroupReturnsNull()
+    {
+        var company = new Company(1, new CompanyData())
+        {
+            OwnerId = 42,
+            Group = new CompanyGroup()
+        };
+
+        mockCompanyRepo.Setup(r => r.GetCompanyById(1)).Returns(company);
+        mockCompanyRepo.Setup(r => r.GetByGroup(company.Group)).Returns((IEnumerable<Company>)null);
+
+        Assert.Throws<NullReferenceException>(() =>
+            subscribedAction?.Invoke(new CompanyBoughtEvent(1, 42)));
+    }
+
+    [Test]
+    public void CompanyBoughtUpdate_ShouldThrow_WhenPlayerIsNull()
+    {
+        var group = new CompanyGroup();
+        var company = new Company(1, new CompanyData())
+        {
+            OwnerId = 42,
+            Group = group
+        };
+
+        mockCompanyRepo.Setup(r => r.GetCompanyById(1)).Returns(company);
+        mockCompanyRepo.Setup(r => r.GetByGroup(group)).Returns(new[] { company });
+        mockPlayerRepo.Setup(r => r.GetPlayerById(42)).Returns((PlayerData)null);
+
+        var mockView = new Mock<IUICompanyCellView>();
+        mockUIRepo.Setup(r => r.GetByCompanyId(1)).Returns(mockView.Object);
+
+        Assert.Throws<NullReferenceException>(() =>
+            subscribedAction?.Invoke(new CompanyBoughtEvent(1, 42)));
+    }
+
+    [Test]
+    public void CompanyBoughtUpdate_ShouldThrow_WhenViewIsNull()
+    {
+        var group = new CompanyGroup();
+        var company = new Company(1, new CompanyData())
+        {
+            OwnerId = 42,
+            Group = group
+        };
+        var player = new PlayerData("p1", 1000, 42, null);
+
+        mockCompanyRepo.Setup(r => r.GetCompanyById(1)).Returns(company);
+        mockCompanyRepo.Setup(r => r.GetByGroup(group)).Returns(new[] { company });
+        mockPlayerRepo.Setup(r => r.GetPlayerById(42)).Returns(player);
+        mockUIRepo.Setup(r => r.GetByCompanyId(1)).Returns((IUICompanyCellView)null);
+
+        Assert.Throws<NullReferenceException>(() =>
+            subscribedAction?.Invoke(new CompanyBoughtEvent(1, 42)));
+    }
+
+    #endregion
+
 }

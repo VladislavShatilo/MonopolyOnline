@@ -175,4 +175,36 @@ public class CellHandlerServiceTests
 
         mockTurnManager.Verify(t => t.RequestEndTurn(), Times.Once);
     }
+
+    [Test]
+    public void OnHandleCell_ShouldNotEndTurn_WhenCornerTypeIsCasinoAndNotMasterClient()
+    {
+        mockBoardService.Setup(b => b.CellsCount).Returns(10);
+        mockBoardService.Setup(b => b.GetCellData(5)).Returns(new CellData
+        {
+            cellType = CellType.Corner,
+            cornerData = new CornerData { type = CornerType.Caisno }
+        });
+
+        mockPhotonNetwork.Setup(p => p.IsMasterClient).Returns(false);
+
+        var e = new HandleCellEvent(5, 10);
+
+        service.OnHandleCell(e);
+
+        mockTurnManager.Verify(t => t.RequestEndTurn(), Times.Never);
+    }
+
+    [Test]
+    public void OnHandleCell_ShouldThrow_WhenCellDataIsNull()
+    {
+        mockBoardService.Setup(b => b.CellsCount).Returns(10);
+        mockBoardService.Setup(b => b.GetCellData(3)).Returns((CellData)null);
+
+        var e = new HandleCellEvent(3, 7);
+
+        Assert.Throws<NullReferenceException>(() => service.OnHandleCell(e));
+    }
+
+
 }

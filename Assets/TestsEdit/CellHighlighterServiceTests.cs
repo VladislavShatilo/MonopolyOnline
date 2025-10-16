@@ -1,6 +1,7 @@
-using NUnit.Framework;
-using UnityEngine;
 using Moq;
+using NUnit.Framework;
+using System;
+using UnityEngine;
 
 public class CellHighlighterServiceTests 
 {
@@ -67,5 +68,13 @@ public class CellHighlighterServiceTests
         Assert.AreEqual(45f, rect.position.x - 0f); // исходная позиция 0,0 + distanceCorrection
         Assert.AreEqual(-45f, rect.position.y - 0f);
     }
+    [Test]
+    public void ShowHighlight_ShouldThrow_WhenBoardServiceReturnsNull()
+    {
+        boardServiceMock.Setup(b => b.GetCellGameObject(It.IsAny<int>())).Returns((GameObject)null);
+
+        Assert.Throws<InvalidOperationException>(() => highlighterService.ShowHighlight(1));
+    }
+ 
 
 }

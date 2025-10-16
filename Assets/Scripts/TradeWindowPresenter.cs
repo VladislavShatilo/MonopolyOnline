@@ -17,13 +17,13 @@ public class TradeWindowPresenter : IInitializable, IDisposable
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(ITradeWindow view, ILocalPlayerService localPlayerService, IEventBus eventBus, IPhotonTradeManager photonTradeManager, ITurnWindow turnWindow)
+    public void Construct(ITradeWindow tradeView, ILocalPlayerService localPlayerService, IEventBus eventBus, IPhotonTradeManager photonTradeManager, ITurnWindow turnWindow)
     {
-        this.tradeWindow = view;
-        this.localPlayerService = localPlayerService;
-        this.eventBus = eventBus;
-        this.photonTradeManager = photonTradeManager;
-        this.turnWindow = turnWindow;
+        this.tradeWindow = tradeView ?? throw new ArgumentNullException(nameof(tradeWindow));
+        this.localPlayerService = localPlayerService ?? throw new ArgumentNullException(nameof(localPlayerService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.photonTradeManager = photonTradeManager ?? throw new ArgumentNullException(nameof(photonTradeManager));
+        this.turnWindow = turnWindow ?? throw new ArgumentNullException(nameof(turnWindow));
     }
 
     public void Initialize()

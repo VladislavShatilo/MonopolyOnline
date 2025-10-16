@@ -1,6 +1,8 @@
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
 using Photon.Pun;
+using System;
+using System.Reflection;
 using UnityEngine;
 
 public class PhotonBankNotifierTests
@@ -59,4 +61,59 @@ public class PhotonBankNotifierTests
 
         eventBusMock.Verify(e => e.Publish(It.Is<OnUpdatePlayerMoneyEvent>(evt => evt.Player == player)), Times.Once);
     }
+
+    #region Construct Tests
+
+    [Test]
+    public void Construct_ShouldThrow_WhenPlayerRepositoryNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            bankNotifier.Construct(null, eventBusMock.Object, photonViewWrapperMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenEventBusNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            bankNotifier.Construct(playerRepositoryMock.Object, null, photonViewWrapperMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenPhotonViewWrapperNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            bankNotifier.Construct(playerRepositoryMock.Object, eventBusMock.Object, null));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenPhotonViewNull()
+    {
+        var go = new GameObject();
+        var notifier = go.AddComponent<PhotonBankNotifier>();
+        // удаляем PhotonView
+        GameObject.DestroyImmediate(go.GetComponent<PhotonView>());
+        Assert.Throws<NullReferenceException>(() =>
+            notifier.Construct(playerRepositoryMock.Object, eventBusMock.Object, photonViewWrapperMock.Object));
+    }
+
+    #endregion
+
+  
+    #region RPC_UpdateMoney Tests
+
+
+    [Test]
+    public void RPC_UpdateMoney_ShouldThrow_WhenPlayerNotFound()
+    {
+        bankNotifier.Construct(playerRepositoryMock.Object, eventBusMock.Object, photonViewWrapperMock.Object);
+
+        playerRepositoryMock.Setup(r => r.GetPlayerById(It.IsAny<int>())).Returns((PlayerData)null);
+
+        var method = typeof(PhotonBankNotifier)
+            .GetMethod("RPC_UpdateMoney", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        Assert.Throws<TargetInvocationException>(() => method.Invoke(bankNotifier, new object[] { 1, 500 }));
+    }
+
+    #endregion
 }

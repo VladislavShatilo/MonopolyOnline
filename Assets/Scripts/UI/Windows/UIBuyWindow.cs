@@ -1,5 +1,6 @@
 using DG.Tweening;
 using Photon.Pun;
+using System;
 using System.Globalization;
 using TMPro;
 using UnityEngine;
@@ -17,6 +18,23 @@ public class UIBuyWindow : UIWindowBase,IBuyWindow
     [SerializeField] private TextMeshProUGUI cantBuyButtonText;
 
     private int currentCellIndex;
+    #region LIFE_CYCLE
+
+    private void Start()
+    {
+        if (buyButton == null)
+            throw new ArgumentNullException(nameof(buyButton));
+        if (cantBuyButton == null)
+            throw new ArgumentNullException(nameof(cantBuyButton));
+        if (auctionButton == null)
+            throw new ArgumentNullException(nameof(auctionButton));
+        if (buyButtonText == null)
+            throw new ArgumentNullException(nameof(buyButtonText));
+        if (cantBuyButtonText == null)
+            throw new ArgumentNullException(nameof(cantBuyButtonText));
+      
+    }
+    #endregion LIFE_CYCLE
 
     #region PUBLIC_METHODS
 

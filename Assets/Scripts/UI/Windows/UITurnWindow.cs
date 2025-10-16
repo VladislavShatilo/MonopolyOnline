@@ -1,5 +1,6 @@
 using DG.Tweening;
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -14,6 +15,23 @@ public class UITurnWindow : UIWindowBase,ITurnWindow
     [Header("Cheat")]
     [SerializeField] private TMP_InputField inputField1;
     [SerializeField] private TMP_InputField inputField2;
+
+    #region LIFE_CYCLE
+
+    private void Start()
+    {
+        if (throwDiceButton == null)
+            throw new ArgumentNullException(nameof(throwDiceButton));
+        if (inputField1 == null)
+            throw new ArgumentNullException(nameof(inputField1));
+        if (inputField2 == null)
+            throw new ArgumentNullException(nameof(inputField2));
+ 
+
+    }
+
+    #endregion LIFE_CYCLE
+
 
     #region PUBLIC_METHODS
 

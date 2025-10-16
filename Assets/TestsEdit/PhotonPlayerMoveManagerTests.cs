@@ -1,6 +1,7 @@
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
 using Photon.Pun;
+using System;
 using UnityEngine;
 
 [TestFixture]
@@ -36,7 +37,7 @@ public class PhotonPlayerMoveManagerTests
     [TearDown]
     public void TearDown()
     {
-        Object.DestroyImmediate(go);
+       UnityEngine.Object.DestroyImmediate(go);
     }
 
     [Test]
@@ -109,4 +110,22 @@ public class PhotonPlayerMoveManagerTests
 
         playerMoveUseCaseMock.Verify(p => p.MovePlayer(1, 3, true), Times.Once);
     }
+    [Test]
+    public void OnEnable_ShouldSubscribeToEvent()
+    {
+        var method = typeof(PhotonPlayerMoveManager).GetMethod("OnEnable", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method.Invoke(manager, null);
+
+        eventBusMock.Verify(e => e.Subscribe<OnPlayerMoveEvent>(It.IsAny<Action<OnPlayerMoveEvent>>()), Times.Once);
+    }
+
+    [Test]
+    public void OnDisable_ShouldUnsubscribeFromEvent()
+    {
+        var method = typeof(PhotonPlayerMoveManager).GetMethod("OnDisable", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method.Invoke(manager, null);
+
+        eventBusMock.Verify(e => e.Unsubscribe<OnPlayerMoveEvent>(It.IsAny<Action<OnPlayerMoveEvent>>()), Times.Once);
+    }
+
 }

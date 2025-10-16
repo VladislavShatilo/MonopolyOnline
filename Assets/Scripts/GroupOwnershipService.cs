@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ public class GroupOwnershipService : IGroupOwnershipService
     [Inject]
     public void Construct(ICompanyRepository companyRepository)
     {
-        this.companyRepository = companyRepository;
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
     }
 
     #endregion LIFE_CYCLE

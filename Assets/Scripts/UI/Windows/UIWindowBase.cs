@@ -8,16 +8,26 @@ public abstract class UIWindowBase: MonoBehaviour
 
     public virtual void ShowWindow()
     {
-        windowAnimation?.ShowWindow();
+        if (windowAnimation != null)
+        {
+            windowAnimation.ShowWindow();
+        }
     }
 
     public virtual void HideWindow()
     {
-        windowAnimation?.HideWindow();
+        if (windowAnimation != null)
+        {
+            windowAnimation.HideWindow();
+        }
     }
     public virtual void HardHideWindow()
     {
-        windowAnimation?.HardHideWindow();
+        if (windowAnimation != null)
+        {
+            windowAnimation.HardHideWindow();
+
+        }
     }
 
     #endregion PUBLIC_METHODS

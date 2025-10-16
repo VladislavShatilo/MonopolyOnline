@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -12,6 +13,8 @@ public class UICornerCell : UICellBase
 
     public override void UpdateUI(CellData cellData, PlayerData owner)
     {
+        if (logoImage == null)
+            throw new ArgumentNullException(nameof(logoImage));
         var corner = cellData.cornerData;
         logoImage.sprite = corner.logoSprite;
     }

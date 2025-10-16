@@ -1,25 +1,31 @@
+using System;
 using System.Globalization;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Zenject;
+
 public interface ICompanyStatsUI<TData>
 {
     void SetData(TData data);
 }
+
 public class CompanyUIManager : MonoBehaviour
 {
     [Header("Windows")]
     [SerializeField] private RectTransform companyInfoWindow;
+
     [SerializeField] private RectTransform fieldCompanyInfoWindow;
     [SerializeField] private RectTransform diceCompanyInfoWindow;
 
     [Header("Stats Panels")]
     [SerializeField] private UICompanyStats statsCompanyPanel;
+
     [SerializeField] private UIFieldCompanyStats statsFieldCompanyPanel;
     [SerializeField] private UIDiceStats statsDiceCompanyPanel;
 
     [Header("Settings")]
     [SerializeField] private float cellWidth = 70;
+
     [SerializeField] private float offset = 80;
 
     private IEventBus eventBus;
@@ -27,9 +33,8 @@ public class CompanyUIManager : MonoBehaviour
     [Inject]
     public void Construct(IEventBus eventBus)
     {
-        this.eventBus = eventBus;
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
     }
-
 
     private void Update()
     {
@@ -41,6 +46,7 @@ public class CompanyUIManager : MonoBehaviour
             HandleClick(Input.GetTouch(0).position);
 #endif
     }
+
     private void OnEnable()
     {
         eventBus.Subscribe<ShowCompanyWindowEvent>(OnShowCompanyWindow);
@@ -54,6 +60,7 @@ public class CompanyUIManager : MonoBehaviour
         eventBus.Unsubscribe<ShowFieldCompanyWindowEvent>(OnShowFieldCompanyWindow);
         eventBus.Unsubscribe<ShowDiceCompanyWindowEvent>(OnShowDiceCompanyWindow);
     }
+
     private void HandleClick(Vector2 screenPosition)
     {
         if (!IsInsideAnyWindow(screenPosition))
@@ -120,6 +127,7 @@ public class CompanyUIManager : MonoBehaviour
         // Активируем текущее окно
         window.gameObject.SetActive(true);
     }
+
     private void OnShowCompanyWindow(ShowCompanyWindowEvent e)
     {
         ShowWindow(companyInfoWindow, statsCompanyPanel, e.Cell, e.Position, e.Data);
@@ -134,8 +142,4 @@ public class CompanyUIManager : MonoBehaviour
     {
         ShowWindow(diceCompanyInfoWindow, statsDiceCompanyPanel, e.Cell, e.Position, e.Data);
     }
-
-
-
-
 }

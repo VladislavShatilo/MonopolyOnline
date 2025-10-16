@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -23,6 +24,7 @@ public class MessageLogView : MonoBehaviour, IMessageLogView
 
     private void Start()
     {
+        if (sendButton == null || chatInputField == null || contentTransform == null || messagePrefab == null) throw new NullReferenceException(nameof(MessageLogView));
         sendButton.gameObject.SetActive(false);
         sendButton.onClick.AddListener(() => OnSendMessage(chatInputField.text));
         chatInputField.onValueChanged.AddListener(OnInputChanged);
@@ -35,6 +37,8 @@ public class MessageLogView : MonoBehaviour, IMessageLogView
 
     public void AddMessage(string formattedText)
     {
+        if (contentTransform == null || messagePrefab == null) return;
+
         var newMsg = Instantiate(messagePrefab, contentTransform);
         newMsg.text = formattedText;
         messages.Enqueue(newMsg);
@@ -52,15 +56,22 @@ public class MessageLogView : MonoBehaviour, IMessageLogView
 
     private void OnInputChanged(string text)
     {
-        sendButton.gameObject.SetActive(!string.IsNullOrWhiteSpace(text));
+        if(sendButton != null)
+        {
+            sendButton.gameObject.SetActive(!string.IsNullOrWhiteSpace(text));
+        }
     }
 
     private void OnSendMessage(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return;
         OnSendClicked?.Invoke(text);
-        chatInputField.text = "";
-        chatInputField.ActivateInputField();
+        if (chatInputField != null)
+        {
+            chatInputField.text = "";
+            chatInputField.ActivateInputField();
+        }
+       
     }
 
     #endregion CALLBACKS

@@ -17,10 +17,10 @@ public class TurnCompanyUIAdapter: IInitializable,IDisposable
     public void Construct(ITurnCompanyUIUseCase turnUIUseCase, IEventBus eventBus, ICompanyUIService companyUIService,
         ICompanyRepository companyRepository)
     {
-        this.eventBus = eventBus;
-        this.turnUIUseCase = turnUIUseCase;
-        this.companyUIService = companyUIService;
-        this.companyRepository = companyRepository;
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.turnUIUseCase = turnUIUseCase ?? throw new ArgumentNullException(nameof(turnUIUseCase));
+        this.companyUIService = companyUIService ?? throw new ArgumentNullException(nameof(companyUIService));
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
     }
     public void Initialize()
     {
@@ -42,8 +42,7 @@ public class TurnCompanyUIAdapter: IInitializable,IDisposable
 
         foreach (var action in actions)
         {
-            var ui = companyUIService.GetCompanyUI(action.CompanyId);
-            if (ui == null) continue;
+            var ui = companyUIService.GetCompanyUI(action.CompanyId) ?? throw new NullReferenceException(nameof(OnTurnStart));
 
             switch (action.ActionType)
             {
@@ -54,7 +53,7 @@ public class TurnCompanyUIAdapter: IInitializable,IDisposable
                     ui.ShowBuyoutButton();
                     break;
                 case CompanyActionType.ManageBranches:
-                    var company = companyRepository.GetCompanyById(action.CompanyId);
+                    var company = companyRepository.GetCompanyById(action.CompanyId) ?? throw new NullReferenceException(nameof(OnTurnStart));
                     switch (company.RentLevel)
                     {
                         case 0: ui.ShowBuyFirstBranchButton(); break;

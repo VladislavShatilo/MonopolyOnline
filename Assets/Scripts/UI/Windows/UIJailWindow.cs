@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -18,6 +19,23 @@ public class UIJailWindow : UIWindowBase, IJailWindow
 
     private int currentPlayerId;
 
+    #region LIFE_CYCLE
+
+    private void Start()
+    {
+        if (ransomButton == null)
+            throw new ArgumentNullException(nameof(ransomButton));
+        if (cantRansomButton == null)
+            throw new ArgumentNullException(nameof(cantRansomButton));
+        if (throwDiceButton == null)
+            throw new ArgumentNullException(nameof(throwDiceButton));
+        if (ransomText == null)
+            throw new ArgumentNullException(nameof(ransomText));
+        if (cantRansomText == null)
+            throw new ArgumentNullException(nameof(cantRansomText));
+
+    }
+    #endregion LIFE_CYCLE
     #region PUBLIC_METHODS
 
     public void Show(int playerId, int ransomMoney, bool canAfford)

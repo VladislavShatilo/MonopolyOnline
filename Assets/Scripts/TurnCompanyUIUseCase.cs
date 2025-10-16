@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,9 +22,9 @@ public class TurnCompanyUIUseCase: ITurnCompanyUIUseCase
     [Inject]
     public void Construct(ICompanyRepository companyRepository, IGroupOwnershipService groupOwnershipService, ILocalPlayerService localPlayerService)
     {
-        this.companyRepository = companyRepository;
-        this.groupOwnershipService = groupOwnershipService;
-        this.localPlayerService = localPlayerService;
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
+        this.groupOwnershipService = groupOwnershipService ?? throw new ArgumentNullException(nameof(groupOwnershipService));
+        this.localPlayerService = localPlayerService ?? throw new ArgumentNullException(nameof(localPlayerService));
     }
 
     #endregion LIFE_CYCLE

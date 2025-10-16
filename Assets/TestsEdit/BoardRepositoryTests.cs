@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,6 +22,7 @@ public class BoardRepositoryTests
         boardRepository.Construct(config);
     }
 
+    // ===== GetAllCells =====
     [Test]
     public void GetAllCells_ShouldReturnAllCells()
     {
@@ -32,13 +34,18 @@ public class BoardRepositoryTests
     }
 
     [Test]
+    public void GetAllCells_ReturnedList_ShouldBeReadOnly()
+    {
+        var cells = boardRepository.GetAllCells();
+        Assert.IsInstanceOf<IReadOnlyList<CellData>>(cells);
+    }
+
+    // ===== GetCell =====
+    [Test]
     public void GetCell_ValidId_ShouldReturnCorrectCell()
     {
-        var cell = boardRepository.GetCell(0);
-        Assert.AreEqual(cell1, cell);
-
-        cell = boardRepository.GetCell(1);
-        Assert.AreEqual(cell2, cell);
+        Assert.AreEqual(cell1, boardRepository.GetCell(0));
+        Assert.AreEqual(cell2, boardRepository.GetCell(1));
     }
 
     [Test]
@@ -48,11 +55,52 @@ public class BoardRepositoryTests
         Assert.IsNull(boardRepository.GetCell(2)); // index out of range
     }
 
+    // ===== Construct =====
     [Test]
-    public void GetAllCells_ReturnedList_ShouldBeReadOnly()
+    public void Construct_WithEmptyList_ShouldCreateEmptyRepository()
     {
-        var cells = boardRepository.GetAllCells();
+        var emptyConfig = new BoardConfig { cells = new List<CellData>() };
+        var repo = new BoardRepository();
+        repo.Construct(emptyConfig);
 
-        Assert.IsInstanceOf<IReadOnlyList<CellData>>(cells);
+        var cells = repo.GetAllCells();
+        Assert.IsNotNull(cells);
+        Assert.AreEqual(0, cells.Count);
+    }
+
+    [Test]
+    public void Construct_WithNullList_ShouldThrowArgumentNullException()
+    {
+        var configWithNullList = new BoardConfig { cells = null };
+        var repo = new BoardRepository();
+
+        Assert.Throws<ArgumentNullException>(() => repo.Construct(configWithNullList));
+    }
+
+    [Test]
+    public void Construct_WithNullConfig_ShouldThrowArgumentNullException()
+    {
+        var repo = new BoardRepository();
+        Assert.Throws<ArgumentNullException>(() => repo.Construct(null));
+    }
+
+    [Test]
+    public void ModifyingOriginalList_ShouldNotAffectRepository()
+    {
+        var cell1 = new CellData();
+        var cell2 = new CellData();
+        var originalList = new List<CellData> { cell1, cell2 };
+        var configCopy = new BoardConfig { cells = originalList };
+
+        var repo = new BoardRepository();
+        repo.Construct(configCopy);
+
+        // »змен€ем оригинальный список после конструктора
+        originalList.Clear();
+
+        var cells = repo.GetAllCells();
+        Assert.AreEqual(2, cells.Count);
+        Assert.AreEqual(cell1, cells[0]);
+        Assert.AreEqual(cell2, cells[1]);
     }
 }

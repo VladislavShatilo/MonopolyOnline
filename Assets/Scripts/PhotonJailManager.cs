@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,11 +18,13 @@ public class PhotonJailManager : MonoBehaviourPun, IPhotonJailManager
     [Inject]
     public void Construct(IJailService jailService, IEventBus eventBus, IPhotonTurnManager photonTurnManager, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
-        this.jailService = jailService;
-        this.eventBus = eventBus;
-        this.photonTurnManager = photonTurnManager;
-        this.photonNetworkWrapper = photonNetworkWrapper;
-        this.photonViewWrapper = photonViewWrapper;
+        this.jailService = jailService ?? throw new ArgumentNullException(nameof(jailService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.photonTurnManager = photonTurnManager ?? throw new ArgumentNullException(nameof(photonTurnManager));
+        this.photonNetworkWrapper = photonNetworkWrapper ?? throw new ArgumentNullException(nameof(photonNetworkWrapper));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
+        if (photonView == null) throw new NullReferenceException(nameof(photonView));
+
     }
 
     #endregion LIFE_CYCLE

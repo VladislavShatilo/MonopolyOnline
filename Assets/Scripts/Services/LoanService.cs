@@ -18,14 +18,14 @@ public class LoanService : ILoanService,IInitializable,IDisposable
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IPlayerRepository playerRepository, IPhotonLoanManager network, IBankService bankService, IEventBus eventBus, GameSettings gameSettings, IPhotonNetworkWrapper photonNetworkWrapper)
+    public void Construct(IPlayerRepository playerRepository, IPhotonLoanManager photonLoanManager, IBankService bankService, IEventBus eventBus, GameSettings gameSettings, IPhotonNetworkWrapper photonNetworkWrapper)
     {
-        this.playerRepository = playerRepository;
-        this.photonLoanManager = network;
-        this.bankService = bankService;
-        this.eventBus = eventBus;
-        this.gameSettings = gameSettings;
-        this.photonNetworkWrapper = photonNetworkWrapper;
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.photonLoanManager = photonLoanManager ?? throw new ArgumentNullException(nameof(photonLoanManager));
+        this.bankService = bankService ?? throw new ArgumentNullException(nameof(bankService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.gameSettings = gameSettings ?? throw new ArgumentNullException(nameof(gameSettings));
+        this.photonNetworkWrapper = photonNetworkWrapper ?? throw new ArgumentNullException(nameof(photonNetworkWrapper));
 
     }
     public void Initialize()
@@ -47,7 +47,7 @@ public class LoanService : ILoanService,IInitializable,IDisposable
         {
             bankService.AddMoney(playerId, gameSettings.loanAmount);
         }
-        var player = playerRepository.GetPlayerById(playerId);
+        var player = playerRepository.GetPlayerById(playerId) ?? throw new InvalidOperationException(nameof(TakeLoanConfirmed));
 
         player.HasLoan = true;
         player.LoanTurnsLeft = 1;
@@ -62,7 +62,7 @@ public class LoanService : ILoanService,IInitializable,IDisposable
         {
             bankService.RemoveMoney(playerId, gameSettings.loanAmountBack);
         }
-        var player = playerRepository.GetPlayerById(playerId);
+        var player = playerRepository.GetPlayerById(playerId) ?? throw new InvalidOperationException(nameof(PayLoanConfirmed));
 
         player.HasLoan = false;
         player.LoanTurnsLeft = 0;
@@ -77,7 +77,7 @@ public class LoanService : ILoanService,IInitializable,IDisposable
 
     private void OnPlayerTurnStart(OnStartTurnLoanEvent e)
     {
-        var player = playerRepository.GetPlayerById(e.PlayerId);
+        var player = playerRepository.GetPlayerById(e.PlayerId) ?? throw new InvalidOperationException(nameof(OnPlayerTurnStart));
         if (!player.HasLoan) return;
 
         player.LoanTurnsLeft--;

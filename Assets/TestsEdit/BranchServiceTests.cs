@@ -1,8 +1,9 @@
 using NUnit.Framework;
 using Moq;
+using System;
 
 [TestFixture]
-public class BranchServiceTests
+public class BranchServiceFullTests
 {
     private BranchService branchService;
     private Mock<ICompanyRepository> companyRepository;
@@ -32,6 +33,8 @@ public class BranchServiceTests
         playerRepository.Setup(r => r.GetPlayerById(1)).Returns(player);
     }
 
+    #region TryBuyBranch Tests
+
     [Test]
     public void TryBuyBranch_ShouldIncreaseRentLevel_WhenValid()
     {
@@ -42,25 +45,25 @@ public class BranchServiceTests
     }
 
     [Test]
-    public void TryBuyBranch_ShouldFail_WhenCompanyIsNull()
+    public void TryBuyBranch_ShouldIncreaseToMaxLevel_WhenAtMaxMinusOne()
     {
-        companyRepository.Setup(r => r.GetCompanyById(2)).Returns((Company)null);
+        company.RentLevel = gameSettings.maxBranchLevel - 1;
 
-        bool result = branchService.TryBuyBranch(2, 1, out var resultCompany);
+        bool result = branchService.TryBuyBranch(1, 1, out var resultCompany);
 
-        Assert.IsFalse(result);
-        Assert.IsNull(resultCompany);
+        Assert.IsTrue(result);
+        Assert.AreEqual(gameSettings.maxBranchLevel, resultCompany.RentLevel);
     }
 
     [Test]
-    public void TryBuyBranch_ShouldFail_WhenPlayerIsNull()
+    public void TryBuyBranch_ShouldFail_WhenMaxLevelReached()
     {
-        playerRepository.Setup(r => r.GetPlayerById(2)).Returns((PlayerData)null);
+        company.RentLevel = gameSettings.maxBranchLevel;
 
-        bool result = branchService.TryBuyBranch(1, 2, out var resultCompany);
+        bool result = branchService.TryBuyBranch(1, 1, out var resultCompany);
 
         Assert.IsFalse(result);
-        Assert.AreEqual(company, resultCompany); // компания всё равно возвращается
+        Assert.AreEqual(gameSettings.maxBranchLevel, resultCompany.RentLevel);
     }
 
     [Test]
@@ -71,19 +74,30 @@ public class BranchServiceTests
         bool result = branchService.TryBuyBranch(1, 1, out var resultCompany);
 
         Assert.IsFalse(result);
-        Assert.AreEqual(1, resultCompany.RentLevel); // уровень не меняется
+        Assert.AreEqual(1, resultCompany.RentLevel);
     }
 
     [Test]
-    public void TryBuyBranch_ShouldFail_WhenMaxLevelReached()
+    public void TryBuyBranch_ShouldThrow_WhenCompanyNull()
     {
-        company.RentLevel = 3;
+        companyRepository.Setup(r => r.GetCompanyById(99)).Returns((Company)null);
 
-        bool result = branchService.TryBuyBranch(1, 1, out var resultCompany);
-
-        Assert.IsFalse(result);
-        Assert.AreEqual(3, resultCompany.RentLevel);
+        Assert.Throws<InvalidOperationException>(() =>
+            branchService.TryBuyBranch(99, 1, out var resultCompany));
     }
+
+    [Test]
+    public void TryBuyBranch_ShouldThrow_WhenPlayerNull()
+    {
+        playerRepository.Setup(r => r.GetPlayerById(99)).Returns((PlayerData)null);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            branchService.TryBuyBranch(1, 99, out var resultCompany));
+    }
+
+    #endregion
+
+    #region TrySellBranch Tests
 
     [Test]
     public void TrySellBranch_ShouldDecreaseRentLevel_WhenValid()
@@ -120,13 +134,34 @@ public class BranchServiceTests
     }
 
     [Test]
-    public void TrySellBranch_ShouldFail_WhenCompanyIsNull()
+    public void TrySellBranch_ShouldThrow_WhenCompanyNull()
     {
-        companyRepository.Setup(r => r.GetCompanyById(2)).Returns((Company)null);
+        companyRepository.Setup(r => r.GetCompanyById(99)).Returns((Company)null);
 
-        bool result = branchService.TrySellBranch(2, 1, out var resultCompany);
+        Assert.Throws<InvalidOperationException>(() =>
+            branchService.TrySellBranch(99, 1, out var resultCompany));
+    }
+
+    [Test]
+    public void TrySellBranch_ShouldThrow_WhenPlayerNull()
+    {
+        playerRepository.Setup(r => r.GetPlayerById(99)).Returns((PlayerData)null);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            branchService.TrySellBranch(1, 99, out var resultCompany));
+    }
+
+    [Test]
+    public void TrySellBranch_AtZeroLevel_ShouldReturnSameCompany()
+    {
+        company.RentLevel = 0;
+
+        bool result = branchService.TrySellBranch(1, 1, out var resultCompany);
 
         Assert.IsFalse(result);
-        Assert.IsNull(resultCompany);
+        Assert.AreEqual(0, resultCompany.RentLevel);
+        Assert.AreSame(company, resultCompany);
     }
+
+    #endregion
 }

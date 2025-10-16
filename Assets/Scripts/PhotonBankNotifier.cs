@@ -1,5 +1,6 @@
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,9 +18,11 @@ public class PhotonBankNotifier : MonoBehaviourPun, IBankNotifier
     [Inject]
     public void Construct(IPlayerRepository playerRepository, IEventBus eventBus, IPhotonViewWrapper photonViewWrapper)
     {
-        this.playerRepository = playerRepository;
-        this.eventBus = eventBus;
-        this.photonViewWrapper = photonViewWrapper;
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
+        if (photonView == null) throw new NullReferenceException(nameof(photonView));
+
     }
 
     #endregion LIFE_CYCLE
@@ -38,7 +41,7 @@ public class PhotonBankNotifier : MonoBehaviourPun, IBankNotifier
     [PunRPC]
     private void RPC_UpdateMoney(int playerId, int money)
     {
-        PlayerData player = playerRepository.GetPlayerById(playerId);
+        PlayerData player = playerRepository.GetPlayerById(playerId) ?? throw new InvalidOperationException(nameof(RPC_UpdateMoney));
         player.Money = money;
         eventBus.Publish(new OnUpdatePlayerMoneyEvent(player));
     }

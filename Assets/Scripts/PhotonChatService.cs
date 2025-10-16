@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System;
 using UnityEngine;
 using Zenject;
 
@@ -13,9 +14,11 @@ public class PhotonChatService : MonoBehaviourPun, IChatService
     [Inject]
     public void Construct(IEventBus eventBus, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
-        this.eventBus = eventBus;
-        this.photonNetworkWrapper = photonNetworkWrapper;
-        this.photonViewWrapper = photonViewWrapper;
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.photonNetworkWrapper = photonNetworkWrapper ?? throw new ArgumentNullException(nameof(photonNetworkWrapper));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
+        if (photonView == null) throw new NullReferenceException(nameof(photonView));
+
     }
 
     #endregion LIFE_CYCLE

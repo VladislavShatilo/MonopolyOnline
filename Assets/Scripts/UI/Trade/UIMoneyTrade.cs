@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using TMPro;
 using UnityEngine;
@@ -20,7 +21,22 @@ public class UIMoneyTrade : MonoBehaviour
 
     private void Start()
     {
+        if (openMoneyButton == null)
+            throw new ArgumentNullException(nameof(openMoneyButton));
+        if (penImage == null)
+            throw new ArgumentNullException(nameof(penImage));
+        if (moneyInputField == null)
+            throw new ArgumentNullException(nameof(moneyInputField));
+        if (moneyTextValue == null)
+            throw new ArgumentNullException(nameof(moneyTextValue));
+        if (moneyText == null)
+            throw new ArgumentNullException(nameof(moneyText));
+
         rectTransform = GetComponent<RectTransform>();
+        if (rectTransform == null)
+            throw new ArgumentNullException(nameof(rectTransform));
+
+        
         openMoneyButton.onClick.AddListener(OpenMoneyInput);
         RefreshUI();
     }

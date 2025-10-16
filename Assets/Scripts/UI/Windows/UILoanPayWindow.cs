@@ -21,7 +21,21 @@ public class UILoanPayWindow : UIWindowBase, ILoanPayWindow
     [SerializeField] private TextMeshProUGUI cantPayLoanText;
 
     private int currentPlayerId;
+    #region LIFE_CYCLE
 
+    private void Start()
+    {
+        if (payLoanButton == null)
+            throw new ArgumentNullException(nameof(payLoanButton));
+        if (cantPayLoanButton == null)
+            throw new ArgumentNullException(nameof(cantPayLoanButton));
+        if (payLoanText == null)
+            throw new ArgumentNullException(nameof(payLoanText));
+        if (cantPayLoanText == null)
+            throw new ArgumentNullException(nameof(cantPayLoanText));
+
+    }
+    #endregion LIFE_CYCLE
     #region PUBLIC_METHODS
 
     public void Show(int playerId, int loanAmount, bool canAfford)

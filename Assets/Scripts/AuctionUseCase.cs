@@ -41,21 +41,29 @@ public class AuctionUseCase : IInitializable, IDisposable
 
     private void StartAuction(StartAuctionEvent e)
     {
+        if (e == null)
+            throw new ArgumentNullException(nameof(e));
         auctionService.StartAuction(e.StarterActorNumber, e.CompanyId, e.CompanyBasePrice);
     }
 
     private void PlayerBid(PlayerBidAuction e)
     {
+        if (e == null)
+            throw new ArgumentNullException(nameof(e));
         auctionService.PlaceBid(e.PlayerId);
     }
 
     private void PlayerPass(PlayerPassAuction e)
     {
+        if (e == null)
+            throw new ArgumentNullException(nameof(e));
         auctionService.PassBid(e.PlayerId);
     }
 
     private void TimerExpiredEvent(TimerExpiredEvent e)
     {
+        if (e == null)
+            throw new ArgumentNullException(nameof(e));
         if (e.Type != TimerType.Auction) return;
         auctionService.PassBid(e.PlayerId);
     }

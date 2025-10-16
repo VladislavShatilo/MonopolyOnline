@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,10 +18,12 @@ public class PhotonTimerUpdater : MonoBehaviourPun
     [Inject]
     public void Construct(ITimerManager timerManager, IEventBus eventBus, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
-        this.timerManager = timerManager;
-        this.eventBus = eventBus;
-        this.photonNetworkWrapper = photonNetworkWrapper;
-        this.photonViewWrapper = photonViewWrapper;
+        this.timerManager = timerManager ?? throw new ArgumentNullException(nameof(timerManager));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.photonNetworkWrapper = photonNetworkWrapper ?? throw new ArgumentNullException(nameof(photonNetworkWrapper));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
+        if (photonView == null) throw new NullReferenceException(nameof(photonView));
+
     }
 
     private void Update()

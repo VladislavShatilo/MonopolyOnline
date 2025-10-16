@@ -11,6 +11,8 @@ public class TestUIAuctionWindow : UIAuctionWindow
 
     public void InvokePlayClicked() => HandlePlayClicked();
     public void InvokePassClicked() => HandlePassClicked();
+    public void TestOnEnable() => base.OnEnable();
+    public void TestOnDisable() => base.OnDisable();
 
 
 }

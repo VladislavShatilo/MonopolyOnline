@@ -27,13 +27,13 @@ public class CompanyService : ICompanyService, IInitializable, IDisposable
     public void Construct(ICompanyRepository companyRepository, IBankService bank, IPhotonTurnManager photonTurnManager, ICompanySyncService companySyncService,
        IPlayerRepository playerRepository, IEventBus eventBus, IPhotonNetworkWrapper photonNetworkWrapper)
     {
-        this.companyRepository = companyRepository;
-        this.bank = bank;
-        this.photonTurnManager = photonTurnManager;
-        this.companySyncService = companySyncService;
-        this.playerRepository = playerRepository;
-        this.eventBus = eventBus;
-        this.photonNetworkWrapper = photonNetworkWrapper;
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
+        this.bank = bank ?? throw new ArgumentNullException(nameof(bank));
+        this.photonTurnManager = photonTurnManager ?? throw new ArgumentNullException(nameof(photonTurnManager));
+        this.companySyncService = companySyncService ?? throw new ArgumentNullException(nameof(companySyncService));
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.photonNetworkWrapper = photonNetworkWrapper ?? throw new ArgumentNullException(nameof(photonNetworkWrapper));
     }
 
     public void Initialize()
@@ -52,8 +52,7 @@ public class CompanyService : ICompanyService, IInitializable, IDisposable
 
     public void HandleCell(int cellIndex, int playerId)
     {
-        var company = companyRepository.GetCompanyById(cellIndex);
-        if (company == null) return;
+        var company = companyRepository.GetCompanyById(cellIndex) ?? throw new InvalidOperationException(nameof(HandleCell));
 
         if (!company.IsBought)
         {
@@ -62,7 +61,7 @@ public class CompanyService : ICompanyService, IInitializable, IDisposable
         }
         else if (company.OwnerId != playerId && !company.IsMortgaged)
         {
-            PlayerData player = playerRepository.GetPlayerById(playerId);
+            PlayerData player = playerRepository.GetPlayerById(playerId) ?? throw new InvalidOperationException(nameof(HandleCell));
             eventBus.Publish(new OfferRentEvent(cellIndex, playerId, CalculateRent(company, player.LastDiceSum)));
         }
         else
@@ -76,9 +75,9 @@ public class CompanyService : ICompanyService, IInitializable, IDisposable
 
     public void TryBuyCompany(int cellIndex, int playerId, int price, BuyReason reason)
     {
-        var company = companyRepository.GetCompanyById(cellIndex);
+        var company = companyRepository.GetCompanyById(cellIndex) ?? throw new InvalidOperationException(nameof(TryBuyCompany));
 
-        if (company == null || company.IsBought) return;
+        if (company.IsBought) return;
         if (reason == BuyReason.Buy)
         {
             price = company.Price;
@@ -94,9 +93,9 @@ public class CompanyService : ICompanyService, IInitializable, IDisposable
 
     public void TryPayRent(int cellIndex, int playerId)
     {
-        var company = companyRepository.GetCompanyById(cellIndex);
-        if (company == null || !company.IsBought) return;
-        PlayerData player = playerRepository.GetPlayerById(playerId);
+        var company = companyRepository.GetCompanyById(cellIndex) ?? throw new InvalidOperationException(nameof(TryPayRent));
+        if (!company.IsBought) return;
+        PlayerData player = playerRepository.GetPlayerById(playerId) ?? throw new InvalidOperationException(nameof(TryPayRent));
 
         int rent = CalculateRent(company, player.LastDiceSum);
         if (!bank.HasEnoughMoney(playerId, rent)) return;

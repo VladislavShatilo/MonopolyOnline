@@ -6,7 +6,14 @@ public class CodeLineCounterWindow : EditorWindow
 {
 
     private int totalLines;
+    private int totalTestsLines;
+    private int totalPlayModeTestsLines;
+
     private bool calculated;
+    private bool calculatedTests;
+    private bool calculatedPlayModeTests;
+
+
 
     [MenuItem("Tools/Code Line Counter")]
     public static void ShowWindow()
@@ -21,12 +28,17 @@ public class CodeLineCounterWindow : EditorWindow
         if (GUILayout.Button("Посчитать строки в Assets/Scripts"))
         {
             CountLines();
+            CountTestsLines();
+            CountPlayModeTestsLines();
         }
 
-        if (calculated)
+        if (calculated && calculatedTests && calculatedPlayModeTests)
         {
             GUILayout.Space(10);
             EditorGUILayout.HelpBox($"Всего строк кода в папке Scripts: {totalLines}", MessageType.Info);
+            EditorGUILayout.HelpBox($"Всего строк кода в папке Tests: {totalTestsLines}", MessageType.Info);
+            EditorGUILayout.HelpBox($"Всего строк кода в папке Tests: {totalPlayModeTestsLines}", MessageType.Info);
+
         }
     }
 
@@ -49,6 +61,48 @@ public class CodeLineCounterWindow : EditorWindow
 
         totalLines = lineCount;
         calculated = true;
+        Repaint();
+    }
+    private void CountTestsLines()
+    {
+        string scriptsPath = Path.Combine(Application.dataPath, "TestsEdit");
+        if (!Directory.Exists(scriptsPath))
+        {
+            EditorUtility.DisplayDialog("Ошибка", "Папка Assets/Scripts не найдена!", "OK");
+            return;
+        }
+
+        string[] files = Directory.GetFiles(scriptsPath, "*.cs", SearchOption.AllDirectories);
+        int lineCount = 0;
+
+        foreach (var file in files)
+        {
+            lineCount += File.ReadAllLines(file).Length;
+        }
+
+        totalTestsLines = lineCount;
+        calculatedTests = true;
+        Repaint();
+    }
+    private void CountPlayModeTestsLines()
+    {
+        string scriptsPath = Path.Combine(Application.dataPath, "Tests");
+        if (!Directory.Exists(scriptsPath))
+        {
+            EditorUtility.DisplayDialog("Ошибка", "Папка Assets/Scripts не найдена!", "OK");
+            return;
+        }
+
+        string[] files = Directory.GetFiles(scriptsPath, "*.cs", SearchOption.AllDirectories);
+        int lineCount = 0;
+
+        foreach (var file in files)
+        {
+            lineCount += File.ReadAllLines(file).Length;
+        }
+
+        totalPlayModeTestsLines = lineCount;
+        calculatedPlayModeTests = true;
         Repaint();
     }
 }

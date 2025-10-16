@@ -1,4 +1,3 @@
-using Photon.Pun;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,19 +27,22 @@ public class CompanyWindowPopup : MonoBehaviour
     [Inject]
     public void Construct(ITradeService tradeService, ICompanyRepository companyRepository)
     {
-        this.tradeService = tradeService;
-        this.companyRepository = companyRepository;
+        this.tradeService = tradeService ?? throw new ArgumentNullException(nameof(tradeService));
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(tradeService));
     }
 
     public void Init(int id)
     {
         companyId = id;
+        if (showWindowButton == null) throw new NullReferenceException(nameof(tradeService));
         showWindowButton.onClick.AddListener(OnClick);
         interactor = new CompanyOfferInteractor(tradeService, companyRepository);
     }
 
     private void OnClick()
     {
+        if (interactor == null) return;
+
         bool handled = interactor.TryToggleCompanyInOffer(companyId);
 
         if (!handled)

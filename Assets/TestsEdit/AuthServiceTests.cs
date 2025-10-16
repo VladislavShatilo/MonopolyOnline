@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Photon.Pun;
+using System;
 
 [TestFixture]
 public class AuthServiceTests
@@ -56,5 +57,10 @@ public class AuthServiceTests
         Assert.AreEqual(string.Empty, data.Nickname);
         Assert.AreEqual("abc", data.Password);
         Assert.AreEqual(string.Empty, PhotonNetwork.NickName);
+    }
+    [Test]
+    public void Login_WithNullNickname_ShouldThrow()
+    {
+        Assert.Throws<NullReferenceException>(() => authService.Login(null, "abc"));
     }
 }

@@ -144,4 +144,39 @@ public class PayRentPresenterTests
         // Assert
         mockCompanyManager.Verify(m => m.RequestPayRent(5, 1), Times.Once);
     }
+    [Test]
+    public void ShowRentFor_LocalPlayerCannotPay_ShowsWindowWithFalseCanPay()
+    {
+        testPlayer.Money = 100; // меньше аренды
+        presenter.Initialize();
+
+        offerHandler?.Invoke(new OfferRentEvent(5,1, 300));
+
+        mockWindow.Verify(w => w.Show(1, 5, 300, false), Times.Once);
+    }
+
+    [Test]
+    public void ShowRentFor_PlayerNotFound_Throws()
+    {
+        mockPlayerRepository.Setup(r => r.GetPlayerById(1)).Returns((PlayerData)null);
+        presenter.Initialize();
+
+        Assert.Throws<InvalidOperationException>(() => offerHandler?.Invoke(offerEvent));
+    }
+
+    [Test]
+    public void OnRentPaid_DifferentPlayerOrCell_DoesNotHideWindow()
+    {
+        presenter.Initialize();
+        offerHandler?.Invoke(offerEvent);
+
+        // другой игрок
+        rentPaidHandler?.Invoke(new RentPaidEvent(99, 5, 1, 300));
+        // друга€ €чейка
+        rentPaidHandler?.Invoke(new RentPaidEvent(1, 99, 1, 300));
+
+        mockWindow.Verify(w => w.Hide(), Times.Never);
+    }
+
+    
 }

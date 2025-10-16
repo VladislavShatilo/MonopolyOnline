@@ -1,5 +1,6 @@
 using Moq;
 using NUnit.Framework;
+using System;
 
 [TestFixture]
 public class TradeServiceTests
@@ -156,5 +157,74 @@ public class TradeServiceTests
         tradeService.TimerExpiredEvent(e);
 
         photonTradeManagerMock.Verify(p => p.SendTradeResult(false), Times.Once);
+    }
+    [Test]
+    public void StartTrade_ShouldThrow_WhenPlayerNull()
+    {
+        playerRepositoryMock.Setup(p => p.GetPlayerById(3)).Returns((PlayerData)null);
+
+        Assert.Throws<NullReferenceException>(() => tradeService.StartTrade(3, 2));
+        Assert.Throws<NullReferenceException>(() => tradeService.StartTrade(1, 3));
+    }
+
+    [Test]
+    public void OnTradeCompleted_ShouldNotApplyTrade_WhenCurrentOfferNull()
+    {
+        // Перед вызовом убедимся, что CurrentOffer = null
+        Assert.IsNull(tradeService.CurrentOffer);
+
+        tradeService.OnTradeCompleted(true);
+
+        // Проверка, что методы вызываются
+        turnPresenterMock.Verify(t => t.ShowTurnFor(It.IsAny<int>()), Times.Once);
+        timerManagerMock.Verify(t => t.StartTurnTimer(0, 0), Times.Once); // т.к. senderId = 0 по умолчанию
+        eventBusMock.Verify(e => e.Publish(It.IsAny<TradeEndedEvent>()), Times.Once);
+    }
+    [Test]
+    public void ApplyTrade_ShouldNotChangeMoney_WhenNotMasterClient()
+    {
+        var offer = new TradeOffer(playerA, playerB) { FromMoney = 100, ToMoney = 200 };
+        tradeService.OnTradeProposalReceived(offer);
+
+        photonNetworkWrapperMock.Setup(p => p.IsMasterClient).Returns(false);
+
+        tradeService.OnTradeCompleted(true);
+
+        bankServiceMock.Verify(b => b.RemoveMoney(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+        bankServiceMock.Verify(b => b.AddMoney(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+    }
+
+    [Test]
+    public void TimerExpiredEvent_ShouldNotCallSendTradeResult_WhenWrongTimerType()
+    {
+        tradeService.StartTrade(1, 2);
+        var e = new TimerExpiredEvent(TimerType.Turn, 2);
+
+        tradeService.TimerExpiredEvent(e);
+
+        photonTradeManagerMock.Verify(p => p.SendTradeResult(It.IsAny<bool>()), Times.Never);
+    }
+
+    [Test]
+    public void ApplyTrade_ShouldHandleEmptyCompanyLists()
+    {
+        var offer = new TradeOffer(playerA, playerB)
+        {
+            FromMoney = 100,
+            ToMoney = 200
+        };
+
+        // пустые списки компаний
+        tradeService.OnTradeProposalReceived(offer);
+
+        photonNetworkWrapperMock.Setup(p => p.IsMasterClient).Returns(true);
+
+        Assert.DoesNotThrow(() => tradeService.OnTradeCompleted(true));
+
+        // Проверка операций с деньгами
+        bankServiceMock.Verify(b => b.RemoveMoney(playerA.Id, 100), Times.Once);
+        bankServiceMock.Verify(b => b.AddMoney(playerB.Id, 100), Times.Once);
+        bankServiceMock.Verify(b => b.RemoveMoney(playerB.Id, 200), Times.Once);
+        bankServiceMock.Verify(b => b.AddMoney(playerA.Id, 200), Times.Once);
     }
 }

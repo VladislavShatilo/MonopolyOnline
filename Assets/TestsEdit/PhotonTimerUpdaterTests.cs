@@ -1,7 +1,8 @@
-using NUnit.Framework;
 using Moq;
-using UnityEngine;
+using NUnit.Framework;
 using Photon.Pun;
+using System;
+using UnityEngine;
 
 [TestFixture]
 public class PhotonTimerUpdaterTests
@@ -23,6 +24,7 @@ public class PhotonTimerUpdaterTests
         eventBusMock = new Mock<IEventBus>();
         photonNetworkMock = new Mock<IPhotonNetworkWrapper>();
         photonViewWrapperMock = new Mock<IPhotonViewWrapper>();
+        var photonView = go.AddComponent<PhotonView>(); // <--- вот это
 
         manager.Construct(timerManagerMock.Object, eventBusMock.Object, photonNetworkMock.Object, photonViewWrapperMock.Object);
     }
@@ -30,7 +32,7 @@ public class PhotonTimerUpdaterTests
     [TearDown]
     public void TearDown()
     {
-        Object.DestroyImmediate(go);
+        UnityEngine.Object.DestroyImmediate(go);
     }
 
     [Test]
@@ -89,5 +91,52 @@ public class PhotonTimerUpdaterTests
 
         eventBusMock.Verify(e => e.Publish(It.Is<TimerUpdatedEvent>(ev =>
             ev.Type == TimerType.Turn && ev.PlayerId == 1 && ev.TimeLeft == 4.2f && ev.IsActive)), Times.Once);
+    }
+    [Test]
+    public void TickTimer_ShouldDoNothing_WhenTickReturnsNull()
+    {
+        photonNetworkMock.Setup(p => p.IsMasterClient).Returns(true);
+        timerManagerMock.Setup(t => t.Tick()).Returns((ValueTuple<TimerType, int, float, bool, bool>?)null);
+
+        manager.TickTimer();
+
+        eventBusMock.Verify(e => e.Publish(It.IsAny<object>()), Times.Never);
+        photonViewWrapperMock.Verify(v => v.RPC(It.IsAny<PhotonView>(), It.IsAny<string>(), It.IsAny<RpcTarget>(), It.IsAny<object[]>()), Times.Never);
+    }
+
+    // --------------------------
+    // 2. TickTimer не вызывает события, если секунда не изменилась и expired=false
+    // --------------------------
+    [Test]
+    public void TickTimer_ShouldNotPublish_WhenSecondUnchangedAndNotExpired()
+    {
+        photonNetworkMock.Setup(p => p.IsMasterClient).Returns(true);
+
+        // первый тик
+        timerManagerMock.SetupSequence(t => t.Tick())
+            .Returns((TimerType.Turn, 1, 5.2f, true, false))
+            .Returns((TimerType.Turn, 1, 5.1f, true, false)); // ceil(5.1)=6, ceil(5.2)=6, секунда не меняется
+
+        manager.TickTimer(); // первый тик
+        manager.TickTimer(); // второй тик, секунда не изменилась
+
+        eventBusMock.Verify(e => e.Publish(It.IsAny<TimerUpdatedEvent>()), Times.Once);
+        photonViewWrapperMock.Verify(v => v.RPC(It.IsAny<PhotonView>(), It.IsAny<string>(), It.IsAny<RpcTarget>(), It.IsAny<object[]>()), Times.Once);
+    }
+
+    // --------------------------
+    // 3. Конструктор выбрасывает NullReferenceException при отсутствии photonView
+    // --------------------------
+    [Test]
+    public void Construct_ShouldThrow_WhenPhotonViewNull()
+    {
+        var go2 = new GameObject();
+        var manager2 = go2.AddComponent<PhotonTimerUpdater>();
+
+        Assert.Throws<NullReferenceException>(() =>
+            manager2.Construct(timerManagerMock.Object, eventBusMock.Object, photonNetworkMock.Object, photonViewWrapperMock.Object)
+        );
+
+        UnityEngine.Object.DestroyImmediate(go2);
     }
 }

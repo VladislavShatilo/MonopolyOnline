@@ -21,7 +21,17 @@ public class UIAuctionWindow : UIWindowBase, IAuctionWindow
     private Action<int> onPass;
 
     #region LIFE_CYCLE
+    public void ValidateUI()
+    {
+        if (playButton == null) throw new ArgumentNullException(nameof(playButton));
+        if (cantPlayButton == null) throw new ArgumentNullException(nameof(cantPlayButton));
+        if (cancelButton == null) throw new ArgumentNullException(nameof(cancelButton));
+        if (playPriceText == null) throw new ArgumentNullException(nameof(playPriceText));
+        if (cantPriceText == null) throw new ArgumentNullException(nameof(cantPriceText));
+        if (headerText == null) throw new ArgumentNullException(nameof(headerText));
+    }
 
+    private void Start() => ValidateUI();
     protected void OnEnable()
     {
         playButton.onClick.AddListener(HandlePlayClicked);

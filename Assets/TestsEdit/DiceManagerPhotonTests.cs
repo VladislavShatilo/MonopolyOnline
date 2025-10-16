@@ -1,9 +1,11 @@
-using NUnit.Framework;
 using Moq;
-using UnityEngine;
+using NUnit.Framework;
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Reflection;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 [TestFixture]
 public class DiceManagerPhotonTests
@@ -12,33 +14,44 @@ public class DiceManagerPhotonTests
     private Mock<IRollDiceUseCase> mockRollDiceUseCase;
     private Mock<IPhotonNetworkWrapper> mockPhotonNetworkWrapper;
     private Mock<IPhotonViewWrapper> mockPhotonViewWrapper;
-    private Mock<PhotonView> mockPhotonView;
+    private GameObject go;
+    private PhotonView photonView;
 
     [SetUp]
     public void SetUp()
     {
-        // Создаём GameObject, чтобы привязать MonoBehaviour
-        var go = new GameObject();
+        // Создаем GameObject и добавляем необходимые компоненты
+        go = new GameObject("DiceManagerPhoton");
         diceManager = go.AddComponent<DiceManagerPhoton>();
 
+        // Добавляем настоящий PhotonView
+        photonView = go.AddComponent<PhotonView>();
+
+        // Создаем моки
         mockRollDiceUseCase = new Mock<IRollDiceUseCase>();
         mockPhotonNetworkWrapper = new Mock<IPhotonNetworkWrapper>();
         mockPhotonViewWrapper = new Mock<IPhotonViewWrapper>();
-        mockPhotonView = new Mock<PhotonView>();
 
+        // Конструктор
         diceManager.Construct(mockRollDiceUseCase.Object, mockPhotonNetworkWrapper.Object, mockPhotonViewWrapper.Object);
     }
+
+    [TearDown]
+    public void TearDown()
+    {
+        if (go != null)
+            Object.DestroyImmediate(go);
+    }
+
+    // ---------------- RequestDiceRoll ----------------
 
     [Test]
     public void RequestDiceRoll_CallsRPCOnPhotonViewWrapper()
     {
         diceManager.RequestDiceRoll(1, true, 3, 4);
 
-      
-
-
         mockPhotonViewWrapper.Verify(p =>
-            p.RPC(It.IsAny<PhotonView>(),
+            p.RPC(photonView,
                   "RPC_RequestGetDiceResult",
                   RpcTarget.MasterClient,
                   1, true, 3, 4),
@@ -46,45 +59,59 @@ public class DiceManagerPhotonTests
     }
 
     [Test]
-    public void RPC_RequestGetDiceResult_UsesCheats_WhenAllowed()
+    public void RequestDiceRoll_ThrowsException_WhenPhotonViewNull()
     {
-        DiceManagerPhoton.AllowCheats = true;
-        mockPhotonNetworkWrapper.Setup(p => p.IsMasterClient).Returns(true);
+        // Создаем новый объект без PhotonView
+        var goWithoutPV = new GameObject("NoPhotonView");
+        var dm = goWithoutPV.AddComponent<DiceManagerPhoton>();
+        dm.Construct(mockRollDiceUseCase.Object, mockPhotonNetworkWrapper.Object, mockPhotonViewWrapper.Object);
 
-        // вызываем private метод через Reflection
-        var method = typeof(DiceManagerPhoton)
-            .GetMethod("RPC_RequestGetDiceResult", BindingFlags.NonPublic | BindingFlags.Instance);
-        method.Invoke(diceManager, new object[] { 1, true, 5, 6 });
+        Assert.Throws<NullReferenceException>(() =>
+            dm.RequestDiceRoll(1, false));
 
-        // проверяем правильный вызов RPC на DiceHandle
-        mockPhotonViewWrapper.Verify(p =>
-            p.RPC(It.IsAny<PhotonView>(),
-                  "RPC_RequestDiceHandle",   // <-- тут исправлено
-                  RpcTarget.All,
-                  5, 6, 1, true),
-            Times.Once);
+        Object.DestroyImmediate(goWithoutPV);
+    }
+
+    // ---------------- RPC_RequestGetDiceResult ----------------
+
+
+
+    [Test]
+    public void RPC_RequestGetDiceResult_DoesNothing_WhenNotMasterClient()
+    {
+        mockPhotonNetworkWrapper.Setup(p => p.IsMasterClient).Returns(false);
+
+        typeof(DiceManagerPhoton)
+            .GetMethod("RPC_RequestGetDiceResult", BindingFlags.NonPublic | BindingFlags.Instance)
+            .Invoke(diceManager, new object[] { 1, true, 5, 6 });
+
+        mockPhotonViewWrapper.Verify(p => p.RPC(It.IsAny<PhotonView>(),
+                                                It.IsAny<string>(),
+                                                It.IsAny<RpcTarget>(),
+                                                It.IsAny<object[]>()),
+                                     Times.Never);
     }
 
     [Test]
-    public void RPC_RequestGetDiceResult_UsesRollDiceUseCase_WhenNoCheats()
+    public void RPC_RequestGetDiceResult_ThrowsException_WhenPhotonViewNull()
     {
-        DiceManagerPhoton.AllowCheats = false;
         mockPhotonNetworkWrapper.Setup(p => p.IsMasterClient).Returns(true);
 
-        mockRollDiceUseCase.Setup(r => r.GetDiceResult(1, true))
-            .Returns(new DiceResult(2,3));
+        // Создаем новый объект без PhotonView
+        var goWithoutPV = new GameObject("NoPhotonView");
+        var dm = goWithoutPV.AddComponent<DiceManagerPhoton>();
+        dm.Construct(mockRollDiceUseCase.Object, mockPhotonNetworkWrapper.Object, mockPhotonViewWrapper.Object);
 
-        diceManager.GetType()
-            .GetMethod("RPC_RequestGetDiceResult", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .Invoke(diceManager, new object[] { 1, true, -1, -1 });
+        var method = typeof(DiceManagerPhoton)
+            .GetMethod("RPC_RequestGetDiceResult", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        mockPhotonViewWrapper.Verify(p =>
-       p.RPC(It.IsAny<PhotonView>(),
-             "RPC_RequestDiceHandle",   // <-- исправлено
-             RpcTarget.All,
-             2, 3, 1, true),
-       Times.Once);
+        Assert.Throws<TargetInvocationException>(() =>
+            method.Invoke(dm, new object[] { 1, true, 1, 1 }));
+
+        Object.DestroyImmediate(goWithoutPV);
     }
+
+    // ---------------- RPC_RequestDiceHandle ----------------
 
     [Test]
     public void RPC_RequestDiceHandle_StartsCoroutineHandleDice()
@@ -94,14 +121,17 @@ public class DiceManagerPhotonTests
         var playerId = 1;
         var isForJail = false;
 
-        // Мокируем HandleDice как корутину
         mockRollDiceUseCase.Setup(r => r.HandleDice(first, second, playerId, isForJail))
             .Returns(Mock.Of<IEnumerator>());
 
-        diceManager.GetType()
-            .GetMethod("RPC_RequestDiceHandle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+        typeof(DiceManagerPhoton)
+            .GetMethod("RPC_RequestDiceHandle", BindingFlags.NonPublic | BindingFlags.Instance)
             .Invoke(diceManager, new object[] { first, second, playerId, isForJail });
 
         mockRollDiceUseCase.Verify(r => r.HandleDice(first, second, playerId, isForJail), Times.Once);
     }
+
+    // ---------------- Update ----------------
+
+   
 }

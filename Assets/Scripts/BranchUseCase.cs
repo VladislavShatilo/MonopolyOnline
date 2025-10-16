@@ -1,3 +1,5 @@
+using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -16,10 +18,10 @@ public class BranchUseCase : IBranchUseCase
     [Inject]
     public void Construct(IBranchService branchService, ICompanyUIService companyUIService, IBankService bankService, ICompanyRepository companyRepository)
     {
-        this.branchService = branchService;
-        this.companyUIService = companyUIService;
-        this.bankService = bankService;
-        this.companyRepository = companyRepository;
+        this.branchService = branchService ?? throw new ArgumentNullException(nameof(branchService));
+        this.companyUIService = companyUIService ?? throw new ArgumentNullException(nameof(companyUIService));
+        this.bankService = bankService ?? throw new ArgumentNullException(nameof(bankService));
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
     }
 
     #endregion LIFE_CYCLE
@@ -43,12 +45,15 @@ public class BranchUseCase : IBranchUseCase
 
         if (branchService.TrySellBranch(companyId, playerId, out var company))
         {
-            var ui = companyUIService.GetCompanyUI(company.Id);
-            if (ui != null)
-            {
-                ui.UpdateBranchStars(company.RentLevel);
-            }
+            var ui = companyUIService.GetCompanyUI(company.Id) ?? throw new InvalidOperationException(nameof(SellBranch));
+            ui.UpdateBranchStars(company.RentLevel);
+
             var ownedCount = companyRepository.CountOwnedByPlayer(company.OwnerId, company.Type);
+            if (ownedCount < 0)
+            {
+                throw new InvalidOperationException(nameof(ownedCount));
+            }
+
             ui.SetRentText(company.GetRent(ownedCount));
             bankService.AddMoney(playerId, company.BranchPrice);
             companyLevel = company.RentLevel;
@@ -58,14 +63,17 @@ public class BranchUseCase : IBranchUseCase
 
     public void UpdateBranchUI(int companyId, int playerId, int newRentLevel)
     {
-        var company = companyRepository.GetCompanyById(companyId);
-        if (company == null) return;
+        var company = companyRepository.GetCompanyById(companyId) ?? throw new InvalidOperationException(nameof(UpdateBranchUI));
         company.RentLevel = newRentLevel;
-        var ui = companyUIService.GetCompanyUI(company.Id);
-
+        var ui = companyUIService.GetCompanyUI(company.Id) ?? throw new InvalidOperationException(nameof(SellBranch));
         ui.UpdateBranchStars(company.RentLevel);
 
         var ownedCount = companyRepository.CountOwnedByPlayer(company.OwnerId, company.Type);
+        if (ownedCount < 0)
+        {
+            throw new InvalidOperationException(nameof(ownedCount));
+        }
+
         ui.SetRentText(company.GetRent(ownedCount));
         HideAllBranchButtonsByGroup(playerId, company.Group);
     }
@@ -78,14 +86,11 @@ public class BranchUseCase : IBranchUseCase
     {
         foreach (var c in companyRepository.GetByGroup(group))
         {
-            var ui = companyUIService.GetCompanyUI(c.Id);
-            if (ui != null)
-            {
-                ui.HideAllBranchButtons();
-            }
+            var ui = companyUIService.GetCompanyUI(c.Id) ?? throw new InvalidOperationException(nameof(HideAllBranchButtonsByGroup));
+
+            ui.HideAllBranchButtons();
         }
     }
 
     #endregion PRIVATE_METHODS
-
 }

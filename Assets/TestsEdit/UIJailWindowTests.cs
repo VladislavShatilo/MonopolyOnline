@@ -1,9 +1,12 @@
 using NUnit.Framework;
+using System;
 using System.Collections;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 public class UIJailWindowTests
 {
@@ -102,5 +105,82 @@ public class UIJailWindowTests
         _window.RansomButton.onClick.Invoke();
 
         Assert.AreEqual(4, receivedId);
+    }
+    [Test]
+    public void Start_Throws_WhenButtonsOrTextsAreNull()
+    {
+        var go = new GameObject("Window");
+        var window = go.AddComponent<UIJailWindow>();
+
+        var startMethod = typeof(UIJailWindow).GetMethod("Start",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        var ex = Assert.Throws<TargetInvocationException>(() =>
+        {
+            startMethod.Invoke(window, null); // вызываем private Start
+        });
+
+        // TargetInvocationException обернет реальное исключение
+        Assert.IsInstanceOf<ArgumentNullException>(ex.InnerException);
+        Assert.IsNotNull(((ArgumentNullException)ex.InnerException).ParamName);
+    }
+
+    // === Gраничные значения ransomMoney ===
+    [TestCase(0)]
+    [TestCase(-100)]
+    [TestCase(int.MaxValue)]
+    public void Show_SetsTexts_WithEdgeRansomMoney(int ransom)
+    {
+        _window.Show(1, ransom, true);
+        string expected = $"Заплатите {ransom.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)}";
+        Assert.AreEqual(expected, _window.RansomText.text);
+        Assert.AreEqual(expected, _window.CantRansomText.text);
+    }
+
+    // === Проверка повторного присвоения делегата ThrowDice ===
+    [Test]
+    public void SetThrowDiceAction_RemovesPreviousListeners()
+    {
+        int firstCall = -1;
+        int secondCall = -1;
+
+        _window.SetThrowDiceAction(id => firstCall = id);
+        _window.SetThrowDiceAction(id => secondCall = id); // предыдущий должен быть удалён
+
+        _window.Show(5, 0, true);
+        _window.ThrowDiceButton.onClick.Invoke();
+
+        Assert.AreEqual(-1, firstCall); // старый listener не должен сработать
+        Assert.AreEqual(5, secondCall); // новый listener сработал
+    }
+
+    // === Проверка повторного присвоения делегата Ransom ===
+    [Test]
+    public void SetRansomAction_RemovesPreviousListeners()
+    {
+        int firstCall = -1;
+        int secondCall = -1;
+
+        _window.SetRansomAction(id => firstCall = id);
+        _window.SetRansomAction(id => secondCall = id);
+
+        _window.Show(7, 100, true);
+        _window.RansomButton.onClick.Invoke();
+
+        Assert.AreEqual(-1, firstCall);
+        Assert.AreEqual(7, secondCall);
+    }
+
+    // === Делегаты null ===
+    [Test]
+    public void SetThrowDiceAction_WithNull_DoesNotThrow()
+    {
+        Assert.DoesNotThrow(() => _window.SetThrowDiceAction(null));
+    }
+
+    [Test]
+    public void SetRansomAction_WithNull_DoesNotThrow()
+    {
+        Assert.DoesNotThrow(() => _window.SetRansomAction(null));
     }
 }

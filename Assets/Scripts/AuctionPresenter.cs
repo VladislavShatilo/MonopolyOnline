@@ -54,16 +54,12 @@ public class AuctionPresenter : IInitializable, IDisposable
     }
     private void OnAuctionPromptBid(AuctionPromptBidEvent e)
     {
+       
         int localId = localPlayerService.GetLocalPlayerId();
         if (e.PlayerId == localId)
         {
-            PlayerData player = playerRepository.GetPlayerById(localId);
-            Company company = companyRepository.GetCompanyById(e.CompanyId);
-
-            if (player == null)
-                throw new InvalidOperationException($"Player with ID {localId} not found in repository.");
-            if (company == null)
-                throw new InvalidOperationException($"Company with ID {e.CompanyId} not found in repository.");
+            PlayerData player = playerRepository.GetPlayerById(localId) ?? throw new InvalidOperationException(nameof(player));
+            Company company = companyRepository.GetCompanyById(e.CompanyId) ?? throw new InvalidOperationException(nameof(company));
 
             auctionWindow.Show(e.PlayerId, company.Name, e.Bid, player.Money);
         }

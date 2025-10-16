@@ -22,16 +22,17 @@ public class JailPresenter : IInitializable, IDisposable
     public void Construct(IJailWindow jailWindow, ILocalPlayerService localPlayerService, IEventBus eventBus, IPlayerRepository playerRepository,
        IRansomJailWindow ransomJailWindow, IPhotonDiceManager photonDiceManager, IJailService jailService, IBankService bankService, GameSettings gameSettings)
     {
-        this.jailWindow = jailWindow;
-        this.localPlayerService = localPlayerService;
-        this.eventBus = eventBus;
-        this.playerRepository = playerRepository;
-        this.ransomJailWindow = ransomJailWindow;
-        this.photonDiceManager = photonDiceManager;
-        this.jailService = jailService;
-        this.bankService = bankService;
-        this.gameSettings = gameSettings;
+        this.jailWindow = jailWindow ?? throw new ArgumentNullException(nameof(jailWindow));
+        this.localPlayerService = localPlayerService ?? throw new ArgumentNullException(nameof(localPlayerService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus)); ;
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.ransomJailWindow = ransomJailWindow ?? throw new ArgumentNullException(nameof(ransomJailWindow));
+        this.photonDiceManager = photonDiceManager ?? throw new ArgumentNullException(nameof(photonDiceManager));
+        this.jailService = jailService ?? throw new ArgumentNullException(nameof(jailService));
+        this.bankService = bankService ?? throw new ArgumentNullException(nameof(bankService));
+        this.gameSettings = gameSettings ?? throw new ArgumentNullException(nameof(gameSettings));
     }
+    
 
     public void Initialize()
     {
@@ -53,7 +54,7 @@ public class JailPresenter : IInitializable, IDisposable
 
     private void OnStartTurn(StartTurnJailEvent e)
     {
-        PlayerData player = playerRepository.GetPlayerById(e.PlayerId);
+        PlayerData player = playerRepository.GetPlayerById(e.PlayerId) ?? throw new InvalidOperationException(nameof(jailWindow));
         int localId = localPlayerService.GetLocalPlayerId();
 
         if (player.JailTurnsLeft > 0)

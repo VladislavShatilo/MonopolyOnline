@@ -9,6 +9,12 @@ public class DiceManager3D : MonoBehaviour, IDiceManager3D
 
     public void ShowDice(int first, int second)
     {
+        if (dice1 == null || dice2 == null)
+            throw new MissingReferenceException("DiceManager3D: Один или оба кубика (dice1, dice2) не заданы в инспекторе.");
+
+        if (dice1.gameObject == null || dice2.gameObject == null)
+            throw new MissingReferenceException("DiceManager3D: GameObject одного из кубиков уничтожен.");
+
         dice1.gameObject.SetActive(true);
         dice2.gameObject.SetActive(true);
 

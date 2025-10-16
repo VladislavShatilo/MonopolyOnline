@@ -9,6 +9,5 @@ public class TestUILoanPayWindow : UILoanPayWindow
     public override void ShowWindow() => showWindowCalled = true;
     public override void HideWindow() => hideWindowCalled = true;
 
-    // Свойства для тестирования (getter/setter)
   
 }

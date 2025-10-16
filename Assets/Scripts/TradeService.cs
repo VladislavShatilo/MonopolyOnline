@@ -28,14 +28,14 @@ public class TradeService : ITradeService,IInitializable,IDisposable
     public void Construct(IPhotonTradeManager photonTradeManager, IBankService bankService, IEventBus eventBus, IPlayerRepository playerRepository
        , ITimerManager timerManager, GameSettings gameSettings, ITurnPresenter turnPresenter, IPhotonNetworkWrapper photonNetworkWrapper)
     {
-        this.photonTradeManager = photonTradeManager;
-        this.bankService = bankService;
-        this.eventBus = eventBus;
-        this.playerRepository = playerRepository;
-        this.timerManager = timerManager;
-        this.gameSettings = gameSettings;
-        this.turnPresenter = turnPresenter;
-        this.photonNetworkWrapper = photonNetworkWrapper;
+        this.photonTradeManager = photonTradeManager ?? throw new ArgumentNullException(nameof(photonTradeManager));
+        this.bankService = bankService ?? throw new ArgumentNullException(nameof(bankService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.timerManager = timerManager ?? throw new ArgumentNullException(nameof(timerManager));
+        this.gameSettings = gameSettings ?? throw new ArgumentNullException(nameof(gameSettings));
+        this.turnPresenter = turnPresenter ?? throw new ArgumentNullException(nameof(turnPresenter));
+        this.photonNetworkWrapper = photonNetworkWrapper ?? throw new ArgumentNullException(nameof(photonNetworkWrapper));
     }
     public void Initialize()
     {
@@ -56,10 +56,13 @@ public class TradeService : ITradeService,IInitializable,IDisposable
         senderId = fromPlayerId;
         receiverId = toPlayerId;
         IsTradeActive = true;
-        PlayerData playerFrom = playerRepository.GetPlayerById(fromPlayerId);
-        PlayerData playerTo = playerRepository.GetPlayerById(toPlayerId);
+        PlayerData playerFrom = playerRepository.GetPlayerById(fromPlayerId) ?? throw new NullReferenceException(nameof(StartTrade)); 
+        PlayerData playerTo = playerRepository.GetPlayerById(toPlayerId) ?? throw new NullReferenceException(nameof(StartTrade)); ; ;
         CurrentOffer = new TradeOffer(playerFrom, playerTo);
-        eventBus.Publish(new TradeStartedEvent(fromPlayerId, toPlayerId, CurrentOffer));
+        if (CurrentOffer != null)
+        {
+            eventBus.Publish(new TradeStartedEvent(fromPlayerId, toPlayerId, CurrentOffer));
+        }
     }
 
     public void TimerExpiredEvent(TimerExpiredEvent e)

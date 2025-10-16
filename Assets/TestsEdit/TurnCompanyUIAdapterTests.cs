@@ -1,6 +1,7 @@
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
 using System.Collections.Generic;
+using System.Reflection;
 
 [TestFixture]
 public class TurnCompanyUIAdapterTests
@@ -78,15 +79,17 @@ public class TurnCompanyUIAdapterTests
     public void OnTurnStart_ShouldShowBuyFirstBranchButton_WhenRentLevelIs0()
     {
         var companyUI = new Mock<IUICompanyCellView>();
-        companyUIServiceMock.Setup(c => c.GetCompanyUI(3)).Returns(companyUI.Object);
+        companyUIServiceMock.Setup(c => c.GetCompanyUI(3)).Returns(companyUI.Object); // <-- важно
         var company = new Company(3, new CompanyData());
         company.RentLevel = 0;
         companyRepositoryMock.Setup(r => r.GetCompanyById(3)).Returns(company);
+
         turnUIUseCaseMock.Setup(u => u.GetAvailableActions(3))
-            .Returns(new List<CompanyUIAction> { new(2, CompanyActionType.ManageBranches) });
+            .Returns(new List<CompanyUIAction> { new(3, CompanyActionType.ManageBranches) });
 
         var turnStartEvent = new TurnStartEvent(3);
-        var method = typeof(TurnCompanyUIAdapter).GetMethod("OnTurnStart", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var method = typeof(TurnCompanyUIAdapter).GetMethod("OnTurnStart",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         method.Invoke(adapter, new object[] { turnStartEvent });
 
         companyUI.Verify(u => u.ShowBuyFirstBranchButton(), Times.Once);
@@ -132,9 +135,9 @@ public class TurnCompanyUIAdapterTests
     public void OnTurnStart_ShouldHideButtons_WhenActionIsNone()
     {
         var companyUI = new Mock<IUICompanyCellView>();
-        companyUIServiceMock.Setup(c => c.GetCompanyUI(6)).Returns(companyUI.Object);
+        companyUIServiceMock.Setup(c => c.GetCompanyUI(6)).Returns(companyUI.Object); // <-- добавлено
         turnUIUseCaseMock.Setup(u => u.GetAvailableActions(6))
-            .Returns(new List<CompanyUIAction> { new(5, CompanyActionType.None) });
+            .Returns(new List<CompanyUIAction> { new(6, CompanyActionType.None) });
 
         var turnStartEvent = new TurnStartEvent(6);
         var method = typeof(TurnCompanyUIAdapter).GetMethod("OnTurnStart", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -142,5 +145,63 @@ public class TurnCompanyUIAdapterTests
 
         companyUI.Verify(u => u.HideAllBranchButtons(), Times.Once);
         companyUI.Verify(u => u.HideAllMortgageButtons(), Times.Once);
+    }
+    [Test]
+    public void OnTurnStart_ShouldDoNothing_WhenNoActions()
+    {
+        turnUIUseCaseMock.Setup(u => u.GetAvailableActions(1))
+            .Returns(new List<CompanyUIAction>());
+
+        var turnStartEvent = new TurnStartEvent(1);
+        var method = typeof(TurnCompanyUIAdapter).GetMethod("OnTurnStart", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // Проверяем, что не выбрасывается исключений
+        Assert.DoesNotThrow(() => method.Invoke(adapter, new object[] { turnStartEvent }));
+    }
+
+    [Test]
+    public void OnTurnStart_ShouldThrow_WhenCompanyUIIsNull()
+    {
+        turnUIUseCaseMock.Setup(u => u.GetAvailableActions(1))
+            .Returns(new List<CompanyUIAction> { new(1, CompanyActionType.Mortgage) });
+
+        companyUIServiceMock.Setup(c => c.GetCompanyUI(1)).Returns((IUICompanyCellView)null);
+
+        var turnStartEvent = new TurnStartEvent(1);
+        var method = typeof(TurnCompanyUIAdapter).GetMethod("OnTurnStart", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        Assert.Throws<TargetInvocationException>(() => method.Invoke(adapter, new object[] { turnStartEvent }));
+    }
+
+    [Test]
+    public void OnTurnStart_ShouldThrow_WhenCompanyIsNull_ForManageBranches()
+    {
+        turnUIUseCaseMock.Setup(u => u.GetAvailableActions(1))
+            .Returns(new List<CompanyUIAction> { new(1, CompanyActionType.ManageBranches) });
+
+        var uiMock = new Mock<IUICompanyCellView>();
+        companyUIServiceMock.Setup(c => c.GetCompanyUI(1)).Returns(uiMock.Object);
+        companyRepositoryMock.Setup(r => r.GetCompanyById(1)).Returns((Company)null);
+
+        var turnStartEvent = new TurnStartEvent(1);
+        var method = typeof(TurnCompanyUIAdapter).GetMethod("OnTurnStart", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        Assert.Throws<TargetInvocationException>(() => method.Invoke(adapter, new object[] { turnStartEvent }));
+    }
+
+    [Test]
+    public void OnTurnStart_ShouldHideButtons_WhenUnknownActionType()
+    {
+        var uiMock = new Mock<IUICompanyCellView>();
+        turnUIUseCaseMock.Setup(u => u.GetAvailableActions(1))
+            .Returns(new List<CompanyUIAction> { new(1, (CompanyActionType)999) }); // неизвестный тип
+        companyUIServiceMock.Setup(c => c.GetCompanyUI(1)).Returns(uiMock.Object);
+
+        var turnStartEvent = new TurnStartEvent(1);
+        var method = typeof(TurnCompanyUIAdapter).GetMethod("OnTurnStart", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method.Invoke(adapter, new object[] { turnStartEvent });
+
+        uiMock.Verify(u => u.HideAllBranchButtons(), Times.Once);
+        uiMock.Verify(u => u.HideAllMortgageButtons(), Times.Once);
     }
 }

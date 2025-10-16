@@ -1,5 +1,6 @@
 ﻿using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Globalization;
 using TMPro;
 using UnityEngine;
@@ -28,6 +29,45 @@ public class UIPlayerStats : MonoBehaviour, IPlayerStatsView
     [Header("Buttons")]
     [SerializeField] private Button tradeButton;
     [SerializeField] private Button leaveButton;
+
+    #region LIFE_CYCLE
+
+    private void Start()
+    {
+        if (namePlayerText == null)
+            throw new ArgumentNullException(nameof(namePlayerText));
+        if (moneyPlayerText == null)
+            throw new ArgumentNullException(nameof(moneyPlayerText));
+        if (capitalText == null)
+            throw new ArgumentNullException(nameof(capitalText));
+
+        if (liquidText == null)
+            throw new ArgumentNullException(nameof(liquidText));
+        if (timerGO == null)
+            throw new ArgumentNullException(nameof(timerGO));
+        if (timerText == null)
+            throw new ArgumentNullException(nameof(timerText));
+        if (highlightTurnImage == null)
+            throw new ArgumentNullException(nameof(highlightTurnImage));
+        if (highlightAuctionImage == null)
+            throw new ArgumentNullException(nameof(highlightAuctionImage));
+        if (loanContainer == null)
+            throw new ArgumentNullException(nameof(loanContainer));
+        if (loanTurnsLeftText == null)
+            throw new ArgumentNullException(nameof(loanTurnsLeftText));
+        if (takeLoanButton == null)
+            throw new ArgumentNullException(nameof(takeLoanButton));
+        if (payLoanButton == null)
+            throw new ArgumentNullException(nameof(payLoanButton));
+        if (tradeButton == null)
+            throw new ArgumentNullException(nameof(tradeButton));
+        if (leaveButton == null)
+            throw new ArgumentNullException(nameof(leaveButton));
+
+    }
+
+    #endregion LIFE_CYCLE
+
 
     #region PUBLIC_METHODS
 

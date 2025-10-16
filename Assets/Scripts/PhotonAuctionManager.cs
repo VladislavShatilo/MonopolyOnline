@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,9 +15,11 @@ public class PhotonAuctionManager : MonoBehaviourPun, IPhotonAuctionManager
     [Inject]
     public void Consturct(IEventBus eventBus, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
-        this.eventBus = eventBus;
-        this.photonNetworkWrapper = photonNetworkWrapper;
-        this.photonViewWrapper = photonViewWrapper;
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.photonNetworkWrapper = photonNetworkWrapper ?? throw new ArgumentNullException(nameof(photonNetworkWrapper));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
+        if (photonView == null) throw new NullReferenceException(nameof(photonView));
+
     }
 
     #endregion LIFE_CYCLE
@@ -45,9 +48,8 @@ public class PhotonAuctionManager : MonoBehaviourPun, IPhotonAuctionManager
 
     public void CloseAuctionWindowRequest(int playerId)
     {
-        var target = PhotonNetwork.CurrentRoom.GetPlayer(playerId);
 
-        photonViewWrapper.RPC(photonView, nameof(RPC_CloseAuctionWindow),target, null);
+        photonViewWrapper.RPC(photonView, nameof(RPC_CloseAuctionWindow),playerId, null);
 
     }
 

@@ -83,4 +83,12 @@ public class LapMoneyServiceTests
         bankService.Verify(b => b.AddMoney(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
         chatService.Verify(c => c.SendMessage(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
     }
+    [Test]
+    public void Construct_NullDependencies_Throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => new LapMoneyService().Construct(null, bankService.Object, settings, chatService.Object));
+        Assert.Throws<ArgumentNullException>(() => new LapMoneyService().Construct(eventBus.Object, null, settings, chatService.Object));
+        Assert.Throws<ArgumentNullException>(() => new LapMoneyService().Construct(eventBus.Object, bankService.Object, null, chatService.Object));
+        Assert.Throws<ArgumentNullException>(() => new LapMoneyService().Construct(eventBus.Object, bankService.Object, settings, null));
+    }
 }

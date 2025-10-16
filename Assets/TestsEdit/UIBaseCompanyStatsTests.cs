@@ -1,8 +1,10 @@
+using Moq;
 using NUnit.Framework;
+using System;
+using System.Reflection;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Moq;
 
 [TestFixture]
 public class UIBaseCompanyStatsTests
@@ -90,5 +92,46 @@ public class UIBaseCompanyStatsTests
         stats.SetBuyoutPrice(45000);
         Assert.AreEqual("45,000", buyoutPrice.text);
     }
+    [Test]
+    public void Construct_ShouldThrow_WhenGroupColorsIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => stats.Constuct(null));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenTopBarImage1IsNull()
+    {
+        typeof(UIBaseCompanyStats)
+            .GetField("topBarImage1", BindingFlags.NonPublic | BindingFlags.Instance)
+            .SetValue(stats, null);
+        Assert.Throws<ArgumentNullException>(() => stats.Constuct(groupColorsMock.Object));
+    }
+    [Test]
+    public void SetTopBarColor_ShouldNotThrow_WhenImageIsNull()
+    {
+        typeof(UIBaseCompanyStats)
+            .GetField("topBarImage1", BindingFlags.NonPublic | BindingFlags.Instance)
+            .SetValue(stats, null);
+
+        Assert.DoesNotThrow(() => stats.SetTopBarColor(0));
+    }
+    [Test]
+    public void SetText_ShouldNotThrow_WhenTextFieldIsNull()
+    {
+        Assert.DoesNotThrow(() => stats.SetCompanyName(null));
+    }
+    [TestCase(0, "0")]
+    [TestCase(-1234, "-1,234")]
+    [TestCase(1000000, "1,000,000")]
+    public void FormatNumber_ShouldReturnFormattedString(int value, string expected)
+    {
+        var method = typeof(UIBaseCompanyStats)
+            .GetMethod("FormatNumber", BindingFlags.NonPublic | BindingFlags.Instance);
+        string result = (string)method.Invoke(stats, new object[] { value });
+        Assert.AreEqual(expected, result);
+    }
+
+
+
 }
 public class TestCompanyStats : UIBaseCompanyStats { }

@@ -1,5 +1,6 @@
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
+using System;
 
 [TestFixture]
 public class CompanyServiceTests
@@ -40,49 +41,41 @@ public class CompanyServiceTests
     // ---------------- HandleCell ----------------
 
     [Test]
+    public void HandleCell_ShouldThrow_WhenCompanyNotFound()
+    {
+        companyRepoMock.Setup(r => r.GetCompanyById(5)).Returns((Company)null);
+        Assert.Throws<InvalidOperationException>(() => service.HandleCell(5, 1));
+    }
+
+    [Test]
     public void HandleCell_ShouldPublishOfferPurchase_WhenCompanyNotBoughtAndCanAfford()
     {
-        var company = new Company(1, new CompanyData());
-        company.IsBought = false;
-        company.Price = 100;
-
+        var company = new Company(1, new CompanyData()) { IsBought = false, Price = 100 };
         companyRepoMock.Setup(r => r.GetCompanyById(1)).Returns(company);
         bankMock.Setup(b => b.HasEnoughMoney(10, 100)).Returns(true);
 
         service.HandleCell(1, 10);
 
         eventBusMock.Verify(e => e.Publish(It.Is<OfferPurchaseEvent>(
-            ev => ev.CellIndex == 1 && ev.PlayerId == 10 && ev.CanAfford == true
-        )), Times.Once);
+            ev => ev.CellIndex == 1 && ev.PlayerId == 10 && ev.CanAfford)), Times.Once);
     }
 
     [Test]
     public void HandleCell_ShouldPublishOfferRent_WhenCompanyOwnedByAnotherPlayer()
     {
-        var company = new Company(1,new CompanyData());
+        CompanyData companyData = new CompanyData() { rent = new int[1] { 200 } };
+        var company = new Company(1, companyData);
         company.Id = 1;
         company.IsBought = true;
         company.OwnerId = 99;
-        company.IsMortgaged = false;
         company.Type = CompanyType.Company;
+        company.IsMortgaged = false;
+        company.RentLevel = 0;
 
         companyRepoMock.Setup(r => r.GetCompanyById(1)).Returns(company);
-
-        var player = new PlayerData("P", 1000, 10, null) { LastDiceSum = 7 };
-        playerRepoMock.Setup(p => p.GetPlayerById(10)).Returns(player);
         companyRepoMock.Setup(r => r.CountOwnedByPlayer(99, company.Type)).Returns(1);
+        playerRepoMock.Setup(p => p.GetPlayerById(10)).Returns(new PlayerData("P", 1000, 10, null) { LastDiceSum = 7 });
 
-        // Подменяем поведение GetRent через поддельную реализацию Company
-        // если метод виртуальный, можно мокнуть, иначе просто вернуть фиксированное значение
-        int rent = 300;
-        companyRepoMock.Setup(r => r.CountOwnedByPlayer(99, company.Type)).Returns(1);
-        companyRepoMock.Setup(r => r.GetCompanyById(1)).Returns(company);
-        var serviceSpy = new Mock<CompanyService>() { CallBase = true };
-
-        // Принудительно подменим метод CalculateRent, чтобы избежать вызова реального GetRent()
-     
-        // Или просто разрешим GetRent вернуть нужное
-        // (если Company.GetRent не virtual — просто проверим событие без mock)
         service.HandleCell(1, 10);
 
         eventBusMock.Verify(e => e.Publish(It.IsAny<OfferRentEvent>()), Times.Once);
@@ -104,28 +97,16 @@ public class CompanyServiceTests
         turnManagerMock.Verify(t => t.RequestEndTurn(), Times.Once);
     }
 
-    [Test]
-    public void HandleCell_ShouldDoNothing_WhenCompanyNotFound()
-    {
-        companyRepoMock.Setup(r => r.GetCompanyById(5)).Returns((Company)null);
-
-        service.HandleCell(5, 1);
-
-        eventBusMock.VerifyNoOtherCalls();
-    }
-
     // ---------------- TryBuyCompany ----------------
 
     [Test]
     public void TryBuyCompany_ShouldBuyAndSync_WhenEnoughMoney()
     {
-        var company = new Mock<Company>();
-        company.SetupAllProperties();
-        company.Object.Id = 1;
-        company.Object.Price = 500;
-        company.Object.IsBought = false;
+        var company = new Company(1, new CompanyData());
+        company.IsBought = false;
+        company.Price = 500;
 
-        companyRepoMock.Setup(r => r.GetCompanyById(1)).Returns(company.Object);
+        companyRepoMock.Setup(r => r.GetCompanyById(1)).Returns(company);
         bankMock.Setup(b => b.HasEnoughMoney(7, 500)).Returns(true);
 
         service.TryBuyCompany(1, 7, 999, BuyReason.Buy);
@@ -139,13 +120,11 @@ public class CompanyServiceTests
     [Test]
     public void TryBuyCompany_ShouldNotBuy_WhenNotEnoughMoney()
     {
-        var company = new Mock<Company>();
-        company.SetupAllProperties();
-        company.Object.Id = 2;
-        company.Object.Price = 1000;
-        company.Object.IsBought = false;
+        var company = new Company(2, new CompanyData());
+        company.IsBought = false;
+        company.Price = 1000;
 
-        companyRepoMock.Setup(r => r.GetCompanyById(2)).Returns(company.Object);
+        companyRepoMock.Setup(r => r.GetCompanyById(2)).Returns(company);
         bankMock.Setup(b => b.HasEnoughMoney(5, 1000)).Returns(false);
 
         service.TryBuyCompany(2, 5, 1000, BuyReason.Buy);
@@ -154,95 +133,134 @@ public class CompanyServiceTests
         syncMock.Verify(s => s.SyncCompanyBought(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
     }
 
+    [Test]
+    public void TryBuyCompany_ShouldDoNothing_WhenAlreadyBought()
+    {
+        var company = new Company(3, new CompanyData());
+        company.IsBought = true;
+
+        companyRepoMock.Setup(r => r.GetCompanyById(3)).Returns(company);
+        service.TryBuyCompany(3, 1, 100, BuyReason.Buy);
+
+        bankMock.Verify(b => b.RemoveMoney(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+        syncMock.Verify(s => s.SyncCompanyBought(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+        eventBusMock.VerifyNoOtherCalls();
+    }
+
     // ---------------- TryPayRent ----------------
 
     [Test]
-    public void TryPayRent_ShouldTransferMoney_AndSync_WhenEnoughMoney()
+    public void TryPayRent_ShouldTransferMoney_WhenEnoughMoney()
     {
-        var company = new Mock<Company>();
-        company.SetupAllProperties();
-        company.Object.Id = 3;
-        company.Object.IsBought = true;
-        company.Object.OwnerId = 99;
+        CompanyData companyData = new CompanyData() { rent = new int[1] { 200 } };
+        var company = new Company(4, companyData);
+        company.IsBought = true;
+        company.OwnerId = 99;
+        company.RentLevel = 0;
 
-        var player = new PlayerData("P", 5000, 10, null) { LastDiceSum = 6 };
-        playerRepoMock.Setup(p => p.GetPlayerById(10)).Returns(player);
-        companyRepoMock.Setup(r => r.GetCompanyById(3)).Returns(company.Object);
-        companyRepoMock.Setup(r => r.CountOwnedByPlayer(99, company.Object.Type)).Returns(2);
-        company.Setup(c => c.GetRent(2, 6)).Returns(200);
+
+        companyRepoMock.Setup(r => r.GetCompanyById(4)).Returns(company);
+        playerRepoMock.Setup(p => p.GetPlayerById(10)).Returns(new PlayerData("P", 500, 10, null) { LastDiceSum = 6 });
         bankMock.Setup(b => b.HasEnoughMoney(10, 200)).Returns(true);
+        companyRepoMock.Setup(r => r.CountOwnedByPlayer(99, company.Type)).Returns(1);
 
-        service.TryPayRent(3, 10);
+        service.TryPayRent(4, 10);
 
         bankMock.Verify(b => b.TransferMoney(10, 99, 200), Times.Once);
-        eventBusMock.Verify(e => e.Publish(It.Is<RentPaidEvent>(
-            ev => ev.CellIndex == 3 && ev.PlayerId == 10 && ev.Owner == 99 && ev.Rent == 200
-        )), Times.Once);
-        syncMock.Verify(s => s.SyncRentPaid(3, 10, 99, 200), Times.Once);
+        syncMock.Verify(s => s.SyncRentPaid(4, 10, 99, 200), Times.Once);
         turnManagerMock.Verify(t => t.RequestEndTurn(), Times.Once);
+        eventBusMock.Verify(e => e.Publish(It.IsAny<RentPaidEvent>()), Times.Once);
     }
 
     [Test]
     public void TryPayRent_ShouldNotPay_WhenNotEnoughMoney()
     {
-        var company = new Mock<Company>();
-        company.SetupAllProperties();
-        company.Object.Id = 4;
-        company.Object.IsBought = true;
-        company.Object.OwnerId = 99;
+        CompanyData companyData = new CompanyData() { rent = new int[1] { 500 } };
+        var company = new Company(5, companyData);
+        company.IsBought = true;
+        company.OwnerId = 99;
+        company.RentLevel = 0;
 
-        companyRepoMock.Setup(r => r.GetCompanyById(4)).Returns(company.Object);
+        companyRepoMock.Setup(r => r.GetCompanyById(5)).Returns(company);
         playerRepoMock.Setup(p => p.GetPlayerById(7)).Returns(new PlayerData("A", 100, 7, null));
-        company.Setup(c => c.GetRent(It.IsAny<int>(), It.IsAny<int>())).Returns(500);
         bankMock.Setup(b => b.HasEnoughMoney(7, 500)).Returns(false);
 
-        service.TryPayRent(4, 7);
+        service.TryPayRent(5, 7);
 
         bankMock.Verify(b => b.TransferMoney(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
         syncMock.Verify(s => s.SyncRentPaid(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
     }
 
+    [Test]
+    public void TryPayRent_ShouldNotPay_WhenCompanyNotBought()
+    {
+        var company = new Company(6, new CompanyData());
+        company.IsBought = false;
+
+     
+
+
+        companyRepoMock.Setup(r => r.GetCompanyById(6)).Returns(company);
+        playerRepoMock.Setup(p => p.GetPlayerById(8)).Returns(new PlayerData("B", 100, 8, null));
+
+        service.TryPayRent(6, 8);
+
+        bankMock.Verify(b => b.TransferMoney(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+        syncMock.Verify(s => s.SyncRentPaid(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+    }
+
+    [Test]
+    public void TryPayRent_ShouldThrow_WhenPlayerNotFound()
+    {
+        var company = new Company(7, new CompanyData());
+        company.IsBought = true;
+
+
+    
+
+        companyRepoMock.Setup(r => r.GetCompanyById(7)).Returns(company);
+        playerRepoMock.Setup(p => p.GetPlayerById(9)).Returns((PlayerData)null);
+
+        Assert.Throws<InvalidOperationException>(() => service.TryPayRent(7, 9));
+    }
+
     // ---------------- CalculateRent ----------------
 
     [Test]
-    public void CalculateRent_ShouldUseRepositoryAndReturnCorrectValue()
+    public void CalculateDiceRent_ShouldReturnCorrectRent()
     {
-        var company = new Mock<Company>();
-        company.SetupAllProperties();
-        company.Object.OwnerId = 1;
-        company.Object.Type = CompanyType.Company;
-        company.Setup(c => c.GetRent(3, 8)).Returns(600);
+        DiceCompanyData companyData = new DiceCompanyData() { rentMultiplier = new int[1] { 100 } };
+        var company = new Company(5, companyData);
+        company.IsBought = true;
+        company.OwnerId = 1;
+        company.RentLevel = 0;
+     
+        company.Type = CompanyType.DiceCompany;
 
-        companyRepoMock.Setup(r => r.CountOwnedByPlayer(1, CompanyType.Company)).Returns(3);
+        companyRepoMock.Setup(r => r.CountOwnedByPlayer(1, CompanyType.DiceCompany)).Returns(1);
 
-        var rent = service.CalculateRent(company.Object, 8);
+        var rent = service.CalculateRent(company, 8);
 
-        Assert.That(rent, Is.EqualTo(600));
-        company.Verify(c => c.GetRent(3, 8), Times.Once);
+        Assert.AreEqual(800, rent);
     }
+    [Test]
+    public void CalculateFieldRent_ShouldReturnCorrectRent()
+    {
+        FieldCompanyData companyData = new FieldCompanyData() { rentField = new int[4] { 250,500,1000,2000 } };
+        var company = new Company(5, companyData);
+        company.IsBought = true;
+        company.OwnerId = 1;
+        company.RentLevel = 0;
 
+        company.Type = CompanyType.FieldCompany;
+
+        companyRepoMock.Setup(r => r.CountOwnedByPlayer(1, CompanyType.FieldCompany)).Returns(3);
+
+        var rent = service.CalculateRent(company, 0);
+
+        Assert.AreEqual(1000, rent);
+    }
     // ---------------- Auction Event ----------------
 
-    [Test]
-    public void AuctionBuyCompany_ShouldCallTryBuyCompany()
-    {
-        var called = false;
-        var company = new Mock<Company>();
-        company.SetupAllProperties();
-        companyRepoMock.Setup(r => r.GetCompanyById(1)).Returns(company.Object);
-        bankMock.Setup(b => b.HasEnoughMoney(It.IsAny<int>(), It.IsAny<int>())).Returns(true);
-
-        var serviceSpy = new Mock<CompanyService>();
-        serviceSpy.CallBase = true;
-
-        var e = new EndAuctionWithWinnerEvent(1, 10, 700);
-        service.Initialize();
-        service.GetType()
-            .GetMethod("AuctionBuyCompany", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
-            .Invoke(service, new object[] { e });
-
-        // Проверим, что TryBuyCompany корректно вызывается
-        // (косвенно тестируется через основную реализацию)
-        Assert.Pass("AuctionBuyCompany вызван успешно.");
-    }
+   
 }

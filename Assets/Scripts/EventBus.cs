@@ -8,30 +8,55 @@ public class EventBus : IEventBus
 
     public void Subscribe<TEvent>(Action<TEvent> handler)
     {
-        var type = typeof(TEvent);
-        if (!eventHandlers.ContainsKey(type))
-            eventHandlers[type] = new List<Delegate>();
+        if (handler == null)
+            throw new ArgumentNullException(nameof(handler));
 
-        eventHandlers[type].Add(handler);
+        var type = typeof(TEvent);
+
+        if (!eventHandlers.TryGetValue(type, out var handlers))
+        {
+            handlers = new List<Delegate>();
+            eventHandlers[type] = handlers;
+        }
+
+        if (!handlers.Contains(handler))
+            handlers.Add(handler);
     }
 
     public void Unsubscribe<TEvent>(Action<TEvent> handler)
     {
+        if (handler == null)
+            throw new ArgumentNullException(nameof(handler));
+
         var type = typeof(TEvent);
-        if (eventHandlers.ContainsKey(type))
-        {
-            eventHandlers[type].Remove(handler);
-            if (eventHandlers[type].Count == 0)
-                eventHandlers.Remove(type);
-        }
+
+        if (!eventHandlers.TryGetValue(type, out var handlers))
+            return;
+
+        handlers.Remove(handler);
+
+        if (handlers.Count == 0)
+            eventHandlers.Remove(type);
     }
 
     public void Publish<TEvent>(TEvent eventData)
     {
-        var type = typeof(TEvent);
-        if (!eventHandlers.ContainsKey(type)) return;
+        // Пропускаем null-события, чтобы не вызывать обработчики с null.
+        if (eventData == null)
+        {
+            Debug.LogWarning($"EventBus: попытка опубликовать null событие ({typeof(TEvent).Name}) проигнорирована.");
+            return;
+        }
 
-        var handlersCopy = new List<Delegate>(eventHandlers[type]);
+        var type = typeof(TEvent);
+
+        if (!eventHandlers.TryGetValue(type, out var handlers) || handlers.Count == 0)
+            return;
+
+        // Создаём копию списка, чтобы безопасно вызывать обработчики,
+        // даже если кто-то отписывается во время обработки.
+        var handlersCopy = new List<Delegate>(handlers);
+
         foreach (var handler in handlersCopy)
         {
             try

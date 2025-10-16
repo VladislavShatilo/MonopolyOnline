@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -34,7 +35,27 @@ public class UITradeWindowBase : MonoBehaviour
     [Inject]
     public void Construct(DiContainer container)
     {
-        _container = container;
+        _container = container ?? throw new ArgumentNullException(nameof(container));
+        if (leftPanel == null)
+            throw new ArgumentNullException(nameof(leftPanel));
+        if (rightPanel == null)
+            throw new ArgumentNullException(nameof(rightPanel));
+        if (companyCardPrefab == null)
+            throw new ArgumentNullException(nameof(companyCardPrefab));
+        if (windowRectTransform == null)
+            throw new ArgumentNullException(nameof(windowRectTransform));
+        if (leftTotalAmountText == null)
+            throw new ArgumentNullException(nameof(leftTotalAmountText));
+        if (rightTotalAmountText == null)
+            throw new ArgumentNullException(nameof(rightTotalAmountText));
+        if (leftMoneyText == null)
+            throw new ArgumentNullException(nameof(leftMoneyText));
+        if (rightMoneyText == null)
+            throw new ArgumentNullException(nameof(rightMoneyText));
+        if (leftPlayerNameText == null)
+            throw new ArgumentNullException(nameof(leftPlayerNameText));
+        if (rightPlayerNameText == null)
+            throw new ArgumentNullException(nameof(rightPlayerNameText));
     }
 
     #endregion LIFE_CYCLE

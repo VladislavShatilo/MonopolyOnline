@@ -1,6 +1,7 @@
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
 using Photon.Pun;
+using System;
 using UnityEngine;
 
 public class PhotonChatServiceTests
@@ -64,5 +65,41 @@ public class PhotonChatServiceTests
         method.Invoke(chatService, new object[] { 5, "Test message" });
 
         eventBusMock.Verify(e => e.Publish(It.Is<ChatMessage>(msg => msg.PlayerId == 5 && msg.Text == "Test message")), Times.Once);
+    }
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenEventBusIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            chatService.Construct(null, networkMock.Object, viewWrapperMock.Object)
+        );
+    }
+
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenPhotonNetworkWrapperIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            chatService.Construct(eventBusMock.Object, null, viewWrapperMock.Object)
+        );
+    }
+
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenPhotonViewWrapperIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            chatService.Construct(eventBusMock.Object, networkMock.Object, null)
+        );
+    }
+
+    [Test]
+    public void Construct_ShouldThrowNullReferenceException_WhenPhotonViewIsMissing()
+    {
+        GameObject goWithoutView = new GameObject();
+        var serviceWithoutView = goWithoutView.AddComponent<PhotonChatService>();
+
+        Assert.Throws<NullReferenceException>(() =>
+            serviceWithoutView.Construct(eventBusMock.Object, networkMock.Object, viewWrapperMock.Object)
+        );
+
+        GameObject.DestroyImmediate(goWithoutView);
     }
 }

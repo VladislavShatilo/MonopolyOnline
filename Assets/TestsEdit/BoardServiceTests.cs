@@ -1,5 +1,7 @@
+
 using Moq;
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -30,7 +32,7 @@ public class BoardServiceTests
     [TearDown]
     public void TearDown()
     {
-        Object.DestroyImmediate(parent.gameObject);
+        UnityEngine.Object.DestroyImmediate(parent.gameObject);
     }
 
     [Test]
@@ -123,4 +125,115 @@ public class BoardServiceTests
     {
         Assert.AreEqual(0, service.CellsCount);
     }
+    [Test]
+    public void InitializeBoard_WithEmptyParent_ShouldHaveZeroCells()
+    {
+        // Arrange
+        var emptyParent = new GameObject("EmptyParent").transform;
+        var emptyService = new BoardService();
+        emptyService.Construct(mockRepository.Object, emptyParent);
+
+        // Act
+        emptyService.InitializeBoard();
+
+        // Assert
+        Assert.AreEqual(0, emptyService.CellsCount);
+
+        UnityEngine.Object.DestroyImmediate(emptyParent.gameObject);
+    }
+
+    [Test]
+    public void InitializeBoard_CalledTwice_ShouldNotDuplicateCells()
+    {
+        // Act
+        service.InitializeBoard();
+        service.InitializeBoard();
+
+        // Assert
+        Assert.AreEqual(3, service.CellsCount);
+    }
+
+    [Test]
+    public void GetCellRectTransform_WhenChildHasNoRectTransform_ShouldReturnNull()
+    {
+        // Arrange
+        var go = new GameObject("NoRectTransform");
+        go.transform.SetParent(parent);
+        var testService = new BoardService();
+        testService.Construct(mockRepository.Object, parent);
+        testService.InitializeBoard();
+
+        // Act
+        var rect = testService.GetCellRectTransform(3); // index нового объекта без RectTransform
+
+        // Assert
+        Assert.IsNull(rect);
+
+        UnityEngine.Object.DestroyImmediate(go);
+    }
+
+    [Test]
+    public void GetCellRectTransform_AtBoundaryIndices_ShouldReturnCorrectTransform()
+    {
+        service.InitializeBoard();
+
+        // Act & Assert
+        var first = service.GetCellRectTransform(0);
+        var last = service.GetCellRectTransform(service.CellsCount - 1);
+
+        Assert.NotNull(first);
+        Assert.NotNull(last);
+        Assert.AreEqual("Cell0", first.gameObject.name);
+        Assert.AreEqual("Cell2", last.gameObject.name);
+    }
+    [Test]
+    public void Construct_WithNullRepository_ShouldThrow()
+    {
+        var service = new BoardService();
+        Assert.Throws<ArgumentNullException>(() => service.Construct(null, parent));
+    }
+
+    [Test]
+    public void Construct_WithNullParent_ShouldThrow()
+    {
+        var service = new BoardService();
+        Assert.Throws<ArgumentNullException>(() => service.Construct(mockRepository.Object, null));
+    }
+
+    [Test]
+    public void InitializeBoard_WithNullChild_ShouldIgnoreNull()
+    {
+
+        var child1 = new GameObject("Child1").transform;
+        var child3 = new GameObject("Child3").transform;
+
+        child1.SetParent(parent);
+        child3.SetParent(parent);
+
+        var service = new BoardService();
+        service.Construct(mockRepository.Object, parent);
+
+        // Act
+        service.InitializeBoard();
+
+        // Assert
+        Assert.AreEqual(5, service.CellsCount); // учитываются только реальные трансформы
+    }
+
+    [Test]
+    public void GetCellRectTransform_ForChildWithoutRectTransform_ShouldReturnNull()
+    {
+        var go = new GameObject("NoRect");
+        go.transform.SetParent(parent);
+
+        var service = new BoardService();
+        service.Construct(mockRepository.Object, parent);
+        service.InitializeBoard();
+
+        var rect = service.GetCellRectTransform(service.CellsCount - 1); // последний объект без RectTransform
+        Assert.IsNull(rect);
+
+        UnityEngine.Object.DestroyImmediate(go);
+    }
+
 }

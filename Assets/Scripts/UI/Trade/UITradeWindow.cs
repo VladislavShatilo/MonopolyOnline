@@ -1,6 +1,7 @@
 using DG.Tweening;
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Globalization;
 using TMPro;
 using UnityEngine;
@@ -21,7 +22,21 @@ public class UITradeWindow : UITradeWindowBase, ITradeWindow
     [SerializeField] private UIMoneyTrade rightUIMoneyTrade;
 
     #region LIFE_CYCLE
-
+    private void Start()
+    {
+        if (offerButton == null)
+            throw new ArgumentNullException(nameof(offerButton));
+        if (closeButton == null)
+            throw new ArgumentNullException(nameof(closeButton));
+        if (leftMoneyInputField == null)
+            throw new ArgumentNullException(nameof(leftMoneyInputField));
+        if (rightMoneyInputField == null)
+            throw new ArgumentNullException(nameof(rightMoneyInputField));
+        if (leftUIMoneyTrade == null)
+            throw new ArgumentNullException(nameof(leftUIMoneyTrade));
+        if (rightUIMoneyTrade == null)
+            throw new ArgumentNullException(nameof(rightUIMoneyTrade));
+    }
     private void OnEnable()
     {
         offerButton.interactable = false;
@@ -120,7 +135,6 @@ public class UITradeWindow : UITradeWindowBase, ITradeWindow
     {
         if (currentOffer != null)
         {
-            Debug.Log("ValidateOfferButton");
             int leftAmount = currentOffer.GetFromTotalValue();
             int rightAmount = currentOffer.GetToTotalValue();
             if (leftAmount == 0 || rightAmount == 0)
@@ -129,14 +143,10 @@ public class UITradeWindow : UITradeWindowBase, ITradeWindow
             }
             if (leftAmount > 2 * rightAmount || rightAmount > 2 * leftAmount)
             {
-                Debug.Log("leftAmount " + leftAmount + "  " + "rightAmount " + rightAmount);
-
                 offerButton.interactable = false;
             }
             else
             {
-                Debug.Log("leftAmount " + leftAmount + "  " + "rightAmount " + rightAmount);
-
                 offerButton.interactable = true;
             }
         }

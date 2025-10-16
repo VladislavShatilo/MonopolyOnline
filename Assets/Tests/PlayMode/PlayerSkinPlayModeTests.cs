@@ -11,15 +11,18 @@ public class PlayerSkinPlayModeTests
 {
     private GameObject go;
     private PlayerSkin playerSkin;
+    private PhotonView photonView1;
+
     private Mock<IEventBus> eventBusMock;
     private Mock<IPhotonViewWrapper> photonViewWrapperMock;
+    private Mock<ILocalPlayerService> localPlayerServiceMock;
 
     [SetUp]
     public void Setup()
     {
         go = new GameObject();
         playerSkin = go.AddComponent<PlayerSkin>();
-
+        photonView1 = go.AddComponent<PhotonView>();
         var imageGO = new GameObject();
         imageGO.transform.parent = go.transform;
         var image = imageGO.AddComponent<Image>();
@@ -36,8 +39,9 @@ public class PlayerSkinPlayModeTests
 
         eventBusMock = new Mock<IEventBus>();
         photonViewWrapperMock = new Mock<IPhotonViewWrapper>();
+        localPlayerServiceMock=new Mock<ILocalPlayerService>();
 
-        playerSkin.Initialize(eventBusMock.Object, photonViewWrapperMock.Object);
+        playerSkin.Initialize(eventBusMock.Object, photonViewWrapperMock.Object, localPlayerServiceMock.Object);
 
         // Создаём PhotonView для теста OwnerActorNr
         var photonView = go.AddComponent<PhotonView>();

@@ -1,9 +1,11 @@
 using NUnit.Framework;
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 public class UILoanPayWindowTests
 {
@@ -82,5 +84,81 @@ public class UILoanPayWindowTests
         _window.PayLoanButton.onClick.Invoke();
 
         Assert.AreEqual(3, receivedId);
+    }
+    [Test]
+    public void Start_Throws_WhenButtonsOrTextsAreNull()
+    {
+        var go = new GameObject("Window");
+        var window = go.AddComponent<UILoanPayWindow>();
+
+        // Не присваиваем кнопки и тексты
+        var startMethod = typeof(UILoanPayWindow)
+            .GetMethod("Start", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        var ex = Assert.Throws<System.Reflection.TargetInvocationException>(() =>
+        {
+            startMethod.Invoke(window, null);
+        });
+
+        Assert.IsInstanceOf<ArgumentNullException>(ex.InnerException);
+        Assert.IsNotNull(((ArgumentNullException)ex.InnerException).ParamName);
+    }
+
+    // -----------------------------
+    // Проверка null в SetPayLoanAction
+    // -----------------------------
+    [Test]
+    public void SetPayLoanAction_AllowsNullDelegate()
+    {
+        Assert.DoesNotThrow(() => _window.SetPayLoanAction(null));
+    }
+
+    // -----------------------------
+    // Проверка повторного вызова SetPayLoanAction
+    // -----------------------------
+    [Test]
+    public void SetPayLoanAction_RemovesPreviousListeners()
+    {
+        int callCount = 0;
+        _window.SetPayLoanAction(id => callCount++);
+        _window.SetPayLoanAction(id => callCount += 10);
+
+        _window.Show(1, 100, true);
+        _window.PayLoanButton.onClick.Invoke();
+
+        // Старый listener должен быть удалён
+        Assert.AreEqual(10, callCount);
+    }
+
+    // -----------------------------
+    // Проверка публичных свойств
+    // -----------------------------
+    [Test]
+    public void PublicProperties_GetSetWorkCorrectly()
+    {
+        var newButton = CreateButton("NewButton");
+        var newText = CreateTMP("NewText");
+
+        _window.PayLoanButton = newButton;
+        _window.CantPayLoanButton = newButton;
+        _window.PayLoanText = newText;
+        _window.CantPayLoanText = newText;
+
+        Assert.AreEqual(newButton, _window.PayLoanButton);
+        Assert.AreEqual(newButton, _window.CantPayLoanButton);
+        Assert.AreEqual(newText, _window.PayLoanText);
+        Assert.AreEqual(newText, _window.CantPayLoanText);
+    }
+
+    // -----------------------------
+    // Проверка текста при Show
+    // -----------------------------
+    [Test]
+    public void Show_FormatsTextWithThousandsSeparator()
+    {
+        _window.Show(5, 1234567, true);
+
+        Assert.AreEqual("Заплатите банку 1,234,567", _window.PayLoanText.text);
+        Assert.AreEqual("Заплатите банку 1,234,567", _window.CantPayLoanText.text);
     }
 }

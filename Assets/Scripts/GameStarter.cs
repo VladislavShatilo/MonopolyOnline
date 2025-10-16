@@ -1,5 +1,6 @@
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,17 +13,19 @@ public class GameStarter : MonoBehaviourPunCallbacks
     private IEventBus eventBus;
     private IPhotonNetworkWrapper networkWrapper;
     private IPhotonViewWrapper photonViewWrapper;
-
+    private ILocalPlayerService localPlayerService;
     #region LIFE_CYCLE
 
     [Inject]
-    public void Construct(IPhotonTurnManager photonTurnManager, IBoardService boardService, IEventBus eventBus, IPhotonNetworkWrapper networkWrapper, IPhotonViewWrapper photonViewWrapper)
+    public void Construct(IPhotonTurnManager photonTurnManager, IBoardService boardService, IEventBus eventBus, IPhotonNetworkWrapper networkWrapper,
+        IPhotonViewWrapper photonViewWrapper, ILocalPlayerService localPlayerService)
     {
-        this.photonTurnManager = photonTurnManager;
-        this.boardService = boardService;
-        this.eventBus = eventBus;
-        this.networkWrapper = networkWrapper;
-        this.photonViewWrapper = photonViewWrapper;
+        this.photonTurnManager = photonTurnManager ?? throw new ArgumentNullException(nameof(photonTurnManager));
+        this.boardService = boardService ?? throw new ArgumentNullException(nameof(boardService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.networkWrapper = networkWrapper ?? throw new ArgumentNullException(nameof(networkWrapper));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
+        this.localPlayerService = localPlayerService ?? throw new ArgumentNullException(nameof(localPlayerService));
     }
 
     public void Start()
@@ -71,7 +74,7 @@ public class GameStarter : MonoBehaviourPunCallbacks
             }
             if (playerSkin != null)
             {
-                player.GetComponent<PlayerSkin>().Initialize(eventBus, photonViewWrapper);
+                player.GetComponent<PlayerSkin>().Initialize(eventBus, photonViewWrapper,localPlayerService);
             }
         }
         yield return new WaitForSeconds(0.5f);

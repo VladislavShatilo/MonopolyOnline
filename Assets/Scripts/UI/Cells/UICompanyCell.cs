@@ -59,9 +59,63 @@ public class UICompanyCell : MonoBehaviour, IUICompanyCellView, IInitializable, 
     [Inject]
     public void Construct(IUICompanyCellRepository repository, IPhotonBranchManager photonBranchManager, IPhotonMortgageManager photonMortgageManager)
     {
-        this.repository = repository;
-        this.photonBranchManager = photonBranchManager;
-        this.photonMortgageManager = photonMortgageManager;
+        this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        this.photonBranchManager = photonBranchManager ?? throw new ArgumentNullException(nameof(photonBranchManager));
+        this.photonMortgageManager = photonMortgageManager ?? throw new ArgumentNullException(nameof(photonMortgageManager));
+        // === UI ===
+        if (companyNameText == null)
+            throw new ArgumentNullException(nameof(companyNameText));
+        if (priceText == null)
+            throw new ArgumentNullException(nameof(priceText));
+        if (BGImage == null)
+            throw new ArgumentNullException(nameof(BGImage));
+        if (BGPriceImage == null)
+            throw new ArgumentNullException(nameof(BGPriceImage));
+
+        // === Branch Buttons ===
+        if (buyFirstBranchButton == null)
+            throw new ArgumentNullException(nameof(buyFirstBranchButton));
+        if (buyBranchButton == null)
+            throw new ArgumentNullException(nameof(buyBranchButton));
+        if (sellBranchButton == null)
+            throw new ArgumentNullException(nameof(sellBranchButton));
+        if (sellFirstBranchButton == null)
+            throw new ArgumentNullException(nameof(sellFirstBranchButton));
+
+        // === Branch Button Icons ===
+        if (buyFirstBranchIcon == null)
+            throw new ArgumentNullException(nameof(buyFirstBranchIcon));
+        if (buyBranchIcon == null)
+            throw new ArgumentNullException(nameof(buyBranchIcon));
+        if (sellBranchIcon == null)
+            throw new ArgumentNullException(nameof(sellBranchIcon));
+        if (sellFirstBranchIcon == null)
+            throw new ArgumentNullException(nameof(sellFirstBranchIcon));
+
+        // === Mortgage ===
+        if (mortgageButton == null)
+            throw new ArgumentNullException(nameof(mortgageButton));
+        if (buyoutButton == null)
+            throw new ArgumentNullException(nameof(buyoutButton));
+        if (mortgageTurnsText == null)
+            throw new ArgumentNullException(nameof(mortgageTurnsText));
+        if (mortgageStatsGO == null)
+            throw new ArgumentNullException(nameof(mortgageStatsGO));
+        if (mortgageFadeImage == null)
+            throw new ArgumentNullException(nameof(mortgageFadeImage));
+
+        // === Stars ===
+        if (star1Image == null)
+            throw new ArgumentNullException(nameof(star1Image));
+        if (star2Image == null)
+            throw new ArgumentNullException(nameof(star2Image));
+        if (star3Image == null)
+            throw new ArgumentNullException(nameof(star3Image));
+        if (star4Image == null)
+            throw new ArgumentNullException(nameof(star4Image));
+        if (goldStarImage == null)
+            throw new ArgumentNullException(nameof(goldStarImage));
+
     }
 
     public void Initialize()

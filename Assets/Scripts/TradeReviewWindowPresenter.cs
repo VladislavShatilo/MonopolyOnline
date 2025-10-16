@@ -17,10 +17,10 @@ public class TradeReviewWindowPresenter :  IInitializable, IDisposable
     [Inject]
     public void Construct(ITradeReviewWindow tradeReviewWindow, IEventBus eventBus, ILocalPlayerService localPlayerService, IPhotonTradeManager photonTradeManager)
     {
-        this.tradeReviewWindow = tradeReviewWindow;
-        this.eventBus = eventBus;
-        this.localPlayerService = localPlayerService;
-        this.photonTradeManager = photonTradeManager;
+        this.tradeReviewWindow = tradeReviewWindow ?? throw new ArgumentNullException(nameof(tradeReviewWindow));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.localPlayerService = localPlayerService ?? throw new ArgumentNullException(nameof(localPlayerService));
+        this.photonTradeManager = photonTradeManager ?? throw new ArgumentNullException(nameof(photonTradeManager));
     }
 
     public void Initialize()

@@ -20,21 +20,35 @@ public class AuthUI :MonoBehaviour, IInitializable,IDisposable
     [Inject]
     public void Construct(IAuthService authService)
     {
-        this.authService = authService;
+        this.authService = authService ?? throw new ArgumentNullException(nameof(authService));
+        if(nicknameField == null )
+            throw new NullReferenceException(nameof(nicknameField));
+        if (passwordField == null)
+            throw new NullReferenceException(nameof(passwordField));
+        if (loginButton == null)
+            throw new NullReferenceException(nameof(loginButton));
+
     }
     void IInitializable.Initialize()
     {
-        nicknameField.onValueChanged.AddListener(_ => CheckFields());
-        passwordField.onValueChanged.AddListener(_ => CheckFields());
-        loginButton.onClick.AddListener(OnLoginButtonClick);
+        if(nicknameField != null)
+            nicknameField.onValueChanged.AddListener(_ => CheckFields());
+        if (passwordField != null)
+            passwordField.onValueChanged.AddListener(_ => CheckFields());
+        if (loginButton != null)
+            loginButton.onClick.AddListener(OnLoginButtonClick);
 
-        loginButton.interactable = false;
+
+        //loginButton.interactable = false;
     }
     void IDisposable.Dispose()
     {
-        nicknameField.onValueChanged.RemoveListener(_ => CheckFields());
-        passwordField.onValueChanged.RemoveListener(_ => CheckFields());
-        loginButton.onClick.RemoveListener(OnLoginButtonClick);
+        if (nicknameField != null)
+            nicknameField.onValueChanged.RemoveListener(_ => CheckFields());
+        if (passwordField != null)
+            passwordField.onValueChanged.RemoveListener(_ => CheckFields());
+        if (loginButton != null)
+            loginButton.onClick.RemoveListener(OnLoginButtonClick);
 
     }
 
@@ -44,8 +58,8 @@ public class AuthUI :MonoBehaviour, IInitializable,IDisposable
 
     private void CheckFields()
     {
-        loginButton.interactable = !string.IsNullOrWhiteSpace(nicknameField.text) &&
-                                   !string.IsNullOrWhiteSpace(passwordField.text);
+      // loginButton.interactable = !string.IsNullOrWhiteSpace(nicknameField.text) &&
+                                   //!string.IsNullOrWhiteSpace(passwordField.text);
     }
 
     #endregion PRIVATE_METHODS

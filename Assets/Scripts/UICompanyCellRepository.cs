@@ -11,7 +11,6 @@ public class UICompanyCellRepository : IUICompanyCellRepository
     {
         if (views.ContainsKey(view.CompanyId()))
         {
-            Debug.LogWarning($"UICompanyCell с id {view.CompanyId()} уже зарегистрирован");
             return;
         }
 

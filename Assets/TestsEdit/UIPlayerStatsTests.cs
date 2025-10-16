@@ -178,4 +178,103 @@ public class UIPlayerStatsTests
         takeButton.onClick.Invoke();
         Assert.IsTrue(clicked);
     }
+    [Test]
+    public void BindPayLoanAction_InvokesAction()
+    {
+        bool clicked = false;
+        _stats.BindPayLoanAction(() => clicked = true);
+
+        var payButton = _stats.GetType().GetField("payLoanButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                              .GetValue(_stats) as Button;
+        payButton.onClick.Invoke();
+
+        Assert.IsTrue(clicked);
+    }
+
+    [Test]
+    public void BindLeaveButton_VisibleAndCanToggle()
+    {
+        var leaveButton = _stats.GetType().GetField("leaveButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                                .GetValue(_stats) as Button;
+
+        _stats.SetLeaveButtonVisible(true);
+        Assert.IsTrue(leaveButton.gameObject.activeSelf);
+
+        _stats.SetLeaveButtonVisible(false);
+        Assert.IsFalse(leaveButton.gameObject.activeSelf);
+    }
+
+    // --- Тесты для видимости элементов ---
+    [Test]
+    public void SetTimerGOVisible_WorksCorrectly()
+    {
+        var timerGO = _stats.GetType().GetField("timerGO", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                            .GetValue(_stats) as GameObject;
+        _stats.SetTimerGOVisible(true);
+        Assert.IsTrue(timerGO.activeSelf);
+        _stats.SetTimerGOVisible(false);
+        Assert.IsFalse(timerGO.activeSelf);
+    }
+
+    [Test]
+    public void SetLoanContainerVisible_WorksCorrectly()
+    {
+        var loanContainer = _stats.GetType().GetField("loanContainer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                                   .GetValue(_stats) as GameObject;
+        _stats.SetLoanContainerVisible(true);
+        Assert.IsTrue(loanContainer.activeSelf);
+        _stats.SetLoanContainerVisible(false);
+        Assert.IsFalse(loanContainer.activeSelf);
+    }
+
+    [Test]
+    public void SetTurnHighlightVisible_WorksCorrectly()
+    {
+        var highlightTurn = _stats.GetType().GetField("highlightTurnImage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                                  .GetValue(_stats) as Image;
+        _stats.SetTurnHighlightVisible(true);
+        Assert.IsTrue(highlightTurn.gameObject.activeSelf);
+        _stats.SetTurnHighlightVisible(false);
+        Assert.IsFalse(highlightTurn.gameObject.activeSelf);
+    }
+
+    [Test]
+    public void SetAuctionHighlightVisible_WorksCorrectly()
+    {
+        var highlightAuction = _stats.GetType().GetField("highlightAuctionImage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                                     .GetValue(_stats) as Image;
+        _stats.SetAuctionHighlightVisible(true);
+        Assert.IsTrue(highlightAuction.gameObject.activeSelf);
+        _stats.SetAuctionHighlightVisible(false);
+        Assert.IsFalse(highlightAuction.gameObject.activeSelf);
+    }
+
+    [Test]
+    public void SetTradeButtonVisible_WorksCorrectly()
+    {
+        var tradeButton = _stats.GetType().GetField("tradeButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                                .GetValue(_stats) as Button;
+        _stats.SetTradeButtonVisible(true);
+        Assert.IsTrue(tradeButton.gameObject.activeSelf);
+        _stats.SetTradeButtonVisible(false);
+        Assert.IsFalse(tradeButton.gameObject.activeSelf);
+    }
+
+    [Test]
+    public void SetLoanButtonsVisible_WorksCorrectly()
+    {
+        var takeButton = _stats.GetType().GetField("takeLoanButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                               .GetValue(_stats) as Button;
+        var payButton = _stats.GetType().GetField("payLoanButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                              .GetValue(_stats) as Button;
+
+        _stats.SetLoanButtonsVisible(true, false);
+        Assert.IsTrue(takeButton.gameObject.activeSelf);
+        Assert.IsFalse(payButton.gameObject.activeSelf);
+
+        _stats.SetLoanButtonsVisible(false, true);
+        Assert.IsFalse(takeButton.gameObject.activeSelf);
+        Assert.IsTrue(payButton.gameObject.activeSelf);
+    }
+
 }

@@ -1,4 +1,5 @@
 ﻿using Photon.Pun;
+using System;
 using System.ComponentModel;
 using UnityEditor;
 using UnityEngine;
@@ -16,6 +17,11 @@ public class PlayerView : MonoBehaviourPun, IPunInstantiateMagicCallback
     {
         rectTransform = GetComponent<RectTransform>();
         playerSkin = GetComponent<PlayerSkin>();
+        if (playerSkin == null) throw new NullReferenceException(nameof(playerSkin));
+        if (rectTransform == null) throw new NullReferenceException(nameof(rectTransform));
+        if (photonView == null) throw new NullReferenceException(nameof(photonView));
+
+
     }
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
@@ -35,7 +41,7 @@ public class PlayerView : MonoBehaviourPun, IPunInstantiateMagicCallback
             Vector3 position = (Vector3)data[4];
 
             rectTransform.anchoredPosition = position;
-            Color color = new Color(r, g, b, 1);
+            Color color = new Color(r, g, b, 1); 
             playerSkin.SetColorDirect(color);
         }
 

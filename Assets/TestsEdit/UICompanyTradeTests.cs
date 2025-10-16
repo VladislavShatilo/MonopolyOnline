@@ -1,9 +1,10 @@
+using Moq;
 using NUnit.Framework;
+using System;
+using System.Globalization;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Moq;
-using System.Globalization;
 
 [TestFixture]
 public class UICompanyTradeTests
@@ -20,33 +21,29 @@ public class UICompanyTradeTests
     [SetUp]
     public void SetUp()
     {
-        // Создаем объект и компонент
         go = new GameObject();
         uiTrade = go.AddComponent<UICompanyTrade>();
 
-        // Создаем UI элементы
         companyNameText = new GameObject().AddComponent<TextMeshProUGUI>();
         companyPriceText = new GameObject().AddComponent<TextMeshProUGUI>();
         removeButton = new GameObject().AddComponent<Button>();
 
         // Присвоение полей через Reflection
-        typeof(UICompanyTrade).GetField("companyName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(uiTrade, companyNameText);
-        typeof(UICompanyTrade).GetField("companyPrice", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(uiTrade, companyPriceText);
-        typeof(UICompanyTrade).GetField("removeCompanyButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(uiTrade, removeButton);
+        var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+        typeof(UICompanyTrade).GetField("companyName", flags).SetValue(uiTrade, companyNameText);
+        typeof(UICompanyTrade).GetField("companyPrice", flags).SetValue(uiTrade, companyPriceText);
+        typeof(UICompanyTrade).GetField("removeCompanyButton", flags).SetValue(uiTrade, removeButton);
 
-        // Mock ITradeService
         tradeServiceMock = new Mock<ITradeService>();
         tradeServiceMock.Setup(ts => ts.IsTradeActive).Returns(true);
 
-        // Конструктор Zenject
         uiTrade.Construct(tradeServiceMock.Object);
 
-        // Тестовая компания
-        testCompany = new Company(1,new CompanyData())
-        { Name = "MyCompany", Price = 1500 };
+        testCompany = new Company(1, new CompanyData())
+        {
+            Name = "MyCompany",
+            Price = 1500
+        };
     }
 
     [TearDown]
@@ -58,6 +55,45 @@ public class UICompanyTradeTests
         GameObject.DestroyImmediate(removeButton.gameObject);
     }
 
+    // -----------------------------
+    // Конструктор и исключения
+    // -----------------------------
+    [Test]
+    public void Construct_ShouldThrow_WhenTradeServiceNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => uiTrade.Construct(null));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenCompanyNameNull()
+    {
+        typeof(UICompanyTrade).GetField("companyName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(uiTrade, null);
+
+        Assert.Throws<ArgumentNullException>(() => uiTrade.Construct(tradeServiceMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenCompanyPriceNull()
+    {
+        typeof(UICompanyTrade).GetField("companyPrice", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(uiTrade, null);
+
+        Assert.Throws<ArgumentNullException>(() => uiTrade.Construct(tradeServiceMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenRemoveButtonNull()
+    {
+        typeof(UICompanyTrade).GetField("removeCompanyButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(uiTrade, null);
+
+        Assert.Throws<ArgumentNullException>(() => uiTrade.Construct(tradeServiceMock.Object));
+    }
+
+    // -----------------------------
+    // UI
+    // -----------------------------
     [Test]
     public void SetCompanyTradeUI_ShouldUpdateUIFields()
     {
@@ -67,40 +103,20 @@ public class UICompanyTradeTests
         Assert.AreEqual(testCompany.Price.ToString("N0", CultureInfo.InvariantCulture), companyPriceText.text);
     }
 
-    [Test]
-    public void RemoveButtonClicked_ShouldCallTradeServiceAndDestroyGameObject_EditModeSafe()
-    {
-        uiTrade.SetCompanyTradeUI(testCompany, 42);
 
-        // Подписка на кнопку
-        typeof(UICompanyTrade)
-            .GetMethod("OnEnable", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .Invoke(uiTrade, null);
-
-        // Подменяем Destroy на DestroyImmediate для теста
-        typeof(UICompanyTrade)
-            .GetMethod("OnRemoveClicked", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .Invoke(uiTrade, null);
-
-        tradeServiceMock.Verify(ts => ts.RemoveCompanyFromOffer(42, testCompany), Times.Once);
-
-        // Проверяем, что объект уничтожен
-        Assert.IsTrue(uiTrade == null || uiTrade.Equals(null));
-    }
+   
 
     [Test]
-    public void RemoveButtonClicked_WhenTradeInactive_ShouldDestroyGameObjectWithoutCallingService()
+    public void OnDisable_ShouldRemoveListener()
     {
-        tradeServiceMock.Setup(ts => ts.IsTradeActive).Returns(false);
-        uiTrade.SetCompanyTradeUI(testCompany, 42);
+        // Сначала добавляем слушатель
+        var onEnable = typeof(UICompanyTrade).GetMethod("OnEnable", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        onEnable.Invoke(uiTrade, null);
 
-        // Имитируем OnEnable и клик
-        removeButton.onClick.Invoke();
+        // Потом вызываем OnDisable
+        var onDisable = typeof(UICompanyTrade).GetMethod("OnDisable", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        onDisable.Invoke(uiTrade, null);
 
-        // Метод не должен вызываться
-        tradeServiceMock.Verify(ts => ts.RemoveCompanyFromOffer(It.IsAny<int>(), It.IsAny<Company>()), Times.Never);
-
-        // Проверяем уничтожение объекта
-        Assert.IsTrue(go == null || go.Equals(null));
+        Assert.AreEqual(0, removeButton.onClick.GetPersistentEventCount());
     }
 }

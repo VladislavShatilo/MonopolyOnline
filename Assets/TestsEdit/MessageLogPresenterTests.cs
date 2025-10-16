@@ -11,6 +11,7 @@ public class MessageLogPresenterTests
     private Mock<IChatService> chatServiceMock;
     private Mock<IPlayerRepository> playerRepositoryMock;
     private Mock<IEventBus> eventBusMock;
+    private Mock<ILocalPlayerService> localPlayerServiceMock;
     private MessageLogPresenter presenter;
 
     [SetUp]
@@ -20,10 +21,11 @@ public class MessageLogPresenterTests
         viewMock.SetupAllProperties(); // нужно дл€ работы событий
         chatServiceMock = new Mock<IChatService>();
         playerRepositoryMock = new Mock<IPlayerRepository>();
+        localPlayerServiceMock = new Mock<ILocalPlayerService>();
         eventBusMock = new Mock<IEventBus>();
 
         presenter = new MessageLogPresenter();
-        presenter.Construct(viewMock.Object, chatServiceMock.Object, playerRepositoryMock.Object, eventBusMock.Object);
+        presenter.Construct(viewMock.Object, chatServiceMock.Object, playerRepositoryMock.Object, eventBusMock.Object, localPlayerServiceMock.Object);
         presenter.Initialize();
     }
 
@@ -88,5 +90,36 @@ public class MessageLogPresenterTests
         // ѕровер€ем форматирование
         string expected = $"<color=#{ColorUtility.ToHtmlStringRGB(player.PlayerColor.ToUnityColor())}>John</color>: Hello world";
         viewMock.Verify(v => v.AddMessage(expected), Times.Once);
+    }
+    
+    [Test]
+    public void Construct_NullDependencies_Throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => new MessageLogPresenter().Construct(null, chatServiceMock.Object, playerRepositoryMock.Object, eventBusMock.Object, localPlayerServiceMock.Object));
+        Assert.Throws<ArgumentNullException>(() => new MessageLogPresenter().Construct(viewMock.Object, null, playerRepositoryMock.Object, eventBusMock.Object, localPlayerServiceMock.Object));
+        Assert.Throws<ArgumentNullException>(() => new MessageLogPresenter().Construct(viewMock.Object, chatServiceMock.Object, null, eventBusMock.Object, localPlayerServiceMock.Object));
+        Assert.Throws<ArgumentNullException>(() => new MessageLogPresenter().Construct(viewMock.Object, chatServiceMock.Object, playerRepositoryMock.Object, null, localPlayerServiceMock.Object));
+        Assert.Throws<ArgumentNullException>(() => new MessageLogPresenter().Construct(viewMock.Object, chatServiceMock.Object, playerRepositoryMock.Object, eventBusMock.Object, null));
+    }
+
+    [Test]
+    public void OnMessageReceived_PlayerNotFound_Throws()
+    {
+        var message = new ChatMessage(1, "Hello");
+        playerRepositoryMock.Setup(r => r.GetPlayerById(1)).Returns((PlayerData)null);
+
+        var method = typeof(MessageLogPresenter).GetMethod("OnMessageReceived", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.Throws<TargetInvocationException>(() => method.Invoke(presenter, new object[] { message }),
+            "ƒолжно выбрасывать InvalidOperationException, завернутое в TargetInvocationException");
+    }
+
+    [Test]
+    public void OnSendClicked_NullOrEmpty_DoesNotThrow()
+    {
+        var method = typeof(MessageLogPresenter).GetMethod("OnSendClicked", BindingFlags.NonPublic | BindingFlags.Instance);
+        localPlayerServiceMock.Setup(l => l.GetLocalPlayerId()).Returns(1);
+
+        Assert.DoesNotThrow(() => method.Invoke(presenter, new object[] { null }));
+        Assert.DoesNotThrow(() => method.Invoke(presenter, new object[] { "" }));
     }
 }

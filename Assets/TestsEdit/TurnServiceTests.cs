@@ -1,7 +1,8 @@
-using NUnit.Framework;
 using Moq;
-using UnityEngine;
+using NUnit.Framework;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class TurnServiceTests
 {
@@ -91,4 +92,61 @@ public class TurnServiceTests
         // Проверяем через внутренние методы Turn, можно проверить косвенно через поведение
         Assert.Pass("SetMode вызван успешно"); // Тест гарантирует вызов метода без ошибок
     }
+    [Test]
+    public void EndTurn_ShouldUseExtraTurn_WhenPlayerHasExtraTurn()
+    {
+        turnService.RegisterDouble(1); // добавляем ExtraTurn
+        turnService.StartTurn(1, true);
+
+        turnService.EndTurn();
+
+        // Проверяем, что тот же игрок получает следующий ход
+        timerManagerMock.Verify(t => t.StartTurnTimer(1, gameSettings.turnTime), Times.Exactly(2));
+        turnSyncMock.Verify(t => t.RequestStartTurn(1, false), Times.Once);
+    }
+    [Test]
+    public void EndTurn_ShouldSkipNextPlayer_WhenNextPlayerHasSkipNextTurn()
+    {
+        player2.SkipNextTurn = true;
+
+        // Текущий ход начинается
+        turnService.StartTurn(1, true);
+
+        // Очистим счётчик моков, чтобы измерять только вызовы EndTurn
+        turnSyncMock.Invocations.Clear();
+        timerManagerMock.Invocations.Clear();
+
+        turnService.EndTurn();
+
+        // Теперь проверяем, что StartTurn был вызван для текущего игрока один раз
+        timerManagerMock.Verify(t => t.StartTurnTimer(1, gameSettings.turnTime), Times.Once);
+        turnSyncMock.Verify(t => t.RequestStartTurn(1, true), Times.Once);
+    }
+
+    [Test]
+    public void StartRandomTurn_ShouldDoNothing_WhenNoPlayers()
+    {
+        playerRepoMock.Setup(r => r.GetAllPlayers()).Returns(new List<PlayerData>());
+
+        Assert.DoesNotThrow(() => turnService.StartRandomTurn());
+        timerManagerMock.Verify(t => t.StartTurnTimer(It.IsAny<int>(), It.IsAny<float>()), Times.Never);
+        turnSyncMock.Verify(t => t.RequestStartTurn(It.IsAny<int>(), It.IsAny<bool>()), Times.Never);
+    }
+    [Test]
+    public void RegisterDouble_ShouldThrow_WhenPlayerNotFound()
+    {
+        playerRepoMock.Setup(r => r.GetPlayerById(999)).Returns((PlayerData)null);
+
+        Assert.Throws<InvalidOperationException>(() => turnService.RegisterDouble(999));
+    }
+    [Test]
+    public void Construct_ShouldThrowArgumentNull_WhenDependenciesNull()
+    {
+        var service = new TurnService();
+        Assert.Throws<ArgumentNullException>(() => service.Construct(null, turnSyncMock.Object, timerManagerMock.Object, gameSettings));
+        Assert.Throws<ArgumentNullException>(() => service.Construct(playerRepoMock.Object, null, timerManagerMock.Object, gameSettings));
+        Assert.Throws<ArgumentNullException>(() => service.Construct(playerRepoMock.Object, turnSyncMock.Object, null, gameSettings));
+        Assert.Throws<ArgumentNullException>(() => service.Construct(playerRepoMock.Object, turnSyncMock.Object, timerManagerMock.Object, null));
+    }
+
 }

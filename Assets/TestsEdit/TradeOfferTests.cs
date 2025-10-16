@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 
 [TestFixture]
@@ -125,4 +126,56 @@ public class TradeOfferTests
 
         Assert.IsFalse(tradeOffer.IsValid()); // ratio = 2.5
     }
+    [Test]
+    public void SetFromCompanies_Should_Clear_WhenNullPassed()
+    {
+        var company = new Company(1, new CompanyData()) { Price = 100 };
+        tradeOffer.SetFromCompanies(new List<Company> { company });
+
+        tradeOffer.SetFromCompanies(null);
+
+        Assert.IsEmpty(tradeOffer.FromCompanies);
+    }
+
+    [Test]
+    public void SetToCompanies_Should_Clear_WhenNullPassed()
+    {
+        var company = new Company(1, new CompanyData()) { Price = 100 };
+        tradeOffer.SetToCompanies(new List<Company> { company });
+
+        tradeOffer.SetToCompanies(null);
+
+        Assert.IsEmpty(tradeOffer.ToCompanies);
+    }
+
+    [Test]
+    public void SetFromCompanies_Should_Throw_WhenListContainsNull()
+    {
+        var list = new List<Company> { null };
+        Assert.Throws<ArgumentException>(() => tradeOffer.SetFromCompanies(list));
+    }
+
+    [Test]
+    public void SetToCompanies_Should_Throw_WhenListContainsNull()
+    {
+        var list = new List<Company> { null };
+        Assert.Throws<ArgumentException>(() => tradeOffer.SetToCompanies(list));
+    }
+
+    [Test]
+    public void GetFromTotalValue_Should_Throw_WhenContainsNull()
+    {
+        tradeOffer.FromCompanies.Add(null);
+        tradeOffer.FromMoney = 100;
+        Assert.Throws<InvalidOperationException>(() => tradeOffer.GetFromTotalValue());
+    }
+
+    [Test]
+    public void GetToTotalValue_Should_Throw_WhenContainsNull()
+    {
+        tradeOffer.ToCompanies.Add(null);
+        tradeOffer.ToMoney = 100;
+        Assert.Throws<InvalidOperationException>(() => tradeOffer.GetToTotalValue());
+    }
+
 }

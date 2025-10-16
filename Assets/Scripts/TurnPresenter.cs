@@ -16,10 +16,10 @@ public class TurnPresenter : ITurnPresenter, IInitializable, IDisposable
     [Inject]
     public void Construct(ILocalPlayerService localPlayerService, ITurnWindow uiTurnWindow, IPhotonDiceManager photonDiceManager, IEventBus eventBus)
     {
-        this.localPlayerService = localPlayerService;
-        this.uiTurnWindow = uiTurnWindow;
-        this.photonDiceManager = photonDiceManager;
-        this.eventBus = eventBus;
+        this.localPlayerService = localPlayerService ?? throw new ArgumentNullException(nameof(localPlayerService));
+        this.uiTurnWindow = uiTurnWindow ?? throw new ArgumentNullException(nameof(uiTurnWindow));
+        this.photonDiceManager = photonDiceManager ?? throw new ArgumentNullException(nameof(photonDiceManager));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
     }
 
     public void Initialize()

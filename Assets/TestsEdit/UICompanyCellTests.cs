@@ -25,42 +25,48 @@ public class UICompanyCellTests
         branchMock = new Mock<IPhotonBranchManager>();
         mortgageMock = new Mock<IPhotonMortgageManager>();
 
+        // ===== Создаем UI элементы =====
+        var textFields = new[] { "companyNameText", "priceText", "mortgageTurnsText" };
+        foreach (var name in textFields)
+        {
+            cell.GetType()
+                .GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .SetValue(cell, new GameObject(name).AddComponent<TextMeshProUGUI>());
+        }
+
+        var images = new[] { "BGImage", "BGPriceImage", "star1Image", "star2Image", "star3Image", "star4Image", "goldStarImage", "mortgageFadeImage" };
+        foreach (var name in images)
+        {
+            cell.GetType()
+                .GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .SetValue(cell, new GameObject(name).AddComponent<Image>());
+        }
+
+        // ===== Кнопки =====
+        var buttons = new[] { "buyFirstBranchButton", "buyBranchButton", "sellBranchButton", "sellFirstBranchButton", "mortgageButton", "buyoutButton" };
+        foreach (var name in buttons)
+        {
+            cell.GetType()
+                .GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .SetValue(cell, new GameObject(name).AddComponent<Button>());
+        }
+
+        // ===== Иконки кнопок филиалов =====
+        var icons = new[] { "buyFirstBranchIcon", "buyBranchIcon", "sellBranchIcon", "sellFirstBranchIcon" };
+        foreach (var name in icons)
+        {
+            cell.GetType()
+                .GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .SetValue(cell, new GameObject(name).AddComponent<Image>());
+        }
+
+        // ===== Mortgage UI GameObject =====
+        cell.GetType()
+            .GetField("mortgageStatsGO", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(cell, new GameObject("mortgageStatsGO"));
+
+        // ===== Вызов Construct =====
         cell.Construct(repoMock.Object, branchMock.Object, mortgageMock.Object);
-
-        // Создаем минимальные UI элементы
-        cell.GetType().GetField("companyNameText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(cell, new GameObject().AddComponent<TextMeshProUGUI>());
-        cell.GetType().GetField("priceText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(cell, new GameObject().AddComponent<TextMeshProUGUI>());
-        cell.GetType().GetField("BGPriceImage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(cell, new GameObject().AddComponent<Image>());
-        cell.GetType().GetField("BGImage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(cell, new GameObject().AddComponent<Image>());
-
-        // Кнопки
-        string[] buttonNames = { "buyFirstBranchButton", "buyBranchButton", "sellBranchButton", "sellFirstBranchButton",
-                                 "mortgageButton", "buyoutButton" };
-        foreach (var name in buttonNames)
-        {
-            cell.GetType().GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                .SetValue(cell, new GameObject().AddComponent<Button>());
-        }
-
-        // Звезды
-        string[] starNames = { "star1Image", "star2Image", "star3Image", "star4Image", "goldStarImage" };
-        foreach (var name in starNames)
-        {
-            cell.GetType().GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                .SetValue(cell, new GameObject().AddComponent<Image>());
-        }
-
-        // Mortgage UI элементы
-        cell.GetType().GetField("mortgageStatsGO", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(cell, new GameObject());
-        cell.GetType().GetField("mortgageFadeImage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(cell, new GameObject().AddComponent<Image>());
-        cell.GetType().GetField("mortgageTurnsText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(cell, new GameObject().AddComponent<TextMeshProUGUI>());
     }
 
     [TearDown]
@@ -266,4 +272,35 @@ public class UICompanyCellTests
         Assert.AreEqual(Color.white, bg.color);
         Assert.AreEqual("5,000", price.text);
     }
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenAnyDependencyIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => cell.Construct(null, branchMock.Object, mortgageMock.Object));
+        Assert.Throws<ArgumentNullException>(() => cell.Construct(repoMock.Object, null, mortgageMock.Object));
+        Assert.Throws<ArgumentNullException>(() => cell.Construct(repoMock.Object, branchMock.Object, null));
+    }
+
+    [Test]
+    public void SetMortgageTurnsText_ShouldSetCorrectText()
+    {
+        var turnsField = (TextMeshProUGUI)cell.GetType().GetField("mortgageTurnsText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(cell);
+        cell.SetMortgageTurnsText(3);
+        Assert.AreEqual("3", turnsField.text);
+    }
+
+    [Test]
+    public void HideAllMortgageButtons_ShouldDeactivateButtons()
+    {
+        var mortgageButton = (Button)cell.GetType().GetField("mortgageButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(cell);
+        var buyoutButton = (Button)cell.GetType().GetField("buyoutButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(cell);
+
+        mortgageButton.gameObject.SetActive(true);
+        buyoutButton.gameObject.SetActive(true);
+
+        cell.HideAllMortgageButtons();
+
+        Assert.IsFalse(mortgageButton.gameObject.activeSelf);
+        Assert.IsFalse(buyoutButton.gameObject.activeSelf);
+    }
+
 }

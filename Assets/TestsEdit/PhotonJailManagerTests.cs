@@ -1,6 +1,7 @@
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
 using Photon.Pun;
+using System;
 using UnityEngine;
 
 public class PhotonJailManagerTests
@@ -71,4 +72,51 @@ public class PhotonJailManagerTests
         eventBusMock.Verify(e => e.Publish(It.Is<MoveToJailEvent>(ev => ev.PlayerID == 1)), Times.Once);
         jailServiceMock.Verify(j => j.SendPlayerToJail(1), Times.Once);
     }
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenJailServiceIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            jailManager.Construct(null, eventBusMock.Object, turnManagerMock.Object, networkMock.Object, viewWrapperMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenEventBusIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            jailManager.Construct(jailServiceMock.Object, null, turnManagerMock.Object, networkMock.Object, viewWrapperMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenTurnManagerIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            jailManager.Construct(jailServiceMock.Object, eventBusMock.Object, null, networkMock.Object, viewWrapperMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenNetworkWrapperIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            jailManager.Construct(jailServiceMock.Object, eventBusMock.Object, turnManagerMock.Object, null, viewWrapperMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenViewWrapperIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            jailManager.Construct(jailServiceMock.Object, eventBusMock.Object, turnManagerMock.Object, networkMock.Object, null));
+    }
+
+    [Test]
+    public void Construct_ShouldThrowNullReferenceException_WhenPhotonViewIsMissing()
+    {
+        var goWithoutView = new GameObject();
+        var managerWithoutView = goWithoutView.AddComponent<PhotonJailManager>();
+
+        Assert.Throws<NullReferenceException>(() =>
+            managerWithoutView.Construct(jailServiceMock.Object, eventBusMock.Object, turnManagerMock.Object, networkMock.Object, viewWrapperMock.Object));
+
+        GameObject.DestroyImmediate(goWithoutView);
+    }
+
 }

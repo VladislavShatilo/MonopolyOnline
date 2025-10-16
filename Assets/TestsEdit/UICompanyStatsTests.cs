@@ -1,9 +1,10 @@
+using Moq;
 using NUnit.Framework;
+using System;
+using System.Globalization;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Moq;
-using System.Globalization;
 
 [TestFixture]
 public class UICompanyStatsTests
@@ -15,36 +16,47 @@ public class UICompanyStatsTests
 
     private Mock<IGroupColors> groupColorsMock;
 
+    private Image topBarImage1, topBarImage2, topBarImage3;
+
     [SetUp]
     public void SetUp()
     {
         go = new GameObject();
         stats = go.AddComponent<UICompanyStats>();
 
-        // Создаём UI элементы
-        companyName = new GameObject().AddComponent<TextMeshProUGUI>();
-        groupName = new GameObject().AddComponent<TextMeshProUGUI>();
+        var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+
+        // UI элементы UICompanyStats
         branchPriceText = new GameObject().AddComponent<TextMeshProUGUI>();
+        typeof(UICompanyStats).GetField("branchPriceText", flags).SetValue(stats, branchPriceText);
 
         rentPriceTexts = new TextMeshProUGUI[5];
         for (int i = 0; i < rentPriceTexts.Length; i++)
             rentPriceTexts[i] = new GameObject().AddComponent<TextMeshProUGUI>();
+        typeof(UICompanyStats).GetField("rentPriceTexts", flags).SetValue(stats, rentPriceTexts);
 
-        // Присваиваем через Reflection
-        typeof(UIBaseCompanyStats).GetField("companyNameText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(stats, companyName);
-        typeof(UIBaseCompanyStats).GetField("groupNameText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(stats, groupName);
-        typeof(UICompanyStats).GetField("branchPriceText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(stats, branchPriceText);
-        typeof(UICompanyStats).GetField("rentPriceTexts", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(stats, rentPriceTexts);
+        // UI элементы базового класса
+        topBarImage1 = new GameObject().AddComponent<Image>();
+        topBarImage2 = new GameObject().AddComponent<Image>();
+        companyName = new GameObject().AddComponent<TextMeshProUGUI>();
+        groupName = new GameObject().AddComponent<TextMeshProUGUI>();
+        var cellPriceText = new GameObject().AddComponent<TextMeshProUGUI>();
+        var pledgePriceText = new GameObject().AddComponent<TextMeshProUGUI>();
+        var buyoutPriceText = new GameObject().AddComponent<TextMeshProUGUI>();
+
+        typeof(UIBaseCompanyStats).GetField("topBarImage1", flags).SetValue(stats, topBarImage1);
+        typeof(UIBaseCompanyStats).GetField("topBarImage2", flags).SetValue(stats, topBarImage2);
+        typeof(UIBaseCompanyStats).GetField("companyNameText", flags).SetValue(stats, companyName);
+        typeof(UIBaseCompanyStats).GetField("groupNameText", flags).SetValue(stats, groupName);
+        typeof(UIBaseCompanyStats).GetField("cellPriceText", flags).SetValue(stats, cellPriceText);
+        typeof(UIBaseCompanyStats).GetField("pledgePriceText", flags).SetValue(stats, pledgePriceText);
+        typeof(UIBaseCompanyStats).GetField("buyoutPriceText", flags).SetValue(stats, buyoutPriceText);
 
         // Mock для цветов
         groupColorsMock = new Mock<IGroupColors>();
         groupColorsMock.Setup(g => g.Colors).Returns(new Color[] { Color.red, Color.green, Color.blue });
-        stats.Constuct(groupColorsMock.Object);
     }
+
 
     [TearDown]
     public void TearDown()
@@ -89,8 +101,10 @@ public class UICompanyStatsTests
         typeof(UIBaseCompanyStats).GetField("buyoutPriceText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .SetValue(stats, buyoutPriceText);
 
+        stats.Constuct(groupColorsMock.Object);
+
         // создаём данные для компании
-        CompanyData data = new CompanyData()
+        CompanyData data = new()
         {
             name = "MyCompany",
             group = 0, // соответствует первому цвету в мокe
@@ -121,6 +135,62 @@ public class UICompanyStatsTests
         GameObject.DestroyImmediate(cellPriceText.gameObject);
         GameObject.DestroyImmediate(pledgePriceText.gameObject);
         GameObject.DestroyImmediate(buyoutPriceText.gameObject);
+    }
+    [Test]
+    public void SetRentPrices_ShouldNotThrow_WhenRentTextsNull()
+    {
+        typeof(UICompanyStats).GetField("rentPriceTexts", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(stats, null);
+
+        Assert.DoesNotThrow(() => stats.SetRentPrices(new int[] { 1, 2, 3 }));
+    }
+
+    [Test]
+    public void SetBranchPrice_ShouldNotThrow_WhenBranchPriceTextNull()
+    {
+        typeof(UICompanyStats).GetField("branchPriceText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(stats, null);
+
+        Assert.DoesNotThrow(() => stats.SetBranchPrice(123));
+    }
+
+    [Test]
+    public void Constuct_ShouldThrow_WhenGroupColorsNull()
+    {
+        Assert.Throws<System.ArgumentNullException>(() => stats.Constuct(null));
+    }
+
+    // ----------------------------
+    // Некорректные данные
+    // ----------------------------
+
+    [Test]
+    public void SetRentPrices_ShouldHandleShortArray()
+    {
+        int[] values = { 10, 20 }; // меньше чем 5
+        stats.SetRentPrices(values);
+
+        Assert.AreEqual("10", rentPriceTexts[0].text);
+        Assert.AreEqual("20", rentPriceTexts[1].text);
+
+    }
+
+    [Test]
+    public void SetData_ShouldHandleNullRent()
+    {
+        stats.Constuct(groupColorsMock.Object);
+
+        CompanyData data = new CompanyData()
+        {
+            name = "NullRentCo",
+            group = 0,
+            rent = null,
+            price = 100,
+            pledgePrice = 50,
+            buyoutPrice = 150,
+            branchPrice = 25
+        };
+        Assert.Throws<ArgumentNullException>(() => stats.SetData(data));
     }
 
 }

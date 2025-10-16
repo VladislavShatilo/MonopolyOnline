@@ -1,9 +1,10 @@
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
 using Photon.Pun;
 using Photon.Realtime;
-using UnityEngine;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class PhotonLoanManagerTests
 {
@@ -60,7 +61,7 @@ public class PhotonLoanManagerTests
         {
             new PlayerData("A", 500, 1, null),
             new PlayerData("B", 500, 2, null),
-                        new PlayerData("C", 500, 3, null)
+            new PlayerData("C", 500, 3, null)
 
         };
 
@@ -68,7 +69,7 @@ public class PhotonLoanManagerTests
 
         viewWrapperMock.Verify(v => v.RPC(loanManager.photonView,
             "RPC_ShowLoanWindow",
-            players[2].photonPlayer,
+            3,
             3, 500), Times.Once);
        
     }
@@ -104,5 +105,37 @@ public class PhotonLoanManagerTests
         method.Invoke(loanManager, new object[] { 3, 500 });
 
         eventBusMock.Verify(e => e.Publish(It.Is<OfferLoanPayEvent>(ev => ev.PlayerId == 3 && ev.LoanAmount == 500)), Times.Once);
+    }
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenLoanServiceIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            loanManager.Construct(null, eventBusMock.Object, viewWrapperMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenEventBusIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            loanManager.Construct(loanServiceMock.Object, null, viewWrapperMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenViewWrapperIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            loanManager.Construct(loanServiceMock.Object, eventBusMock.Object, null));
+    }
+
+    [Test]
+    public void Construct_ShouldThrowNullReferenceException_WhenPhotonViewIsMissing()
+    {
+        var goWithoutView = new GameObject();
+        var managerWithoutView = goWithoutView.AddComponent<PhotonLoanManager>();
+
+        Assert.Throws<NullReferenceException>(() =>
+            managerWithoutView.Construct(loanServiceMock.Object, eventBusMock.Object, viewWrapperMock.Object));
+
+        GameObject.DestroyImmediate(goWithoutView);
     }
 }

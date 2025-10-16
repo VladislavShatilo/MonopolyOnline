@@ -1,6 +1,7 @@
-using System;
 using Moq;
 using NUnit.Framework;
+using System;
+using System.Reflection;
 using UnityEngine;
 
 public class JailPresenterTests
@@ -135,5 +136,45 @@ public class JailPresenterTests
         diceManager.Verify(d => d.RequestDiceRoll(1, false,-1,-1), Times.Once);
         jailWindow.Verify(j => j.Hide(), Times.Once);
         ransomWindow.Verify(r => r.Hide(), Times.Once);
+    }
+    [Test]
+    public void OnStartTurn_PlayerNotLocal_NotInJail_HidesRansomWindow()
+    {
+        var player = new PlayerData("player1", 1000, 0, null) { JailTurnsLeft = 0 };
+        playerRepo.Setup(r => r.GetPlayerById(2)).Returns(player);
+
+        presenter.GetType()
+            .GetMethod("OnStartTurn", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .Invoke(presenter, new object[] { new StartTurnJailEvent(2) });
+
+        ransomWindow.Verify(r => r.HardHide(), Times.Once);
+    }
+
+    // Локальный игрок не может оплатить штраф
+    [Test]
+    public void OnStartTurn_LocalPlayerCannotAffordJail_ShowsWindowWithCanAffordFalse()
+    {
+        var player = new PlayerData("player1", 100, 1, null) { JailTurnsLeft = 1 }; // Money < jailRansom
+        playerRepo.Setup(r => r.GetPlayerById(1)).Returns(player);
+
+        presenter.GetType()
+            .GetMethod("OnStartTurn", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .Invoke(presenter, new object[] { new StartTurnJailEvent(1) });
+
+        jailWindow.Verify(j => j.Show(1, settings.jailRansom, false), Times.Once);
+    }
+
+    // playerRepository возвращает null
+    [Test]
+    public void OnStartTurn_PlayerNotFound_ThrowsInvalidOperationException()
+    {
+        playerRepo.Setup(r => r.GetPlayerById(1)).Returns((PlayerData)null);
+
+        Assert.Throws<TargetInvocationException>(() =>
+        {
+            presenter.GetType()
+                .GetMethod("OnStartTurn", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .Invoke(presenter, new object[] { new StartTurnJailEvent(1) });
+        });
     }
 }

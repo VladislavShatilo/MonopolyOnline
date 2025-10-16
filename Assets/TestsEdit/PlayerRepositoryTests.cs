@@ -135,4 +135,13 @@ public class PlayerRepositoryTests
         // Act & Assert
         Assert.Throws<System.ArgumentOutOfRangeException>(() => repository.GetNextPlayerId(1));
     }
+    [Test]
+    public void GetNextPlayerId_ShouldThrow_WhenPlayerIdNotFound()
+    {
+        var player1 = new PlayerData("player1", 500, 1, null);
+        repository.AddPlayer(player1);
+
+        Assert.Throws<System.ArgumentException>(() => repository.GetNextPlayerId(999));
+    }
+
 }

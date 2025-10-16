@@ -1,78 +1,228 @@
-using NUnit.Framework;
+п»їusing NUnit.Framework;
 using Moq;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CompanyUIServiceTests
 {
-    private CompanyUIService service;
     private Mock<IBoardService> boardServiceMock;
     private Mock<IEventBus> eventBusMock;
+    private CompanyUIService service;
 
     [SetUp]
     public void Setup()
     {
         boardServiceMock = new Mock<IBoardService>();
         eventBusMock = new Mock<IEventBus>();
-
         service = new CompanyUIService();
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenBoardServiceIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => service.Construct(null, eventBusMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenEventBusIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => service.Construct(boardServiceMock.Object, null));
+    }
+
+    [Test]
+    public void Construct_ShouldAssignDependencies()
+    {
         service.Construct(boardServiceMock.Object, eventBusMock.Object);
+        Assert.NotNull(service);
     }
 
     [Test]
     public void Initialize_ShouldSubscribeToEvent()
     {
+        service.Construct(boardServiceMock.Object, eventBusMock.Object);
         service.Initialize();
-        eventBusMock.Verify(e => e.Subscribe<HideButtonsTradeEvent>(It.IsAny<System.Action<HideButtonsTradeEvent>>()), Times.Once);
+        eventBusMock.Verify(e => e.Subscribe<HideButtonsTradeEvent>(It.IsAny<Action<HideButtonsTradeEvent>>()), Times.Once);
     }
 
     [Test]
     public void Dispose_ShouldUnsubscribeFromEvent()
     {
-        service.Initialize(); // подписка
+        service.Construct(boardServiceMock.Object, eventBusMock.Object);
         service.Dispose();
-        eventBusMock.Verify(e => e.Unsubscribe<HideButtonsTradeEvent>(It.IsAny<System.Action<HideButtonsTradeEvent>>()), Times.Once);
+        eventBusMock.Verify(e => e.Unsubscribe<HideButtonsTradeEvent>(It.IsAny<Action<HideButtonsTradeEvent>>()), Times.Once);
     }
 
     [Test]
-    public void InitializeUI_ShouldCreateAndInitCompanyCellsAndPopups()
+    public void InitializeUI_ShouldInitializeCellsAndPopups()
     {
-        // Подготовка моков
-        var mockCells = new List<CellData>
-        {
-            new CellData { cellType = CellType.Company, companyData = new CompanyData() },
-            new CellData { cellType = CellType.FieldCompany, fieldCompanyData = new FieldCompanyData() }
-        };
+        service.Construct(boardServiceMock.Object, eventBusMock.Object);
 
-        var mockTransforms = new List<RectTransform> { new GameObject().AddComponent<RectTransform>(), new GameObject().AddComponent<RectTransform>() };
-        boardServiceMock.Setup(b => b.GetAllCellData()).Returns(mockCells);
-        boardServiceMock.Setup(b => b.GetCellRectTransform(It.IsAny<int>())).Returns<int>(i => mockTransforms[i]);
+        var cellData = new List<CellData>
+    {
+        new CellData { cellType = CellType.Company, companyData = new CompanyData() },
+    };
+        boardServiceMock.Setup(b => b.GetAllCellData()).Returns(cellData);
 
-        // Добавим компоненты к трансформам
-        var popup = mockTransforms[0].gameObject.AddComponent<CompanyWindowPopup>();
-        var companyUI = mockTransforms[1].gameObject.AddComponent<UICompanyCell>();
+        // РЎРѕР·РґР°С‘Рј РѕРґРёРЅ GameObject СЃ РѕР±РѕРёРјРё РєРѕРјРїРѕРЅРµРЅС‚Р°РјРё
+        var cellGO = new GameObject("CellGO");
+        var rect = cellGO.AddComponent<RectTransform>();
+        var companyCell = cellGO.AddComponent<TestUICompanyCell>();
+        var popup = cellGO.AddComponent<TestCompanyWindowPopup>();
+
+        // РќР°СЃС‚СЂР°РёРІР°РµРј boardServiceMock
+        boardServiceMock.Setup(b => b.GetCellRectTransform(It.IsAny<int>())).Returns(rect);
 
         service.InitializeUI();
 
-        // Проверка, что UI и popup сохранились в словарях
-        Assert.IsNotNull(service.GetCompanyUI(1));
+        // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ companyUI РґРѕР±Р°РІР»РµРЅ РІ СЃР»РѕРІР°СЂСЊ
+        Assert.NotNull(service.GetCompanyUI(0));
+    }
+
+
+    [Test]
+    public void GetCompanyUI_ShouldReturnNull_IfNotExists()
+    {
+        service.Construct(boardServiceMock.Object, eventBusMock.Object);
+        var result = service.GetCompanyUI(99);
+        Assert.IsNull(result);
     }
 
     [Test]
     public void HideAllButtonsOnTrade_ShouldCallHideMethods()
     {
-        var mockCompanyUI = new Mock<IUICompanyCellView>();
-        service.InitializeUI(); // иначе словарь пустой
-        // Вставляем напрямую для теста
-        service.GetType().GetField("companyUIs", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(service, new Dictionary<int, UICompanyCell> { { 0, mockCompanyUI.Object as UICompanyCell } });
+        // Arrange
+        var fakeCell = new FakeUICompanyCell();
 
-        var e = new HideButtonsTradeEvent(0);
-        // Вызов приватного метода через reflection
-        var method = service.GetType().GetMethod("HideAllButtonsOnTrade", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        // РџРѕРґСЃС‚Р°РІР»СЏРµРј С„РµР№Рє РІ РїСЂРёРІР°С‚РЅС‹Р№ СЃР»РѕРІР°СЂСЊ companyUIs
+        var dictField = typeof(CompanyUIService)
+            .GetField("companyUIs", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        dictField.SetValue(service, new Dictionary<int, IUICompanyCellView>
+        {
+            { 1, fakeCell } // РёСЃРїРѕР»СЊР·СѓРµРј ID = 1
+        });
+
+        var e = new HideButtonsTradeEvent(1);
+
+        // Act: РІС‹Р·С‹РІР°РµРј РїСЂРёРІР°С‚РЅС‹Р№ РјРµС‚РѕРґ С‡РµСЂРµР· reflection
+        var method = typeof(CompanyUIService)
+            .GetMethod("HideAllButtonsOnTrade", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
         method.Invoke(service, new object[] { e });
 
-        mockCompanyUI.Verify(c => c.HideAllBranchButtons(), Times.Once);
-        mockCompanyUI.Verify(c => c.HideAllMortgageButtons(), Times.Once);
+        // Assert: РїСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ С„РµР№Рє Р·Р°С„РёРєСЃРёСЂРѕРІР°Р» РІС‹Р·РѕРІС‹
+        Assert.IsTrue(fakeCell.HideBranchesCalled, "HideAllBranchButtons РЅРµ РІС‹Р·РІР°РЅРѕ");
+        Assert.IsTrue(fakeCell.HideMortgageCalled, "HideAllMortgageButtons РЅРµ РІС‹Р·РІР°РЅРѕ");
+    }
+    // ---------- Р—Р°РіР»СѓС€РєРё ----------
+
+    private class TestCompanyWindowPopup : MonoBehaviour
+    {
+        public void Init(int id) { } // РёРјРёС‚Р°С†РёСЏ РјРµС‚РѕРґР°
+        public event Action<int> OnCompanyClicked;
+    }
+
+    private class TestUICompanyCell : MonoBehaviour, IUICompanyCellView
+    {
+        public void Init(int id) { }
+        public void HideAllBranchButtons() { }
+        public void HideAllMortgageButtons() { }
+
+        public int CompanyId()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateUI(string name, int price, Color groupColor)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateOwner(Color ownerColor)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetRentText(int rent)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateBranchStars(int level)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ShowBuyFirstBranchButton()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ShowBuySellButtons()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ShowSellFirstButton()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ShowMortgageButton()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ShowBuyoutButton()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void MortgageUI()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void BuyoutUI()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetMortgageTurnsText(int turns)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void LoseCompanyUI(Company company)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    // Р—Р°РіР»СѓС€РєР° Р±РµР· РЅР°СЃР»РµРґРѕРІР°РЅРёСЏ РѕС‚ MonoBehaviour
+    private class FakeUICompanyCell : IUICompanyCellView
+    {
+        public bool HideBranchesCalled { get; private set; }
+        public bool HideMortgageCalled { get; private set; }
+
+        public void HideAllBranchButtons() => HideBranchesCalled = true;
+        public void HideAllMortgageButtons() => HideMortgageCalled = true;
+
+        // РџСѓСЃС‚С‹Рµ СЂРµР°Р»РёР·Р°С†РёРё РѕСЃС‚Р°Р»СЊРЅС‹С… РјРµС‚РѕРґРѕРІ РёРЅС‚РµСЂС„РµР№СЃР°
+        public void Init(int id) { }
+        public int CompanyId() => 0;
+        public void UpdateUI(string name, int price, Color groupColor) { }
+        public void UpdateOwner(Color ownerColor) { }
+        public void SetRentText(int rent) { }
+        public void UpdateBranchStars(int level) { }
+        public void ShowBuyFirstBranchButton() { }
+        public void ShowBuySellButtons() { }
+        public void ShowSellFirstButton() { }
+        public void ShowMortgageButton() { }
+        public void ShowBuyoutButton() { }
+        public void MortgageUI() { }
+        public void BuyoutUI() { }
+        public void SetMortgageTurnsText(int turns) { }
+        public void LoseCompanyUI(Company company) { }
     }
 }

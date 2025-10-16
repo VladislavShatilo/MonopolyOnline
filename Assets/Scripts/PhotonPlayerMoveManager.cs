@@ -1,5 +1,6 @@
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,12 +20,12 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
     [Inject]
     public void Construct(IPlayerMoveUseCase playerMoveUseCase, IEventBus eventBus, IPlayerRepository playerRepository, IBoardService boardService, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
-        this.playerMoveUseCase = playerMoveUseCase;
-        this.playerRepository = playerRepository;
-        this.eventBus = eventBus;
-        this.boardService = boardService;
-        this.photonNetworkWrapper = photonNetworkWrapper;
-        this.photonViewWrapper = photonViewWrapper;
+        this.playerMoveUseCase = playerMoveUseCase ?? throw new ArgumentNullException(nameof(playerMoveUseCase));
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.boardService = boardService ?? throw new ArgumentNullException(nameof(boardService));
+        this.photonNetworkWrapper = photonNetworkWrapper ?? throw new ArgumentNullException(nameof(photonNetworkWrapper));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
     }
 
     private void OnEnable()
@@ -64,7 +65,7 @@ public class PhotonPlayerMoveManager : MonoBehaviourPun, IPhotonPlayerMoveManage
     {
         if (!photonNetworkWrapper.IsMasterClient) return;
 
-        PlayerData player = playerRepository.GetPlayerById(playerId);
+        PlayerData player = playerRepository.GetPlayerById(playerId) ?? throw new NullReferenceException(nameof(RPC_TeleportPlayer)); ;
         int randomIndex;
         do
         {

@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,7 +11,13 @@ public class WindowAnimation : MonoBehaviour
     [SerializeField] private float animationOffset = 160f;
 
     #region PUBLIC_METHODS
-
+    private void Awake()
+    {
+        if(windowRectTransform == null)
+        {
+            throw new NullReferenceException(nameof(WindowAnimation));
+        }
+    }
     public RectTransform WindowRectTransform
     {
         get => windowRectTransform;
@@ -18,15 +25,24 @@ public class WindowAnimation : MonoBehaviour
     }
     public virtual void ShowWindow()
     {
-        windowRectTransform.DOAnchorPos(Vector2.zero, animationDuration);
+        if(windowRectTransform != null)
+        {
+            windowRectTransform.DOAnchorPos(Vector2.zero, animationDuration);
+        }
     }
     public virtual void HideWindow()
     {
-        windowRectTransform.DOAnchorPos(new Vector2(0, animationOffset), animationDuration);
+        if (windowRectTransform != null)
+        {
+            windowRectTransform.DOAnchorPos(new Vector2(0, animationOffset), animationDuration);
+        }
     }
     public virtual void HardHideWindow()
     {
-        windowRectTransform.anchoredPosition = new Vector2(0, animationOffset);
+        if (windowRectTransform != null)
+        {
+            windowRectTransform.anchoredPosition = new Vector2(0, animationOffset);
+        }
     }
 
     #endregion PUBLIC_METHODS

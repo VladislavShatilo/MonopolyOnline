@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,11 +15,15 @@ public class UISpendCell : UICellBase
 
     public override void UpdateUI(CellData cellData, PlayerData owner)
     {
+        if (spendImage == null)
+            throw new ArgumentNullException(nameof(spendImage));
         var spend = cellData.spendData;
         spendImage.sprite = spend.spendSprite;
     }
     public void RotateIcon()
     {
+        if (spendImage == null)
+            throw new ArgumentNullException(nameof(spendImage));
         spendImage.rectTransform.eulerAngles = new Vector3(0, 0, 270);
     }
 

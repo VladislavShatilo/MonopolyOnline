@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +20,10 @@ public class TurnService : ITurnService
     [Inject]
     public void Construct(IPlayerRepository playerRepository, IPhotonTurnSynchronizer photonTurnSynchronizer, ITimerManager timerManager, GameSettings gameSettings)
     {
-        this.playerRepository = playerRepository;
-        this.photonTurnSynchronizer = photonTurnSynchronizer;
-        this.timerManager = timerManager;
-        this.gameSettings = gameSettings;
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.photonTurnSynchronizer = photonTurnSynchronizer ?? throw new ArgumentNullException(nameof(photonTurnSynchronizer));
+        this.timerManager = timerManager ?? throw new ArgumentNullException(nameof(timerManager));
+        this.gameSettings = gameSettings ?? throw new ArgumentNullException(nameof(gameSettings));
         turn = new Turn();
     }
 
@@ -32,7 +33,7 @@ public class TurnService : ITurnService
 
     public void StartRandomTurn()
     {
-        var players = playerRepository.GetAllPlayers();
+        var players = playerRepository.GetAllPlayers() ?? throw new InvalidOperationException(nameof(StartRandomTurn));
         if (players.Count == 0) return;
         var randomPlayer = players[UnityEngine.Random.Range(0, players.Count)];
         StartTurn(randomPlayer.Id, true);
@@ -53,7 +54,7 @@ public class TurnService : ITurnService
 
         if (turn.HasExtraTurn(currentId))
         {
-            var pd = playerRepository.GetPlayerById(currentId);
+            var pd = playerRepository.GetPlayerById(currentId) ?? throw new InvalidOperationException(nameof(EndTurn));
 
             if (pd.SkipNextTurn)
             {
@@ -68,7 +69,7 @@ public class TurnService : ITurnService
             }
         }
 
-        var nextPlayer = playerRepository.GetNextPlayerId(currentId);
+        var nextPlayer = playerRepository.GetNextPlayerId(currentId) ?? throw new InvalidOperationException(nameof(EndTurn));
         if (nextPlayer != null)
         {
             if (nextPlayer.SkipNextTurn)
@@ -85,11 +86,9 @@ public class TurnService : ITurnService
 
     public void RegisterDouble(int playerId)
     {
-        Debug.Log("RegisterDouble 1");
-
-        var player = playerRepository.GetPlayerById(playerId);
+        var player = playerRepository.GetPlayerById(playerId) ?? throw new InvalidOperationException(nameof(RegisterDouble));
         if (player.SkipNextTurn) return;
-        Debug.Log("RegisterDouble 2");
+
         turn.AddExtraTurn(playerId);
     }
 

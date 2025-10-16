@@ -1,5 +1,7 @@
 ﻿using NUnit.Framework;
+using System;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class UnityPlayerColorServiceTests
 {
@@ -78,5 +80,26 @@ public class UnityPlayerColorServiceTests
         var color3 = service.GetColorForPlayer(3);
 
         AssertColorsEqual(new PlayerColor(1, 0, 0), color3);
+    }
+    [Test]
+    public void Construct_ThrowsArgumentNullException_WhenGameSettingsIsNull()
+    {
+        var newService = new UnityPlayerColorService();
+        Assert.Throws<ArgumentNullException>(() => newService.Construct(null));
+    }
+
+
+    [Test]
+    public void GetColorForPlayer_WrapsAroundCorrectly_ForLargeActorNumber()
+    {
+        gameSettings.playerColors = new Color[]
+        {
+            new Color(1, 0, 0),
+            new Color(0, 1, 0),
+            new Color(0, 0, 1)
+        };
+
+        var color = service.GetColorForPlayer(100); // 100 % 3 = 1 → индекс 0
+        AssertColorsEqual(new PlayerColor(1, 0, 0), color);
     }
 }

@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,9 +16,11 @@ public class PhotonLoanManager : MonoBehaviourPun, IPhotonLoanManager
     [Inject]
     public void Construct(ILoanService loanService, IEventBus eventBus, IPhotonViewWrapper photonViewWrapper)
     {
-        this.loanService = loanService;
-        this.eventBus = eventBus;
-        this.photonViewWrapper = photonViewWrapper;
+        this.loanService = loanService ?? throw new ArgumentNullException(nameof(loanService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
+        if (photonView == null) throw new NullReferenceException(nameof(photonView));
+
     }
 
     #endregion LIFE_CYCLE
@@ -36,7 +39,7 @@ public class PhotonLoanManager : MonoBehaviourPun, IPhotonLoanManager
 
     public void ShowLoanWindow(int playerId, int loanAmount)
     {
-        photonViewWrapper.RPC(photonView, nameof(RPC_ShowLoanWindow), PhotonNetwork.CurrentRoom.GetPlayer(playerId), playerId, loanAmount);
+        photonViewWrapper.RPC(photonView, nameof(RPC_ShowLoanWindow), playerId, playerId, loanAmount);
     }
 
     #endregion PUBLIC_METHODS

@@ -9,10 +9,13 @@ public class AuthService : IAuthService
 
     public void Login(string nickname, string password)
     {
-        playerData.Nickname = nickname.Trim();
-        playerData.Password = password;
+        
+            playerData.Nickname = nickname.Trim();
+            playerData.Password = password;
 
-        PhotonNetwork.NickName = playerData.Nickname;
+            PhotonNetwork.NickName = playerData.Nickname;
+        
+       
     }
 
     public PlayerAuthData GetPlayerData()

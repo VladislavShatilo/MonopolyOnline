@@ -6,6 +6,7 @@ public static class PlayerColorExtensions
 
     public static Color ToUnityColor(this PlayerColor color)
     {
+        if (color == null) return Color.aliceBlue;
         return new Color(color.R, color.G, color.B);
     }
 

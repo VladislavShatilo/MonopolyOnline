@@ -13,6 +13,25 @@ public class UIPayRentWindow : UIWindowBase, IPayRentWindow
     [SerializeField] private Button cantPayRentButton;
     [SerializeField] private TextMeshProUGUI cantPayRentText;
 
+    #region LIFE_CYCLE
+
+    private void Start()
+    {
+        if (payRentButton == null)
+            throw new ArgumentNullException(nameof(payRentButton));
+        if (payButtonText == null)
+            throw new ArgumentNullException(nameof(payButtonText));
+        if (cantPayRentButton == null)
+            throw new ArgumentNullException(nameof(cantPayRentButton));
+        if (cantPayRentText == null)
+            throw new ArgumentNullException(nameof(cantPayRentText));
+       
+        
+
+    }
+    #endregion LIFE_CYCLE
+
+
     #region PUBLIC_METHODS
 
     public void SetPayAction(Action payAction)

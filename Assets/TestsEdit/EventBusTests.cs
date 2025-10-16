@@ -85,4 +85,25 @@ public class EventBusTests
 
         Assert.IsTrue(handlerCalled);
     }
+    [Test]
+    public void Subscribe_ShouldThrow_WhenHandlerIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => eventBus.Subscribe<TestEvent>(null));
+    }
+
+    [Test]
+    public void Unsubscribe_ShouldThrow_WhenHandlerIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => eventBus.Unsubscribe<TestEvent>(null));
+    }
+
+    [Test]
+    public void Publish_ShouldNotThrow_WhenEventIsNull_AndLogsWarning()
+    {
+        // Ожидаем предупреждение в логе Unity
+        LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("EventBus: попытка опубликовать null событие"));
+
+        // Публикация null события
+        Assert.DoesNotThrow(() => eventBus.Publish<TestEvent>(null));
+    }
 }

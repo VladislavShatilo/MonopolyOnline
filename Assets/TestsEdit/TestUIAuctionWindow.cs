@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using TMPro;
 using UnityEditor.PackageManager.UI;
 using UnityEngine;
@@ -39,7 +40,7 @@ public class UIAuctionWindowTests
     [TearDown]
     public void TearDown()
     {
-        Object.DestroyImmediate(_window.gameObject);
+        UnityEngine.Object.DestroyImmediate(_window.gameObject);
     }
 
     [Test]
@@ -98,6 +99,67 @@ public class UIAuctionWindowTests
     {
         _window.Hide();
         Assert.IsTrue(_window.hideWindowCalled);
+    }
+    [Test]
+    public void Start_ShouldThrowException_WhenPlayButtonNull()
+    {
+        _window.PlayButton = null;
+        Assert.Throws<ArgumentNullException>(() => _window.ValidateUI());
+
+    }
+
+    [Test]
+    public void Start_ShouldThrowException_WhenCantPlayButtonNull()
+    {
+        _window.CantPlayButton = null;
+
+        Assert.Throws<ArgumentNullException>(() => _window.ValidateUI());
+    }
+
+    [Test]
+    public void OnEnable_ShouldSubscribeToButtonClicks()
+    {
+        int playCalled = 0;
+        int passCalled = 0;
+
+        _window.SetPlayAction(id => playCalled++);
+        _window.SetPassAction(id => passCalled++);
+
+        _window.TestOnEnable();
+
+        _window.PlayButton.onClick.Invoke();
+        _window.CancelButton.onClick.Invoke();
+
+        Assert.AreEqual(1, playCalled);
+        Assert.AreEqual(1, passCalled);
+    }
+
+    [Test]
+    public void OnDisable_ShouldUnsubscribeFromButtonClicks()
+    {
+        int playCalled = 0;
+        int passCalled = 0;
+
+        _window.SetPlayAction(id => playCalled++);
+        _window.SetPassAction(id => passCalled++);
+
+        _window.TestOnEnable();
+        _window.TestOnDisable();
+
+        _window.PlayButton.onClick.Invoke();
+        _window.CancelButton.onClick.Invoke();
+
+        Assert.AreEqual(0, playCalled);
+        Assert.AreEqual(0, passCalled);
+    }
+
+    [Test]
+    public void Show_ShouldFormatLargeNumbersCorrectly()
+    {
+        _window.Show(1, "MegaCorp", 1234567, 2000000);
+
+        Assert.AreEqual("Поднять до 1,234,567", _window.PlayPriceText.text);
+        Assert.AreEqual("Поднять до 1,234,567", _window.CantPriceText.text);
     }
 }
 

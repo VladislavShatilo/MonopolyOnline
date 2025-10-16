@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,10 +18,12 @@ public class PhotonCompanySyncManager : MonoBehaviourPun, ICompanySyncService
     [Inject]
     public void Construct(ICompanyRepository companyRepository, IPlayerRepository playerRepository, IEventBus eventBus, IPhotonViewWrapper photonViewWrapper)
     {
-        this.companyRepository = companyRepository;
-        this.playerRepository = playerRepository;
-        this.eventBus = eventBus;
-        this.photonViewWrapper = photonViewWrapper;
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
+        if (photonView == null) throw new NullReferenceException(nameof(photonView));
+
     }
 
     #endregion LIFE_CYCLE
@@ -44,19 +47,20 @@ public class PhotonCompanySyncManager : MonoBehaviourPun, ICompanySyncService
     [PunRPC]
     private void RPC_SyncCompanyBought(int companyId, int playerId, int price)
     {
-        var company = companyRepository.GetCompanyById(companyId);
+        var company = companyRepository.GetCompanyById(companyId) ?? throw new NullReferenceException(nameof(RPC_SyncCompanyBought)); 
         company.Buy(playerId);
 
-        var player = playerRepository.GetPlayerById(playerId);
-        player.Money -= price; // синхронизация, не логика банка
+        var player = playerRepository.GetPlayerById(playerId) ?? throw new NullReferenceException(nameof(RPC_SyncCompanyBought)); 
+        player.Money -= price; 
+
         eventBus.Publish(new CompanyBoughtEvent(companyId, playerId));
     }
     [PunRPC]
     private void RPC_SyncRentPaid(int companyId, int playerId, int ownerId, int rent)
     {
-        var company = companyRepository.GetCompanyById(companyId);
-        var owner = playerRepository.GetPlayerById(ownerId);
-        var renter = playerRepository.GetPlayerById(playerId);
+        var company = companyRepository.GetCompanyById(companyId) ?? throw new NullReferenceException(nameof(RPC_SyncRentPaid)); ;
+        var owner = playerRepository.GetPlayerById(ownerId) ?? throw new NullReferenceException(nameof(RPC_SyncRentPaid)); ;
+        var renter = playerRepository.GetPlayerById(playerId) ?? throw new NullReferenceException(nameof(RPC_SyncRentPaid)); ;
 
         owner.Money += rent;
         renter.Money -= rent;

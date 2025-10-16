@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,17 +10,13 @@ public class CompanyOfferInteractor
 
     public CompanyOfferInteractor(ITradeService tradeService, ICompanyRepository companyRepository)
     {
-        this.tradeService = tradeService;
-        this.companyRepository = companyRepository;
+        this.tradeService = tradeService ?? throw new ArgumentNullException(nameof(tradeService));
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
     }
 
     public bool TryToggleCompanyInOffer(int companyId)
     {
-        var company = companyRepository.GetCompanyById(companyId);
-        if (company == null)
-        {
-            return false;
-        }
+        var company = companyRepository.GetCompanyById(companyId) ?? throw new InvalidOperationException(nameof(companyRepository));     
 
         if (!tradeService.IsTradeActive)
         {

@@ -191,4 +191,83 @@ public class AuctionServiceTests
         // Первый вызов PromptBidRequest должен быть для игрока с ID > 3, т.е. A (1)
         photonAuctionManager.Verify(p => p.PromptBidRequest(1, 600, 100), Times.Once);
     }
+    [Test]
+    public void Construct_ShouldThrowArgumentNullException_WhenAnyDependencyIsNull()
+    {
+        var auctionService = new AuctionService();
+
+        var photonAuctionManager = new Mock<IPhotonAuctionManager>().Object;
+        var photonTurnManager = new Mock<IPhotonTurnManager>().Object;
+        var eventBus = new Mock<IEventBus>().Object;
+        var timerManager = new Mock<ITimerManager>().Object;
+        var playerRepository = new Mock<IPlayerRepository>().Object;
+        var gameSettings = ScriptableObject.CreateInstance<GameSettings>(); // Правильный способ
+
+        // Проверим все зависимости по очереди
+        Assert.Throws<ArgumentNullException>(() =>
+            auctionService.Construct(null, photonTurnManager, eventBus, timerManager, gameSettings, playerRepository));
+
+        Assert.Throws<ArgumentNullException>(() =>
+            auctionService.Construct(photonAuctionManager, null, eventBus, timerManager, gameSettings, playerRepository));
+
+        Assert.Throws<ArgumentNullException>(() =>
+            auctionService.Construct(photonAuctionManager, photonTurnManager, null, timerManager, gameSettings, playerRepository));
+
+        Assert.Throws<ArgumentNullException>(() =>
+            auctionService.Construct(photonAuctionManager, photonTurnManager, eventBus, null, gameSettings, playerRepository));
+
+        Assert.Throws<ArgumentNullException>(() =>
+            auctionService.Construct(photonAuctionManager, photonTurnManager, eventBus, timerManager, null, playerRepository));
+
+        Assert.Throws<ArgumentNullException>(() =>
+            auctionService.Construct(photonAuctionManager, photonTurnManager, eventBus, timerManager, gameSettings, null));
+    }
+    [Test]
+    public void IsPlayerTurn_ShouldReturnTrue_WhenItIsPlayersTurn()
+    {
+        playerRepository.Setup(r => r.GetAllPlayers()).Returns(new List<PlayerData>
+        {
+            new("PlayerA", 500, 1, null),
+            new("PlayerB", 500, 2, null)
+        });
+
+        auctionService.StartAuction(1, 100, 500);
+
+        bool result = InvokePrivate<bool>("IsPlayerTurn", 2);
+        Assert.IsTrue(result);
+    }
+
+    [Test]
+    public void IsPlayerTurn_ShouldReturnFalse_WhenPlayerAlreadyPassed()
+    {
+        playerRepository.Setup(r => r.GetAllPlayers()).Returns(new List<PlayerData>
+        {
+            new("PlayerA", 500, 1, null),
+            new("PlayerB", 500, 2, null)
+        });
+
+        auctionService.StartAuction(1, 100, 500);
+        auctionService.PassBid(1); // игрок 1 сдался
+
+        bool result = InvokePrivate<bool>("IsPlayerTurn", 1);
+        Assert.IsFalse(result);
+    }
+
+    [Test]
+    public void IsPlayerTurn_ShouldReturnFalse_WhenNoBidders()
+    {
+        playerRepository.Setup(r => r.GetAllPlayers()).Returns(new List<PlayerData>());
+        auctionService.StartAuction(1, 100, 500);
+
+        bool result = InvokePrivate<bool>("IsPlayerTurn", 1);
+        Assert.IsFalse(result);
+    }
+
+    // ---------- Вспомогательный метод для вызова приватных ----------
+
+    private T InvokePrivate<T>(string methodName, params object[] args)
+    {
+        var method = typeof(AuctionService).GetMethod(methodName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        return (T)method.Invoke(auctionService, args);
+    }
 }

@@ -1,6 +1,7 @@
 using NUnit.Framework;
-using UnityEngine;
+using System;
 using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class UITurnWindowTests
@@ -38,7 +39,7 @@ public class UITurnWindowTests
     [TearDown]
     public void TearDown()
     {
-        Object.DestroyImmediate(_window.gameObject);
+        UnityEngine.Object.DestroyImmediate(_window.gameObject);
     }
     [Test]
     public void Show_CallsShowWindow()
@@ -95,5 +96,36 @@ public class UITurnWindowTests
     {
         _window.InputField2Public.text = "";
         Assert.AreEqual(0, _window.GetSteps2());
+    }
+ 
+    [Test]
+    public void SetThrowDiceAction_AllListenersRemoved_WhenNullPassed()
+    {
+        bool called = false;
+        _window.SetThrowDiceAction(() => called = true);
+
+        // ѕровер€ем, что слушатель установлен
+        _window.ThrowDiceButtonPublic.onClick.Invoke();
+        Assert.IsTrue(called);
+
+        // ѕередаем null и провер€ем, что слушатели очищены
+        _window.SetThrowDiceAction(null);
+        called = false;
+        _window.ThrowDiceButtonPublic.onClick.Invoke();
+        Assert.IsFalse(called);
+    }
+
+    [Test]
+    public void GetSteps1_ThrowsFormatException_WhenTextIsNotNumber()
+    {
+        _window.InputField1Public.text = "abc";
+        Assert.Throws<FormatException>(() => _window.GetSteps1());
+    }
+
+    [Test]
+    public void GetSteps2_ThrowsFormatException_WhenTextIsNotNumber()
+    {
+        _window.InputField2Public.text = "xyz";
+        Assert.Throws<FormatException>(() => _window.GetSteps2());
     }
 }

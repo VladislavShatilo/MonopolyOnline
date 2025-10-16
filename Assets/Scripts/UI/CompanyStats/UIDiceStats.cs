@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,6 +15,9 @@ public class UIDiceStats : UIBaseCompanyStats,ICompanyStatsUI<DiceCompanyData>
 
     public void SetDiceFieldMultiTexts(int[] values)
     {
+        if(diceFieldMultiTexts == null)
+            throw new ArgumentNullException(nameof(diceFieldMultiTexts));
+
         for (int i = 0; i < diceFieldMultiTexts.Length && i < values.Length; i++)
         {
             diceFieldMultiTexts[i].text = values[i].ToString("N0", CultureInfo.InvariantCulture);
@@ -21,6 +25,8 @@ public class UIDiceStats : UIBaseCompanyStats,ICompanyStatsUI<DiceCompanyData>
     }
     public void SetData(DiceCompanyData data)
     {
+        if (data == null)
+            throw new ArgumentNullException(nameof(data));
         SetCompanyName(data.name);
         SetGroupName(data.group.ToString());
         SetTopBarColor((int)data.group);

@@ -146,4 +146,77 @@ public class PhotonChanceManagerTests
         jailManagerMock.Verify(j => j.SendToJail(1), Times.Once);
         chatServiceMock.Verify(c => c.SendMessage(1, "попал в тюрьму!", false), Times.Once);
     }
+    [Test]
+    public void GiveRandomBuff_ShouldDoNothing_WhenBuffIsNull()
+    {
+        networkMock.Setup(n => n.IsMasterClient).Returns(true);
+        chanceServiceMock.Setup(c => c.GetRandomBuff()).Returns((ChanceBuff)null);
+
+        chanceManager.GiveRandomBuff(1);
+
+        viewWrapperMock.Verify(v => v.RPC(It.IsAny<PhotonView>(), It.IsAny<string>(), It.IsAny<RpcTarget>(), It.IsAny<object[]>()), Times.Never);
+        turnManagerMock.Verify(t => t.RequestEndTurn(), Times.Never);
+    }
+
+    [Test]
+    public void RPC_ApplyBuff_ShouldHandleMoneyGainFixed()
+    {
+        networkMock.Setup(n => n.IsMasterClient).Returns(true);
+        var player = new PlayerData("p1", 100, 1, null);
+        playerRepositoryMock.Setup(r => r.GetPlayerById(1)).Returns(player);
+
+        var method = typeof(PhotonChanceManager)
+            .GetMethod("RPC_ApplyBuff", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        method.Invoke(chanceManager, new object[] { 1, (int)BuffType.MoneyGainFixed, 0, 500 });
+
+        bankServiceMock.Verify(b => b.AddMoney(1, 500), Times.Once);
+        chatServiceMock.Verify(c => c.SendMessage(1, It.Is<string>(s => s.Contains("получил")), false), Times.Once);
+    }
+
+    [Test]
+    public void RPC_ApplyBuff_ShouldHandleMoneyLoseFixed()
+    {
+        networkMock.Setup(n => n.IsMasterClient).Returns(true);
+        var player = new PlayerData("p1", 1000, 1, null);
+        playerRepositoryMock.Setup(r => r.GetPlayerById(1)).Returns(player);
+
+        var method = typeof(PhotonChanceManager)
+            .GetMethod("RPC_ApplyBuff", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        method.Invoke(chanceManager, new object[] { 1, (int)BuffType.MoneyLoseFixed, 0, 500 });
+
+        bankServiceMock.Verify(b => b.RemoveMoney(1, 500), Times.Once);
+        chatServiceMock.Verify(c => c.SendMessage(1, It.Is<string>(s => s.Contains("потерял")), false), Times.Once);
+    }
+
+    [Test]
+    public void RPC_ApplyBuff_ShouldSetSkipTurn()
+    {
+        var player = new PlayerData("p1", 500, 1, null);
+        playerRepositoryMock.Setup(r => r.GetPlayerById(1)).Returns(player);
+
+        var method = typeof(PhotonChanceManager)
+            .GetMethod("RPC_ApplyBuff", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        method.Invoke(chanceManager, new object[] { 1, (int)BuffType.SkipTurn, 0, 0 });
+
+        Assert.IsTrue(player.SkipNextTurn);
+        chatServiceMock.Verify(c => c.SendMessage(1, "пропускает ход!", false), Times.Once);
+    }
+
+    [Test]
+    public void RPC_ApplyBuff_ShouldSetReverseMove()
+    {
+        var player = new PlayerData("p1", 500, 1, null);
+        playerRepositoryMock.Setup(r => r.GetPlayerById(1)).Returns(player);
+
+        var method = typeof(PhotonChanceManager)
+            .GetMethod("RPC_ApplyBuff", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        method.Invoke(chanceManager, new object[] { 1, (int)BuffType.ReverseMove, 0, 0 });
+
+        Assert.IsTrue(player.NextMoveBackward);
+        chatServiceMock.Verify(c => c.SendMessage(1, "идёт в обратную сторону!", false), Times.Once);
+    }
 }

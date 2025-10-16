@@ -1,9 +1,9 @@
+using System;
 using System.Collections.Generic;
-using Zenject;
 
 public class TradeOffer
 {
-    public PlayerData FromPlayerData { get;}
+    public PlayerData FromPlayerData { get; }
     public PlayerData ToPlayerData { get; }
 
     public List<Company> FromCompanies { get; set; } = new();
@@ -12,38 +12,73 @@ public class TradeOffer
     public int FromMoney { get; set; }
     public int ToMoney { get; set; }
 
+    #region CONSTRUCTOR
+
+    public TradeOffer(PlayerData fromPlayerData, PlayerData toPlayerData)
+    {
+        FromPlayerData = fromPlayerData ?? throw new ArgumentNullException(nameof(fromPlayerData));
+        ToPlayerData = toPlayerData ?? throw new ArgumentNullException(nameof(toPlayerData));
+    }
+
+    #endregion CONSTRUCTOR
+
     #region PUBLIC_METHODS
 
     public void SetFromCompanies(List<Company> companies)
     {
+        if (companies == null)
+        {
+            FromCompanies.Clear();
+            return;
+        }
+
+        if (companies.Contains(null))
+            throw new ArgumentException("FromCompanies list contains null element.", nameof(companies));
+
         FromCompanies.Clear();
-        if (companies != null)
-            FromCompanies.AddRange(companies);
+        FromCompanies.AddRange(companies);
     }
 
     public void SetToCompanies(List<Company> companies)
     {
+        if (companies == null)
+        {
+            ToCompanies.Clear();
+            return;
+        }
+
+        if (companies.Contains(null))
+            throw new ArgumentException("ToCompanies list contains null element.", nameof(companies));
+
         ToCompanies.Clear();
-        if (companies != null)
-            ToCompanies.AddRange(companies);
+        ToCompanies.AddRange(companies);
     }
 
-    public TradeOffer(PlayerData fromPlayerData, PlayerData toPlayerData)
-    {
-        FromPlayerData = fromPlayerData;
-        ToPlayerData = toPlayerData;
-    }
     public int GetFromTotalValue()
     {
         int value = FromMoney;
-        foreach (var c in FromCompanies) value += c.Price;
+
+        foreach (var c in FromCompanies)
+        {
+            if (c == null)
+                throw new InvalidOperationException("FromCompanies contains null reference.");
+            value += c.Price;
+        }
+
         return value;
     }
 
     public int GetToTotalValue()
     {
         int value = ToMoney;
-        foreach (var c in ToCompanies) value += c.Price;
+
+        foreach (var c in ToCompanies)
+        {
+            if (c == null)
+                throw new InvalidOperationException("ToCompanies contains null reference.");
+            value += c.Price;
+        }
+
         return value;
     }
 
@@ -52,12 +87,12 @@ public class TradeOffer
         int left = GetFromTotalValue();
         int right = GetToTotalValue();
 
-        if (left == 0 || right == 0) return false;
+        if (left <= 0 || right <= 0)
+            return false;
+
         float ratio = (float)left / right;
         return ratio >= 0.5f && ratio <= 2f;
     }
 
     #endregion PUBLIC_METHODS
-
-
 }

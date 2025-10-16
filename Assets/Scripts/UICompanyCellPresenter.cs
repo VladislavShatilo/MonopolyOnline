@@ -20,11 +20,11 @@ public class UICompanyCellPresenter : IInitializable, IDisposable
     public void Construct(IPlayerRepository playerRepository, ICompanyRepository companyRepository, IUICompanyCellRepository uiRepository,
        ICompanyService companyService, IEventBus eventBus)
     {
-        this.playerRepository = playerRepository;
-        this.companyRepository = companyRepository;
-        this.uiRepository = uiRepository;
-        this.companyService = companyService;
-        this.eventBus = eventBus;
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
+        this.uiRepository = uiRepository ?? throw new ArgumentNullException(nameof(uiRepository));
+        this.companyService = companyService ?? throw new ArgumentNullException(nameof(companyService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
     }
 
     public void Initialize()
@@ -44,25 +44,22 @@ public class UICompanyCellPresenter : IInitializable, IDisposable
     private void CompanyBoughtUpdate(CompanyBoughtEvent e)
     {
         CompanyGroup companyGroup = companyRepository.GetCompanyById(e.CellIndex).Group;
-
-        IEnumerable<Company> companies = companyRepository.GetByGroup(companyGroup);
+       
+        IEnumerable<Company> companies = companyRepository.GetByGroup(companyGroup) ?? throw new NullReferenceException(nameof(CompanyBoughtUpdate));
 
         foreach (var company in companies)
         {
-            Debug.Log("company.Name" + company.Name + "  " + "company.OwnerId" + company.OwnerId);
+            if (company == null) return;
+
             if (company.OwnerId != e.PlayerId)
                 continue;
 
-            var view = uiRepository.GetByCompanyId(company.Id);
-            if (view == null)
-                continue;
+            var view = uiRepository.GetByCompanyId(company.Id) ?? throw new NullReferenceException(nameof(CompanyBoughtUpdate)); ;         
 
-            var owner = playerRepository.GetPlayerById(e.PlayerId);
+            var owner = playerRepository.GetPlayerById(e.PlayerId) ?? throw new NullReferenceException(nameof(CompanyBoughtUpdate)); ;
 
             var ownerColor = owner != null ? owner.PlayerColor.ToUnityColor() : Color.white;
             view.UpdateOwner(ownerColor);
-
-            if (company == null) return;
 
             view.SetRentText(companyService.CalculateRent(company, 1));
         }

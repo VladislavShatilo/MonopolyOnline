@@ -19,12 +19,12 @@ public class BuyCompanyPresenter : IBuyCompanyPresenter, IInitializable, IDispos
     public void Construct(ILocalPlayerService localPlayerService, IBuyWindow buyWindow, IPhotonCompanyManager photonCompanyManager, IPhotonAuctionManager photonAuctionManager,
         ICompanyRepository companyRepository, IEventBus eventBus)
     {
-        this.localPlayerService = localPlayerService;
-        this.buyWindow = buyWindow;
-        this.photonCompanyManager = photonCompanyManager;
-        this.photonAuctionManager = photonAuctionManager;
-        this.companyRepository = companyRepository;
-        this.eventBus = eventBus;
+        this.localPlayerService = localPlayerService ?? throw new ArgumentNullException(nameof(localPlayerService));
+        this.buyWindow = buyWindow ?? throw new ArgumentNullException(nameof(buyWindow));
+        this.photonCompanyManager = photonCompanyManager ?? throw new ArgumentNullException(nameof(photonCompanyManager));
+        this.photonAuctionManager = photonAuctionManager ?? throw new ArgumentNullException(nameof(photonAuctionManager));
+        this.companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
     }
 
     public void Initialize()
@@ -53,13 +53,9 @@ public class BuyCompanyPresenter : IBuyCompanyPresenter, IInitializable, IDispos
     public void StartAuctionRequest(int cellIndex)
     {
         int localId = localPlayerService.GetLocalPlayerId();
-        Company company = companyRepository.GetCompanyById(cellIndex);
+        Company company = companyRepository.GetCompanyById(cellIndex) ?? throw new InvalidOperationException(nameof(company)); 
         photonAuctionManager.StartAuctionRequest(localId, cellIndex, company.Price);
     }
-
-    public void ShowTurnFor(int playerId) => HideTurn();
-
-    public void HideTurn() => buyWindow.Hide();
 
     #endregion PUBLIC_METHODS
 
@@ -67,6 +63,8 @@ public class BuyCompanyPresenter : IBuyCompanyPresenter, IInitializable, IDispos
 
     private void BuyWindowShow(OfferPurchaseEvent e)
     {
+        if (e == null)
+            throw new ArgumentNullException(nameof(e));
         int localId = localPlayerService.GetLocalPlayerId();
 
         if (e.PlayerId == localId)

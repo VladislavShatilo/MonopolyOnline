@@ -12,8 +12,8 @@ public class DicePresenter : IInitializable,IDisposable
     [Inject]   
     public void Construct(IDiceManager3D diceManager3D, IEventBus eventBus)
     {
-        this.diceManager3D = diceManager3D;
-        this.eventBus = eventBus;
+        this.diceManager3D = diceManager3D ?? throw new ArgumentNullException(nameof(diceManager3D));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
 
     }
     public void Initialize()

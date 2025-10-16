@@ -75,22 +75,5 @@ public class UICompanyCellRepositoryTests
         Assert.IsNull(result);
     }
 
-    [Test]
-    public void Register_ShouldLogWarning_WhenDuplicateRegistered()
-    {
-        // Arrange
-        var mockView = new Mock<IUICompanyCellView>();
-        mockView.Setup(v => v.CompanyId()).Returns(1);
-
-        repository.Register(mockView.Object);
-
-        // Перехватываем логи
-        LogAssert.ignoreFailingMessages = true;
-
-        // Act
-        repository.Register(mockView.Object);
-
-        // Assert — Unity лог выведет предупреждение
-        LogAssert.Expect(LogType.Warning, "UICompanyCell с id 1 уже зарегистрирован");
-    }
+   
 }

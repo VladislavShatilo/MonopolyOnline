@@ -1,6 +1,7 @@
 using Moq;
 using NUnit.Framework;
 using Photon.Pun;
+using System;
 using UnityEngine;
 
 public class PhotonAuctionManagerTests
@@ -83,4 +84,89 @@ public class PhotonAuctionManagerTests
 
         eventBusMock.Verify(e => e.Publish(It.IsAny<StartAuctionEvent>()), Times.Never);
     }
+    [Test]
+    public void PlayerBidRequest_ShouldCallRPC_MasterClient()
+    {
+        auctionManager.PlayerBidRequest(42);
+        photonViewWrapperMock.Verify(p => p.RPC(
+            auctionManager.photonView, "RPC_UpdateBid", RpcTarget.MasterClient, 42), Times.Once);
+    }
+
+    [Test]
+    public void PlayerPassRequest_ShouldCallRPC_MasterClient()
+    {
+        auctionManager.PlayerPassRequest(42);
+        photonViewWrapperMock.Verify(p => p.RPC(
+            auctionManager.photonView, "RPC_UpdatePass", RpcTarget.MasterClient, 42), Times.Once);
+    }
+
+    [Test]
+    public void CloseAuctionWindowRequest_ShouldCallRPC_WithPlayerId()
+    {
+        // Arrange
+        int playerId = 5;
+
+        // Act
+        auctionManager.CloseAuctionWindowRequest(playerId);
+
+        // Assert
+        photonViewWrapperMock.Verify(p => p.RPC(
+            auctionManager.photonView,
+            "RPC_CloseAuctionWindow",
+            playerId,
+            null),
+            Times.Once);
+    }
+
+    [Test]
+    public void RPC_UpdateBid_ShouldPublishEvent_OnlyIfMasterClient()
+    {
+        photonNetworkMock.Setup(p => p.IsMasterClient).Returns(true);
+        var method = typeof(PhotonAuctionManager).GetMethod("RPC_UpdateBid", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method.Invoke(auctionManager, new object[] { 1 });
+        eventBusMock.Verify(e => e.Publish(It.Is<PlayerBidAuction>(ev => ev.PlayerId == 1)), Times.Once);
+
+        photonNetworkMock.Setup(p => p.IsMasterClient).Returns(false);
+        eventBusMock.Reset();
+        method.Invoke(auctionManager, new object[] { 1 });
+        eventBusMock.Verify(e => e.Publish(It.IsAny<PlayerBidAuction>()), Times.Never);
+    }
+
+    [Test]
+    public void RPC_UpdatePass_ShouldPublishEvent_OnlyIfMasterClient()
+    {
+        photonNetworkMock.Setup(p => p.IsMasterClient).Returns(true);
+        var method = typeof(PhotonAuctionManager).GetMethod("RPC_UpdatePass", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method.Invoke(auctionManager, new object[] { 1 });
+        eventBusMock.Verify(e => e.Publish(It.Is<PlayerPassAuction>(ev => ev.PlayerId == 1)), Times.Once);
+
+        photonNetworkMock.Setup(p => p.IsMasterClient).Returns(false);
+        eventBusMock.Reset();
+        method.Invoke(auctionManager, new object[] { 1 });
+        eventBusMock.Verify(e => e.Publish(It.IsAny<PlayerPassAuction>()), Times.Never);
+    }
+
+    [Test]
+    public void RPC_CloseAuctionWindow_ShouldPublishAuctionEndEvent()
+    {
+        var method = typeof(PhotonAuctionManager).GetMethod("RPC_CloseAuctionWindow", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method.Invoke(auctionManager, null);
+        eventBusMock.Verify(e => e.Publish(It.IsAny<AuctionEndEvent>()), Times.Once);
+    }
+
+    [Test]
+    public void Construct_NullParameters_ShouldThrow()
+    {
+        var go = new GameObject();
+        var manager = go.AddComponent<PhotonAuctionManager>();
+        var ex = Assert.Throws<ArgumentNullException>(() => manager.Consturct(null, photonNetworkMock.Object, photonViewWrapperMock.Object));
+        Assert.IsNotNull(ex);
+
+        ex = Assert.Throws<ArgumentNullException>(() => manager.Consturct(eventBusMock.Object, null, photonViewWrapperMock.Object));
+        Assert.IsNotNull(ex);
+
+        ex = Assert.Throws<ArgumentNullException>(() => manager.Consturct(eventBusMock.Object, photonNetworkMock.Object, null));
+        Assert.IsNotNull(ex);
+    }
+
 }

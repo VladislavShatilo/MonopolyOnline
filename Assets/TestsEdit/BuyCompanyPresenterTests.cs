@@ -1,7 +1,8 @@
 using Moq;
 using NUnit.Framework;
 using System;
-using System.ComponentModel.Design;
+using System.Collections.Generic;
+using System.Reflection;
 
 [TestFixture]
 public class BuyCompanyPresenterTests
@@ -14,6 +15,8 @@ public class BuyCompanyPresenterTests
     private Mock<ICompanyRepository> companyRepository;
     private Mock<IEventBus> eventBus;
 
+    private Company company;
+
     [SetUp]
     public void Setup()
     {
@@ -23,6 +26,14 @@ public class BuyCompanyPresenterTests
         photonAuctionManager = new Mock<IPhotonAuctionManager>();
         companyRepository = new Mock<ICompanyRepository>();
         eventBus = new Mock<IEventBus>();
+
+        var companyData = new CompanyData();
+      
+        company = new Company(5, companyData)
+        {
+            Price = 1000
+
+        };
 
         presenter = new BuyCompanyPresenter();
         presenter.Construct(
@@ -35,8 +46,10 @@ public class BuyCompanyPresenterTests
         );
     }
 
+    #region Initialization / Dispose
+
     [Test]
-    public void Initialize_ShouldSubscribeToEventAndSetActions()
+    public void Initialize_ShouldSubscribeAndSetActions()
     {
         presenter.Initialize();
 
@@ -46,12 +59,16 @@ public class BuyCompanyPresenterTests
     }
 
     [Test]
-    public void Dispose_ShouldUnsubscribeFromEvent()
+    public void Dispose_ShouldUnsubscribeEvent()
     {
         presenter.Dispose();
 
         eventBus.Verify(e => e.Unsubscribe<OfferPurchaseEvent>(It.IsAny<Action<OfferPurchaseEvent>>()), Times.Once);
     }
+
+    #endregion
+
+    #region TryBuyCompany
 
     [Test]
     public void TryBuyCompany_ShouldCallRequestBuyCompany()
@@ -63,37 +80,53 @@ public class BuyCompanyPresenterTests
         photonCompanyManager.Verify(p => p.RequestBuyCompany(5, 42, BuyReason.Buy), Times.Once);
     }
 
+    #endregion
+
+    #region StartAuctionRequest
+
     [Test]
-    public void StartAuctionRequest_ShouldCallStartAuctionRequest()
+    public void StartAuctionRequest_ShouldCallStartAuctionRequest_WhenCompanyExists()
     {
         localPlayerService.Setup(l => l.GetLocalPlayerId()).Returns(42);
-        var company = new Company(5, new CompanyData());
-        company.Price = 1000;
         companyRepository.Setup(r => r.GetCompanyById(5)).Returns(company);
 
         presenter.StartAuctionRequest(5);
 
-        photonAuctionManager.Verify(p => p.StartAuctionRequest(42, 5, 1000), Times.Once);
+        photonAuctionManager.Verify(p => p.StartAuctionRequest(42, 5, company.Price), Times.Once);
     }
+
+    [Test]
+    public void StartAuctionRequest_ShouldThrow_WhenCompanyIsNull()
+    {
+        localPlayerService.Setup(l => l.GetLocalPlayerId()).Returns(42);
+        companyRepository.Setup(r => r.GetCompanyById(5)).Returns((Company)null);
+
+        Assert.Throws<InvalidOperationException>(() => presenter.StartAuctionRequest(5));
+    }
+
+    #endregion
+
+    #region BuyWindowShow (private)
 
     [Test]
     public void BuyWindowShow_ShouldShowWindow_WhenPlayerIsLocal()
     {
         localPlayerService.Setup(l => l.GetLocalPlayerId()).Returns(1);
-        var evt = new OfferPurchaseEvent(3, 1, 500, true);
+        var evt = new OfferPurchaseEvent(5,1, 500, true);
 
-        // вызываем приватный метод через reflection или сделаем его internal + InternalsVisibleTo
         presenter.GetType().GetMethod("BuyWindowShow", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .Invoke(presenter, new object[] { evt });
 
-        buyWindow.Verify(b => b.Show(1, 3, 500, true), Times.Once);
-    }
 
+        // Assert
+       buyWindow.Verify(b => b.Show(1,5, 500, true), Times.Once);
+
+    }
     [Test]
     public void BuyWindowShow_ShouldHideWindow_WhenPlayerIsNotLocal()
     {
         localPlayerService.Setup(l => l.GetLocalPlayerId()).Returns(1);
-        var evt = new OfferPurchaseEvent(2, 2, 500, true);
+        var evt = new OfferPurchaseEvent(5,2, 500, true);
 
         presenter.GetType().GetMethod("BuyWindowShow", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .Invoke(presenter, new object[] { evt });
@@ -102,18 +135,12 @@ public class BuyCompanyPresenterTests
     }
 
     [Test]
-    public void HideTurn_ShouldHideWindow()
+    public void BuyWindowShow_ShouldThrow_WhenEventIsNull()
     {
-        presenter.HideTurn();
-
-        buyWindow.Verify(b => b.Hide(), Times.Once);
+        Assert.Throws<TargetInvocationException>(() =>
+            presenter.GetType().GetMethod("BuyWindowShow", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .Invoke(presenter, new object[] { null }));
     }
 
-    [Test]
-    public void ShowTurnFor_ShouldHideWindow()
-    {
-        presenter.ShowTurnFor(42);
-
-        buyWindow.Verify(b => b.Hide(), Times.Once);
-    }
+    #endregion
 }

@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,20 +9,27 @@ public class PlayerSkin : MonoBehaviourPun
 {
     [SerializeField] private Image playerSkinImage;
     [SerializeField] private TextMeshProUGUI turnJailText;
+
     private IEventBus eventBus;
     private IPhotonViewWrapper photonViewWrapper;
+    private ILocalPlayerService localPlayerService;
 
     #region LIFE_CYCLE
 
-    public void Initialize(IEventBus eventBus, IPhotonViewWrapper photonViewWrapper)
+    public void Initialize(IEventBus eventBus, IPhotonViewWrapper photonViewWrapper, ILocalPlayerService localPlayerService)
     {
-        this.eventBus = eventBus;
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
+        this.localPlayerService = localPlayerService ?? throw new ArgumentNullException(nameof(localPlayerService));
+        if (photonView == null) throw new NullReferenceException(nameof(photonView));
+
         eventBus.Subscribe<SetTurnsJailEvent>(SetTurnJain);
-        this.photonViewWrapper = photonViewWrapper;
+
     }
 
     private void Start()
     {
+        if (playerSkinImage == null || turnJailText == null) throw new NullReferenceException(nameof(PlayerSkin));
         turnJailText.gameObject.SetActive(false);
     }
 
@@ -39,7 +47,10 @@ public class PlayerSkin : MonoBehaviourPun
 
     public void SetColorDirect(Color c)
     {
-        playerSkinImage.color = c;
+        if (playerSkinImage != null)
+        {
+            playerSkinImage.color = c;
+        }
     }
 
     #endregion PUBLIC_METHODS
@@ -49,6 +60,8 @@ public class PlayerSkin : MonoBehaviourPun
     [PunRPC]
     private void RPC_SetTurnJain(int turns)
     {
+        if (turnJailText == null) return;
+
         if (turns == 0)
         {
             turnJailText.gameObject.SetActive(false);
@@ -66,7 +79,7 @@ public class PlayerSkin : MonoBehaviourPun
 
     private void SetTurnJain(SetTurnsJailEvent e)
     {
-        if (e.PlayerID == photonView.OwnerActorNr)
+        if (e.PlayerID == localPlayerService.GetLocalPlayerId())
         {
             photonViewWrapper.RPC(photonView, nameof(RPC_SetTurnJain), RpcTarget.AllBuffered, e.Turns);
         }

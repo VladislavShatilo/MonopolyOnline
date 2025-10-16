@@ -9,7 +9,7 @@ public class CompanyUIService : ICompanyUIService, IInitializable, IDisposable
 {
     private IBoardService boardService;
     private IEventBus eventBus;
-    private readonly Dictionary<int, UICompanyCell> companyUIs = new();
+    private readonly Dictionary<int, IUICompanyCellView> companyUIs = new();
     private readonly Dictionary<int, CompanyWindowPopup> popups = new();
 
     #region LIFE_CYCLE
@@ -17,8 +17,8 @@ public class CompanyUIService : ICompanyUIService, IInitializable, IDisposable
     [Inject]
     public void Construct(IBoardService boardService, IEventBus eventBus)
     {
-        this.boardService = boardService;
-        this.eventBus = eventBus;
+        this.boardService = boardService ?? throw new ArgumentNullException(nameof(boardService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
     }
 
     public void Initialize()
@@ -67,7 +67,7 @@ public class CompanyUIService : ICompanyUIService, IInitializable, IDisposable
                     }
                 };
             }
-            if (cellTransform.TryGetComponent(out UICompanyCell companyUI))
+            if (cellTransform.TryGetComponent<IUICompanyCellView>(out var companyUI))
             {
                 companyUI.Init(i);
                 companyUIs[i] = companyUI;

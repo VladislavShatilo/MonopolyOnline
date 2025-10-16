@@ -42,4 +42,27 @@ public class SendChatMessageUseCaseTests
         // Assert
         chatServiceMock.Verify(c => c.SendMessage(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
     }
+    [Test]
+    public void Execute_Should_NotThrow_When_ChatServiceIsNull()
+    {
+        // Arrange
+        SendChatMessageUseCase useCaseWithNullService = new SendChatMessageUseCase(null);
+        int playerId = 1;
+        string text = "Hello";
+
+        // Act & Assert
+        Assert.DoesNotThrow(() => useCaseWithNullService.Execute(playerId, text));
+    }
+
+    [Test]
+    public void Execute_Should_DoNothing_When_ChatServiceIsNull_AndTextIsEmpty()
+    {
+        // Arrange
+        SendChatMessageUseCase useCaseWithNullService = new SendChatMessageUseCase(null);
+        int playerId = 1;
+        string text = "";
+
+        // Act & Assert
+        Assert.DoesNotThrow(() => useCaseWithNullService.Execute(playerId, text));
+    }
 }

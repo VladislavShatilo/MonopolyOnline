@@ -18,10 +18,10 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase, IInitializable, IDisposable
     [Inject]
     public void Construct(IPlayerRepository playerRepository, IBoardService boardService, IEventBus eventBus, ICellHighlighterService cellHighlighterService)
     {
-        this.playerRepository = playerRepository;
-        this.boardService = boardService;
-        this.eventBus = eventBus;
-        this.cellHighlighterService = cellHighlighterService;
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.boardService = boardService ?? throw new ArgumentNullException(nameof(boardService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.cellHighlighterService = cellHighlighterService ?? throw new ArgumentNullException(nameof(cellHighlighterService));
     }
     public void Initialize()
     {
@@ -38,7 +38,7 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase, IInitializable, IDisposable
 
     public void MovePlayer(int playerId, int steps, bool isForward)
     {
-        PlayerData player = playerRepository.GetPlayerById(playerId);
+        PlayerData player = playerRepository.GetPlayerById(playerId) ?? throw new NullReferenceException(nameof(MovePlayer)); ;
         player.LastDiceSum = steps;
         int targetIndex = isForward
             ? (player.CurrentCellId + steps) % boardService.CellsCount
@@ -52,7 +52,7 @@ public class PlayerMoveUseCase : IPlayerMoveUseCase, IInitializable, IDisposable
 
     public void TeleportPlayer(int playerId, int randomIndex, int currentCellIndex)
     {
-        int steps = 0;
+        int steps;
         if (randomIndex > currentCellIndex)
         {
             steps = randomIndex - currentCellIndex;

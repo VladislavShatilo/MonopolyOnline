@@ -1,116 +1,134 @@
-using System.Collections;
 using NUnit.Framework;
+using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
-public class AutoScrollRectTests
+public class AutoScrollRectPlayModeTests
 {
-    private GameObject canvasGO;
-    private GameObject scrollGO;
-    private AutoScrollRect autoScroll;
-    private ScrollRect scrollRect;
-    private GridLayoutGroup gridLayout;
-    private RectTransform content;
+    private GameObject _go;
+    private AutoScrollRect _autoScroll;
+    private ScrollRect _scrollRect;
+    private RectTransform _content;
+    private GridLayoutGroup _grid;
 
     [SetUp]
-    public void Setup()
+    public void SetUp()
     {
-        // Создаем Canvas
-        canvasGO = new GameObject("Canvas", typeof(Canvas));
-        canvasGO.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+        _go = new GameObject("AutoScrollTest");
+        _scrollRect = _go.AddComponent<ScrollRect>();
+        _autoScroll = _go.AddComponent<AutoScrollRect>();
 
-        // Создаем ScrollRect
-        scrollGO = new GameObject("ScrollRect", typeof(ScrollRect), typeof(AutoScrollRect));
-        scrollGO.transform.SetParent(canvasGO.transform);
+        // Создаем viewport
+        var viewportGO = new GameObject("Viewport", typeof(RectTransform));
+        viewportGO.transform.SetParent(_go.transform, false);
+        _scrollRect.viewport = viewportGO.GetComponent<RectTransform>();
+        _scrollRect.viewport.sizeDelta = new Vector2(100, 200);
 
-        // Создаем Viewport
-        GameObject viewportGO = new GameObject("Viewport", typeof(RectTransform), typeof(Mask), typeof(Image));
-        viewportGO.transform.SetParent(scrollGO.transform);
-        RectTransform viewportRT = viewportGO.GetComponent<RectTransform>();
-        viewportRT.sizeDelta = new Vector2(200, 200);
+        // Создаем content
+        var contentGO = new GameObject("Content", typeof(RectTransform));
+        contentGO.transform.SetParent(viewportGO.transform, false); // внутри viewport
+        _scrollRect.content = contentGO.GetComponent<RectTransform>();
+        _content = _scrollRect.content;
 
-        // Создаем Content
-        GameObject contentGO = new GameObject("Content", typeof(RectTransform), typeof(GridLayoutGroup));
-        contentGO.transform.SetParent(viewportGO.transform);
-        content = contentGO.GetComponent<RectTransform>();
-        content.sizeDelta = new Vector2(200, 200);
+        // Создаем GridLayoutGroup
+        _grid = contentGO.AddComponent<GridLayoutGroup>();
+        _grid.cellSize = new Vector2(50, 50);
+        _grid.spacing = new Vector2(5, 5);
+        _grid.constraintCount = 2;
 
-        // Настройка ScrollRect
-        scrollRect = scrollGO.GetComponent<ScrollRect>();
-        scrollRect.content = content;
-        scrollRect.viewport = viewportRT;
-
-        // Настройка GridLayoutGroup
-        gridLayout = contentGO.GetComponent<GridLayoutGroup>();
-        gridLayout.cellSize = new Vector2(50, 50);
-        gridLayout.spacing = new Vector2(0, 10);
-        gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        gridLayout.constraintCount = 2;
-
-        // Получаем AutoScrollRect
-        autoScroll = scrollGO.GetComponent<AutoScrollRect>();
-
-        // Назначаем gridLayoutGroup через Reflection, т.к. поле private [SerializeField]
-        typeof(AutoScrollRect)
+        _autoScroll.GetType()
             .GetField("gridLayoutGroup", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            ?.SetValue(autoScroll, gridLayout);
-
-        // Инициализация Start() вручную (т.к. MonoBehaviour.Start не вызывается автоматически в тестах)
-        autoScroll.SendMessage("Start");
+            .SetValue(_autoScroll, _grid);
     }
+
 
     [TearDown]
-    public void Teardown()
+    public void TearDown()
     {
-        Object.DestroyImmediate(canvasGO);
+        Object.Destroy(_go);
     }
 
     [UnityTest]
-    public IEnumerator ScrollDisabled_WhenElementsFitViewport()
+    public IEnumerator Start_ThrowsIfNoScrollRectOrContent()
     {
-        for (int i = 0; i < 2; i++)
+        var go = new GameObject("BrokenScroll");
+        var autoScroll = go.AddComponent<AutoScrollRect>();
+
+        // Ловим лог ошибки
+        LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("ArgumentNullException"));
+
+        // Вызов Start через SendMessage
+        autoScroll.SendMessage("Start");
+
+        Object.Destroy(go);
+        yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator Update_DisablesVerticalIfChildCountLessThanMaxVisible()
+    {
+        // Arrange
+        _autoScroll.SendMessage("Start");
+
+        // Добавим меньше элементов, чем maxVisibleElements
+        for (int i = 0; i < 3; i++)
         {
-            GameObject child = new GameObject("Item" + i, typeof(RectTransform));
-            child.transform.SetParent(content);
+            var child = new GameObject($"Child{i}", typeof(RectTransform));
+            child.transform.SetParent(_content, false);
         }
 
-        yield return new WaitForEndOfFrame();
+        // Act
+        _autoScroll.SendMessage("Update");
 
-        Assert.IsFalse(scrollRect.vertical, "Scroll should be disabled when elements fit viewport");
-        Assert.AreEqual(1f, scrollRect.verticalNormalizedPosition, "VerticalNormalizedPosition should reset to 1");
+        // Assert: вертикальная прокрутка должна быть выключена
+        Assert.IsFalse(_scrollRect.vertical, "Vertical should be false when child count <= maxVisibleElements");
+
+        // Опционально: проверяем, что количество дочерних элементов учтено
+        Assert.AreEqual(3, _content.childCount);
+
+        yield return null;
     }
 
     [UnityTest]
-    public IEnumerator ScrollEnabled_WhenElementsExceedViewport()
+    public IEnumerator Update_EnablesVerticalIfChildCountExceedsMaxVisible()
     {
+        // Arrange
+        _autoScroll.SendMessage("Start");
+
+        // Добавим больше элементов, чем maxVisibleElements
         for (int i = 0; i < 10; i++)
         {
-            GameObject child = new GameObject("Item" + i, typeof(RectTransform));
-            child.transform.SetParent(content);
+            var child = new GameObject($"Child{i}", typeof(RectTransform));
+            child.transform.SetParent(_content, false);
         }
 
-        yield return null; // ждем кадр для Update
+        // Act
+        _autoScroll.SendMessage("Update");
 
-        Assert.IsTrue(scrollRect.vertical, "Scroll should be enabled when elements exceed viewport");
+        // Assert
+        Assert.IsTrue(_scrollRect.vertical, "Vertical should be true when child count > maxVisibleElements");
+        yield return null;
     }
 
     [UnityTest]
-    public IEnumerator VerticalNormalizedPositionResets_WhenChildCountChanges()
+    public IEnumerator Update_DoesNothingIfGridLayoutIsNull()
     {
-        GameObject child = new GameObject("Item0", typeof(RectTransform));
-        child.transform.SetParent(content);
-        yield return new WaitForEndOfFrame();
+        // Arrange
+        _autoScroll.SendMessage("Start");
 
-        float firstPosition = scrollRect.verticalNormalizedPosition;
+        // Убираем GridLayoutGroup
+        _autoScroll.GetType()
+            .GetField("gridLayoutGroup", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(_autoScroll, null);
 
-        GameObject child2 = new GameObject("Item1", typeof(RectTransform));
-        child2.transform.SetParent(content);
-        yield return new WaitForEndOfFrame();
+        // Act
+        _autoScroll.SendMessage("Update");
 
-        float newPosition = scrollRect.verticalNormalizedPosition;
-
-        Assert.AreEqual(1f, newPosition, "VerticalNormalizedPosition should reset to 1 when child count changes");
-        Assert.AreNotEqual(firstPosition, newPosition, "VerticalNormalizedPosition should actually update");
+        // Assert (не должно быть ошибок и vertical остаётся по умолчанию)
+        Assert.IsFalse(_scrollRect.vertical);
+        yield return null;
     }
 }

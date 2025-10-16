@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,7 +13,7 @@ public class UnityPlayerColorService : IPlayerColorService
     [Inject]
     public void Construct(GameSettings gameSettings)
     {
-        this.gameSettings = gameSettings;
+        this.gameSettings = gameSettings ?? throw new ArgumentNullException(nameof(gameSettings));
     }
 
     #endregion LIFE_CYCLE

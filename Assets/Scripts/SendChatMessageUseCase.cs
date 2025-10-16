@@ -16,7 +16,10 @@ public class SendChatMessageUseCase
     public void Execute(int playerId, string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return;
-        chatService.SendMessage(playerId, text, true);
+        if(chatService != null)
+        {
+            chatService.SendMessage(playerId, text, true);
+        }
     }
 
     #endregion PUBLIC_METHODS

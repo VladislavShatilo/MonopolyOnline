@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,8 +14,8 @@ public class BankService : IBankService
     [Inject]
     public void Consturct(IPlayerRepository playerRepository, IBankNotifier notifier)
     {
-        this.playerRepository = playerRepository;
-        this.notifier = notifier;
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.notifier = notifier ?? throw new ArgumentNullException(nameof(playerRepository));
     }
 
     #endregion LIFE_CYCLE
@@ -24,7 +25,8 @@ public class BankService : IBankService
     public void AddMoney(int playerId, int amount)
     {
         if (amount <= 0) return;
-        var player = playerRepository.GetPlayerById(playerId);
+        var player = playerRepository.GetPlayerById(playerId) ?? throw new InvalidOperationException(nameof(AddMoney));
+
         player.Money += amount;
         notifier.NotifyBalanceChanged(player);
     }
@@ -32,8 +34,8 @@ public class BankService : IBankService
     public bool RemoveMoney(int playerId, int amount)
     {
         if (amount <= 0) return false;
-        var player = playerRepository.GetPlayerById(playerId);
-
+        var player = playerRepository.GetPlayerById(playerId) ?? throw new InvalidOperationException(nameof(RemoveMoney));
+       
         if (player.Money < amount) return false;
 
         player.Money -= amount;
@@ -43,7 +45,8 @@ public class BankService : IBankService
 
     public bool HasEnoughMoney(int playerId, int amount)
     {
-        var player = playerRepository.GetPlayerById(playerId);
+        var player = playerRepository.GetPlayerById(playerId) ?? throw new InvalidOperationException(nameof(RemoveMoney));
+
         return player.Money >= amount;
     }
 

@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,11 +18,13 @@ public class PhotonTurnSynchronizer : MonoBehaviourPun,IPhotonTurnSynchronizer
     [Inject]
     public void Construct(IPlayerRepository playerRepository, IEventBus eventBus, IMortgageService mortgageService, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
-        this.playerRepository = playerRepository;
-        this.eventBus = eventBus;
-        this.mortgageService = mortgageService;
-        this.photonNetworkWrapper = photonNetworkWrapper;
-        this.photonViewWrapper = photonViewWrapper;
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.mortgageService = mortgageService ?? throw new ArgumentNullException(nameof(mortgageService));
+        this.photonNetworkWrapper = photonNetworkWrapper ?? throw new ArgumentNullException(nameof(photonNetworkWrapper));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
+        if (photonView == null) throw new NullReferenceException(nameof(photonView));
+
     }
 
     #endregion LIFE_CYCLE
@@ -40,7 +43,7 @@ public class PhotonTurnSynchronizer : MonoBehaviourPun,IPhotonTurnSynchronizer
     [PunRPC]
     private void RPC_StartTurn(int playerId, bool isNext)
     {
-        var player = playerRepository.GetPlayerById(playerId);
+        var player = playerRepository.GetPlayerById(playerId) ?? throw new NullReferenceException(nameof(RPC_StartTurn)); ;
 
         if (player.IsInJail)
         {

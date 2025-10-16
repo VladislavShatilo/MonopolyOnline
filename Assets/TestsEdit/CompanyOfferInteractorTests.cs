@@ -1,5 +1,6 @@
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 
 [TestFixture]
@@ -47,15 +48,13 @@ public class CompanyOfferInteractorTests
 
         interactor = new CompanyOfferInteractor(tradeServiceMock.Object, companyRepositoryMock.Object);
     }
-
     [Test]
-    public void TryToggleCompanyInOffer_ShouldReturnFalse_WhenCompanyDoesNotExist()
+    public void TryToggleCompanyInOffer_ShouldThrow_WhenCompanyDoesNotExist()
     {
         companyRepositoryMock.Setup(c => c.GetCompanyById(99)).Returns((Company)null);
 
-        var result = interactor.TryToggleCompanyInOffer(99);
+        Assert.Throws<InvalidOperationException>(() => interactor.TryToggleCompanyInOffer(99));
 
-        Assert.IsFalse(result);
         tradeServiceMock.Verify(ts => ts.AddCompanyToOffer(It.IsAny<int>(), It.IsAny<Company>()), Times.Never);
         tradeServiceMock.Verify(ts => ts.RemoveCompanyFromOffer(It.IsAny<int>(), It.IsAny<Company>()), Times.Never);
     }
@@ -104,5 +103,24 @@ public class CompanyOfferInteractorTests
         Assert.IsFalse(result);
         tradeServiceMock.Verify(ts => ts.AddCompanyToOffer(It.IsAny<int>(), It.IsAny<Company>()), Times.Never);
         tradeServiceMock.Verify(ts => ts.RemoveCompanyFromOffer(It.IsAny<int>(), It.IsAny<Company>()), Times.Never);
+    }
+
+    [Test]
+    public void Constructor_ShouldThrow_WhenTradeServiceIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => new CompanyOfferInteractor(null, companyRepositoryMock.Object));
+    }
+
+    [Test]
+    public void Constructor_ShouldThrow_WhenCompanyRepositoryIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => new CompanyOfferInteractor(tradeServiceMock.Object, null));
+    }
+
+    [Test]
+    public void TryToggleCompanyInOffer_ShouldThrow_WhenCompanyNotFound()
+    {
+        companyRepositoryMock.Setup(c => c.GetCompanyById(It.IsAny<int>())).Returns((Company)null);
+        Assert.Throws<InvalidOperationException>(() => interactor.TryToggleCompanyInOffer(99));
     }
 }

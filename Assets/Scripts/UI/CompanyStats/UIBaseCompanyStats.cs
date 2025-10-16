@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -28,7 +29,21 @@ public abstract class UIBaseCompanyStats : MonoBehaviour
     [Inject]
     public void Constuct(IGroupColors groupColors)
     {
-        this.groupColors = groupColors;
+        this.groupColors = groupColors ?? throw new ArgumentNullException(nameof(groupColors));
+        if (topBarImage1 == null)
+            throw new ArgumentNullException(nameof(topBarImage1));
+        if (topBarImage2 == null)
+            throw new ArgumentNullException(nameof(topBarImage2));
+        if (companyNameText == null)
+            throw new ArgumentNullException(nameof(companyNameText));
+        if (groupNameText == null)
+            throw new ArgumentNullException(nameof(groupNameText));
+        if (cellPriceText == null)
+            throw new ArgumentNullException(nameof(cellPriceText));
+        if (pledgePriceText == null)
+            throw new ArgumentNullException(nameof(pledgePriceText));
+        if (buyoutPriceText == null)
+            throw new ArgumentNullException(nameof(buyoutPriceText));
     }
 
     #endregion LIFE_CYCLE

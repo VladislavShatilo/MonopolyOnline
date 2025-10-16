@@ -17,8 +17,8 @@ public class CellOccupancyService : ICellOccupancyService, IDisposable
     [Inject]
     public void Construct(IBoardService boardService, IEventBus eventBus)
     {
-        this.boardService = boardService;
-        this.eventBus = eventBus;
+        this.boardService = boardService ?? throw new ArgumentNullException(nameof(boardService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
     }
 
     public void InitializePlayer()
@@ -40,10 +40,17 @@ public class CellOccupancyService : ICellOccupancyService, IDisposable
     public void UpdatePositions(int cellIndex)
     {
         if (!cellPlayers.ContainsKey(cellIndex)) return;
-        Vector3 cellCenter = boardService.GetCellRectTransform(cellIndex).position;
-        var players = cellPlayers[cellIndex];
-        int count = players.Count;
 
+        var rect = boardService.GetCellRectTransform(cellIndex);
+        if (rect == null)
+            throw new InvalidOperationException($"CellTransform not found for cellIndex {cellIndex}");
+
+        Vector3 cellCenter = rect.position;
+
+        var players = cellPlayers[cellIndex];
+        if (players == null || players.Count == 0) return;
+
+        int count = players.Count;
         Vector3[] positions;
 
         if (cellIndex % 10 == 0 && cellIndex != 30)
@@ -76,10 +83,12 @@ public class CellOccupancyService : ICellOccupancyService, IDisposable
                 default: positions = new[] { cellCenter + new Vector3(49, 15, 0), cellCenter + new Vector3(17.5f, -12.5f, 0), cellCenter + new Vector3(-17.5f, 15, 0), cellCenter + new Vector3(-49, -12.5f, 0) }; break;
             }
         }
-
         for (int i = 0; i < players.Count; i++)
         {
             var pm = players[i];
+            if (pm == null)
+                throw new InvalidOperationException($"PlayerMove is null in cell {cellIndex}");
+
             Vector3 targetPos = positions[i];
             pm.SetTargetPosition(targetPos);
         }
@@ -94,7 +103,9 @@ public class CellOccupancyService : ICellOccupancyService, IDisposable
         yield return new WaitForSeconds(0.06f);
 
         if (cellPlayers.ContainsKey(cellIndex))
+        {
             UpdatePositions(cellIndex);
+        }
 
         pendingCells.Remove(cellIndex);
     }
@@ -105,6 +116,9 @@ public class CellOccupancyService : ICellOccupancyService, IDisposable
 
     private void RegisterPlayerOnCell(PlayerOccupancyRegisterEvent e)
     {
+        if (e == null) throw new ArgumentNullException(nameof(e));
+        if (e.PlayerMove == null) throw new ArgumentNullException(nameof(e.PlayerMove));
+
         int cellIndex = e.CellIndex;
         PlayerMove player = e.PlayerMove;
 
@@ -115,29 +129,30 @@ public class CellOccupancyService : ICellOccupancyService, IDisposable
             cellPlayers[cellIndex].Add(player);
 
         cellPlayers[cellIndex] = cellPlayers[cellIndex]
-            .OrderBy(p => (p.photonView != null && p.photonView.Owner != null) ? p.photonView.Owner.ActorNumber : int.MaxValue)
+            .OrderBy(p => (p?.photonView?.Owner != null) ? p.photonView.Owner.ActorNumber : int.MaxValue)
             .ToList();
 
         if (pendingCells.Contains(cellIndex)) return;
         pendingCells.Add(cellIndex);
+
         player.StartCoroutine(DelayedUpdate(cellIndex));
     }
 
     private void UnregisterPlayerFromCell(PlayerOccupancyUnregisterEvent e)
     {
+        if (e == null) throw new ArgumentNullException(nameof(e));
+        if (e.PlayerMove == null) throw new ArgumentNullException(nameof(e.PlayerMove));
+
         int cellIndex = e.CellIndex;
         PlayerMove player = e.PlayerMove;
+
         if (cellPlayers.ContainsKey(cellIndex))
         {
             cellPlayers[cellIndex].Remove(player);
             if (cellPlayers[cellIndex].Count == 0)
-            {
                 cellPlayers.Remove(cellIndex);
-            }
             else
-            {
                 UpdatePositions(cellIndex);
-            }
         }
     }
 

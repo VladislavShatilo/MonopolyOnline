@@ -1,6 +1,8 @@
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 [TestFixture]
 public class CompanyRepositoryTests
@@ -168,5 +170,119 @@ public class CompanyRepositoryTests
         var owned = repository.GetByOwner(5).ToList();
         Assert.AreEqual(1, owned.Count);
         Assert.AreEqual(1, owned[0].Id);
+    }
+    [Test]
+    public void Construct_ShouldThrow_WhenBoardConfigIsNull()
+    {
+        var repository = new CompanyRepository();
+        Assert.Throws<ArgumentNullException>(() => repository.Construct(null));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenCellsIsNull()
+    {
+        var repository = new CompanyRepository();
+        var config = new BoardConfig { cells = null };
+        Assert.Throws<ArgumentNullException>(() => repository.Construct(config));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenCellsCountInvalid()
+    {
+        var repository = new CompanyRepository();
+
+        // Пустой список через ScriptableObject
+        var configEmpty = ScriptableObject.CreateInstance<BoardConfig>();
+        configEmpty.cells = new List<CellData>(); // пустой список
+        Assert.Throws<ArgumentNullException>(() => repository.Construct(configEmpty));
+
+        // Слишком много элементов
+        var configTooMany = ScriptableObject.CreateInstance<BoardConfig>();
+        configTooMany.cells = new List<CellData>(new CellData[41]); // 41 элемент
+        Assert.Throws<ArgumentNullException>(() => repository.Construct(configTooMany));
+    }
+
+
+    [Test]
+    public void Construct_ShouldIgnoreNonCompanyCells()
+    {
+        var config = new BoardConfig
+        {
+            cells = new List<CellData>
+            {
+                new CellData { index = 1, cellType = CellType.Corner },
+                new CellData { index = 2, cellType = CellType.DiceCompany },
+            }
+        };
+
+        var repository = new CompanyRepository();
+        repository.Construct(config);
+
+        var all = repository.GetAll().ToList();
+        Assert.AreEqual(0, all.Count);
+    }
+
+
+    [Test]
+    public void GetByGroup_ShouldReturnEmpty_WhenNoMatchingCompanies()
+    {
+        var config = new BoardConfig
+        {
+            cells = new List<CellData>
+            {
+                new CellData { index = 1, cellType = CellType.Company, companyData = new CompanyData { group = CompanyGroup.Clothes } }
+            }
+        };
+        var repository = new CompanyRepository();
+        repository.Construct(config);
+
+        var result = repository.GetByGroup(CompanyGroup.Games);
+        Assert.IsEmpty(result);
+    }
+
+    [Test]
+    public void GetByOwner_ShouldReturnEmpty_WhenNoMatchingOwner()
+    {
+        var config = new BoardConfig
+        {
+            cells = new List<CellData>
+            {
+                new CellData { index = 1, cellType = CellType.Company, companyData = new CompanyData() }
+            }
+        };
+        var repository = new CompanyRepository();
+        repository.Construct(config);
+
+        var result = repository.GetByOwner(999);
+        Assert.IsEmpty(result);
+    }
+
+    [Test]
+    public void ResetAll_ShouldCallResetDataOnAllCompanies()
+    {
+        var config = new BoardConfig
+        {
+            cells = new List<CellData>
+            {
+                new CellData { index = 1, cellType = CellType.Company, companyData = new CompanyData() },
+                new CellData { index = 2, cellType = CellType.FieldCompany, fieldCompanyData = new FieldCompanyData() },
+            }
+        };
+
+        var repository = new CompanyRepository();
+        repository.Construct(config);
+
+        var allCompanies = repository.GetAll().ToList();
+        allCompanies[0].Buy(1); // меняем состояние
+        allCompanies[1].Buy(2);
+
+        repository.ResetAll();
+
+        foreach (var company in allCompanies)
+        {
+            Assert.IsFalse(company.IsBought);
+            Assert.AreEqual(-1, company.OwnerId);
+            Assert.AreEqual(0, company.RentLevel);
+        }
     }
 }

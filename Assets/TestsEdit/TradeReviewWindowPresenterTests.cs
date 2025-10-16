@@ -145,4 +145,30 @@ public class TradeReviewWindowPresenterTests
 
         photonTradeManagerMock.Verify(p => p.CompleteTrade(false), Times.Once);
     }
+    [Test]
+    public void Construct_Should_ThrowArgumentNullException_WhenParametersNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => new TradeReviewWindowPresenter().Construct(null, eventBusMock.Object, localPlayerServiceMock.Object, photonTradeManagerMock.Object));
+        Assert.Throws<ArgumentNullException>(() => new TradeReviewWindowPresenter().Construct(windowMock.Object, null, localPlayerServiceMock.Object, photonTradeManagerMock.Object));
+        Assert.Throws<ArgumentNullException>(() => new TradeReviewWindowPresenter().Construct(windowMock.Object, eventBusMock.Object, null, photonTradeManagerMock.Object));
+        Assert.Throws<ArgumentNullException>(() => new TradeReviewWindowPresenter().Construct(windowMock.Object, eventBusMock.Object, localPlayerServiceMock.Object, null));
+    }
+
+    [Test]
+    public void ShowTradeReviewWindow_Should_ShowForOther_WhenLocalNotInvolved()
+    {
+        presenter.Initialize();
+        localPlayerServiceMock.Setup(s => s.GetLocalPlayerId()).Returns(localPlayer.Id);
+
+        var offer = new TradeOffer(new PlayerData("X", 1000, 10, null), new PlayerData("Y", 1000, 11, null));
+        var e = new TradeProposalReceivedEvent(offer, 10, 11);
+
+        var method = typeof(TradeReviewWindowPresenter)
+            .GetMethod("ShowTradeReviewWindow", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        method.Invoke(presenter, new object[] { e });
+
+        windowMock.Verify(w => w.Show(false, offer), Times.Once);
+    }
+
 }

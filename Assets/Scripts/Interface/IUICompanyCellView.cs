@@ -3,6 +3,7 @@ using UnityEngine;
 
 public interface IUICompanyCellView
 {
+    void Init(int id);
     int CompanyId();
 
     void UpdateUI(string name, int price, Color groupColor);

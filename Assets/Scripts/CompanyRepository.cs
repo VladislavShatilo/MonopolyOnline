@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,14 @@ public class CompanyRepository : ICompanyRepository
     [Inject]
     public void Construct(BoardConfig boardConfig)
     {
+        if (boardConfig == null || boardConfig.cells == null)
+        {
+            throw new ArgumentNullException(nameof(boardConfig));
+        }
+        if (boardConfig.cells.Count <= 0 || boardConfig.cells.Count > 40)
+        {
+            throw new ArgumentNullException(nameof(boardConfig));
+        }
         foreach (var cell in boardConfig.cells)
         {
             if (cell.cellType == CellType.Company && cell.companyData != null)
@@ -39,10 +48,12 @@ public class CompanyRepository : ICompanyRepository
             }
         }
     }
+
     public int CountOwnedByPlayer(int playerId, CompanyType type)
     {
         return companies.Values.Count(c => c.OwnerId == playerId && c.Type == type);
     }
+
     public Company GetCompanyById(int id) => companies.ContainsKey(id) ? companies[id] : null;
 
     public IEnumerable<Company> GetAll() => companies.Values;
@@ -59,10 +70,12 @@ public class CompanyRepository : ICompanyRepository
             company.ResetData();
         }
     }
+
     public IEnumerable<Company> GetByGroup(CompanyGroup group)
     {
         return companies.Values.Where(c => c.Group == group);
     }
+
     public IEnumerable<Company> GetByOwner(int ownerId)
     {
         return companies.Values.Where(c => c.OwnerId == ownerId);

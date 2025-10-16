@@ -118,4 +118,43 @@ public class TurnCompanyUIUseCaseTests
         Assert.AreEqual(1, actions.Count);
         Assert.AreEqual(CompanyActionType.Buyout, actions[0].ActionType);
     }
+   
+
+    [Test]
+    public void GetAvailableActions_ShouldReturnMortgage_WhenGroupHasMortgagedCompany()
+    {
+        // Arrange
+        var company = new Company(1, new CompanyData())
+        {
+            IsBought = true,
+            OwnerId = 1,
+            Type = CompanyType.Company,
+            IsMortgaged = false,
+            Group = CompanyGroup.SocialMedia
+        };
+
+        var mortgagedCompany = new Company(2, new CompanyData())
+        {
+            IsBought = true,
+            OwnerId = 1,
+            Type = CompanyType.Company,
+            IsMortgaged = true,
+            Group = CompanyGroup.SocialMedia
+        };
+
+        companyRepoMock.Setup(r => r.GetAll()).Returns(new List<Company> { company });
+        companyRepoMock.Setup(r => r.GetByGroup(CompanyGroup.SocialMedia))
+            .Returns(new List<Company> { company, mortgagedCompany });
+
+        groupOwnershipMock.Setup(g => g.PlayerOwnsWholeGroup(CompanyGroup.SocialMedia, 1)).Returns(true);
+        localPlayerMock.Setup(p => p.GetLocalPlayerId()).Returns(1);
+
+        // Act
+        var actions = useCase.GetAvailableActions(1).ToList();
+
+        // Assert
+        Assert.AreEqual(1, actions.Count);
+        Assert.AreEqual(CompanyActionType.Mortgage, actions[0].ActionType);
+    }
+
 }

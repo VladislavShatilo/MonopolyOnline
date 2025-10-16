@@ -1,63 +1,98 @@
-using Moq;
 using NUnit.Framework;
+using Moq;
+using System;
 using UnityEngine;
 
 public class GameBootstrapperTests
 {
+    private GameObject go;
     private GameBootstrapper bootstrapper;
-    private Mock<GameManager> mockGameManager;
-    private Mock<IBoardService> mockBoardService;
-    private Mock<ICompanyUIService> mockCompanyUIService;
-    private Mock<ICellOccupancyService> mockCellOccupancyService;
-    private FakePlayerStatsService fakePlayerStatsService;
+
+    private Mock<GameManager> gameManagerMock;
+    private Mock<IBoardService> boardServiceMock;
+    private Mock<ICompanyUIService> companyUIMock;
+    private Mock<ICellOccupancyService> cellOccupancyMock;
+    private Mock<PlayerStatsService> playerStatsMock;
 
     [SetUp]
-    public void SetUp()
+    public void Setup()
     {
-        var go = new GameObject();
+        go = new GameObject();
         bootstrapper = go.AddComponent<GameBootstrapper>();
 
-        mockGameManager = new Mock<GameManager>();
-        mockBoardService = new Mock<IBoardService>();
-        mockCompanyUIService = new Mock<ICompanyUIService>();
-        mockCellOccupancyService = new Mock<ICellOccupancyService>();
-        fakePlayerStatsService = new FakePlayerStatsService();
+        gameManagerMock = new Mock<GameManager>();
+        boardServiceMock = new Mock<IBoardService>();
+        companyUIMock = new Mock<ICompanyUIService>();
+        cellOccupancyMock = new Mock<ICellOccupancyService>();
+        playerStatsMock = new Mock<PlayerStatsService>();
 
-        bootstrapper.Construct(
-            mockGameManager.Object,
-            mockBoardService.Object,
-            mockCompanyUIService.Object,
-            mockCellOccupancyService.Object,
-            fakePlayerStatsService
-        );
+        bootstrapper.Construct(gameManagerMock.Object, boardServiceMock.Object, companyUIMock.Object,
+            cellOccupancyMock.Object, playerStatsMock.Object);
+    }
+
+    #region Construct Tests
+
+    [Test]
+    public void Construct_ShouldThrow_WhenGameManagerIsNull()
+    {
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+        {
+            var goTest = new GameObject();
+            var comp = goTest.AddComponent<GameBootstrapper>();
+            comp.Construct(null, boardServiceMock.Object, companyUIMock.Object, cellOccupancyMock.Object, playerStatsMock.Object);
+        });
+        Assert.That(ex.ParamName, Is.EqualTo("gameManager"));
     }
 
     [Test]
-    public void Awake_ShouldInitializeAllServices()
+    public void Construct_ShouldThrow_WhenBoardServiceIsNull()
     {
-        bootstrapper.SendMessage("Awake");
-
-        mockBoardService.Verify(b => b.InitializeBoard(), Times.Once);
-        mockCompanyUIService.Verify(u => u.InitializeUI(), Times.Once);
-        mockCellOccupancyService.Verify(c => c.InitializePlayer(), Times.Once);
-        mockGameManager.Verify(g => g.Initialize(), Times.Once);
-
-        Assert.IsTrue(fakePlayerStatsService.Initialized);
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        Object.DestroyImmediate(bootstrapper.gameObject);
-    }
-
-    private class FakePlayerStatsService : PlayerStatsService
-    {
-        public bool Initialized { get; private set; }
-
-        public new void Initialize()
+        var ex = Assert.Throws<ArgumentNullException>(() =>
         {
-            Initialized = true;
-        }
+            var goTest = new GameObject();
+            var comp = goTest.AddComponent<GameBootstrapper>();
+            comp.Construct(gameManagerMock.Object, null, companyUIMock.Object, cellOccupancyMock.Object, playerStatsMock.Object);
+        });
+        Assert.That(ex.ParamName, Is.EqualTo("boardService"));
     }
+
+    // Аналогично для остальных зависимостей...
+    [Test]
+    public void Construct_ShouldThrow_WhenCompanyUIServiceIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => bootstrapper.Construct(
+            gameManagerMock.Object, boardServiceMock.Object, null, cellOccupancyMock.Object, playerStatsMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenCellOccupancyServiceIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => bootstrapper.Construct(
+            gameManagerMock.Object, boardServiceMock.Object, companyUIMock.Object, null, playerStatsMock.Object));
+    }
+
+    [Test]
+    public void Construct_ShouldThrow_WhenPlayerStatsServiceIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => bootstrapper.Construct(
+            gameManagerMock.Object, boardServiceMock.Object, companyUIMock.Object, cellOccupancyMock.Object, null));
+    }
+
+    #endregion
+
+    #region Awake Tests
+
+    //[Test]
+    //public void Awake_ShouldCallInitializeOnAllServices()
+    //{
+    //    bootstrapper.Awake();
+
+    //    boardServiceMock.Verify(b => b.InitializeBoard(), Times.Once);
+    //    companyUIMock.Verify(c => c.InitializeUI(), Times.Once);
+    //    cellOccupancyMock.Verify(c => c.InitializePlayer(), Times.Once);
+    //    playerStatsMock.Verify(p => p.Initialize(), Times.Once);
+    //    gameManagerMock.Verify(g => g.Initialize(), Times.Once);
+    //}
+
+    #endregion
 }

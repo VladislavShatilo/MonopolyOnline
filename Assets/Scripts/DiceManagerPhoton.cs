@@ -1,4 +1,5 @@
 ﻿using Photon.Pun;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,14 +18,16 @@ public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
     [Inject]
     public void Construct(IRollDiceUseCase rollDiceUseCase, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
-        this.rollDiceUseCase = rollDiceUseCase;
-        this.photonNetworkWrapper = photonNetworkWrapper;
-        this.photonViewWrapper = photonViewWrapper;
+        this.rollDiceUseCase = rollDiceUseCase ?? throw new ArgumentNullException(nameof(rollDiceUseCase));
+        this.photonNetworkWrapper = photonNetworkWrapper ?? throw new ArgumentNullException(nameof(photonNetworkWrapper));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
     }
     public void RequestDiceRoll(int playerId, bool isForJail, int cheatFirst = -1, int cheatSecond = -1)
     {
-        // посылаем запрос мастеру с возможными override (чита)
+        if(photonView == null) throw new NullReferenceException(nameof(RequestDiceRoll));
+
         photonViewWrapper.RPC(photonView, nameof(RPC_RequestGetDiceResult), RpcTarget.MasterClient, playerId, isForJail, cheatFirst, cheatSecond);
+        
 
     }
     private void Update()
@@ -57,12 +60,13 @@ public class DiceManagerPhoton : MonoBehaviourPun, IPhotonDiceManager
         else
         {
             // честный бросок — можно использовать rollDiceUseCase для консистентности
-            var diceResult = rollDiceUseCase.GetDiceResult(playerId, isForJail);
+            var diceResult = rollDiceUseCase.GetDiceResult();
             // предполагаю, что DiceResult хранит First и Second
             first = diceResult.First;
             second = diceResult.Second;
         }
-        
+
+        if (photonView == null) throw new NullReferenceException(nameof(RPC_RequestGetDiceResult));
         // рассылаем всем единый результат
         photonViewWrapper.RPC(photonView,nameof(RPC_RequestDiceHandle), RpcTarget.All, first, second, playerId, isForJail);
     }

@@ -38,15 +38,15 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
     public void Construct(IChanceService chanceService, IPlayerRepository playerRepository, IBankService bankService, IPhotonTurnManager photonTurnManager,
        IPhotonPlayerMoveManager photonPlayerMove, IPhotonJailManager photonJailManager, IChatService chatService, IPhotonNetworkWrapper photonNetworkWrapper, IPhotonViewWrapper photonViewWrapper)
     {
-        this.chanceService = chanceService;
-        this.playerRepository = playerRepository;
-        this.bankService = bankService;
-        this.photonTurnManager = photonTurnManager;
-        this.photonPlayerMove = photonPlayerMove;
-        this.photonJailManager = photonJailManager;
-        this.chatService = chatService;
-        this.photonNetworkWrapper = photonNetworkWrapper;
-        this.photonViewWrapper = photonViewWrapper;
+        this.chanceService = chanceService ?? throw new ArgumentNullException(nameof(chanceService));
+        this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        this.bankService = bankService ?? throw new ArgumentNullException(nameof(bankService));
+        this.photonTurnManager = photonTurnManager ?? throw new ArgumentNullException(nameof(photonTurnManager));
+        this.photonPlayerMove = photonPlayerMove ?? throw new ArgumentNullException(nameof(photonPlayerMove));
+        this.photonJailManager = photonJailManager ?? throw new ArgumentNullException(nameof(photonJailManager));
+        this.chatService = chatService ?? throw new ArgumentNullException(nameof(chatService));
+        this.photonNetworkWrapper = photonNetworkWrapper ?? throw new ArgumentNullException(nameof(photonNetworkWrapper));
+        this.photonViewWrapper = photonViewWrapper ?? throw new ArgumentNullException(nameof(photonViewWrapper));
 
     }
 
@@ -59,6 +59,7 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
         if (!photonNetworkWrapper.IsMasterClient) return;
 
         ChanceBuff buff = chanceService.GetRandomBuff();
+        if(buff == null) return; 
         photonViewWrapper.RPC(photonView, nameof(RPC_ApplyBuff), RpcTarget.All, playerId, (int)buff.Type, buff.MinAmount, buff.MaxAmount);
 
         if (buff.Type != BuffType.Jail && buff.Type != BuffType.Teleport)
@@ -96,7 +97,7 @@ public class PhotonChanceManager : MonoBehaviourPun, IPhotonChanceManager
     [PunRPC]
     private void RPC_ApplyBuff(int playerId, int typeInt, int minAmount, int maxAmount)
     {
-        var player = playerRepository.GetPlayerById(playerId);
+        var player = playerRepository.GetPlayerById(playerId) ?? throw new NullReferenceException(nameof(RPC_ApplyBuff));
         var type = (BuffType)typeInt;
 
         string message;

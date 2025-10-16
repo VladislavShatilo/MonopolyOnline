@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Zenject;
 public class GameManager
@@ -14,11 +15,11 @@ public class GameManager
     public void Construct(IPlayerRepository repository, IPlayerSpawner spawner, IPlayerColorService colorService,
        IEventBus eventBus, GameSettings gameSettings)
     {
-        this.repository = repository;
-        this.spawner = spawner;
-        this.colorService = colorService;
-        this.eventBus = eventBus;
-        this.gameSettings = gameSettings;
+        this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        this.spawner = spawner ?? throw new ArgumentNullException(nameof(spawner));
+        this.colorService = colorService ?? throw new ArgumentNullException(nameof(colorService));
+        this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        this.gameSettings = gameSettings ?? throw new ArgumentNullException(nameof(gameSettings));
     }
 
     #endregion LIFE_CYCLE
@@ -38,8 +39,11 @@ public class GameManager
                 colorService.GetColorForPlayer(p.ActorNumber),
                 p);
 
-            repository.AddPlayer(player);
-            eventBus.Publish(new PlayerJoinedEvent(player));
+            if (player != null)
+            {
+                repository.AddPlayer(player);
+                eventBus.Publish(new PlayerJoinedEvent(player));
+            }
         }
 
         spawner.SpawnLocalPlayer(Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);

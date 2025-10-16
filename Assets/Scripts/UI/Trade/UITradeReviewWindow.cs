@@ -1,5 +1,6 @@
 using DG.Tweening;
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -13,7 +14,14 @@ public class UITradeReviewWindow : UITradeWindowBase, ITradeReviewWindow
     [SerializeField] private Button cancelButton;
 
     #region PUBLIC_METHODS
+    private void Start()
+    {
 
+        if (acceptButton == null)
+            throw new ArgumentNullException(nameof(acceptButton));
+        if (cancelButton == null)
+            throw new ArgumentNullException(nameof(cancelButton));
+    }
     public void Show(bool isRecipient, TradeOffer tradeOffer)
     {
         acceptButton.gameObject.SetActive(isRecipient);

@@ -1,10 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-
 
 public class UICompanyStats : UIBaseCompanyStats, ICompanyStatsUI<CompanyData>
 {
@@ -18,12 +18,20 @@ public class UICompanyStats : UIBaseCompanyStats, ICompanyStatsUI<CompanyData>
 
     public void SetRentPrices(int[] values)
     {
+        if (values == null) throw new ArgumentNullException(nameof(values));
+
         if (rentPriceTexts == null) return;
         for (int i = 0; i < rentPriceTexts.Length && i < values.Length; i++)
             rentPriceTexts[i].text = values[i].ToString("N0", CultureInfo.InvariantCulture);
     }
 
-    public void SetBranchPrice(int value) => branchPriceText.text = value.ToString("N0", CultureInfo.InvariantCulture);
+    public void SetBranchPrice(int value)
+    {
+        if (branchPriceText != null)
+        {
+            branchPriceText.text = value.ToString("N0", CultureInfo.InvariantCulture);
+        }
+    }
 
     public void SetData(CompanyData data)
     {
@@ -39,5 +47,4 @@ public class UICompanyStats : UIBaseCompanyStats, ICompanyStatsUI<CompanyData>
     }
 
     #endregion PUBLIC_METHODS
-
 }
