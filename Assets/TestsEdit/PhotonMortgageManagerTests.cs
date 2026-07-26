@@ -32,7 +32,7 @@ public class PhotonMortgageManagerTests
         gameSettings = new GameSettings { mortgageTurns = 3 };
 
         // Внедрение моков через Reflection (или через отдельный метод Construct с сеттерами)
-        manager.Construct(mortgageServiceMock.Object, companyUIMock.Object, gameSettings, localPlayerMock.Object);
+        manager.Construct(mortgageServiceMock.Object, companyUIMock.Object, gameSettings, localPlayerMock.Object, viewWrapperMock.Object);
 
         // Установка внутренних моков
         typeof(PhotonMortgageManager).GetField("photonViewWrapper", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(manager, viewWrapperMock.Object);
@@ -46,10 +46,12 @@ public class PhotonMortgageManagerTests
     {
         var go2 = new GameObject();
         var mgr = go2.AddComponent<PhotonMortgageManager>();
-        Assert.Throws<ArgumentNullException>(() => mgr.Construct(null, companyUIMock.Object, gameSettings, localPlayerMock.Object));
-        Assert.Throws<ArgumentNullException>(() => mgr.Construct(mortgageServiceMock.Object, null, gameSettings, localPlayerMock.Object));
-        Assert.Throws<ArgumentNullException>(() => mgr.Construct(mortgageServiceMock.Object, companyUIMock.Object, null, localPlayerMock.Object));
-        Assert.Throws<ArgumentNullException>(() => mgr.Construct(mortgageServiceMock.Object, companyUIMock.Object, gameSettings, null));
+        Assert.Throws<ArgumentNullException>(() => mgr.Construct(null, companyUIMock.Object, gameSettings, localPlayerMock.Object, viewWrapperMock.Object));
+        Assert.Throws<ArgumentNullException>(() => mgr.Construct(mortgageServiceMock.Object, null, gameSettings, localPlayerMock.Object, viewWrapperMock.Object));
+        Assert.Throws<ArgumentNullException>(() => mgr.Construct(mortgageServiceMock.Object, companyUIMock.Object, null, localPlayerMock.Object, viewWrapperMock.Object));
+        Assert.Throws<ArgumentNullException>(() => mgr.Construct(mortgageServiceMock.Object, companyUIMock.Object, gameSettings, null, viewWrapperMock.Object));
+        Assert.Throws<ArgumentNullException>(() => mgr.Construct(mortgageServiceMock.Object, companyUIMock.Object, gameSettings, localPlayerMock.Object, null));
+
     }
 
     [Test]
@@ -57,7 +59,7 @@ public class PhotonMortgageManagerTests
     {
         var go2 = new GameObject();
         var mgr = go2.AddComponent<PhotonMortgageManager>();
-        Assert.Throws<NullReferenceException>(() => mgr.Construct(mortgageServiceMock.Object, companyUIMock.Object, gameSettings, localPlayerMock.Object));
+        Assert.Throws<NullReferenceException>(() => mgr.Construct(mortgageServiceMock.Object, companyUIMock.Object, gameSettings, localPlayerMock.Object, viewWrapperMock.Object));
     }
 
     #endregion

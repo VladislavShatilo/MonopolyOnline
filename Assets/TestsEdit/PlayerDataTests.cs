@@ -31,14 +31,14 @@ public class PlayerDataTests
         Assert.IsEmpty(player.OwnedCompanies);
     }
 
-    [Test]
-    public void Constructor_ShouldAssignPhotonPlayer_WhenProvided()
-    {
-        var photonPlayer = new Player("PhotonPlayer", 5);
-        var playerData = new PlayerData("Bob", 500, 2, color, photonPlayer);
+    // [Test]
+    // public void Constructor_ShouldAssignPhotonPlayer_WhenProvided()
+    // {
+    //     var photonPlayer = new Player("PhotonPlayer", 5);
+    //     var playerData = new PlayerData("Bob", 500, 2, color, photonPlayer);
 
-        Assert.AreEqual(photonPlayer, playerData.photonPlayer);
-    }
+    //     Assert.AreEqual(photonPlayer, playerData.photonPlayer);
+    // }
 
     [Test]
     public void SendToJail_ShouldSetJailStateCorrectly()

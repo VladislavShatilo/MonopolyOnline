@@ -138,8 +138,6 @@ namespace Photon.Realtime
         /// <summary>Can be used to store a reference that's useful to know "by player".</summary>
         /// <remarks>Example: Set a player's character as Tag by assigning the GameObject on Instantiate.</remarks>
         public object TagObject;
-        private string v1;
-        private int v2;
 
 
         /// <summary>
@@ -171,10 +169,8 @@ namespace Photon.Realtime
             this.InternalCacheProperties(playerProperties);
         }
 
-        public Player(string v1, int v2)
+        public Player()
         {
-            this.v1 = v1;
-            this.v2 = v2;
         }
 
 
@@ -259,7 +255,7 @@ namespace Photon.Realtime
             {
                 return;
             }
-            
+
             // only remote player instances update their NickName from the properties
             if (!this.IsLocal && properties.ContainsKey(ActorProperties.PlayerName))
             {
@@ -431,7 +427,7 @@ namespace Photon.Realtime
         }
 
 
-        /// <summary>If there is a nickname in the room props, but it's not the current (local) one, update the room when joining/joined.</summary>
+        /// <summary>Updates the server, if the NickName in the custom properties (coming from the server) is not correct.</summary>
         internal bool UpdateNickNameOnJoined()
         {
             if (this.RoomReference == null || this.RoomReference.CustomProperties == null || !this.IsLocal)
@@ -439,10 +435,8 @@ namespace Photon.Realtime
                 return false;
             }
 
-            bool found = this.RoomReference.CustomProperties.ContainsKey(ActorProperties.PlayerName);
-            string nickFromProps = found ? this.RoomReference.CustomProperties[ActorProperties.PlayerName] as string : string.Empty;
-
-            if (!string.Equals(this.NickName, nickFromProps))
+            string nickStoredInCustomProps = this.CustomProperties[ActorProperties.PlayerName] as string;
+            if (!string.Equals(this.NickName, nickStoredInCustomProps))
             {
                 return this.SetPlayerNameProperty();
             }

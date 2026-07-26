@@ -20,7 +20,7 @@ public class PlayerStatsPresenterTests
         mockLocalPlayerService = new Mock<ILocalPlayerService>();
         mockTradeManager = new Mock<IPhotonTradeManager>();
         mockLoanManager = new Mock<IPhotonLoanManager>();
-        var phPlayer = new Photon.Realtime.Player("1", 1);
+        var phPlayer = new Photon.Realtime.Player();
         
         playerData = new PlayerData("TestPlayer", 1000, 1,null, phPlayer)
         {
@@ -60,7 +60,7 @@ public class PlayerStatsPresenterTests
     {
         presenter.Init(null);
 
-        // Проверяем, что методы установки данных на view не вызываются
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ view пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         mockView.Verify(v => v.SetName(It.IsAny<string>()), Times.Never);
         mockView.Verify(v => v.SetMoney(It.IsAny<int>()), Times.Never);
         mockView.Verify(v => v.SetCapital(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
@@ -100,7 +100,7 @@ public class PlayerStatsPresenterTests
         var player = new PlayerData("TestPlayer", 500, 1, null);
         var evt = new OnUpdatePlayerMoneyEvent(player);
 
-        // вызываем через подписку вручную
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         presenter.GetType().GetMethod("OnMoneyUpdate", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .Invoke(presenter, new object[] { evt });
 
