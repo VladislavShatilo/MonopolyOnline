@@ -1956,7 +1956,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1679734286}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f623cbe84c8fedb498aa4c583a752ebe, type: 3}
+  m_Script: {fileID: 11500000, guid: 42c4983277fbe2f4092e77efbd2fdeb0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GameAssembly::AuthUI
   nicknameField: {fileID: 830473922}

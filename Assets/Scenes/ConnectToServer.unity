@@ -465,7 +465,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 998843786}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 405d17652fe6eab4e9636feeb0d6183f, type: 3}
+  m_Script: {fileID: 11500000, guid: 2df7fa80f8e4cc54b88681ee130ac344, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GameAssembly::ConnectToServer
   region: ru
